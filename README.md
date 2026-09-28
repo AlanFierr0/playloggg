@@ -80,12 +80,19 @@ A new Supabase project exists. Its URL and publishable key are configured in
 ignored local `.env.local` using `NEXT_PUBLIC_SUPABASE_URL` and
 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. The current prototype does not query
 Supabase and can run without these variables. A service health check succeeded;
-that does not verify database tables or access policies.
+that alone does not verify database tables or access policies.
+
+Authenticated Supabase plugin inspection confirmed the project is healthy in
+`us-east-1` (North Virginia, within Americas). Its `public` schema has no tables,
+views or other application relations, its migration history is empty, and the
+security advisor reported no findings at inspection time.
 
 The next approved backend stage is public read-only data. Authentication,
 database schema, migrations and seed data still require inspection and agreement.
-No remote database changes have been made. Project API credentials do not replace
-authenticated CLI access for inspecting and managing database migrations.
+No remote database changes have been made. Use authenticated Supabase plugin or
+CLI access for schema inspection and migrations; public application credentials
+are not administration credentials. Plugin authentication and CLI login are
+separate.
 
 Next.js page titles, descriptions and Open Graph metadata provide the initial
 SEO foundation. Canonical URLs, production indexing settings and sitemap
