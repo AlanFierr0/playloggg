@@ -71,9 +71,21 @@ is absent from the source is not researched or invented for this milestone.
 
 ## Infrastructure
 
-No environment variables are required for this prototype. No Supabase project,
-authentication, migrations or Vercel project has been configured. New Supabase
-and Vercel projects are separate future stages, requiring user agreement.
+The prototype is published from GitHub `main` at https://playloggg.vercel.app/.
+Use the Next.js preset on Vercel. The recommended package-manager setting is
+Corepack (`ENABLE_EXPERIMENTAL_COREPACK=1`) to respect the pinned pnpm version;
+verify the version in Vercel's install logs.
+
+A new Supabase project exists. Its URL and publishable key are configured in
+ignored local `.env.local` using `NEXT_PUBLIC_SUPABASE_URL` and
+`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. The current prototype does not query
+Supabase and can run without these variables. A service health check succeeded;
+that does not verify database tables or access policies.
+
+The next approved backend stage is public read-only data. Authentication,
+database schema, migrations and seed data still require inspection and agreement.
+No remote database changes have been made. Project API credentials do not replace
+authenticated CLI access for inspecting and managing database migrations.
 
 Next.js page titles, descriptions and Open Graph metadata provide the initial
 SEO foundation. Canonical URLs, production indexing settings and sitemap
