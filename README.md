@@ -83,13 +83,22 @@ Supabase and can run without these variables. A service health check succeeded;
 that alone does not verify database tables or access policies.
 
 Authenticated Supabase plugin inspection confirmed the project is healthy in
-`us-east-1` (North Virginia, within Americas). Its `public` schema has no tables,
-views or other application relations, its migration history is empty, and the
-security advisor reported no findings at inspection time.
+`us-east-1` (North Virginia, within Americas). The approved `profiles`, `games` and
+`ratings` schema is now applied, with 32 sample games, one sample profile and
+32 ratings. Public reads and blocked writes have been verified. The security
+advisor reported no findings.
 
-The next approved backend stage is public read-only data. Authentication,
-database schema, migrations and seed data still require inspection and agreement.
-No remote database changes have been made. Use authenticated Supabase plugin or
+The first backend stage provides public read-only data. The current UI still uses
+fixtures; connecting it is a separate milestone. Authentication remains deferred.
+See [backend setup and verification](docs/read-only-backend-proposal.md) for the
+applied migration, seed rules and checks. Rebuild or verify the seed with:
+
+```sh
+node scripts/generate-demo-seed.mjs
+node scripts/generate-demo-seed.mjs --check
+```
+
+Use authenticated Supabase plugin or
 CLI access for schema inspection and migrations; public application credentials
 are not administration credentials. Plugin authentication and CLI login are
 separate.

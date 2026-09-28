@@ -8,7 +8,8 @@ owner's profile; all people must use the same Profile/Game/Rating concepts.
 - Next.js App Router, React, strict TypeScript, compiled Tailwind CSS 3.
 - `src/app`: routes, shared layout and metadata.
 - `src/components`: shared UI and faithfully ported Stitch screens.
-- `src/data` and `src/types`: prototype fixtures and frontend types, not a final database schema.
+- `src/data`: original prototype fixtures. `src/types/database.ts`: generated Supabase types.
+- `supabase`: versioned schema, separate demo seed and rollback verification SQL.
 - `design-reference`: untouched original Stitch HTML, screenshots and DESIGN.md.
 - Use pnpm: `pnpm dev`, `pnpm build`, `pnpm typecheck`, `pnpm lint`.
 
@@ -31,8 +32,12 @@ sample content and unavailable features from real persistence.
 ## Infrastructure
 A new Supabase project exists and the prototype is deployed through Vercel from
 GitHub `main`. The first backend seed uses clearly identified sample data.
-The next backend stage is public read-only data; the application
-does not query Supabase yet. Authentication is deferred. Do not enable public database writes without an
+The read-only schema is applied: shared `profiles`, `games`, and `ratings` tables.
+Scores belong to ratings; tiers are independent and may be unassigned. One current
+rating/review exists per profile/game. Rank by score descending, then game slug.
+RLS exposes published profiles and their ratings; application roles have reads only.
+The application does not query Supabase yet. Authentication is deferred.
+Do not enable public database writes without an
 agreed ownership/access design. Inspect Supabase before finalizing a schema;
 track approved changes in versioned migrations. Keep credentials in ignored
 environment files. Never commit secrets or place them in documentation.
