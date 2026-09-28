@@ -1,0 +1,553 @@
+<!DOCTYPE html><html class="dark" lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_standard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..700;1,300..700&amp;family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&amp;family=Space+Grotesk:wght@300..700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-error": "#690005",
+          "background": "#121316",
+          "outline-variant": "#504535",
+          "on-primary-fixed": "#281900",
+          "on-primary-container": "#5e4000",
+          "on-primary": "#432c00",
+          "on-primary-fixed-variant": "#604100",
+          "surface-tint": "#fabc4d",
+          "surface-bright": "#38393c",
+          "primary": "#ffc665",
+          "on-tertiary": "#00315d",
+          "surface": "#121316",
+          "on-tertiary-container": "#004681",
+          "surface-container-low": "#1b1b1f",
+          "outline": "#9d8f7c",
+          "tertiary": "#b3d1ff",
+          "on-secondary-fixed": "#00210c",
+          "surface-container-highest": "#343538",
+          "tertiary-fixed": "#d4e3ff",
+          "error-container": "#93000a",
+          "inverse-primary": "#7e5700",
+          "primary-fixed": "#ffdead",
+          "secondary-fixed-dim": "#4de082",
+          "surface-container": "#1f1f23",
+          "on-surface": "#e3e2e6",
+          "on-surface-variant": "#d4c4b0",
+          "on-tertiary-fixed-variant": "#004883",
+          "surface-container-lowest": "#0d0e11",
+          "on-secondary-container": "#003e1c",
+          "on-background": "#e3e2e6",
+          "primary-fixed-dim": "#fabc4d",
+          "on-secondary-fixed-variant": "#005227",
+          "on-tertiary-fixed": "#001c39",
+          "tertiary-fixed-dim": "#a4c9ff",
+          "inverse-on-surface": "#2f3034",
+          "secondary": "#4de082",
+          "on-error-container": "#ffdad6",
+          "on-secondary": "#003919",
+          "error": "#ffb4ab",
+          "secondary-fixed": "#6dfe9c",
+          "tertiary-container": "#80b6ff",
+          "surface-variant": "#343538",
+          "inverse-surface": "#e3e2e6",
+          "surface-container-high": "#292a2d",
+          "surface-dim": "#121316",
+          "secondary-container": "#00b55d",
+          "primary-container": "#e5a93c"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "gutter-mobile": "0.75rem",
+          "space-sm": "0.5rem",
+          "gutter": "1.25rem",
+          "margin-mobile": "1rem",
+          "space-md": "0.875rem",
+          "space-xs": "0.25rem",
+          "space-lg": "1.5rem",
+          "space-xl": "2.5rem",
+          "margin": "2rem"
+        },
+        "fontFamily": {
+          "headline-xl": [
+            "Space Grotesk"
+          ],
+          "label-lg": [
+            "JetBrains Mono"
+          ],
+          "display-lg": [
+            "Space Grotesk"
+          ],
+          "body-md": [
+            "Hanken Grotesk"
+          ],
+          "label-md": [
+            "JetBrains Mono"
+          ],
+          "headline-xl-mobile": [
+            "Space Grotesk"
+          ],
+          "headline-lg": [
+            "Space Grotesk"
+          ],
+          "label-sm": [
+            "JetBrains Mono"
+          ],
+          "body-sm": [
+            "Hanken Grotesk"
+          ],
+          "body-lg": [
+            "Hanken Grotesk"
+          ],
+          "headline-md": [
+            "Space Grotesk"
+          ],
+          "display-lg-mobile": [
+            "Space Grotesk"
+          ]
+        },
+        "fontSize": {
+          "headline-xl": [
+            "36px",
+            {
+              "lineHeight": "42px",
+              "letterSpacing": "-0.025em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-lg": [
+            "14px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "500"
+            }
+          ],
+          "display-lg": [
+            "52px",
+            {
+              "lineHeight": "58px",
+              "letterSpacing": "-0.03em",
+              "fontWeight": "700"
+            }
+          ],
+          "body-md": [
+            "14px",
+            {
+              "lineHeight": "22px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ],
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0.02em",
+              "fontWeight": "500"
+            }
+          ],
+          "headline-xl-mobile": [
+            "26px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-lg": [
+            "24px",
+            {
+              "lineHeight": "30px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-sm": [
+            "10px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.06em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-sm": [
+            "12px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "body-lg": [
+            "16px",
+            {
+              "lineHeight": "26px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-md": [
+            "18px",
+            {
+              "lineHeight": "24px",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "500"
+            }
+          ],
+          "display-lg-mobile": [
+            "34px",
+            {
+              "lineHeight": "40px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between gap-6"><div class="flex items-center gap-8"><a class="flex items-center gap-3 group" data-path="discover" href="#"><img alt="Modern minimalist logo mark and wordmark for Playlog, a video game critique, rating, and tier-list platform. Geometric diamond/play icon with amber accent and clean modern typography reading PLAYLOG.. Brand logo. - Primary color: #e5a93c
+- Font: spaceGrotesk
+- Mode: dark
+- Roundness: rounded-sm
+" class="h-7 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XXou2h61u7DPSAmHaDNjPu3aObdrekkQGGqIaWrojBFUZ5rZMYvlBkVfOfGRR6iMreI9DP_02eS6A8hdL6OhRawXv_Zyae1-SgBObjKt9iJFWXMegOsfAkpuPJl5PluVzyCsp2UsBqYu9pbBu7tPJxKHjRZH_yE-kf3Ib6H-3M57Gvd5QxlpAvUh39lE2X4NfI7DqBCGxylw9Bx-pmwZGnI0fZNvzurdZKHXwkV2mNh6RUiUIipbPaNA"><span class="font-headline-md text-headline-md tracking-tight uppercase text-on-surface font-bold">Playlog<span class="text-primary">.gg</span></span></a><nav class="hidden md:flex items-center gap-6" data-active-classes="text-on-surface font-semibold"><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="discover" href="#">Discover</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="rankings" href="#">Rankings</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="lists" href="#">Lists</a><a aria-current="page" class="transition-colors text-on-surface font-semibold" data-path="compare" href="#">Compare</a></nav></div><div class="flex items-center gap-4 flex-1 max-w-xs justify-end"><div class="relative hidden sm:flex items-center w-full max-w-[220px]"><span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px] pointer-events-none">search</span><input class="w-full bg-surface-container-low pl-9 pr-3 py-1.5 rounded text-on-surface placeholder:text-on-surface-variant/60 font-body-sm text-body-sm focus:outline-none focus:bg-surface-container transition-colors" placeholder="Search titles..." type="text"><kbd class="absolute right-2 font-label-sm text-label-sm text-on-surface-variant px-1.5 py-0.5 rounded bg-surface-container-high pointer-events-none">⌘K</kbd></div><a class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-primary-container text-on-primary-container hover:bg-primary transition-colors font-label-md text-label-md tracking-wider uppercase font-semibold" data-path="log-game" href="#"><span class="material-symbols-outlined text-[16px]">add</span><span>Log</span></a><a class="flex-shrink-0" data-path="profile" href="#"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-surface-variant hover:ring-primary transition-all" src="https://lh3.googleusercontent.com/aida/AEtjO1Uj7oX5IeIx6GsQRBuZhtpXniSBfDG3f7hQvxiIHe5BLa8ZXfahWEi91J_3xZM-wYZ82SUL3f4OtTBvABtfIVYIWDQIHDKW4b-FsswCawrncUUSCQ7JyYf02lZUWe54k20DG6C5h3pMOoKSBIMjkuj5AszhzZ25dBwhgOF5pirFYl7qu1_wa9i1LInq12QSIwF3rL-NHBD5uSfuxdNhSEhaKDX615dqS_DdI1dW7lwhn3PSkW9Ld6tl-Ks"></a></div></div></header><main class="w-full pt-16 bg-surface"><div class="flex flex-col w-full">
+<!-- Atmospheric Ambient Glow Layer -->
+<div class="relative w-full max-w-7xl mx-auto px-6 lg:px-12 py-10 md:py-16">
+<div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
+<div class="absolute top-3/4 left-1/4 w-72 h-72 bg-tertiary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
+<!-- 1. Minimal Match Header -->
+<header class="w-full mb-16 md:mb-24">
+<div class="flex flex-col items-center">
+<!-- Sub-label Overline -->
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-outline mb-4">Archival Concordance Analysis</span>
+<!-- Compare Duel Matrix: User A - Metric Node - User B -->
+<div class="w-full flex flex-col md:flex-row items-center justify-between gap-8 md:gap-4 bg-surface-container-low/70 backdrop-blur-md rounded-xl p-8 lg:p-12 shadow-xl">
+<!-- Profile Left: Alex Vance -->
+<div class="flex items-center gap-6 w-full md:w-auto justify-start">
+<div class="relative flex-shrink-0">
+<img class="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover shadow-md" data-alt="Editorial close portrait photograph of games journalist and media critic Alex Vance, contemplative gaze, soft warm cinematic lighting, dark textured background, deep amber tones, natural skin texture, studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCijOdZCxU12oY9lvcM7UuDUgu27G_DJlwP9x23FYVAjh6pXdpPsl4vDC5Wz-H8x5toeS5OupfQczeuUlG4tm9gcwbuKbgxI0cuSUwQubEn5aJMgjsZdt0kdEyEfHtIg8lk3vpwBpTnFBzwNXtW9Did7iLSoMEMuvg9OicXRJVNO3RgoEGD6PEvjkKAzMSLW7qZt-9BE8Aj7-oK_ZBviEr6wbwD2plOBJPd-httn5j-4J756QJZ2fxQ">
+<span class="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-secondary"></span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md uppercase tracking-wider text-outline">Senior Critic</span>
+<h1 class="font-headline-xl text-headline-xl text-on-surface font-semibold tracking-tight">Alex Vance</h1>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono mt-0.5">842 logs • Paris, FR</span>
+</div>
+</div>
+<!-- Central Affinity Badge -->
+<div class="flex flex-col items-center justify-center my-4 md:my-0 text-center px-6 py-4 rounded-xl bg-surface-container/80 shadow-inner">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary text-[20px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-label-md text-label-md uppercase tracking-widest text-on-surface-variant">Taste Affinity</span>
+</div>
+<div class="flex items-baseline gap-1 my-1">
+<span class="font-display-lg text-display-lg text-primary font-bold tracking-tight">81%</span>
+</div>
+<span class="font-label-sm text-label-sm font-mono text-outline">142 Shared Games Logged</span>
+</div>
+<!-- Profile Right: Hideo Kojima -->
+<div class="flex items-center gap-6 w-full md:w-auto justify-end flex-row-reverse md:flex-row">
+<div class="flex flex-col items-end">
+<span class="font-label-md text-label-md uppercase tracking-wider text-outline">Director &amp; Auteur</span>
+<h2 class="font-headline-xl text-headline-xl text-on-surface font-semibold tracking-tight">Hideo Kojima</h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono mt-0.5">1,219 logs • Tokyo, JP</span>
+</div>
+<div class="relative flex-shrink-0">
+<img class="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover shadow-md" data-alt="Editorial portrait photograph of famed video game auteur director Hideo Kojima wearing modern minimalist glasses against deep volcanic graphite studio backdrop, soft cinematic spotlighting, contemplative expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPLHDThzi2bKIFTYYfybjyUX0LjJugOoKVeXlYUCpHPS5E2tA7CTow90XD0GiCatOAtJlTH2Kd_01nx0_Y5DF2pjf1VC_Mz4MG9H_rxZyLXYypH3708EYP0AJQLYlyLVVpxxHSUPCNL8n8y63UFwkwBSv4fxDqrryylWfzQdCguLtJVM7yX-MTLjzbR3OocBQX6Rb0M2v8jafvwmVjFArVk_j2W7z592o7ZfKR34bYwrXIEwwLgCcI">
+<span class="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-primary"></span>
+</div>
+</div>
+</div>
+<!-- Metric Accent Bar -->
+<div class="w-full max-w-xl mt-6 flex items-center justify-between font-label-sm text-label-sm text-outline px-4">
+<span>78 Consensus Agreements</span>
+<span class="w-1.5 h-1.5 rounded-full bg-surface-bright"></span>
+<span>16 Polarization Divides</span>
+<span class="w-1.5 h-1.5 rounded-full bg-surface-bright"></span>
+<span>48 Minor Variances (≤5 pts)</span>
+</div>
+</div>
+</header>
+<!-- 2. Key Divergences (Disagreements) -->
+<section class="w-full mb-20 md:mb-28">
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-2">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-semibold">Major Polarity</span>
+<h3 class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight mt-1">Key Divergences</h3>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-md">Titles where aesthetic worldview and structural critique parted ways most substantially.</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Card 1: Death Stranding -->
+<article class="bg-surface-container-low rounded-xl overflow-hidden p-6 md:p-8 flex flex-col justify-between shadow-lg transition-transform duration-300 hover:scale-[1.01]">
+<div class="flex flex-col sm:flex-row gap-6 items-start">
+<div class="w-28 sm:w-32 aspect-[3/4] flex-shrink-0 rounded-lg overflow-hidden shadow-md relative bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Cinematic high contrast video game cover art for Death Stranding showing a lonely futuristic courier crossing expansive misty mossy volcanic Icelandic mountains under a heavy slate sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqxuLFlOZ80-fDFOBHrBozixjtFwr362XtbVmhrSoZhYnITd5jiye-8kH79-hPx2thJuoUPjHf0u-xQAhCqnaJZwKJ_72e8NgbDi-npLNYnkq4DnX7YE94GIqqNSLoKIWQs_sWjFFbcXIKDoV19aFvUqlI_yE2oVkcHPFczlxFLyBfQ0pYNEAqs5HMKAJgfz7m6Jw4R6wxY9sAwF08RUqsLf2WaoIbnEIUBlGL2sVoJt70JqnhK0yn">
+<span class="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-surface/85 backdrop-blur font-label-sm text-label-sm font-mono text-primary font-bold">2019</span>
+</div>
+<div class="flex-1 flex flex-col">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Action / Strand</span>
+<span class="font-label-sm text-label-sm font-mono text-error font-semibold px-2 py-0.5 rounded bg-surface-container-high">Δ -18 pts</span>
+</div>
+<h4 class="font-headline-md text-headline-md text-on-surface font-semibold">Death Stranding</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 line-clamp-3">
+                Kojima regards the isolated logistical odyssey as his singular auteur manifesto, while Vance praised the worldbuilding but critiqued structural pacing hurdles.
+              </p>
+</div>
+</div>
+<!-- Comparative Score Array -->
+<div class="mt-8 pt-6 bg-surface-container/60 rounded-lg px-6 py-4 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Alex Vance</span>
+<span class="font-display-lg text-[32px] leading-8 font-bold font-headline-md text-on-surface mt-1">82</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="h-8 w-px bg-surface-variant"></div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Hideo Kojima</span>
+<span class="font-display-lg text-[32px] leading-8 font-bold font-headline-md text-primary mt-1">100</span>
+</div>
+</div>
+</article>
+<!-- Card 2: Starfield -->
+<article class="bg-surface-container-low rounded-xl overflow-hidden p-6 md:p-8 flex flex-col justify-between shadow-lg transition-transform duration-300 hover:scale-[1.01]">
+<div class="flex flex-col sm:flex-row gap-6 items-start">
+<div class="w-28 sm:w-32 aspect-[3/4] flex-shrink-0 rounded-lg overflow-hidden shadow-md relative bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Futuristic astronomical sci-fi box art for Starfield featuring a lone deep space astronaut in a heavy pressurized spacesuit looking toward a distant glowing celestial nebula and barren planetary surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoIXYOfoa5RU-YvOFalMXGzN3kJvaUWGFF1CEsmAEEQKZeJrLAtMilnUyTxfsOyxQrAtBbmsNyzm5bGrgrMahAIF-3Mz953wu5PPbsfUVudyiHJYh693vLfweHhmHhuw6O_vvE6splGP6_W89Y1L39a9rMBWEYk4mZFl278WkI2NgXMINY3QFmKIrjI3DB2a48D5JZyiZ3pJj19yofN9lSJYek8M6ySE7E8LrBq6xGWvl_phhz6KF5">
+<span class="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-surface/85 backdrop-blur font-label-sm text-label-sm font-mono text-primary font-bold">2023</span>
+</div>
+<div class="flex-1 flex flex-col">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Sci-Fi RPG</span>
+<span class="font-label-sm text-label-sm font-mono text-error font-semibold px-2 py-0.5 rounded bg-surface-container-high">Δ -24 pts</span>
+</div>
+<h4 class="font-headline-md text-headline-md text-on-surface font-semibold">Starfield</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 line-clamp-3">
+                Kojima championed the romantic NASA-punk analog aesthetics and ambient celestial contemplation; Vance lamented disjointed loading boundaries and dated quest loops.
+              </p>
+</div>
+</div>
+<!-- Comparative Score Array -->
+<div class="mt-8 pt-6 bg-surface-container/60 rounded-lg px-6 py-4 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Alex Vance</span>
+<span class="font-display-lg text-[32px] leading-8 font-bold font-headline-md text-on-surface-variant mt-1">62</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="h-8 w-px bg-surface-variant"></div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Hideo Kojima</span>
+<span class="font-display-lg text-[32px] leading-8 font-bold font-headline-md text-primary mt-1">86</span>
+</div>
+</div>
+</article>
+</div>
+</section>
+<!-- 3. Unanimous Masterpieces (Agreements) -->
+<section class="w-full mb-20 md:mb-28">
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-2">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-secondary font-semibold">Consensus Apex</span>
+<h3 class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight mt-1">Unanimous Masterpieces</h3>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Near-perfect alignment on seminal triumphs across design generations.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Masterpiece 1: Elden Ring -->
+<div class="bg-surface-container-low rounded-xl p-5 flex flex-col justify-between shadow-md hover:bg-surface-container transition-colors group">
+<div class="w-full aspect-[16/10] rounded-lg overflow-hidden mb-4 relative bg-surface-container">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Dramatic high fantasy key art of a glowing golden Erdtree towering over misty dark cliffs with a lone tarnished warrior kneeling in atmospheric golden light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIKxeCf69bFE2CnB_lRUi4wSxd4qi1_jccrfbcNO8NgTiIU-AJLlfrVxYTcoKde_xUxcTBCynDmFZgp3klEBdveBjfDpulQLYOVMnKMCG-H1jGhlEtdTLkTFNetIHqlgyjO6MBvPBujDBGXjZl5lkDfLoS3wRV8moOoyIyAP5mzXxWlpyGX-ZveZVHwsKmNW0CFdKoRBlKVb7xeH3EOVXBS0YOZC8dnu9fCkzstutSCjG2fTlG_6dd">
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-low via-transparent to-transparent opacity-80"></div>
+<span class="absolute bottom-3 left-3 font-headline-md text-headline-md text-on-surface font-bold drop-shadow">Elden Ring</span>
+</div>
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-outline">VANCE</span>
+<span class="font-label-lg text-label-lg font-mono font-bold text-primary">98</span>
+</div>
+<div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg font-mono font-bold text-primary">98</span>
+<span class="font-label-sm text-label-sm text-outline">KOJIMA</span>
+</div>
+</div>
+</div>
+<!-- Masterpiece 2: Metal Gear Solid 3 -->
+<div class="bg-surface-container-low rounded-xl p-5 flex flex-col justify-between shadow-md hover:bg-surface-container transition-colors group">
+<div class="w-full aspect-[16/10] rounded-lg overflow-hidden mb-4 relative bg-surface-container">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Atmospheric cold-war jungle survival stealth key art showing a tactical soldier blending in lush deep green foliage and white lily petals under soft moonlight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuByfSGaN_-nyLmrqW7XxkyAo8MmGgwY0kDEnn7nXf7QB3Xca7qtjp4GptGe1kEIIC6bGQr3juwU-YlmxwQBUlZZH-0HSLI9xmqHVd0LAxWVuscnf2tEsYeK4-P1TDqzougdvwenToUQ0uxNR5kEFT9rfVsuWr2jez8jM-8E0ldsbQhqq-VvECgrEIXjkKVSU8Tqrj5IybEUgg0xb52cwEtastahTm7m7XC6Vr72RvyhJl1lavpyibVy">
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-low via-transparent to-transparent opacity-80"></div>
+<span class="absolute bottom-3 left-3 font-headline-md text-headline-md text-on-surface font-bold drop-shadow">Metal Gear Solid 3</span>
+</div>
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-outline">VANCE</span>
+<span class="font-label-lg text-label-lg font-mono font-bold text-primary">96</span>
+</div>
+<div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg font-mono font-bold text-primary">98</span>
+<span class="font-label-sm text-label-sm text-outline">KOJIMA</span>
+</div>
+</div>
+</div>
+<!-- Masterpiece 3: Super Mario Bros. 3 -->
+<div class="bg-surface-container-low rounded-xl p-5 flex flex-col justify-between shadow-md hover:bg-surface-container transition-colors group">
+<div class="w-full aspect-[16/10] rounded-lg overflow-hidden mb-4 relative bg-surface-container">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Minimalist vintage video game illustration concept inspired by 8-bit whimsical platformers, bold bright canary yellow canvas with a silhouetted retro character silhouette and theatrical curtain stage lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfcTa0RodZxjMfXJ61j8xaq_5TELQGIufesduNmlG2xwirJvwXNH3pJpDDDgpP38lCVe0Jx7JmgGDX4a4mzsXs2dKp7HcZqC-v8Tl4A8oq2QquBfO2uOWPf0DyYHqeLcLTEeOL5oC2Bvyo04yi1xQAnLKp1dgGI1sp1ePjoeX22uc3f1WQ6FB-FztDr-h3BGoWDAN-CP-HtFUrOTYt-LaGQ62TETmXqUYx6uaxN3nvqaKf9VXwckRv">
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-low via-transparent to-transparent opacity-80"></div>
+<span class="absolute bottom-3 left-3 font-headline-md text-headline-md text-on-surface font-bold drop-shadow">Super Mario Bros. 3</span>
+</div>
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-outline">VANCE</span>
+<span class="font-label-lg text-label-lg font-mono font-bold text-primary">94</span>
+</div>
+<div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg font-mono font-bold text-primary">94</span>
+<span class="font-label-sm text-label-sm text-outline">KOJIMA</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 4. Clean Mutual Games List -->
+<section class="w-full">
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-outline">Curated Ledger</span>
+<h3 class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight mt-1">Shared Catalog Matrix</h3>
+</div>
+<!-- Table View Options / Filter Quick Chips -->
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded bg-surface-container text-primary font-label-md text-label-md transition-colors">All Shared (142)</button>
+<button class="px-3 py-1.5 rounded bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md transition-colors">Ties (18)</button>
+<button class="px-3 py-1.5 rounded bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md transition-colors">Disagreements &gt;10</button>
+</div>
+</div>
+<!-- Spacious Architectural Matrix Table -->
+<div class="w-full bg-surface-container-low rounded-xl overflow-hidden shadow-xl">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high/40 text-outline font-label-sm text-label-sm uppercase tracking-wider">
+<th class="py-4 px-6 font-semibold">Title</th>
+<th class="py-4 px-6 font-semibold">Release</th>
+<th class="py-4 px-6 font-semibold text-right">Alex Vance</th>
+<th class="py-4 px-6 font-semibold text-right">Hideo Kojima</th>
+<th class="py-4 px-6 font-semibold text-right">Difference</th>
+</tr>
+</thead>
+<tbody class="divide-y-0 text-on-surface font-body-md text-body-md">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container/60 transition-colors">
+<td class="py-4 px-6 font-semibold">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span>Bloodborne</span>
+</div>
+</td>
+<td class="py-4 px-6 font-mono text-outline font-label-md text-label-md">2015</td>
+<td class="py-4 px-6 text-right font-mono font-bold text-on-surface">95</td>
+<td class="py-4 px-6 text-right font-mono font-bold text-primary">97</td>
+<td class="py-4 px-6 text-right font-mono text-secondary font-label-md text-label-md">+2 pts</td>
+</tr>
+<!-- Row 2 -->
+<tr class="bg-surface-container-lowest/30 hover:bg-surface-container/60 transition-colors">
+<td class="py-4 px-6 font-semibold">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-surface-variant"></span>
+<span>Cyberpunk 2077</span>
+</div>
+</td>
+<td class="py-4 px-6 font-mono text-outline font-label-md text-label-md">2020</td>
+<td class="py-4 px-6 text-right font-mono font-bold text-on-surface">78</td>
+<td class="py-4 px-6 text-right font-mono font-bold text-primary">91</td>
+<td class="py-4 px-6 text-right font-mono text-error font-label-md text-label-md">+13 pts</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container/60 transition-colors">
+<td class="py-4 px-6 font-semibold">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>The Legend of Zelda: Tears of the Kingdom</span>
+</div>
+</td>
+<td class="py-4 px-6 font-mono text-outline font-label-md text-label-md">2023</td>
+<td class="py-4 px-6 text-right font-mono font-bold text-primary">96</td>
+<td class="py-4 px-6 text-right font-mono font-bold text-primary">95</td>
+<td class="py-4 px-6 text-right font-mono text-secondary font-label-md text-label-md">-1 pt</td>
+</tr>
+<!-- Row 4 -->
+<tr class="bg-surface-container-lowest/30 hover:bg-surface-container/60 transition-colors">
+<td class="py-4 px-6 font-semibold">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-surface-variant"></span>
+<span>Alan Wake 2</span>
+</div>
+</td>
+<td class="py-4 px-6 font-mono text-outline font-label-md text-label-md">2023</td>
+<td class="py-4 px-6 text-right font-mono font-bold text-on-surface">88</td>
+<td class="py-4 px-6 text-right font-mono font-bold text-primary">94</td>
+<td class="py-4 px-6 text-right font-mono text-error font-label-md text-label-md">+6 pts</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container/60 transition-colors">
+<td class="py-4 px-6 font-semibold">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>Shadow of the Colossus</span>
+</div>
+</td>
+<td class="py-4 px-6 font-mono text-outline font-label-md text-label-md">2005</td>
+<td class="py-4 px-6 text-right font-mono font-bold text-primary">97</td>
+<td class="py-4 px-6 text-right font-mono font-bold text-primary">97</td>
+<td class="py-4 px-6 text-right font-mono text-outline font-label-md text-label-md">0 pts</td>
+</tr>
+<!-- Row 6 -->
+<tr class="bg-surface-container-lowest/30 hover:bg-surface-container/60 transition-colors">
+<td class="py-4 px-6 font-semibold">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-surface-variant"></span>
+<span>BioShock</span>
+</div>
+</td>
+<td class="py-4 px-6 font-mono text-outline font-label-md text-label-md">2007</td>
+<td class="py-4 px-6 text-right font-mono font-bold text-primary">95</td>
+<td class="py-4 px-6 text-right font-mono font-bold text-on-surface">90</td>
+<td class="py-4 px-6 text-right font-mono text-secondary font-label-md text-label-md">-5 pts</td>
+</tr>
+<!-- Row 7 -->
+<tr class="hover:bg-surface-container/60 transition-colors">
+<td class="py-4 px-6 font-semibold">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-surface-variant"></span>
+<span>Silent Hill 2</span>
+</div>
+</td>
+<td class="py-4 px-6 font-mono text-outline font-label-md text-label-md">2001</td>
+<td class="py-4 px-6 text-right font-mono font-bold text-primary">93</td>
+<td class="py-4 px-6 text-right font-mono font-bold text-primary">96</td>
+<td class="py-4 px-6 text-right font-mono text-secondary font-label-md text-label-md">+3 pts</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer Pagination / Summary -->
+<div class="px-6 py-4 bg-surface-container-high/20 flex flex-col sm:flex-row items-center justify-between gap-4 font-label-sm text-label-sm text-outline">
+<span>Showing 7 of 142 shared catalog entries</span>
+<div class="flex items-center gap-2">
+<button class="px-2.5 py-1 rounded bg-surface-container hover:bg-surface-bright text-on-surface transition-colors">Previous</button>
+<span class="font-mono text-on-surface px-1">1 / 21</span>
+<button class="px-2.5 py-1 rounded bg-surface-container hover:bg-surface-bright text-on-surface transition-colors">Next</button>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div></main><footer class="w-full bg-surface-container-lowest mt-space-xl"><div class="max-w-7xl mx-auto px-6 lg:px-12 py-10 flex flex-col md:flex-row items-center justify-between gap-4"><div class="flex items-center gap-3"><span class="font-headline-md text-headline-md tracking-tight uppercase text-on-surface-variant">Playlog<span class="text-primary">.gg</span></span><span class="font-label-sm text-label-sm text-on-surface-variant">© 2025</span></div><div class="flex items-center gap-6"><a class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors" data-path="database-archive" href="#">Archive</a><a class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors" data-path="api-docs" href="#">API</a><a class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors" data-path="terms" href="#">Terms</a><a class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors" data-path="privacy" href="#">Privacy</a></div></div></footer></body></html>

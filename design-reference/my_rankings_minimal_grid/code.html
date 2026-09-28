@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..700;1,300..700&amp;family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&amp;family=Space+Grotesk:wght@300..700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-error": "#690005",
+          "background": "#121316",
+          "outline-variant": "#504535",
+          "on-primary-fixed": "#281900",
+          "on-primary-container": "#5e4000",
+          "on-primary": "#432c00",
+          "on-primary-fixed-variant": "#604100",
+          "surface-tint": "#fabc4d",
+          "surface-bright": "#38393c",
+          "primary": "#ffc665",
+          "on-tertiary": "#00315d",
+          "surface": "#121316",
+          "on-tertiary-container": "#004681",
+          "surface-container-low": "#1b1b1f",
+          "outline": "#9d8f7c",
+          "tertiary": "#b3d1ff",
+          "on-secondary-fixed": "#00210c",
+          "surface-container-highest": "#343538",
+          "tertiary-fixed": "#d4e3ff",
+          "error-container": "#93000a",
+          "inverse-primary": "#7e5700",
+          "primary-fixed": "#ffdead",
+          "secondary-fixed-dim": "#4de082",
+          "surface-container": "#1f1f23",
+          "on-surface": "#e3e2e6",
+          "on-surface-variant": "#d4c4b0",
+          "on-tertiary-fixed-variant": "#004883",
+          "surface-container-lowest": "#0d0e11",
+          "on-secondary-container": "#003e1c",
+          "on-background": "#e3e2e6",
+          "primary-fixed-dim": "#fabc4d",
+          "on-secondary-fixed-variant": "#005227",
+          "on-tertiary-fixed": "#001c39",
+          "tertiary-fixed-dim": "#a4c9ff",
+          "inverse-on-surface": "#2f3034",
+          "secondary": "#4de082",
+          "on-error-container": "#ffdad6",
+          "on-secondary": "#003919",
+          "error": "#ffb4ab",
+          "secondary-fixed": "#6dfe9c",
+          "tertiary-container": "#80b6ff",
+          "surface-variant": "#343538",
+          "inverse-surface": "#e3e2e6",
+          "surface-container-high": "#292a2d",
+          "surface-dim": "#121316",
+          "secondary-container": "#00b55d",
+          "primary-container": "#e5a93c"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "gutter-mobile": "0.75rem",
+          "space-sm": "0.5rem",
+          "gutter": "1.25rem",
+          "margin-mobile": "1rem",
+          "space-md": "0.875rem",
+          "space-xs": "0.25rem",
+          "space-lg": "1.5rem",
+          "space-xl": "2.5rem",
+          "margin": "2rem"
+        },
+        "fontFamily": {
+          "headline-xl": [
+            "Space Grotesk"
+          ],
+          "label-lg": [
+            "JetBrains Mono"
+          ],
+          "display-lg": [
+            "Space Grotesk"
+          ],
+          "body-md": [
+            "Hanken Grotesk"
+          ],
+          "label-md": [
+            "JetBrains Mono"
+          ],
+          "headline-xl-mobile": [
+            "Space Grotesk"
+          ],
+          "headline-lg": [
+            "Space Grotesk"
+          ],
+          "label-sm": [
+            "JetBrains Mono"
+          ],
+          "body-sm": [
+            "Hanken Grotesk"
+          ],
+          "body-lg": [
+            "Hanken Grotesk"
+          ],
+          "headline-md": [
+            "Space Grotesk"
+          ],
+          "display-lg-mobile": [
+            "Space Grotesk"
+          ]
+        },
+        "fontSize": {
+          "headline-xl": [
+            "36px",
+            {
+              "lineHeight": "42px",
+              "letterSpacing": "-0.025em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-lg": [
+            "14px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "500"
+            }
+          ],
+          "display-lg": [
+            "52px",
+            {
+              "lineHeight": "58px",
+              "letterSpacing": "-0.03em",
+              "fontWeight": "700"
+            }
+          ],
+          "body-md": [
+            "14px",
+            {
+              "lineHeight": "22px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ],
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0.02em",
+              "fontWeight": "500"
+            }
+          ],
+          "headline-xl-mobile": [
+            "26px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-lg": [
+            "24px",
+            {
+              "lineHeight": "30px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-sm": [
+            "10px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.06em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-sm": [
+            "12px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "body-lg": [
+            "16px",
+            {
+              "lineHeight": "26px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-md": [
+            "18px",
+            {
+              "lineHeight": "24px",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "500"
+            }
+          ],
+          "display-lg-mobile": [
+            "34px",
+            {
+              "lineHeight": "40px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between gap-6"><div class="flex items-center gap-8"><a class="flex items-center gap-3 group" data-path="discover" href="#"><img alt="Modern minimalist logo mark and wordmark for Playlog, a video game critique, rating, and tier-list platform. Geometric diamond/play icon with amber accent and clean modern typography reading PLAYLOG.. Brand logo. - Primary color: #e5a93c
+- Font: spaceGrotesk
+- Mode: dark
+- Roundness: rounded-sm
+" class="h-7 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XXou2h61u7DPSAmHaDNjPu3aObdrekkQGGqIaWrojBFUZ5rZMYvlBkVfOfGRR6iMreI9DP_02eS6A8hdL6OhRawXv_Zyae1-SgBObjKt9iJFWXMegOsfAkpuPJl5PluVzyCsp2UsBqYu9pbBu7tPJxKHjRZH_yE-kf3Ib6H-3M57Gvd5QxlpAvUh39lE2X4NfI7DqBCGxylw9Bx-pmwZGnI0fZNvzurdZKHXwkV2mNh6RUiUIipbPaNA"/><span class="font-headline-md text-headline-md tracking-tight uppercase text-on-surface font-bold">Playlog<span class="text-primary">.gg</span></span></a><nav class="hidden md:flex items-center gap-6" data-active-classes="text-on-surface font-semibold"><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="discover" href="#">Discover</a><a aria-current="page" class="transition-colors text-on-surface font-semibold" data-path="rankings" href="#">Rankings</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="lists" href="#">Lists</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="compare" href="#">Compare</a></nav></div><div class="flex items-center gap-4 flex-1 max-w-xs justify-end"><div class="relative hidden sm:flex items-center w-full max-w-[220px]"><span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px] pointer-events-none">search</span><input class="w-full bg-surface-container-low pl-9 pr-3 py-1.5 rounded text-on-surface placeholder:text-on-surface-variant/60 font-body-sm text-body-sm focus:outline-none focus:bg-surface-container transition-colors" placeholder="Search titles..." type="text"/><kbd class="absolute right-2 font-label-sm text-label-sm text-on-surface-variant px-1.5 py-0.5 rounded bg-surface-container-high pointer-events-none">⌘K</kbd></div><a class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-primary-container text-on-primary-container hover:bg-primary transition-colors font-label-md text-label-md tracking-wider uppercase font-semibold" data-path="log-game" href="#"><span class="material-symbols-outlined text-[16px]">add</span><span>Log</span></a><a class="flex-shrink-0" data-path="profile" href="#"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-surface-variant hover:ring-primary transition-all" src="https://lh3.googleusercontent.com/aida/AEtjO1Uj7oX5IeIx6GsQRBuZhtpXniSBfDG3f7hQvxiIHe5BLa8ZXfahWEi91J_3xZM-wYZ82SUL3f4OtTBvABtfIVYIWDQIHDKW4b-FsswCawrncUUSCQ7JyYf02lZUWe54k20DG6C5h3pMOoKSBIMjkuj5AszhzZ25dBwhgOF5pirFYl7qu1_wa9i1LInq12QSIwF3rL-NHBD5uSfuxdNhSEhaKDX615dqS_DdI1dW7lwhn3PSkW9Ld6tl-Ks"/></a></div></div></header><main class="w-full pt-16 bg-surface"><div class="flex flex-col w-full">
+<!-- Subtle ambient tone field (no borders, pure atmospheric glow) -->
+<div class="relative w-full max-w-7xl mx-auto px-6 lg:px-12 py-10">
+<div class="absolute -top-12 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
+<div class="absolute top-48 right-10 w-80 h-80 bg-secondary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
+<!-- Editorial Header: Pure Profile Presence -->
+<header class="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-12">
+<div class="flex items-center gap-6">
+<div class="relative group">
+<img class="w-20 h-20 md:w-24 md:h-24 rounded object-cover shadow-2xl transition-transform duration-500 group-hover:scale-105" data-alt="Editorial square-cut cinematic portrait of a creative media archivist in soft dramatic chiaroscuro lighting, deep graphite tones with warm amber keylight edge, textured film grain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC10WJHQ6xcmCtI2XkDbAxNeCgHlTziNZCIa6dyUePhcgmillWuI7XgKGaA5K4Uu_IborQAlk_k7IbxskrCFDF9Gm0vqdtNYekQEmKf4ey8b5B3eqFIv7JGO21pzkFGV2cFYTQ48B2wiJa8r4wPRlLSi3x79XASkYLnyh0j6NjwrfDcdDscRZ_Rz0p1yvfYYOwqYMYxK76w62uX44_x4ezYtBrzXVvqetuk0Lih35IEFX9cHPTtbSD6"/>
+<span class="absolute bottom-1 right-1 w-3 h-3 bg-secondary rounded-full ring-2 ring-surface shadow-sm"></span>
+</div>
+<div class="space-y-1.5">
+<div class="flex items-center gap-3">
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight font-semibold">
+              Alex Vance
+            </h1>
+<span class="font-label-sm text-label-sm uppercase tracking-wider px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-medium">Curator</span>
+</div>
+<p class="font-label-md text-label-md text-on-surface-variant tracking-normal">
+            @alexvance
+          </p>
+<div class="flex items-center gap-2 pt-1 font-label-sm text-label-sm text-on-surface-variant">
+<span class="text-on-surface font-semibold">384</span> Games Rated
+            <span class="text-outline-variant">/</span>
+<span class="text-primary font-semibold">78</span> Avg Score
+          </div>
+</div>
+</div>
+<!-- Serene Filter Navigation -->
+<nav aria-label="Ranking Categories" class="flex items-center gap-6 md:gap-8 overflow-x-auto pb-1">
+<button class="filter-btn active font-body-md text-body-md text-on-surface font-semibold tracking-tight transition-colors relative py-1" data-filter="all">
+          All
+          <span class="filter-indicator absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"></span>
+</button>
+<button class="filter-btn font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors relative py-1" data-filter="masterpieces">
+          Masterpieces (90+)
+          <span class="filter-indicator hidden absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"></span>
+</button>
+<button class="filter-btn font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors relative py-1" data-filter="recommended">
+          Recommended (75+)
+          <span class="filter-indicator hidden absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"></span>
+</button>
+<button class="filter-btn font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors relative py-1" data-filter="backlog">
+          Backlog
+          <span class="filter-indicator hidden absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"></span>
+</button>
+</nav>
+</header>
+<!-- Visual Divider Accent (Architectural Bar) -->
+<div class="w-full flex items-center justify-between mb-8">
+<div class="flex items-center gap-3">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant font-medium">Shelf / Personal Canon</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary/60"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant/80">Ordinal Hierarchy</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant tracking-wider">SORT:</span>
+<span class="font-label-sm text-label-sm text-on-surface font-medium uppercase tracking-wider">Critical Rank (Asc)</span>
+</div>
+</div>
+<!-- 4-Column Pure Artwork Grid -->
+<main class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10">
+<!-- Card #01 -->
+<article class="group flex flex-col cursor-pointer transition-transform duration-300" data-rank="1" data-score="98">
+<div class="relative w-full aspect-[3/4] rounded bg-surface-container-low overflow-hidden shadow-xl">
+<img class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" data-alt="Elden Ring vertical atmospheric cover artwork showing the Erd Tree glowing faintly gold in misty dark shattered landscapes with Tarnished warrior looking on, high-end fine art rendering, dark obsidian tones, moody aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdDwxkJwnIL8zh3IR87S76JC_q8DMN092a4QK6IlwuYSB3VQU3lzneYn3N301Bv6s1UnfOrh4S-NvVkYoSOocchSWWoxSZrcopHG4eHYVPuMrb5ryJ9T4uaHhSHfWW2JSGf5vbcCHEPB3WHVePXHIspxQAsI4ytHdcm9q3_-blAGEb9dl9ORb_jysY8c-yGpTAITkEg5L6klX7_cWfsuYM9VYAsCduE7QUJZ2KkVw3EgvhxVDj8b4I"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-surface-container-lowest/10 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
+<!-- Top Rank & Score Tags -->
+<div class="absolute top-3 left-3 flex items-center">
+<span class="font-label-md text-label-md font-bold px-2 py-1 rounded bg-surface-container-lowest/80 text-on-surface backdrop-blur-md shadow-md">#01</span>
+</div>
+<div class="absolute top-3 right-3 flex items-center">
+<span class="font-label-md text-label-md font-bold px-2.5 py-1 rounded bg-surface-container-lowest/90 text-primary backdrop-blur-md shadow-md">98</span>
+</div>
+<!-- Subtle Quick Rate Overlay on Hover -->
+<div class="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-surface-container-lowest/90 backdrop-blur-md flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">Masterpiece</span>
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-sm text-label-sm font-bold">5.0</span>
+</div>
+</div>
+</div>
+<div class="mt-3.5 space-y-1">
+<div class="flex items-baseline justify-between gap-2">
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight truncate group-hover:text-primary transition-colors">
+              Elden Ring
+            </h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">2022</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+            FromSoftware
+          </p>
+</div>
+</article>
+<!-- Card #02 -->
+<article class="group flex flex-col cursor-pointer transition-transform duration-300" data-rank="2" data-score="97">
+<div class="relative w-full aspect-[3/4] rounded bg-surface-container-low overflow-hidden shadow-xl">
+<img class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" data-alt="Baldurs Gate 3 dark fantasy portrait poster showing illithid mindflayer silhouette and glowing nautiloid ship amid violet and amber gothic night sky, cinematic editorial poster composition" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUA17JUFqOTxEhe-2AbD9brJEtpu1QHBEKJUNJRqd1qxrlwTgjomudlkhA2l1WjU8hqlvxpxRNvPHr_-al571DwWbyZhwmU1E2GgGPGzUVH-83DZOLSX7JjfbeoNa1s_L6EsM0paQPUGA5rwlfpL6mtE5ptBK0sMAf7hK5KNjSMctet15u2G6ZRlfm7fr_mm2jYvtPu9sbX6mbwcuWdoc-_zFaCnXBDCFDodb5Y_8P9ZtafuJOZgtr"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-surface-container-lowest/10 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
+<div class="absolute top-3 left-3 flex items-center">
+<span class="font-label-md text-label-md font-bold px-2 py-1 rounded bg-surface-container-lowest/80 text-on-surface backdrop-blur-md shadow-md">#02</span>
+</div>
+<div class="absolute top-3 right-3 flex items-center">
+<span class="font-label-md text-label-md font-bold px-2.5 py-1 rounded bg-surface-container-lowest/90 text-primary backdrop-blur-md shadow-md">97</span>
+</div>
+<div class="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-surface-container-lowest/90 backdrop-blur-md flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">Masterpiece</span>
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-sm text-label-sm font-bold">5.0</span>
+</div>
+</div>
+</div>
+<div class="mt-3.5 space-y-1">
+<div class="flex items-baseline justify-between gap-2">
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight truncate group-hover:text-primary transition-colors">
+              Baldur's Gate 3
+            </h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">2023</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+            Larian Studios
+          </p>
+</div>
+</article>
+<!-- Card #03 -->
+<article class="group flex flex-col cursor-pointer transition-transform duration-300" data-rank="3" data-score="95">
+<div class="relative w-full aspect-[3/4] rounded bg-surface-container-low overflow-hidden shadow-xl">
+<img class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" data-alt="Cyberpunk 2077 Night City vertical poster depicting rain-drenched skyscrapers with neon yellow high-contrast reflections and a lone nomad standing against vehicle headlights, moody dystopian photo style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkxc4ZHZWBjrHTA1pv1BXCGcdEYCSNyeupsGDrK6gr5zn6j0WJ1rL2DgpkVpfIl2B8IV3tkuNqKAtB71po9tH2t802Grl8VJmqEGDxXfwqHptKYuo4ZtyBV5xbFPzV5umzsI0CfzsZh-pCNxuUaOVnzgeakjGKAJi1p9Dt98GQou94wla-ujx6OkR0xuuFZCG8LJUzfGdA7x2BOyRQse5K8dNXVjlBCrNHcrXLS-wbK6tDjJFz1xuK"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-surface-container-lowest/10 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
+<div class="absolute top-3 left-3 flex items-center">
+<span class="font-label-md text-label-md font-bold px-2 py-1 rounded bg-surface-container-lowest/80 text-on-surface backdrop-blur-md shadow-md">#03</span>
+</div>
+<div class="absolute top-3 right-3 flex items-center">
+<span class="font-label-md text-label-md font-bold px-2.5 py-1 rounded bg-surface-container-lowest/90 text-primary backdrop-blur-md shadow-md">95</span>
+</div>
+<div class="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-surface-container-lowest/90 backdrop-blur-md flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">Masterpiece</span>
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-sm text-label-sm font-bold">4.8</span>
+</div>
+</div>
+</div>
+<div class="mt-3.5 space-y-1">
+<div class="flex items-baseline justify-between gap-2">
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight truncate group-hover:text-primary transition-colors">
+              Cyberpunk 2077
+            </h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">2023</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+            CD PROJEKT RED
+          </p>
+</div>
+</article>
+<!-- Card #04 -->
+<article class="group flex flex-col cursor-pointer transition-transform duration-300" data-rank="4" data-score="94">
+<div class="relative w-full aspect-[3/4] rounded bg-surface-container-low overflow-hidden shadow-xl">
+<img class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" data-alt="Disco Elysium expressionist oil painting style poster of Revachol coastal winter harbor, brush stroked silhouette with cigarette glow and melancholic olive, amber and charcoal tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhXnI4_fIuy976kg3EZzbNpt-b0RZmQ2ygUOF9nTk6v0fpH2sBVpOCHOEEeelMy_CgCspd1nt6jfjp7f8EdcxbMgIDYt89DgG77DA8Axn-ivgfYj69wsymNb5J3qzxxXG5wzFIphkJB7qHvk-ZRnwOQWT3tQytS4PIy2O6gI_n6Z8oc-ABTJJDEFftr0SwMFCmwKJ81sNd1lHCn892kc5b5oL7rL_8YgGRBvKzzivVXsJYIZBJoELo"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-surface-container-lowest/10 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
+<div class="absolute top-3 left-3 flex items-center">
+<span class="font-label-md text-label-md font-bold px-2 py-1 rounded bg-surface-container-lowest/80 text-on-surface backdrop-blur-md shadow-md">#04</span>
+</div>
+<div class="absolute top-3 right-3 flex items-center">
+<span class="font-label-md text-label-md font-bold px-2.5 py-1 rounded bg-surface-container-lowest/90 text-primary backdrop-blur-md shadow-md">94</span>
+</div>
+<div class="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-surface-container-lowest/90 backdrop-blur-md flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">Masterpiece</span>
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-sm text-label-sm font-bold">4.7</span>
+</div>
+</div>
+</div>
+<div class="mt-3.5 space-y-1">
+<div class="flex items-baseline justify-between gap-2">
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight truncate group-hover:text-primary transition-colors">
+              Disco Elysium
+            </h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">2021</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+            ZA/UM
+          </p>
+</div>
+</article>
+<!-- Card #05 -->
+<article class="group flex flex-col cursor-pointer transition-transform duration-300" data-rank="5" data-score="93">
+<div class="relative w-full aspect-[3/4] rounded bg-surface-container-low overflow-hidden shadow-xl">
+<img class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" data-alt="Half-Life 2 minimalist dystopian poster featuring City 17 towering dark Citadel structure, strider legs walking through desolate European cobblestone plaza, cool blue atmospheric haze with orange lambda insignia" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBK7Wmk-0M6Nlk5bUKRwT5U_hVw0nX4uCLP5NjEfirCANwcHqYRTmwSFj67BCsXY5XZ66VgQ7LJmXrZZqwABSCHRmi6FTbjuS3N-hY5kTYeWrUw2LfLVt9FBvNkXae32jocM7Pgmwk4TA-QN4PJrmFSIRVbqADyamMxuSHHD3kFXuqw6K3F_nDCPewc1MDiWGmLnvBHg-WchQJ-czGHodixDUO-Ex6VyqsAUVRtN6ue5CjEp-y3D_no"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-surface-container-lowest/10 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
+<div class="absolute top-3 left-3 flex items-center">
+<span class="font-label-md text-label-md font-bold px-2 py-1 rounded bg-surface-container-lowest/80 text-on-surface backdrop-blur-md shadow-md">#05</span>
+</div>
+<div class="absolute top-3 right-3 flex items-center">
+<span class="font-label-md text-label-md font-bold px-2.5 py-1 rounded bg-surface-container-lowest/90 text-primary backdrop-blur-md shadow-md">93</span>
+</div>
+<div class="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-surface-container-lowest/90 backdrop-blur-md flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">Masterpiece</span>
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-sm text-label-sm font-bold">4.8</span>
+</div>
+</div>
+</div>
+<div class="mt-3.5 space-y-1">
+<div class="flex items-baseline justify-between gap-2">
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight truncate group-hover:text-primary transition-colors">
+              Half-Life 2
+            </h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">2004</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+            Valve
+          </p>
+</div>
+</article>
+<!-- Card #06 -->
+<article class="group flex flex-col cursor-pointer transition-transform duration-300" data-rank="6" data-score="92">
+<div class="relative w-full aspect-[3/4] rounded bg-surface-container-low overflow-hidden shadow-xl">
+<img class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" data-alt="Alan Wake 2 psychological thriller poster art with Pacific Northwest dark pine forests double-exposed over deep crimson surreal spiral chamber, lone writer with flashlight cutting through shadow" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYvJ-pkAOE8X8BNi9ADVv98v72CE5cetzgCL_KcEfdyITFozG1C2GxhCWj59uEMrR9nyHW2qd1S4wSgL62g0TCE1NyamFRSwNUBDvGF_MA_jnqNR4sjT7FXLeZhkPom7DEx_5EUFQODIVBMKsr4k-vDAVMa0N6WzCkZHB7wBReIBo9EHMXkX-CRO1gVTRpNiU9OoXcTXvv42DnlaQe956676cgcknZv0953N-EeUZteQiv6D2m9fqe"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-surface-container-lowest/10 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
+<div class="absolute top-3 left-3 flex items-center">
+<span class="font-label-md text-label-md font-bold px-2 py-1 rounded bg-surface-container-lowest/80 text-on-surface backdrop-blur-md shadow-md">#06</span>
+</div>
+<div class="absolute top-3 right-3 flex items-center">
+<span class="font-label-md text-label-md font-bold px-2.5 py-1 rounded bg-surface-container-lowest/90 text-primary backdrop-blur-md shadow-md">92</span>
+</div>
+<div class="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-surface-container-lowest/90 backdrop-blur-md flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">Masterpiece</span>
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-sm text-label-sm font-bold">4.6</span>
+</div>
+</div>
+</div>
+<div class="mt-3.5 space-y-1">
+<div class="flex items-baseline justify-between gap-2">
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight truncate group-hover:text-primary transition-colors">
+              Alan Wake 2
+            </h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">2023</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+            Remedy Entertainment
+          </p>
+</div>
+</article>
+<!-- Card #07 -->
+<article class="group flex flex-col cursor-pointer transition-transform duration-300" data-rank="7" data-score="92">
+<div class="relative w-full aspect-[3/4] rounded bg-surface-container-low overflow-hidden shadow-xl">
+<img class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" data-alt="Hades Greek myth stylized vertical artwork showing Zagreus wielding the Stygian Blade surrounded by underworld flames and blood-red Tartarus pillars, energetic graphic illustration style with sharp inks" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4ZIfvCCbbXYG0Glfy35UaKnkvYBoqfQW9RTWyKRC8d1QLvOllBmzVFJ28MfzvsSKKY0kn8TbVW6WdKv4PxptrurNLRl5r_xPEyHzOs-cKeUS3043kz1Pwfi8CquZO8OMkQPqdzb_J3pXSpV2pZBpdbFIXChZl4pByxevN9q9wClbiSxEnvd_c9Pa07-TBxCmmxDMHvW9CNPDnnZFi_9g4QMXJn0fUP2WLome1SFz2bcDS-ilDDgzY"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-surface-container-lowest/10 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
+<div class="absolute top-3 left-3 flex items-center">
+<span class="font-label-md text-label-md font-bold px-2 py-1 rounded bg-surface-container-lowest/80 text-on-surface backdrop-blur-md shadow-md">#07</span>
+</div>
+<div class="absolute top-3 right-3 flex items-center">
+<span class="font-label-md text-label-md font-bold px-2.5 py-1 rounded bg-surface-container-lowest/90 text-primary backdrop-blur-md shadow-md">92</span>
+</div>
+<div class="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-surface-container-lowest/90 backdrop-blur-md flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">Masterpiece</span>
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-sm text-label-sm font-bold">4.7</span>
+</div>
+</div>
+</div>
+<div class="mt-3.5 space-y-1">
+<div class="flex items-baseline justify-between gap-2">
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight truncate group-hover:text-primary transition-colors">
+              Hades
+            </h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">2020</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+            Supergiant Games
+          </p>
+</div>
+</article>
+<!-- Card #08 -->
+<article class="group flex flex-col cursor-pointer transition-transform duration-300" data-rank="8" data-score="91">
+<div class="relative w-full aspect-[3/4] rounded bg-surface-container-low overflow-hidden shadow-xl">
+<img class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" data-alt="Bloodborne gothic Victorian hunter standing in wet Yharnam cobblestone alley under pale blood moon with saw cleaver dripping, dark atmospheric horror photography style, sepia graphite highlights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7YiUk0GEGRvHGw7RnWE53Xe0sr0SDa6PecU5cMB9xWTcYbbdBhllKVuhL7laofsSvNbg1xD-yIxPHf9lPS86udWWhHopgbPsqaVC0r0xYbzYiN364IDVbczJWYMWVn6DDcrdTvYctYqCeOHu8EBRoT2NKVe5C4H6JaUtrk_iCmpBLXOb6ThUe_gysCtYd1WwnaIDWshr3_Bm_usohyv3etuPjFjm0i6fXMh0nF4-82YaTRoGot5c8"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-surface-container-lowest/10 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
+<div class="absolute top-3 left-3 flex items-center">
+<span class="font-label-md text-label-md font-bold px-2 py-1 rounded bg-surface-container-lowest/80 text-on-surface backdrop-blur-md shadow-md">#08</span>
+</div>
+<div class="absolute top-3 right-3 flex items-center">
+<span class="font-label-md text-label-md font-bold px-2.5 py-1 rounded bg-surface-container-lowest/90 text-primary backdrop-blur-md shadow-md">91</span>
+</div>
+<div class="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-surface-container-lowest/90 backdrop-blur-md flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">Masterpiece</span>
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-sm text-label-sm font-bold">4.9</span>
+</div>
+</div>
+</div>
+<div class="mt-3.5 space-y-1">
+<div class="flex items-baseline justify-between gap-2">
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight truncate group-hover:text-primary transition-colors">
+              Bloodborne
+            </h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">2015</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+            FromSoftware
+          </p>
+</div>
+</article>
+</main>
+<!-- Minimalist Pagination & Canon Position Indicator -->
+<footer class="pt-16 pb-6 flex items-center justify-between text-on-surface-variant">
+<div class="flex items-center gap-3">
+<button aria-label="Previous Page" class="p-2 rounded hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-30 disabled:pointer-events-none" disabled="">
+<span class="material-symbols-outlined text-[20px]">west</span>
+</button>
+<span class="font-label-md text-label-md text-on-surface font-medium tracking-widest">
+          1 <span class="text-outline-variant font-normal">of</span> 48
+        </span>
+<button aria-label="Next Page" class="p-2 rounded hover:bg-surface-container-high hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]">east</span>
+</button>
+</div>
+<div class="hidden sm:flex items-center gap-4 font-label-sm text-label-sm">
+<span class="text-on-surface-variant/70">Displaying entries 1–8 of 384</span>
+<span class="w-1 h-1 rounded-full bg-surface-container-highest"></span>
+<span class="text-on-surface-variant/70">Updated 4h ago</span>
+</div>
+</footer>
+</div>
+<script>
+    // Minimalist filter toggle micro-interaction
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => {
+          b.classList.remove('text-on-surface', 'font-semibold', 'active');
+          b.classList.add('text-on-surface-variant');
+          const indicator = b.querySelector('.filter-indicator');
+          if (indicator) indicator.classList.add('hidden');
+        });
+        btn.classList.add('text-on-surface', 'font-semibold', 'active');
+        btn.classList.remove('text-on-surface-variant');
+        const activeIndicator = btn.querySelector('.filter-indicator');
+        if (activeIndicator) activeIndicator.classList.remove('hidden');
+      });
+    });
+  </script>
+</div></main><footer class="w-full bg-surface-container-lowest mt-space-xl"><div class="max-w-7xl mx-auto px-6 lg:px-12 py-10 flex flex-col md:flex-row items-center justify-between gap-4"><div class="flex items-center gap-3"><span class="font-headline-md text-headline-md tracking-tight uppercase text-on-surface-variant">Playlog<span class="text-primary">.gg</span></span><span class="font-label-sm text-label-sm text-on-surface-variant">© 2025</span></div><div class="flex items-center gap-6"><a class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors" data-path="database-archive" href="#">Archive</a><a class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors" data-path="api-docs" href="#">API</a><a class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors" data-path="terms" href="#">Terms</a><a class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors" data-path="privacy" href="#">Privacy</a></div></div></footer></body></html>

@@ -1,0 +1,378 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_standard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..700;1,300..700&amp;family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&amp;family=Space+Grotesk:wght@300..700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-error": "#690005",
+          "background": "#121316",
+          "outline-variant": "#504535",
+          "on-primary-fixed": "#281900",
+          "on-primary-container": "#5e4000",
+          "on-primary": "#432c00",
+          "on-primary-fixed-variant": "#604100",
+          "surface-tint": "#fabc4d",
+          "surface-bright": "#38393c",
+          "primary": "#ffc665",
+          "on-tertiary": "#00315d",
+          "surface": "#121316",
+          "on-tertiary-container": "#004681",
+          "surface-container-low": "#1b1b1f",
+          "outline": "#9d8f7c",
+          "tertiary": "#b3d1ff",
+          "on-secondary-fixed": "#00210c",
+          "surface-container-highest": "#343538",
+          "tertiary-fixed": "#d4e3ff",
+          "error-container": "#93000a",
+          "inverse-primary": "#7e5700",
+          "primary-fixed": "#ffdead",
+          "secondary-fixed-dim": "#4de082",
+          "surface-container": "#1f1f23",
+          "on-surface": "#e3e2e6",
+          "on-surface-variant": "#d4c4b0",
+          "on-tertiary-fixed-variant": "#004883",
+          "surface-container-lowest": "#0d0e11",
+          "on-secondary-container": "#003e1c",
+          "on-background": "#e3e2e6",
+          "primary-fixed-dim": "#fabc4d",
+          "on-secondary-fixed-variant": "#005227",
+          "on-tertiary-fixed": "#001c39",
+          "tertiary-fixed-dim": "#a4c9ff",
+          "inverse-on-surface": "#2f3034",
+          "secondary": "#4de082",
+          "on-error-container": "#ffdad6",
+          "on-secondary": "#003919",
+          "error": "#ffb4ab",
+          "secondary-fixed": "#6dfe9c",
+          "tertiary-container": "#80b6ff",
+          "surface-variant": "#343538",
+          "inverse-surface": "#e3e2e6",
+          "surface-container-high": "#292a2d",
+          "surface-dim": "#121316",
+          "secondary-container": "#00b55d",
+          "primary-container": "#e5a93c"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "gutter-mobile": "0.75rem",
+          "space-sm": "0.5rem",
+          "gutter": "1.25rem",
+          "margin-mobile": "1rem",
+          "space-md": "0.875rem",
+          "space-xs": "0.25rem",
+          "space-lg": "1.5rem",
+          "space-xl": "2.5rem",
+          "margin": "2rem"
+        },
+        "fontFamily": {
+          "headline-xl": [
+            "Space Grotesk"
+          ],
+          "label-lg": [
+            "JetBrains Mono"
+          ],
+          "display-lg": [
+            "Space Grotesk"
+          ],
+          "body-md": [
+            "Hanken Grotesk"
+          ],
+          "label-md": [
+            "JetBrains Mono"
+          ],
+          "headline-xl-mobile": [
+            "Space Grotesk"
+          ],
+          "headline-lg": [
+            "Space Grotesk"
+          ],
+          "label-sm": [
+            "JetBrains Mono"
+          ],
+          "body-sm": [
+            "Hanken Grotesk"
+          ],
+          "body-lg": [
+            "Hanken Grotesk"
+          ],
+          "headline-md": [
+            "Space Grotesk"
+          ],
+          "display-lg-mobile": [
+            "Space Grotesk"
+          ]
+        },
+        "fontSize": {
+          "headline-xl": [
+            "36px",
+            {
+              "lineHeight": "42px",
+              "letterSpacing": "-0.025em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-lg": [
+            "14px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "500"
+            }
+          ],
+          "display-lg": [
+            "52px",
+            {
+              "lineHeight": "58px",
+              "letterSpacing": "-0.03em",
+              "fontWeight": "700"
+            }
+          ],
+          "body-md": [
+            "14px",
+            {
+              "lineHeight": "22px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ],
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0.02em",
+              "fontWeight": "500"
+            }
+          ],
+          "headline-xl-mobile": [
+            "26px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-lg": [
+            "24px",
+            {
+              "lineHeight": "30px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-sm": [
+            "10px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.06em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-sm": [
+            "12px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "body-lg": [
+            "16px",
+            {
+              "lineHeight": "26px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-md": [
+            "18px",
+            {
+              "lineHeight": "24px",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "500"
+            }
+          ],
+          "display-lg-mobile": [
+            "34px",
+            {
+              "lineHeight": "40px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between gap-6"><div class="flex items-center gap-8"><a class="flex items-center gap-3 group" data-path="discover" href="#"><img alt="Modern minimalist logo mark and wordmark for Playlog, a video game critique, rating, and tier-list platform. Geometric diamond/play icon with amber accent and clean modern typography reading PLAYLOG.. Brand logo. - Primary color: #e5a93c
+- Font: spaceGrotesk
+- Mode: dark
+- Roundness: rounded-sm
+" class="h-7 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XXou2h61u7DPSAmHaDNjPu3aObdrekkQGGqIaWrojBFUZ5rZMYvlBkVfOfGRR6iMreI9DP_02eS6A8hdL6OhRawXv_Zyae1-SgBObjKt9iJFWXMegOsfAkpuPJl5PluVzyCsp2UsBqYu9pbBu7tPJxKHjRZH_yE-kf3Ib6H-3M57Gvd5QxlpAvUh39lE2X4NfI7DqBCGxylw9Bx-pmwZGnI0fZNvzurdZKHXwkV2mNh6RUiUIipbPaNA"><span class="font-headline-md text-headline-md tracking-tight uppercase text-on-surface font-bold">Playlog<span class="text-primary">.gg</span></span></a><nav class="hidden md:flex items-center gap-6" data-active-classes="text-on-surface font-semibold"><a aria-current="page" class="transition-colors text-on-surface font-semibold" data-path="discover" href="#">Discover</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="rankings" href="#">Rankings</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="lists" href="#">Lists</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="compare" href="#">Compare</a></nav></div><div class="flex items-center gap-4 flex-1 max-w-xs justify-end"><div class="relative hidden sm:flex items-center w-full max-w-[220px]"><span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px] pointer-events-none">search</span><input class="w-full bg-surface-container-low pl-9 pr-3 py-1.5 rounded text-on-surface placeholder:text-on-surface-variant/60 font-body-sm text-body-sm focus:outline-none focus:bg-surface-container transition-colors" placeholder="Search titles..." type="text"><kbd class="absolute right-2 font-label-sm text-label-sm text-on-surface-variant px-1.5 py-0.5 rounded bg-surface-container-high pointer-events-none">⌘K</kbd></div><a class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-primary-container text-on-primary-container hover:bg-primary transition-colors font-label-md text-label-md tracking-wider uppercase font-semibold" data-path="log-game" href="#"><span class="material-symbols-outlined text-[16px]">add</span><span class="">Log</span></a><a class="flex-shrink-0" data-path="profile" href="#"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-surface-variant hover:ring-primary transition-all" src="https://lh3.googleusercontent.com/aida/AEtjO1Uj7oX5IeIx6GsQRBuZhtpXniSBfDG3f7hQvxiIHe5BLa8ZXfahWEi91J_3xZM-wYZ82SUL3f4OtTBvABtfIVYIWDQIHDKW4b-FsswCawrncUUSCQ7JyYf02lZUWe54k20DG6C5h3pMOoKSBIMjkuj5AszhzZ25dBwhgOF5pirFYl7qu1_wa9i1LInq12QSIwF3rL-NHBD5uSfuxdNhSEhaKDX615dqS_DdI1dW7lwhn3PSkW9Ld6tl-Ks"></a></div></div></header><main class="w-full pt-16 bg-surface"><div class="flex flex-col w-full">
+<!-- Atmospheric Background Ambient Glow -->
+<div class="relative w-full overflow-hidden">
+<div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-primary/5 rounded-full blur-[140px] pointer-events-none"></div>
+<!-- 1. Hero Spotlight: Elden Ring Shadow of the Erdtree -->
+<section class="max-w-7xl mx-auto px-6 lg:px-12 pt-8 pb-20">
+<div class="relative rounded-xl overflow-hidden bg-surface-container-lowest shadow-2xl group">
+<!-- Backdrop Art -->
+<div class="bg-cover bg-center h-[520px] sm:h-[600px] w-full transition-transform duration-700 ease-out group-hover:scale-[1.015]" data-alt="Cinematic atmospheric vista of a towering withered spectral gold tree bleeding sap against a tempestuous twilight charcoal sky. Somber muted palette of deep obsidian, charcoal ash, and subtle golden amber luminescence, dark fantasy editorial key art style with immense sense of scale, moody, solitary knight standing on a distant jagged ridge." style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuD0NnT2Y_Nz3MroWPy-S8FfVfig5bFH4m2hhLxfuFdoZXCUmDbHFZ9ADG0BUC_XgHadWbAFftpkYoEL5l91LbMieia6ld2wiKCrRDqLtEZxEKQuMfFpVeoi5pJweGAKWVKdXuTSB9jFMflsHYeU9UgkJTnc5_8eey6Gq1mjK4F3vSezEqTj_2vrOR4g4_h_chNU8nGszmGx-HaR6pRVDzAHTroUXoClWvdvmlyzl_ty_CTb3XuNykL_&quot;);">
+</div>
+<!-- Scrim Gradients -->
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-surface/60 to-transparent"></div>
+<div class="absolute inset-0 bg-gradient-to-r from-surface via-surface/40 to-transparent"></div>
+<!-- Featured Banner Stamp -->
+<div class="absolute top-8 left-8 sm:left-12 flex items-center gap-3">
+<span class="px-2.5 py-1 rounded bg-surface-container-high/80 backdrop-blur-md font-label-sm text-label-sm text-primary uppercase tracking-widest">Editor's Spotlight</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Vol. XIV • Curated Feature</span>
+</div>
+<!-- Hero Content Overlay -->
+<div class="absolute bottom-0 left-0 right-0 p-8 sm:p-12 max-w-3xl flex flex-col gap-5">
+<div class="flex flex-wrap items-center gap-3">
+<span class="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">FromSoftware</span>
+<span class="text-on-surface-variant/40">•</span>
+<span class="font-label-md text-label-md text-on-surface-variant">2024</span>
+<span class="text-on-surface-variant/40">•</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Action RPG</span>
+<div class="ml-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-primary-container/20 backdrop-blur-sm text-primary">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: &quot;FILL&quot; 1;">star</span>
+<span class="font-label-md text-label-md font-semibold">98</span>
+<span class="font-label-sm text-label-sm text-primary/70">/ 100</span>
+</div>
+</div>
+<h1 class="font-display-lg text-display-lg sm:text-[64px] sm:leading-[68px] text-on-surface tracking-tight">
+            Elden Ring:<br>
+<span class="text-primary-fixed-dim font-light italic">Shadow of the Erdtree</span>
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl font-light leading-relaxed">
+            “An extraordinary elegy of ruin and majesty, where Miyazaki's subterranean architecture redefines the melancholic beauty of the open world.”
+          </p>
+<div class="flex items-center gap-4 pt-2">
+<a class="inline-flex items-center gap-2 px-6 py-3 rounded bg-primary text-on-primary hover:bg-primary-fixed-dim transition-all duration-200 font-label-md text-label-md uppercase tracking-wider font-semibold shadow-lg shadow-primary/10 hover:shadow-primary/20" data-path="game/elden-ring-shadow-of-the-erdtree" href="#">
+<span class="">View Title</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+<button class="inline-flex items-center gap-2 px-5 py-3 rounded bg-surface-container-high/70 hover:bg-surface-container-highest backdrop-blur-md text-on-surface transition-colors font-label-md text-label-md uppercase tracking-wider">
+<span class="material-symbols-outlined text-[16px]">bookmark_border</span>
+<span class="">Shelf</span>
+</button>
+<button class="inline-flex items-center justify-center w-11 h-11 rounded bg-surface-container-high/70 hover:bg-surface-container-highest backdrop-blur-md text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]">share</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- 2. Curated Highlights ('Essential Canon') -->
+<section class="max-w-7xl mx-auto px-6 lg:px-12 py-12">
+<div class="flex items-end justify-between mb-8">
+<div>
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-widest block mb-1">Archival Selection</span>
+<h2 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">The Essential Canon</h2>
+</div>
+<a class="group flex items-center gap-1.5 font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" data-path="rankings" href="#">
+<span class="">Explore All 250</span>
+<span class="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-1">arrow_forward</span>
+</a>
+</div>
+<!-- 5-Posters Grid -->
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5">
+<!-- 1. Baldur's Gate 3 -->
+<a class="group flex flex-col" data-path="game/baldurs-gate-3" href="#">
+<div class="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Editorial artistic game portrait of a silver-haired vampire elf rogue with crimson eyes against a dark moody twilight gothic forest backdrop, high fantasy portraiture, cinematic lighting, muted shadows with subtle gold embers, deep charcoal tone." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDK2U3PzNCWB3y5Jnqs2Q_oIiisOznnbfOV9jnX4CUJMBcHOmSIp1tZ_e1-jWZV8SSHNcpEuszWG4mWIVOe3KthSn7b_PQ7oF9NIFqNjzstwbd9MxhPY6mgn8oKlMFTQCA93twZyA5zYcaMycnlSunKpne9HU-5ZM7Qrn5rp0CqleKXX2veTaGtqsqqWTQ3Gbcsyaq1lVegqRSxrO2Io1hF9oQ6imD38EhnyDRjQZvL98p0IgI0jWmG">
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+<!-- Score Pill -->
+<div class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded bg-surface-container-lowest/80 backdrop-blur-md">
+<span class="font-label-sm text-label-sm font-semibold text-primary">97</span>
+</div>
+</div>
+<div class="mt-3 flex flex-col">
+<h3 class="font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors truncate">Baldur's Gate 3</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">2023 • Larian Studios</span>
+</div>
+</a>
+<!-- 2. Disco Elysium -->
+<a class="group flex flex-col" data-path="game/disco-elysium" href="#">
+<div class="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Oil painted expressionist portrait of a melancholic disheveled detective in a stained green blazer against a stark, winter coastal European seaside slum with dilapidated pale brick buildings and muted olive gray sky, artistic painterly brushstrokes." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-h5CKf7Ik-rT86iVNmmQXhF1klJb-9Psf1vYqYYJnx30RTrtJ8j4FZgdRDe2r3glGnLdlYcPPfmJkiORjA2G4KSu_ek-ngdepCtdskMOIoP2cQxOs-S8HZ8KsYXnmpy5tVPJb-bIZf66E0VP4k14rRRgGvcQxeCB4UP0Oxp178oS0GTIi3MutYtF5SYFEfugoMJU0yGYXQKt-74-oB114dVppRjFMcILSa56CWJwkJhTsg5wcQP0s">
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+<div class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded bg-surface-container-lowest/80 backdrop-blur-md">
+<span class="font-label-sm text-label-sm font-semibold text-primary">95</span>
+</div>
+</div>
+<div class="mt-3 flex flex-col">
+<h3 class="font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors truncate">Disco Elysium</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">2019 • ZA/UM</span>
+</div>
+</a>
+<!-- 3. Metaphor: ReFantazio -->
+<a class="group flex flex-col" data-path="game/metaphor-refantazio" href="#">
+<div class="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Stylized anime-influenced fantasy art piece showing an ethereal young protagonist with azure eyes looking towards a floating colossal gothic cathedral in a crimson twilight sky, sleek modern typographic contrast, subtle gold filigree, Studio Zero aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAai175ca8B5tiQvS4VkQ_MqckPgmsMaXKBfK45rGnZo31ObUboBFIAbNaXwh_AsmkMwIY8qDnSIkQIbkU2soXO1FFC-23WYX37O-E2yKmx90_Rqe5VPJe8nRRB-87lR5E9mBpRyTgOqjQpqgBMUKmH6wxen--dCOedClT2b_S6fo9whKRDhj45xoOUZxFKGejDiuZ3Ys57Z49IrksjZV827dUsBKzXZmWU1R6BkysK4YVhHCN1HgJ">
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+<div class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded bg-surface-container-lowest/80 backdrop-blur-md">
+<span class="font-label-sm text-label-sm font-semibold text-primary">94</span>
+</div>
+</div>
+<div class="mt-3 flex flex-col">
+<h3 class="font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors truncate">Metaphor: ReFantazio</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">2024 • Studio Zero</span>
+</div>
+</a>
+<!-- 4. Alan Wake 2 -->
+<a class="group flex flex-col" data-path="game/alan-wake-2" href="#">
+<div class="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Psychological horror neo-noir composition of a man with a flashlight in dense misty Pacific Northwest rain forest at night, deep saturated crimson illumination overlapping shadowy pine silhouettes, cinematic film grain, Twin Peaks evocative mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYd9aDwZ6JCUqFqC6dYyeZVhun4XJ6_7m3qeHdsHj2NqC_Hkzd7Tya56rM-mZHHDMrTNEYTHQY78D_QIA8dne2G_houQSK-RyRVO51NCbKqDgNHrU3jIa9c7kxnmERnlDamWvI5GPa6EY8WXJvEvv4wfKe4HC1XtUVThoBed-PR4aF0-JLZNViJPFJFZYkBccc-tpGPm73L3ffAibwxR-jU7Zwynswf8uor40LOtr5ufjAH4p_UTZL">
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+<div class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded bg-surface-container-lowest/80 backdrop-blur-md">
+<span class="font-label-sm text-label-sm font-semibold text-primary">93</span>
+</div>
+</div>
+<div class="mt-3 flex flex-col">
+<h3 class="font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors truncate">Alan Wake 2</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">2023 • Remedy Ent.</span>
+</div>
+</a>
+<!-- 5. Half-Life 2 -->
+<a class="group flex flex-col" data-path="game/half-life-2" href="#">
+<div class="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Brutalist dystopian urban sci-fi vista of City 17 featuring a colossal dark metallic Citadel rising through cold overcast slate clouds over crumbling Eastern European neoclassical brick buildings, atmospheric muted industrial tones, quiet dystopia." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFLFzx6mxMCqAZetfA9IJEHRyYPzTz7Ij-bkaZsBwlScBDx-_yoZIjDl8o5ImFJQgaqMNYn3XC-v_vI62fC6MoEqa4MIuK2u0P3z-k6_WhbZ7iUluRByKbfr3DLFmlia3dN54GGaFT8QCPDxoZ8t43slNKFaq6iErXtVX7MKlDfg2jn_23sgXUMMLZh3IGnpqN9Y6V0WBTG5229ncrDjjjIxip3jUZjzQDnAynrOsIHqzAOhpTuVGx">
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+<div class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded bg-surface-container-lowest/80 backdrop-blur-md">
+<span class="font-label-sm text-label-sm font-semibold text-primary">96</span>
+</div>
+</div>
+<div class="mt-3 flex flex-col">
+<h3 class="font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors truncate">Half-Life 2</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">2004 • Valve</span>
+</div>
+</a>
+</div>
+</section>
+<!-- 3. Recent Reviews / Critical Dispatches -->
+<section class="max-w-7xl mx-auto px-6 lg:px-12 py-12">
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Review 1: Metaphor -->
+
+<!-- Review 2: Silent Hill 2 -->
+
+<!-- Review 3: UFO 50 -->
+
+</div>
+</section>
+<!-- 4. Minimal Community Lists -->
+<section class="max-w-7xl mx-auto px-6 lg:px-12 pt-8 pb-16">
+
+
+</section>
+<!-- Subtle Editorial Colophon / Mission Banner -->
+
+</div>
+</div></main><footer class="w-full bg-surface-container-lowest mt-space-xl"><div class="max-w-7xl mx-auto px-6 lg:px-12 py-10 flex flex-col md:flex-row items-center justify-between gap-4"><div class="flex items-center gap-3"><span class="font-headline-md text-headline-md tracking-tight uppercase text-on-surface-variant">Playlog<span class="text-primary">.gg</span></span><span class="font-label-sm text-label-sm text-on-surface-variant">© 2025</span></div><div class="flex items-center gap-6"><a class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors" data-path="database-archive" href="#">Archive</a><a class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors" data-path="api-docs" href="#">API</a><a class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors" data-path="terms" href="#">Terms</a><a class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors" data-path="privacy" href="#">Privacy</a></div></div></footer>
+
+</body></html>

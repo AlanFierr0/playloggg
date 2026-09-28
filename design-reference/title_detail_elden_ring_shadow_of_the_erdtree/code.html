@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en" style=""><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..700;1,300..700&amp;family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&amp;family=Space+Grotesk:wght@300..700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-error": "#690005",
+          "background": "#121316",
+          "outline-variant": "#504535",
+          "on-primary-fixed": "#281900",
+          "on-primary-container": "#5e4000",
+          "on-primary": "#432c00",
+          "on-primary-fixed-variant": "#604100",
+          "surface-tint": "#fabc4d",
+          "surface-bright": "#38393c",
+          "primary": "#ffc665",
+          "on-tertiary": "#00315d",
+          "surface": "#121316",
+          "on-tertiary-container": "#004681",
+          "surface-container-low": "#1b1b1f",
+          "outline": "#9d8f7c",
+          "tertiary": "#b3d1ff",
+          "on-secondary-fixed": "#00210c",
+          "surface-container-highest": "#343538",
+          "tertiary-fixed": "#d4e3ff",
+          "error-container": "#93000a",
+          "inverse-primary": "#7e5700",
+          "primary-fixed": "#ffdead",
+          "secondary-fixed-dim": "#4de082",
+          "surface-container": "#1f1f23",
+          "on-surface": "#e3e2e6",
+          "on-surface-variant": "#d4c4b0",
+          "on-tertiary-fixed-variant": "#004883",
+          "surface-container-lowest": "#0d0e11",
+          "on-secondary-container": "#003e1c",
+          "on-background": "#e3e2e6",
+          "primary-fixed-dim": "#fabc4d",
+          "on-secondary-fixed-variant": "#005227",
+          "on-tertiary-fixed": "#001c39",
+          "tertiary-fixed-dim": "#a4c9ff",
+          "inverse-on-surface": "#2f3034",
+          "secondary": "#4de082",
+          "on-error-container": "#ffdad6",
+          "on-secondary": "#003919",
+          "error": "#ffb4ab",
+          "secondary-fixed": "#6dfe9c",
+          "tertiary-container": "#80b6ff",
+          "surface-variant": "#343538",
+          "inverse-surface": "#e3e2e6",
+          "surface-container-high": "#292a2d",
+          "surface-dim": "#121316",
+          "secondary-container": "#00b55d",
+          "primary-container": "#e5a93c"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "gutter-mobile": "0.75rem",
+          "space-sm": "0.5rem",
+          "gutter": "1.25rem",
+          "margin-mobile": "1rem",
+          "space-md": "0.875rem",
+          "space-xs": "0.25rem",
+          "space-lg": "1.5rem",
+          "space-xl": "2.5rem",
+          "margin": "2rem"
+        },
+        "fontFamily": {
+          "headline-xl": [
+            "Space Grotesk"
+          ],
+          "label-lg": [
+            "JetBrains Mono"
+          ],
+          "display-lg": [
+            "Space Grotesk"
+          ],
+          "body-md": [
+            "Hanken Grotesk"
+          ],
+          "label-md": [
+            "JetBrains Mono"
+          ],
+          "headline-xl-mobile": [
+            "Space Grotesk"
+          ],
+          "headline-lg": [
+            "Space Grotesk"
+          ],
+          "label-sm": [
+            "JetBrains Mono"
+          ],
+          "body-sm": [
+            "Hanken Grotesk"
+          ],
+          "body-lg": [
+            "Hanken Grotesk"
+          ],
+          "headline-md": [
+            "Space Grotesk"
+          ],
+          "display-lg-mobile": [
+            "Space Grotesk"
+          ]
+        },
+        "fontSize": {
+          "headline-xl": [
+            "36px",
+            {
+              "lineHeight": "42px",
+              "letterSpacing": "-0.025em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-lg": [
+            "14px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "500"
+            }
+          ],
+          "display-lg": [
+            "52px",
+            {
+              "lineHeight": "58px",
+              "letterSpacing": "-0.03em",
+              "fontWeight": "700"
+            }
+          ],
+          "body-md": [
+            "14px",
+            {
+              "lineHeight": "22px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ],
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0.02em",
+              "fontWeight": "500"
+            }
+          ],
+          "headline-xl-mobile": [
+            "26px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-lg": [
+            "24px",
+            {
+              "lineHeight": "30px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-sm": [
+            "10px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.06em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-sm": [
+            "12px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "body-lg": [
+            "16px",
+            {
+              "lineHeight": "26px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-md": [
+            "18px",
+            {
+              "lineHeight": "24px",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "500"
+            }
+          ],
+          "display-lg-mobile": [
+            "34px",
+            {
+              "lineHeight": "40px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between gap-6"><div class="flex items-center gap-8"><a class="flex items-center gap-3 group" data-path="discover" href="#"><img alt="Modern minimalist logo mark and wordmark for Playlog, a video game critique, rating, and tier-list platform. Geometric diamond/play icon with amber accent and clean modern typography reading PLAYLOG.. Brand logo. - Primary color: #e5a93c
+- Font: spaceGrotesk
+- Mode: dark
+- Roundness: rounded-sm
+" class="h-7 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XXou2h61u7DPSAmHaDNjPu3aObdrekkQGGqIaWrojBFUZ5rZMYvlBkVfOfGRR6iMreI9DP_02eS6A8hdL6OhRawXv_Zyae1-SgBObjKt9iJFWXMegOsfAkpuPJl5PluVzyCsp2UsBqYu9pbBu7tPJxKHjRZH_yE-kf3Ib6H-3M57Gvd5QxlpAvUh39lE2X4NfI7DqBCGxylw9Bx-pmwZGnI0fZNvzurdZKHXwkV2mNh6RUiUIipbPaNA"/><span class="font-headline-md text-headline-md tracking-tight uppercase text-on-surface font-bold">Playlog<span class="text-primary">.gg</span></span></a><nav class="hidden md:flex items-center gap-6" data-active-classes="text-on-surface font-semibold"><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="discover" href="#">Discover</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="rankings" href="#">Rankings</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="lists" href="#">Lists</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="compare" href="#">Compare</a></nav></div><div class="flex items-center gap-4 flex-1 max-w-xs justify-end"><div class="relative hidden sm:flex items-center w-full max-w-[220px]"><span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px] pointer-events-none">search</span><input class="w-full bg-surface-container-low pl-9 pr-3 py-1.5 rounded text-on-surface placeholder:text-on-surface-variant/60 font-body-sm text-body-sm focus:outline-none focus:bg-surface-container transition-colors" placeholder="Search titles..." type="text"/><kbd class="absolute right-2 font-label-sm text-label-sm text-on-surface-variant px-1.5 py-0.5 rounded bg-surface-container-high pointer-events-none">⌘K</kbd></div><a class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-primary-container text-on-primary-container hover:bg-primary transition-colors font-label-md text-label-md tracking-wider uppercase font-semibold" data-path="log-game" href="#"><span class="material-symbols-outlined text-[16px]">add</span><span class="">Log</span></a><a class="flex-shrink-0" data-path="profile" href="#"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-surface-variant hover:ring-primary transition-all" src="https://lh3.googleusercontent.com/aida/AEtjO1Uj7oX5IeIx6GsQRBuZhtpXniSBfDG3f7hQvxiIHe5BLa8ZXfahWEi91J_3xZM-wYZ82SUL3f4OtTBvABtfIVYIWDQIHDKW4b-FsswCawrncUUSCQ7JyYf02lZUWe54k20DG6C5h3pMOoKSBIMjkuj5AszhzZ25dBwhgOF5pirFYl7qu1_wa9i1LInq12QSIwF3rL-NHBD5uSfuxdNhSEhaKDX615dqS_DdI1dW7lwhn3PSkW9Ld6tl-Ks"/></a></div></div></header><main class="w-full pt-16 bg-surface"><div class="flex flex-col w-full">
+<!-- Top Ambient Hero Stage -->
+<div class="relative w-full -mt-16 overflow-hidden bg-surface-container-lowest">
+<!-- Atmospheric Cinematic Backdrop -->
+<div class="absolute inset-0 w-full h-[620px] bg-cover bg-top opacity-35 filter brightness-75 contrast-125" data-alt="Elden Ring Shadow of the Erdtree expansion key art concept. Vast, somber panorama of the monolithic twisted black Scadutree towering over the ruined Realm of Shadow under a veiled golden-ash sky. Intricate gothic stone structures, veil of ethereal gold dripping like sap, brooding obsidian silhouettes, dark fantasy cinematic mood with warm amber rim light." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC7N4JFIXFYZ6uyzSW9aEjh7SPMJLKlR1wJfv42WzrZTT-L7pvz0YaUToA3xO87qEYQ5O2mw69ZF0O45lP7PbNRrp2w_qXA4BaXuNvCgd8vaHVnxjpVt7Ha9WYrqLM-6QVaw8dAxjDmhTuzLkDWMvle179-aSqHXKXByNkiWR_-v7ywdfSxOUD_QVc83XtREbM5vr0AEsf75syHqgAHk_kiRyLY1_CdTL1381FIaZPooKfpY47Qitcg')"></div>
+<!-- Multi-stage Depth Scrim -->
+<div class="absolute inset-0 bg-gradient-to-b from-surface/70 via-surface/85 to-surface pointer-events-none"></div>
+<div class="absolute inset-0 bg-gradient-to-r from-surface via-transparent to-surface/80 pointer-events-none"></div>
+<!-- Inner Hero Shell Container -->
+<div class="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 pt-28 pb-12">
+<!-- Breadcrumb & Archival Navigation -->
+<nav class="flex items-center gap-2 mb-8">
+<a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md uppercase tracking-wider group" data-path="discover" href="#">
+<span class="material-symbols-outlined text-[15px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
+<span>Discover</span>
+</a>
+<span class="text-surface-variant font-label-sm">/</span>
+<span class="text-on-surface-variant/70 font-label-md text-label-md uppercase tracking-wider">Titles</span>
+<span class="text-surface-variant font-label-sm">/</span>
+<span class="text-primary font-label-md text-label-md uppercase tracking-wider font-semibold truncate max-w-xs md:max-w-none">Elden Ring: Shadow of the Erdtree</span>
+</nav>
+<!-- Main Showcase Grid (2:3 Poster + High Impact Editorial Header) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+<!-- Left: Physical Artifact (2:3 Vertical Cover Poster) -->
+<div class="lg:col-span-4 xl:col-span-3 flex flex-col gap-4">
+<div class="relative w-full aspect-[2/3] rounded-lg overflow-hidden bg-surface-container-high shadow-2xl group">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" data-alt="Vertical official key art poster for Elden Ring Shadow of the Erdtree. Depicting Messmer the Impaler draped in crimson robes seated on an ornate dark iron throne with a winding winged red serpent, glowing embers, and the dark ruined tree backdrop. Crisp dark archival mood, deep obsidian shadows with stark gold accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA76OysrbgPcq5AgMZRwDuE4pNviRfCH6POmilZ0WEWOiwF3rn0z5bjIJJzvj1uXevdaCfNBQalabdOY2kz0bd2RgDR0PhnomlqCNvbyaG9QOdmYB3uDHZmdmlIle8_0B9FiNo86U6LemSHZpr7SUTFZLSaqJcS3FlYHlFfS8GEXfg01_o7R38xZh4BtMD0R0Y1B3CUwSkA_PqwMShxzwViQq4c7AWf7QnYE4IhPEv6nikkEs7T77hE"/>
+<!-- Floating Score Badge Overlay -->
+<div class="absolute top-3.5 right-3.5 bg-surface/90 backdrop-blur-md px-2.5 py-1 rounded shadow-lg flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[14px]" style="font-variation-settings: 'FILL' 1;">hotel_class</span>
+<span class="font-label-md text-label-md text-primary font-bold tracking-tight">98</span>
+<span class="text-on-surface-variant/60 font-label-sm text-label-sm">/100</span>
+</div>
+<!-- Edition Tag -->
+<div class="absolute bottom-3 left-3 bg-surface-container-lowest/85 backdrop-blur-sm px-2 py-0.5 rounded text-on-surface font-label-sm text-label-sm uppercase tracking-widest">
+              DLC · Expansion
+            </div>
+</div>
+<!-- Quick Metric Snapshot Strip -->
+<div class="grid grid-cols-3 gap-2 bg-surface-container-low p-2.5 rounded text-center">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Median</span>
+<span class="font-label-md text-label-md font-bold text-on-surface">42.5 hrs</span>
+</div>
+<div class="flex flex-col bg-surface-container/60 rounded py-0.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Ranked</span>
+<span class="font-label-md text-label-md font-bold text-primary">#1 / 2024</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Logs</span>
+<span class="font-label-md text-label-md font-bold text-on-surface">142.8k</span>
+</div>
+</div>
+</div>
+<!-- Right: Title, Curatorial Metadata, Score Node & Global CTAs -->
+<div class="lg:col-span-8 xl:col-span-9 flex flex-col justify-between">
+<div class="flex flex-col gap-4">
+<!-- Overline Meta Tags -->
+<div class="flex flex-wrap items-center gap-2">
+<span class="px-2 py-0.5 rounded bg-primary/10 text-primary font-label-sm text-label-sm tracking-wider uppercase font-semibold">
+                Tier S · Masterpiece
+              </span>
+<span class="text-on-surface-variant/40">•</span>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">FromSoftware</span>
+<span class="text-on-surface-variant/40">•</span>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Bandai Namco Entertainment</span>
+</div>
+<!-- Primary Headline -->
+<h1 class="font-headline-xl text-headline-xl lg:text-[44px] lg:leading-[48px] text-on-surface tracking-tight font-bold">
+              Elden Ring: Shadow of the Erdtree
+            </h1>
+<!-- Archival Metadata Dateline -->
+<div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 font-label-md text-label-md text-on-surface-variant">
+<span>Released June 21, 2024</span>
+<span class="text-surface-variant">•</span>
+<span>Action RPG / Dark Fantasy</span>
+<span class="text-surface-variant">•</span>
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">PC</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">PS5</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">XSX</span>
+</div>
+</div>
+<!-- Master Consensus Callout Node -->
+<div class="mt-4 p-5 rounded-lg bg-surface-container-low flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm">
+<div class="flex items-center gap-5">
+<!-- Large Tabular Score Block -->
+<div class="flex items-baseline gap-1 bg-surface-container-lowest px-4 py-3 rounded-lg text-primary">
+<span class="font-display-lg text-display-lg font-bold tracking-tight">98</span>
+<span class="font-label-md text-label-md text-on-surface-variant/70">/100</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-on-surface font-bold">Universal Archival Acclaim</span>
+<span class="material-symbols-outlined text-secondary text-[20px]" title="Curator Verified Consensus">verified</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                    Based on <strong class="text-on-surface font-semibold">84 Verified Curator Critiques</strong> and 12,490 active community logs.
+                  </p>
+<div class="flex items-center gap-3 mt-1 font-label-sm text-label-sm text-on-surface-variant/80">
+<span class="text-secondary font-semibold">99% Positive Critical Ratio</span>
+<span>•</span>
+<span>Ranked #1 All-Time Expansions</span>
+</div>
+</div>
+</div>
+<!-- Mini sparkline representation -->
+<div class="hidden xl:flex flex-col items-end gap-1.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Score Stability</span>
+<div class="flex items-end gap-1 h-9 px-2 py-1 rounded bg-surface-container">
+<span class="w-1.5 bg-primary/40 h-5 rounded-xs"></span>
+<span class="w-1.5 bg-primary/60 h-6 rounded-xs"></span>
+<span class="w-1.5 bg-primary/70 h-7 rounded-xs"></span>
+<span class="w-1.5 bg-primary/80 h-7 rounded-xs"></span>
+<span class="w-1.5 bg-primary h-8 rounded-xs"></span>
+<span class="w-1.5 bg-primary h-8 rounded-xs"></span>
+</div>
+<span class="font-label-sm text-label-sm text-primary font-bold">Δ +0.4 pts</span>
+</div>
+</div>
+<!-- Curator Quick Actions Toolbar -->
+<div class="mt-2 flex flex-wrap items-center gap-3">
+<!-- Primary Action: Log / Rate -->
+<button class="inline-flex items-center gap-2 px-5 py-2.5 rounded bg-primary-container text-on-primary-container hover:bg-primary font-label-md text-label-md tracking-wider uppercase font-semibold transition-all shadow-md active:scale-[0.98]">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span>Log / Rate Game</span>
+</button>
+<!-- Secondary Action: Shelve -->
+<button class="inline-flex items-center gap-2 px-4 py-2.5 rounded bg-surface-container text-on-surface hover:bg-surface-container-high hover:text-primary transition-all font-label-md text-label-md uppercase tracking-wider">
+<span class="material-symbols-outlined text-[18px]">bookmark_add</span>
+<span>Shelve to Vault</span>
+</button>
+<!-- Secondary Action: Add to Tier List -->
+<button class="inline-flex items-center gap-2 px-4 py-2.5 rounded bg-surface-container text-on-surface hover:bg-surface-container-high transition-all font-label-md text-label-md uppercase tracking-wider">
+<span class="material-symbols-outlined text-[18px]">format_list_bulleted_add</span>
+<span>Add to Tier List</span>
+</button>
+<!-- Compare Action -->
+<a class="inline-flex items-center gap-2 px-4 py-2.5 rounded bg-surface-container text-on-surface hover:bg-surface-container-high transition-all font-label-md text-label-md uppercase tracking-wider" data-path="compare" href="#">
+<span class="material-symbols-outlined text-[18px]">compare_arrows</span>
+<span>Compare</span>
+</a>
+<!-- Icon Share -->
+<button class="p-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors ml-auto" title="Share Title">
+<span class="material-symbols-outlined text-[18px]">share</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Editorial Content Canvas -->
+<div class="max-w-7xl mx-auto px-6 lg:px-12 py-10 w-full">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+<!-- Primary Left Column: Analysis, Concordance, Reviews -->
+<div class="lg:col-span-8 flex flex-col gap-10">
+<!-- 1. Alex Vance's Personal Standpoint / Logged Status -->
+<section class="bg-surface-container-low rounded-xl p-5 shadow-sm relative overflow-hidden">
+<div class="absolute -top-12 -right-12 w-48 h-48 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+<div class="flex items-center gap-4">
+<img alt="Alex Vance" class="w-12 h-12 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1Uj7oX5IeIx6GsQRBuZhtpXniSBfDG3f7hQvxiIHe5BLa8ZXfahWEi91J_3xZM-wYZ82SUL3f4OtTBvABtfIVYIWDQIHDKW4b-FsswCawrncUUSCQ7JyYf02lZUWe54k20DG6C5h3pMOoKSBIMjkuj5AszhzZ25dBwhgOF5pirFYl7qu1_wa9i1LInq12QSIwF3rL-NHBD5uSfuxdNhSEhaKDX615dqS_DdI1dW7lwhn3PSkW9Ld6tl-Ks"/>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-on-surface font-semibold">Your Personal Standpoint</span>
+<span class="px-2 py-0.5 rounded bg-primary/15 text-primary font-label-sm text-label-sm font-bold uppercase">Rank #1</span>
+</div>
+<div class="flex flex-wrap items-center gap-x-2 gap-y-1 font-body-sm text-body-sm text-on-surface-variant">
+<span>Rated <strong class="text-primary font-bold">98 / 100</strong> (Tier S)</span>
+<span>•</span>
+<span>Logged in <strong class="text-on-surface">78.4 hrs</strong></span>
+<span>•</span>
+<span>Completed July 4, 2024</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 self-end sm:self-center">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-surface-container text-on-surface hover:text-primary hover:bg-surface-container-high transition-colors font-label-sm text-label-sm uppercase tracking-wider">
+<span class="material-symbols-outlined text-[15px]">edit</span>
+<span>Edit Standpoint</span>
+</button>
+</div>
+</div>
+<!-- Micro Personal Note -->
+<div class="mt-4 pt-3 bg-surface-container-lowest/50 p-3.5 rounded text-on-surface-variant font-body-sm text-body-sm italic">
+            "The vertical density of the Land of Shadow remains unrivaled in contemporary level design. The dual encounters with Messmer and Promised Consort pushed tactile timing into high art."
+          </div>
+</section>
+<!-- 2. Editorial Synopsis & Thematic Analysis -->
+<section class="flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight flex items-center gap-2">
+<span>Curatorial Overview</span>
+<span class="text-primary text-[18px] font-label-md font-normal">/ 01</span>
+</h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">FromSoftware Catalog ID: ER-SOTE-24</span>
+</div>
+<div class="prose max-w-none text-on-surface-variant font-body-lg text-body-lg leading-relaxed flex flex-col gap-4">
+<p>
+              Guided by Empyrean Miquella, players enter the Land of Shadow—a realm obscured by the Erdtree where the goddess Marika first set foot. Rather than merely expanding scale horizontally, <em class="text-on-surface not-italic font-semibold">Shadow of the Erdtree</em> folds inwards, presenting a labyrinthine vertical mountainscape of ruined fortresses, subterranean abysses, and spectral moors dripping with the sap of the veiled Scadutree.
+            </p>
+<p>
+              Hidetaka Miyazaki’s design team abandons standard open-world signposting in favor of organic, architectural discoveries. Legacy dungeons like the Belurat Tower Settlement and the Shadow Keep represent the pinnacle of FromSoftware's environmental composition, seamlessly blending somber environmental storytelling with brutally choreographed encounters that test even max-level Tarnished.
+            </p>
+</div>
+<!-- Thematic Tags & Taxonomy Badges -->
+<div class="flex flex-wrap items-center gap-2 pt-2">
+<span class="px-2.5 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm uppercase tracking-wider hover:bg-surface-container-high transition-colors">
+              #Soulslike
+            </span>
+<span class="px-2.5 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm uppercase tracking-wider hover:bg-surface-container-high transition-colors">
+              #Vertical Architecture
+            </span>
+<span class="px-2.5 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm uppercase tracking-wider hover:bg-surface-container-high transition-colors">
+              #Masterpiece Bosses
+            </span>
+<span class="px-2.5 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm uppercase tracking-wider hover:bg-surface-container-high transition-colors">
+              #Miquella Lore
+            </span>
+<span class="px-2.5 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm uppercase tracking-wider hover:bg-surface-container-high transition-colors">
+              #Atmospheric Melancholy
+            </span>
+<span class="px-2.5 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm uppercase tracking-wider hover:bg-surface-container-high transition-colors">
+              #Steam Deck Verified
+            </span>
+</div>
+</section>
+<!-- 3. Head-to-Head Follower Concordance -->
+<section class="flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight flex items-center gap-2">
+<span>Following Concordance</span>
+<span class="text-primary text-[18px] font-label-md font-normal">/ 02</span>
+</h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">3 Curators Followed</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+<!-- Kojima -->
+<div class="p-4 rounded-lg bg-surface-container-low flex flex-col justify-between gap-3 shadow-sm hover:bg-surface-container transition-colors">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center font-label-md text-on-surface font-bold">HK</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Hideo Kojima</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">@hideo_director</span>
+</div>
+</div>
+<div class="bg-primary/10 text-primary px-2 py-0.5 rounded font-label-md text-label-md font-bold">
+                  98
+                </div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 italic">
+                "A pure manifestation of connection thesis beyond traditional ludology. Miyazaki has mastered silence."
+              </p>
+</div>
+<!-- Elena Rostova -->
+<div class="p-4 rounded-lg bg-surface-container-low flex flex-col justify-between gap-3 shadow-sm hover:bg-surface-container transition-colors">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center font-label-md text-secondary font-bold">ER</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Elena Rostova</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">@rostova_critique</span>
+</div>
+</div>
+<div class="bg-primary/10 text-primary px-2 py-0.5 rounded font-label-md text-label-md font-bold">
+                  99
+                </div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 italic">
+                "Unrivaled architectural majesty. The Shadow Keep sets an insurmountable benchmark for vertical level craft."
+              </p>
+</div>
+<!-- Jason Schreier -->
+<div class="p-4 rounded-lg bg-surface-container-low flex flex-col justify-between gap-3 shadow-sm hover:bg-surface-container transition-colors">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center font-label-md text-on-surface font-bold">JS</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Jason Schreier</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">@jschreier</span>
+</div>
+</div>
+<div class="bg-secondary/10 text-secondary px-2 py-0.5 rounded font-label-md text-label-md font-bold">
+                  96
+                </div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 italic">
+                "Bigger than most standalone games, tighter than any other sandbox this decade. An unbelievable achievement."
+              </p>
+</div>
+</div>
+</section>
+<!-- 4. Top Critical Dispatches / Editorial Reviews -->
+<section class="flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight flex items-center gap-2">
+<span>Curator Dispatches</span>
+<span class="text-primary text-[18px] font-label-md font-normal">/ 03</span>
+</h2>
+<div class="flex items-center gap-3">
+<button class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">Most Helpful</button>
+<span class="text-surface-variant">|</span>
+<button class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors">Recent</button>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<!-- Dispatch 1 -->
+<article class="p-6 rounded-lg bg-surface-container-low flex flex-col gap-4 shadow-sm">
+<div class="flex items-start justify-between gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary font-label-md font-bold">
+                    MK
+                  </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-on-surface font-semibold">Marius Kane</span>
+<span class="px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm uppercase">Senior Fellow</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Logged on PC · 94.2 hrs logged · June 28, 2024</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<div class="bg-primary/10 text-primary px-3 py-1 rounded font-label-lg text-label-lg font-bold">
+                    98 / 100
+                  </div>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                Shadow of the Erdtree is not content to simply provide more Lands Between. It reshapes the grammar of FromSoftware's open space: no longer a planar field dotted with ruins, but an interlocking origami of plateaus, subterranean waterways, and abyssal descent. The final confrontation demands rhythm and discipline that feels almost musical.
+              </p>
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
+<button class="inline-flex items-center gap-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">thumb_up</span>
+<span>1,429 Curator Agrees</span>
+</button>
+<button class="inline-flex items-center gap-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">chat_bubble_outline</span>
+<span>84 Notes</span>
+</button>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant/50">Curator Digest Issue #402</span>
+</div>
+</article>
+<!-- Dispatch 2 -->
+<article class="p-6 rounded-lg bg-surface-container-low flex flex-col gap-4 shadow-sm">
+<div class="flex items-start justify-between gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-secondary font-label-md font-bold">
+                    SA
+                  </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-on-surface font-semibold">Sora Takahashi</span>
+<span class="px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm uppercase">Curator</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Logged on PS5 · 61.0 hrs logged · July 2, 2024</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<div class="bg-primary/10 text-primary px-3 py-1 rounded font-label-lg text-label-lg font-bold">
+                    97 / 100
+                  </div>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                The Scadutree fragment progression elegantly circumvents the base game’s endgame over-leveling crisis, creating an unyielding tension reminiscent of our initial hours entering Limgrave. Yuka Kitamura's musical motifs echo through the scorched tombs with tragic grace.
+              </p>
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
+<button class="inline-flex items-center gap-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">thumb_up</span>
+<span>892 Curator Agrees</span>
+</button>
+<button class="inline-flex items-center gap-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">chat_bubble_outline</span>
+<span>32 Notes</span>
+</button>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant/50">Curator Digest Issue #408</span>
+</div>
+</article>
+<!-- Dispatch 3 -->
+<article class="p-6 rounded-lg bg-surface-container-low flex flex-col gap-4 shadow-sm">
+<div class="flex items-start justify-between gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface font-label-md font-bold">
+                    DL
+                  </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-on-surface font-semibold">David Lindqvist</span>
+<span class="px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm uppercase">Archivist</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Logged on PC · 112.5 hrs logged · July 11, 2024</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<div class="bg-secondary/10 text-secondary px-3 py-1 rounded font-label-lg text-label-lg font-bold">
+                    95 / 100
+                  </div>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                A relentless, unapologetic expansion that asks players to unlearn complacency. The Scadualtar and Abyssal Woods explore dread with horror-game intimacy. Minor camera frictions during hyper-dense boss animations keep it just shy of absolute formal perfection.
+              </p>
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
+<button class="inline-flex items-center gap-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">thumb_up</span>
+<span>614 Curator Agrees</span>
+</button>
+<button class="inline-flex items-center gap-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">chat_bubble_outline</span>
+<span>19 Notes</span>
+</button>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant/50">Curator Digest Issue #412</span>
+</div>
+</article>
+</div>
+</section>
+</div>
+<!-- Secondary Right Column: Minimalist Score Distribution, Curated Shelves, Spec Sheet -->
+<div class="lg:col-span-4 flex flex-col gap-8">
+<!-- Score Distribution Histogram Widget -->
+<div class="bg-surface-container-low p-6 rounded-xl flex flex-col gap-5 shadow-sm">
+<div class="flex items-center justify-between">
+<span class="font-headline-md text-headline-md text-on-surface font-semibold">Curator Rating Curve</span>
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-widest font-bold">Skew S-Tier</span>
+</div>
+<!-- Minimalist Histogram Bars -->
+<div class="flex flex-col gap-3 font-label-sm text-label-sm">
+<!-- 95-100 -->
+<div class="flex items-center gap-3">
+<span class="w-14 text-on-surface font-semibold text-right">95–100</span>
+<div class="flex-1 bg-surface-container-high h-4 rounded overflow-hidden p-0.5">
+<div class="bg-primary h-full rounded-xs transition-all duration-1000" style="width: 72%;"></div>
+</div>
+<span class="w-10 text-primary font-bold">72%</span>
+</div>
+<!-- 90-94 -->
+<div class="flex items-center gap-3">
+<span class="w-14 text-on-surface font-semibold text-right">90–94</span>
+<div class="flex-1 bg-surface-container-high h-4 rounded overflow-hidden p-0.5">
+<div class="bg-primary/70 h-full rounded-xs transition-all duration-1000" style="width: 18%;"></div>
+</div>
+<span class="w-10 text-on-surface-variant">18%</span>
+</div>
+<!-- 80-89 -->
+<div class="flex items-center gap-3">
+<span class="w-14 text-on-surface-variant text-right">80–89</span>
+<div class="flex-1 bg-surface-container-high h-4 rounded overflow-hidden p-0.5">
+<div class="bg-secondary/60 h-full rounded-xs transition-all duration-1000" style="width: 7%;"></div>
+</div>
+<span class="w-10 text-on-surface-variant">7%</span>
+</div>
+<!-- <80 -->
+<div class="flex items-center gap-3">
+<span class="w-14 text-on-surface-variant text-right">&lt; 80</span>
+<div class="flex-1 bg-surface-container-high h-4 rounded overflow-hidden p-0.5">
+<div class="bg-on-surface-variant/30 h-full rounded-xs transition-all duration-1000" style="width: 3%;"></div>
+</div>
+<span class="w-10 text-on-surface-variant">3%</span>
+</div>
+</div>
+<div class="pt-3 flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>Sample: 12,490 logged users</span>
+<span class="text-secondary font-semibold">Standard Dev: ±2.1</span>
+</div>
+</div>
+<!-- Curated Lists Featuring This Title -->
+<div class="bg-surface-container-low p-6 rounded-xl flex flex-col gap-4 shadow-sm">
+<div class="flex items-center justify-between">
+<span class="font-headline-md text-headline-md text-on-surface font-semibold">Curated In Lists</span>
+<a class="font-label-sm text-label-sm text-primary hover:underline uppercase tracking-wider" data-path="lists" href="#">All 84 Lists</a>
+</div>
+<div class="flex flex-col gap-3">
+<!-- List Card 1 -->
+<a class="p-3 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors flex flex-col gap-1 group" href="#">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-on-surface group-hover:text-primary transition-colors">
+                  All-Time Masterpieces (95+)
+                </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">#3 / 48</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Curated by The Editorial Guild • 18.2k saves</p>
+</a>
+<!-- List Card 2 -->
+<a class="p-3 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors flex flex-col gap-1 group" href="#">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-on-surface group-hover:text-primary transition-colors">
+                  FromSoftware Architecture &amp; Lore
+                </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">#1 / 14</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Curated by Elena Rostova • 9.4k saves</p>
+</a>
+<!-- List Card 3 -->
+<a class="p-3 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors flex flex-col gap-1 group" href="#">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-on-surface group-hover:text-primary transition-colors">
+                  GOTY 2024 Contenders
+                </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">#1 / 25</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Curated by Global Critic Aggregate • 34.1k saves</p>
+</a>
+</div>
+</div>
+<!-- Archival Spec Sheet (Dense Metadata Matrix) -->
+<div class="bg-surface-container-low p-6 rounded-xl flex flex-col gap-4 shadow-sm">
+<span class="font-headline-md text-headline-md text-on-surface font-semibold">Technical Dossier</span>
+<div class="flex flex-col gap-2.5 font-label-md text-label-md">
+<div class="flex justify-between py-1.5 bg-surface-container/40 px-2 rounded">
+<span class="text-on-surface-variant">Director</span>
+<span class="text-on-surface font-medium">Hidetaka Miyazaki</span>
+</div>
+<div class="flex justify-between py-1.5 px-2">
+<span class="text-on-surface-variant">Lead Designer</span>
+<span class="text-on-surface font-medium">Kazuhiro Hamatani</span>
+</div>
+<div class="flex justify-between py-1.5 bg-surface-container/40 px-2 rounded">
+<span class="text-on-surface-variant">Main Composer</span>
+<span class="text-on-surface font-medium">Yuka Kitamura, Tsukasa Saitoh</span>
+</div>
+<div class="flex justify-between py-1.5 px-2">
+<span class="text-on-surface-variant">Base Engine</span>
+<span class="text-on-surface font-medium">FromSoftware Proprietary</span>
+</div>
+<div class="flex justify-between py-1.5 bg-surface-container/40 px-2 rounded">
+<span class="text-on-surface-variant">Install Footprint</span>
+<span class="text-on-surface font-medium">16.5 GB (Expansion)</span>
+</div>
+<div class="flex justify-between py-1.5 px-2">
+<span class="text-on-surface-variant">Base Game Req.</span>
+<span class="text-secondary font-medium">Elden Ring (2022)</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div></main><footer class="w-full bg-surface-container-lowest mt-space-xl"><div class="max-w-7xl mx-auto px-6 lg:px-12 py-10 flex flex-col md:flex-row items-center justify-between gap-4"><div class="flex items-center gap-3"><span class="font-headline-md text-headline-md tracking-tight uppercase text-on-surface-variant">Playlog<span class="text-primary">.gg</span></span><span class="font-label-sm text-label-sm text-on-surface-variant">© 2025</span></div><div class="flex items-center gap-6"><a class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors" data-path="database-archive" href="#">Archive</a><a class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors" data-path="api-docs" href="#">API</a><a class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors" data-path="terms" href="#">Terms</a><a class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors" data-path="privacy" href="#">Privacy</a></div></div></footer>
+</body></html>
