@@ -1,0 +1,299 @@
+"use client";
+import Link from "next/link";
+import { PreviewAction } from "@/components/preview-action";
+import { useState } from "react";
+import type { Game, Tier } from "@/types/domain";
+import { TierBadge, ScoreStars } from "@/components/rating-controls";
+
+export function ReviewScreen({ game }: { game: Game }) {
+const isReference = game.slug === "metaphor-refantazio";
+const [score, setScore] = useState(game.score);
+const [tier, setTier] = useState<Tier>("S");
+const [platform, setPlatform] = useState(1);
+const [status, setStatus] = useState(0);
+const [broadcast, setBroadcast] = useState(true);
+const [hours, setHours] = useState(isReference ? "78.4 hrs" : "");
+const [date, setDate] = useState(isReference ? "October 28, 2024" : "");
+const [review, setReview] = useState(isReference ? "Hashino delivers an impeccably stylized political dissertation disguised as a peak turn-based odyssey. The Archetype hierarchy rewards relentless tactical friction, while Meguro's monastic choral brass anchors every election-trial confrontation with staggering momentum. A peerless apex for contemporary JRPGs." : "");
+function resetDraft() { setScore(game.score); setTier("S"); setPlatform(1); setStatus(0); setBroadcast(true); setHours(isReference ? "78.4 hrs" : ""); setDate(isReference ? "October 28, 2024" : ""); setReview(isReference ? "Hashino delivers an impeccably stylized political dissertation disguised as a peak turn-based odyssey. The Archetype hierarchy rewards relentless tactical friction, while Meguro's monastic choral brass anchors every election-trial confrontation with staggering momentum. A peerless apex for contemporary JRPGs." : ""); }
+return (<>
+<div className="w-full  bg-surface"><div className="flex flex-col w-full">
+<div className="relative w-full min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 sm:p-6 lg:p-12 overflow-hidden">
+<div className="absolute inset-0 pointer-events-none overflow-hidden">
+<div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[720px] h-[360px] bg-primary/5 rounded-full blur-[140px]"></div>
+
+<div className="absolute bottom-0 right-10 w-[420px] h-[280px] bg-surface-container-high/40 rounded-full blur-[100px]"></div>
+
+<div className="absolute inset-0 bg-[radial-gradient(#292a2d_1px,transparent_1px)] [background-size:24px_24px] opacity-20"></div>
+
+</div>
+
+<div className="relative w-full max-w-4xl bg-surface-container-low rounded-xl shadow-2xl overflow-hidden flex flex-col my-auto">
+<div className="w-full bg-surface-container px-6 py-4 flex items-center justify-between gap-4">
+<div className="flex items-center gap-3 min-w-0">
+<span className="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
+
+<span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{"Archival Dispatch · Entry #4092"}</span>
+
+<span className="hidden sm:inline text-outline-variant font-label-sm">{"/"}</span>
+
+<span className="hidden sm:inline font-label-sm text-label-sm text-on-surface-variant/80">{"Temporary draft · resets on refresh"}</span>
+
+</div>
+
+<div className="flex items-center gap-3">
+<Link className="group flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors" title="Change Title" type="button" href="/search?mode=log&from=/log">
+<span className="material-symbols-outlined text-[15px]">{"swap_horiz"}</span>
+
+<span className="font-label-sm text-label-sm uppercase tracking-wider">{"Switch Game"}</span>
+
+</Link>
+
+<Link aria-label="Close modal" className="p-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="/profile">
+<span className="material-symbols-outlined text-[20px]">{"close"}</span>
+
+</Link>
+
+</div>
+
+</div>
+
+<div className="p-6 sm:p-8 lg:p-10 flex flex-col gap-8">
+<div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-start">
+<div className="relative group flex-shrink-0 w-32 sm:w-40 aspect-[3/4] rounded-lg overflow-hidden bg-surface-container shadow-xl">
+<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt={game.title} src={game.cover} />
+
+<div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/80 via-transparent to-transparent opacity-90"></div>
+
+<div className="absolute bottom-2 left-2 right-2 flex justify-between items-center text-on-surface">
+<span className="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-lowest/80 backdrop-blur-sm text-primary">{game.year ?? "—"}</span>
+
+<span className="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-lowest/80 backdrop-blur-sm text-on-surface-variant">{isReference ? "JRPG" : "Sample"}</span>
+
+</div>
+
+</div>
+
+<div className="flex flex-col flex-1 min-w-0 justify-between self-stretch">
+<div className="flex flex-col gap-2">
+<div className="flex items-center gap-2">
+<span className="font-label-sm text-label-sm uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">{"Selected Subject"}</span>
+
+<span className="font-label-sm text-label-sm text-on-surface-variant tracking-wider">{"ID: 881290"}</span>
+
+</div>
+
+<h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight truncate">{game.title}</h1>
+
+<p className="font-body-md text-body-md text-on-surface-variant">{isReference ? "Directed by Katsura Hashino " : "Sample game metadata "}<span className="text-outline-variant mx-1.5">{"·"}</span>
+{isReference ? " Studio Zero / ATLUS" : "Prototype catalog"}</p>
+
+</div>
+
+<div className="flex flex-col gap-2.5 mt-5 pt-5 bg-surface-container/40 -mx-3 px-3 py-3 rounded-lg">
+<span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{"Platform Played"}</span>
+
+<div className="flex flex-wrap gap-2" id="platform-selector">
+<button type="button" onClick={() => setPlatform(0)} aria-pressed={platform === 0} className={platform === 0 ? "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-primary/15 text-primary shadow-sm flex items-center gap-1.5" : "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface flex items-center gap-1.5"}>
+<span className="material-symbols-outlined text-[14px]">{"desktop_windows"}</span>
+{" PC / Steam\n                "}</button>
+
+<button type="button" onClick={() => setPlatform(1)} aria-pressed={platform === 1} className={platform === 1 ? "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-primary/15 text-primary shadow-sm flex items-center gap-1.5" : "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface flex items-center gap-1.5"}>
+<span className="material-symbols-outlined text-[14px]">{"sports_esports"}</span>
+{" PlayStation 5\n                "}</button>
+
+<button type="button" onClick={() => setPlatform(2)} aria-pressed={platform === 2} className={platform === 2 ? "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-primary/15 text-primary shadow-sm flex items-center gap-1.5" : "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface flex items-center gap-1.5"}>
+<span className="material-symbols-outlined text-[14px]">{"stadia_controller"}</span>
+{" Xbox Series X\n                "}</button>
+
+<button type="button" onClick={() => setPlatform(3)} aria-pressed={platform === 3} className={platform === 3 ? "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-primary/15 text-primary shadow-sm flex items-center gap-1.5" : "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface flex items-center gap-1.5"}>
+<span className="material-symbols-outlined text-[14px]">{"tablet"}</span>
+{" Steam Deck\n                "}</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div className="bg-surface-container/60 rounded-xl p-6 sm:p-8 flex flex-col items-center gap-6 relative">
+<div className="w-full flex items-center justify-between">
+<span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{"Archival Evaluation"}</span>
+
+<TierBadge value={tier} onChange={setTier} />
+</div>
+
+<div className="flex flex-col items-center justify-center gap-1 my-2">
+<div className="flex items-baseline gap-2">
+<span className="font-display-lg text-display-lg font-bold tracking-tighter text-primary font-headline-xl" id="score-display">{score}</span>
+
+<span className="font-headline-md text-headline-md text-on-surface-variant/50">{"/100"}</span>
+
+</div>
+
+<ScoreStars score={score} />
+</div>
+
+<div className="w-full max-w-xl flex flex-col gap-3">
+<div className="relative w-full flex items-center">
+<input className="w-full h-2 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary focus:outline-none" id="score-slider" max="100" min="0" type="range" value={score} onChange={(event) => setScore(Number(event.target.value))} aria-label={"Numerical score from 0 to 100"} />
+
+</div>
+
+<div className="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm px-1">
+<span>{"0 (Deficient)"}</span>
+
+<span>{"50 (Median)"}</span>
+
+<span>{"75 (Essential)"}</span>
+
+<span className="text-primary font-bold">{"100 (Flawless)"}</span>
+
+</div>
+
+<div className="flex items-center justify-center gap-2 mt-2">
+<button className="px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" onClick={() => setScore((previous) => Math.max(0, Math.min(100, previous + -5)))}>{"-5"}</button>
+
+<button className="px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" onClick={() => setScore((previous) => Math.max(0, Math.min(100, previous + -1)))}>{"-1"}</button>
+
+<div className="w-px h-4 bg-surface-container-highest mx-1"></div>
+
+<button className="px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" onClick={() => setScore((previous) => Math.max(0, Math.min(100, previous + 1)))}>{"+1"}</button>
+
+<button className="px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" onClick={() => setScore((previous) => Math.max(0, Math.min(100, previous + 5)))}>{"+5"}</button>
+
+</div>
+
+</div>
+
+</div>
+
+<div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+<div className="md:col-span-12 flex flex-col gap-2.5">
+<label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{"Archival Playback Status"}</label>
+
+<div className="grid grid-cols-2 sm:grid-cols-4 gap-2" id="status-group">
+<button type="button" onClick={() => setStatus(0)} aria-pressed={status === 0} className={status === 0 ? "status-btn px-4 py-2.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" : "status-btn px-4 py-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-all flex items-center justify-center gap-2"}>
+<span className="material-symbols-outlined text-[16px]" style={{"fontVariationSettings": "'FILL' 1"}}>{"check_circle"}</span>
+{" Completed\n              "}</button>
+
+<button type="button" onClick={() => setStatus(1)} aria-pressed={status === 1} className={status === 1 ? "status-btn px-4 py-2.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" : "status-btn px-4 py-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-all flex items-center justify-center gap-2"}>
+<span className="material-symbols-outlined text-[16px]">{"hourglass_top"}</span>
+{" In Progress\n              "}</button>
+
+<button type="button" onClick={() => setStatus(2)} aria-pressed={status === 2} className={status === 2 ? "status-btn px-4 py-2.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" : "status-btn px-4 py-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-all flex items-center justify-center gap-2"}>
+<span className="material-symbols-outlined text-[16px]">{"bookmark"}</span>
+{" Backlog\n              "}</button>
+
+<button type="button" onClick={() => setStatus(3)} aria-pressed={status === 3} className={status === 3 ? "status-btn px-4 py-2.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" : "status-btn px-4 py-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-all flex items-center justify-center gap-2"}>
+<span className="material-symbols-outlined text-[16px]">{"cancel"}</span>
+{" Shelved\n              "}</button>
+
+</div>
+
+</div>
+
+<div className="md:col-span-6 flex flex-col gap-2">
+<label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" htmlFor="hours-input">{"Runtime Inscribed"}</label>
+
+<div className="relative flex items-center">
+<span className="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">{"schedule"}</span>
+
+<input className="w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="hours-input" placeholder="e.g. 45 hrs" type="text" value={hours} onChange={(event) => setHours(event.target.value)} />
+
+</div>
+
+</div>
+
+<div className="md:col-span-6 flex flex-col gap-2">
+<label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" htmlFor="date-input">{"Date Concluded"}</label>
+
+<div className="relative flex items-center">
+<span className="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">{"calendar_today"}</span>
+
+<input className="w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="date-input" placeholder="Log date" type="text" value={date} onChange={(event) => setDate(event.target.value)} />
+
+</div>
+
+</div>
+
+<div className="md:col-span-12 flex flex-col gap-2">
+<div className="flex items-center justify-between">
+<label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" htmlFor="dispatch-textarea">{"Critical Dispatch / Review"}</label>
+
+<span className="font-label-sm text-label-sm text-on-surface-variant/70">{"Markdown Supported"}</span>
+
+</div>
+
+<textarea className="w-full bg-surface-container p-4 rounded text-on-surface font-body-md text-body-md placeholder:text-on-surface-variant/50 focus:outline-none focus:bg-surface-container-high transition-colors resize-none leading-relaxed" id="dispatch-textarea" placeholder="Write a dispatch or critical thoughts (optional)..." rows={4} value={review} onChange={(event) => setReview(event.target.value)}></textarea>
+
+</div>
+
+<div className="md:col-span-12 flex flex-col gap-2.5">
+<div className="flex items-center justify-between">
+<label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{"Archival Shelves & Curatorial Badges"}</label>
+
+<span className="font-label-sm text-label-sm text-primary">{"+ New Shelf"}</span>
+
+</div>
+
+<div className="flex flex-wrap gap-2">
+<PreviewAction className="tag-pill px-3 py-1.5 rounded font-label-sm text-label-sm tracking-wider uppercase bg-primary/10 text-primary flex items-center gap-1.5" type="button" message={"Preview only: this feature is not connected yet."}>
+<span className="material-symbols-outlined text-[13px]">{"award_star"}</span>
+{" GOTY 2024 Contender\n              "}</PreviewAction>
+
+<PreviewAction className="tag-pill px-3 py-1.5 rounded font-label-sm text-label-sm tracking-wider uppercase bg-primary/10 text-primary flex items-center gap-1.5" type="button" message={"Preview only: this feature is not connected yet."}>
+<span className="material-symbols-outlined text-[13px]">{"auto_awesome"}</span>
+{" Masterpiece Tier\n              "}</PreviewAction>
+
+<PreviewAction className="tag-pill px-3 py-1.5 rounded font-label-sm text-label-sm tracking-wider uppercase bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button" message={"Preview only: this feature is not connected yet."}>{"\n                Turn-Based Essential\n              "}</PreviewAction>
+
+<PreviewAction className="tag-pill px-3 py-1.5 rounded font-label-sm text-label-sm tracking-wider uppercase bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button" message={"Preview only: this feature is not connected yet."}>{"\n                OST Pantheon\n              "}</PreviewAction>
+
+<PreviewAction className="px-2.5 py-1.5 rounded font-label-sm text-label-sm tracking-wider uppercase bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors flex items-center gap-1" type="button" message={"Preview only: this feature is not connected yet."}>
+<span className="material-symbols-outlined text-[14px]">{"add"}</span>
+{" Add Tag\n              "}</PreviewAction>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div className="w-full bg-surface-container-lowest px-6 py-4 sm:px-10 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 mt-auto">
+<label className="flex items-center gap-3 cursor-pointer group select-none self-start sm:self-auto">
+<input checked={broadcast} onChange={(event) => setBroadcast(event.target.checked)} className="sr-only peer" type="checkbox" />
+
+<div className="w-4 h-4 rounded bg-surface-container-high peer-checked:bg-primary-container flex items-center justify-center text-on-primary-container transition-colors">
+<span className="material-symbols-outlined text-[14px] font-bold">{"check"}</span>
+
+</div>
+
+<span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant group-hover:text-on-surface transition-colors">{"\n            Broadcast to Curator Timeline\n          "}</span>
+
+</label>
+
+<div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+<button className="w-full sm:w-auto px-4 py-2 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-colors" type="button" onClick={resetDraft}>{"\n            Discard Draft\n          "}</button>
+
+<PreviewAction className="w-full sm:w-auto px-6 py-2 rounded bg-primary-container text-on-primary-container hover:bg-primary font-label-md text-label-md uppercase tracking-wider font-semibold shadow-lg shadow-primary-container/20 transition-all flex items-center justify-center gap-2" type="button" message={"Preview only: your draft stays on this screen and resets when you leave or refresh. Nothing was saved or broadcast."}>
+<span className="material-symbols-outlined text-[18px]">{"bookmark_added"}</span>
+{"\n            Commit to Log\n          "}</PreviewAction>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+</>);
+}

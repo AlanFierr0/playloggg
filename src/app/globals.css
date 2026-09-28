@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Preserve the base behavior of the Stitch export. */
+@layer base {
+  html, body { margin: 0; padding: 0; }
+  body { overscroll-behavior: none; }
+  main > :first-child { margin-top: 0 !important; }
+  main > :last-child { margin-bottom: 0 !important; }
+  :focus-visible { outline: 2px solid #ffc665; outline-offset: 3px; }
+}
+::-webkit-scrollbar { display: none; }
+
+/* Google's icon stylesheet follows Next's CSS. Match the export's icon sizes
+   with enough specificity to preserve Tailwind's original sizing. */
+.material-symbols-outlined.text-\[13px\] { font-size: 13px; }
+.material-symbols-outlined.text-\[14px\] { font-size: 14px; }
+.material-symbols-outlined.text-\[15px\] { font-size: 15px; }
+.material-symbols-outlined.text-\[16px\] { font-size: 16px; }
+.material-symbols-outlined.text-\[18px\] { font-size: 18px; }
+.material-symbols-outlined.text-\[20px\] { font-size: 20px; }
+.material-symbols-outlined.text-\[22px\] { font-size: 22px; }
+.material-symbols-outlined.text-\[24px\] { font-size: 24px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
