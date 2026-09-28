@@ -30,7 +30,8 @@ sample content and unavailable features from real persistence.
 
 ## Infrastructure
 A new Supabase project exists and the prototype is deployed through Vercel from
-GitHub `main`. The next backend stage is public read-only data; the application
+GitHub `main`. The first backend seed uses clearly identified sample data.
+The next backend stage is public read-only data; the application
 does not query Supabase yet. Authentication is deferred. Do not enable public database writes without an
 agreed ownership/access design. Inspect Supabase before finalizing a schema;
 track approved changes in versioned migrations. Keep credentials in ignored
