@@ -11,10 +11,10 @@ const originalRows = { "cyberpunk-2077-phantom-liberty": ReferenceGame0, "cyberp
 export type SearchScope = "all" | "games" | "curators" | "lists" | "actions";
 export function SearchResults({ query, scope, mode }: { query: string; scope: SearchScope; mode: "browse" | "log" }) {
   const portfolio = usePortfolio();
-  const { titles, profiles } = getSearchMatches(query, portfolio);
+  const { titles, profiles, lists } = getSearchMatches(query, portfolio);
   const rated = ratedGames(portfolio.games);
   const show = (section: SearchScope) => scope === "all" || scope === section;
-  const count = (show("games") ? titles.length : 0) + (show("curators") ? profiles.length : 0) + (show("actions") ? 2 : 0);
+  const count = (show("games") ? titles.length : 0) + (show("curators") ? profiles.length : 0) + (show("actions") ? 2 : 0) + (show("lists") ? lists.length : 0);
   return (
     <div className="max-h-[634px] overflow-y-auto px-4 py-3 divide-y-0 space-y-5" aria-live="polite" aria-atomic="false">
       <span className="sr-only">{count} results</span>
@@ -31,7 +31,7 @@ export function SearchResults({ query, scope, mode }: { query: string; scope: Se
         <ResultHeading icon="group" label="Curators & Critics" detail={`${profiles.length} matching profiles`} color="text-tertiary" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">{profiles.map((profile) => <ReferenceProfile0 key={profile.id} profile={profile} count={rated.length} average={averageScore(rated)} />)}</div>
       </section>}
-      {show("lists") && <p className="px-2 py-4 text-on-surface-variant">Curated lists are not available yet.</p>}
+      {show("lists") && <section><ResultHeading icon="list" label="Curated lists" detail={`${lists.length} matches`} color="text-primary" />{lists.map((list) => <Link data-search-result key={list.id} href={`/lists/${list.id}`} className="block p-3 rounded hover:bg-surface-container"><HighlightedTitle title={list.name} query={query} /></Link>)}</section>}
       {show("actions") && <section className="pt-3 pb-1">
         <ResultHeading icon="bolt" label="Quick Commands" detail="Shortcuts" color="text-primary" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2"><ReferenceCommand0 /><ReferenceCommand1 /></div>

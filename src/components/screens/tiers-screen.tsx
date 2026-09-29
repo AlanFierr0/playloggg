@@ -30,6 +30,7 @@ return (<>
 
 <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold">{"\n          Personal Tier Board\n        "}</h1>
 
+<Link href="/lists" className="text-primary font-label-md text-label-md hover:underline">Curated lists</Link>
 <p className="font-body-md text-body-md text-on-surface-variant">{logged.length + " logged titles grouped by independently selected tiers."}</p>
 
 </div>

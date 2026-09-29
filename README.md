@@ -43,6 +43,7 @@ Next.js ESLint configuration fail on ESLint 10's rule API.
 | `/search` | Search overlay; Ctrl/Cmd+K also opens it |
 | `/log` | Owner rating/review and playback-status editor |
 | `/login` | Owner email magic-link sign-in |
+| `/lists`, `/lists/[id]` | Curated lists and custom game order (pending rollout) |
 | `/game/[slug]` | Game detail using the existing detail-page layout |
 
 Search reads the public Supabase catalog and sample profile, with categories, arrow keys, Enter,
@@ -51,18 +52,20 @@ Score and tier are independently editable. Saved owner scores, tiers, playback
 status and reviews reload from Supabase. Scores are optional; zero is a real
 score. Saved optional platform, playtime and completion date reload from Supabase.
 Their migration is applied and production rollout is authorized; see
-[saved play details](docs/saved-play-details.md). Shelves/tags and broadcast
-remain temporary controls.
+[saved play details](docs/saved-play-details.md). Personal tags and ordered lists
+are implemented locally with production rollout pending; see
+[tags and curated lists](docs/tags-and-curated-lists.md). Broadcast remains temporary.
 
 “Commit to Log” saves the signed-in owner's optional score, independent tier,
-playback status and review. It is disabled for the sample portfolio. Other draft
-fields remain temporary and nothing is broadcast. Unsupported controls display
+playback status, play details, tags and review. It is disabled for the sample
+portfolio. Nothing is broadcast. Unsupported controls display
 a prototype notice. Counts, averages, rankings and tiers use the selected profile.
 The Backlog uses saved entries, including unscored games. Its migration is
 applied and production rollout is authorized; see
 [Backlog and playback status](docs/backlog-and-playback-status.md).
 Comparison metrics, discovery content, public-figure profiles and editorial
-reviews remain illustrative content from Stitch. Curated lists remain unavailable.
+reviews remain illustrative content from Stitch. Curated list visibility follows
+the owning profile; list membership is independent of ratings.
 
 ## Structure and design
 

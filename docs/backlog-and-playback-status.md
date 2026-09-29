@@ -21,8 +21,9 @@ The user approved adding backlog and playing games without rating them.
   independent tier. Unassigned includes logged entries without a tier, excluding
   unlogged catalog games. Empty averages stay unavailable, not zero.
 - Game detail displays saved playback status. Platform, hours, and completion date are covered by the applied
-  [saved play details](saved-play-details.md) migration. Shelves/tags and broadcast
-  remain temporary.
+  [saved play details](saved-play-details.md) migration. Tags and curated lists
+  are implemented in the [pending next milestone](tags-and-curated-lists.md).
+  Broadcast remains temporary.
 
 ## Schema and access
 

@@ -18,7 +18,9 @@ changes or sample play details are invented.
 A successful save becomes the new Discard baseline for all saved fields.
 Invalid playtime and failed requests retain the draft without changing saved
 values. Reload restores these details from the selected profile's entry.
-Tags, shelves, and broadcast remain temporary or unavailable.
+Broadcast remains temporary. Personal tags and curated lists are implemented
+in the subsequent local milestone; see [tags-and-curated-lists.md](tags-and-curated-lists.md)
+for their pending production rollout.
 
 ## Schema and access
 

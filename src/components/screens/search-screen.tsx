@@ -15,7 +15,7 @@ const dialog = useRef<HTMLDivElement>(null);
 const input = useRef<HTMLInputElement>(null);
 const router = useRouter();
 const matchCounts = getSearchMatches(query, portfolio);
-const totalCount = matchCounts.titles.length + matchCounts.profiles.length + (matchCounts.listMatches ? 1 : 0) + 2;
+const totalCount = matchCounts.titles.length + matchCounts.profiles.length + matchCounts.lists.length + 2;
 function close() { router.push(returnPath); }
 useEffect(() => { input.current?.focus(); input.current?.setSelectionRange(initialQuery.length, initialQuery.length); }, [initialQuery]);
 function onKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
@@ -134,7 +134,7 @@ return (<div onKeyDown={onKeyDown}>
 
 <button onClick={() => setScope("curators")} aria-pressed={scope === "curators"} className={"px-2.5 py-1 rounded font-label-sm text-label-sm tracking-wide transition-colors whitespace-nowrap " + (scope === "curators" ? "bg-surface-container-high text-primary font-semibold shadow-sm" : "hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface")}>Curators ({matchCounts.profiles.length})</button>
 
-<button onClick={() => setScope("lists")} aria-pressed={scope === "lists"} className={"px-2.5 py-1 rounded font-label-sm text-label-sm tracking-wide transition-colors whitespace-nowrap " + (scope === "lists" ? "bg-surface-container-high text-primary font-semibold shadow-sm" : "hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface")}>Curated Lists ({matchCounts.listMatches ? 1 : 0})</button>
+<button onClick={() => setScope("lists")} aria-pressed={scope === "lists"} className={"px-2.5 py-1 rounded font-label-sm text-label-sm tracking-wide transition-colors whitespace-nowrap " + (scope === "lists" ? "bg-surface-container-high text-primary font-semibold shadow-sm" : "hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface")}>Curated Lists ({matchCounts.lists.length})</button>
 
 <button onClick={() => setScope("actions")} aria-pressed={scope === "actions"} className={"px-2.5 py-1 rounded font-label-sm text-label-sm tracking-wide transition-colors whitespace-nowrap " + (scope === "actions" ? "bg-surface-container-high text-primary font-semibold shadow-sm" : "hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface")}>Actions (2)</button>
 

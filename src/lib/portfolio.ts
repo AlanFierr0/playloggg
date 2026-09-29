@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import type { Database } from "@/types/database";
 import type { Game, Portfolio } from "@/types/domain";
+import { getLists } from "@/lib/collections";
 import { getOwner } from "@/lib/owner";
 
 type GameRow = Database["public"]["Tables"]["games"]["Row"];
@@ -27,16 +28,16 @@ export const getCatalog = cache(() => readPublic<GameRow>("games?select=slug,tit
 export const getPortfolio = cache(async (): Promise<Portfolio> => {
   const [owner, rows] = await Promise.all([getOwner(), getCatalog()]);
   let profile: Pick<ProfileRow, "id" | "handle" | "display_name" | "is_sample" | "is_public"> | undefined;
-  let ratings: Pick<RatingRow, "game_id" | "score" | "tier" | "review" | "status" | "platform" | "hours_played" | "completed_on">[];
+  let ratings: Pick<RatingRow, "game_id" | "score" | "tier" | "review" | "status" | "platform" | "hours_played" | "completed_on" | "tags">[];
   if (owner?.profile) {
     profile = owner.profile;
-    const { data, error } = await owner.supabase.from("ratings").select("game_id,score,tier,review,status,platform,hours_played,completed_on").eq("profile_id", profile.id).limit(1000);
+    const { data, error } = await owner.supabase.from("ratings").select("game_id,score,tier,review,status,platform,hours_played,completed_on,tags").eq("profile_id", profile.id).limit(1000);
     if (error) throw new Error("Your ratings could not be loaded.");
     ratings = data;
   } else {
     const [profiles, sampleRatings] = await Promise.all([
       readPublic<ProfileRow>("profiles?handle=eq.alexvance&select=id,handle,display_name,is_sample,is_public&limit=1"),
-      readPublic<RatingRow>("ratings?select=game_id,score,tier,review,status,platform,hours_played,completed_on,profiles!inner(handle)&profiles.handle=eq.alexvance&limit=1000"),
+      readPublic<RatingRow>("ratings?select=game_id,score,tier,review,status,platform,hours_played,completed_on,tags,profiles!inner(handle)&profiles.handle=eq.alexvance&limit=1000"),
     ]);
     profile = profiles[0];
     ratings = sampleRatings;
@@ -52,13 +53,13 @@ export const getPortfolio = cache(async (): Promise<Portfolio> => {
       review: rating?.review ?? null,
       status: rating?.status as Game["status"] ?? null, logged: Boolean(rating),
       platform: rating?.platform as Game["platform"] ?? null,
-      hoursPlayed: rating?.hours_played ?? null, completedOn: rating?.completed_on ?? null,
+      hoursPlayed: rating?.hours_played ?? null, completedOn: rating?.completed_on ?? null, tags: rating?.tags ?? [],
       artwork: row.artwork_image_ids[0] ? image(row.artwork_image_ids[0], "screenshot_huge") : row.screenshot_image_ids[0] ? image(row.screenshot_image_ids[0], "screenshot_huge") : null,
       screenshots: row.screenshot_image_ids.map((id) => image(id, "screenshot_big")),
     };
   });
   games.sort((a, b) => (b.score ?? -1) - (a.score ?? -1) || a.slug.localeCompare(b.slug));
-  return { games, profile: { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: profile.is_sample, isPublic: profile.is_public }, access: { signedIn: Boolean(owner), canEdit: Boolean(owner?.profile) } };
+  return { games, lists: await getLists(profile.id), profile: { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: profile.is_sample, isPublic: profile.is_public }, access: { signedIn: Boolean(owner), canEdit: Boolean(owner?.profile) } };
 });
 
 export async function getPublicGame(slug: string) {

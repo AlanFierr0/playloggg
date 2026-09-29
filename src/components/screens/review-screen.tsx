@@ -1,9 +1,10 @@
 "use client";
 import Link from "next/link";
-import { PreviewAction } from "@/components/preview-action";
+import { TagEditor } from "@/components/tag-editor";
 import { useRef, useState, useTransition } from "react";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { saveRating } from "@/app/actions/ratings";
+import { normalizeTags } from "@/lib/collection-input";
 import { parseHours } from "@/lib/rating-input";
 import type { Game, PlaybackStatus, PlayedPlatform, Tier } from "@/types/domain";
 import { TierBadge, ScoreStars } from "@/components/rating-controls";
@@ -13,7 +14,7 @@ const { access } = usePortfolio();
 const canEdit = access?.canEdit ?? false;
 const [pending, startTransition] = useTransition();
 const [saveMessage, setSaveMessage] = useState("");
-const [saved, setSaved] = useState({ score: game.score, tier: game.tier ?? null, status: game.status ?? null, review: game.review ?? "", platform: game.platform ?? null, hoursPlayed: game.hoursPlayed ?? null, completedOn: game.completedOn ?? null });
+const [saved, setSaved] = useState({ score: game.score, tier: game.tier ?? null, status: game.status ?? null, review: game.review ?? "", platform: game.platform ?? null, hoursPlayed: game.hoursPlayed ?? null, completedOn: game.completedOn ?? null, tags: game.tags ?? [] });
 const isReference = game.slug === "metaphor-refantazio";
 const [score, setScore] = useState<number | null>(game.score);
 const [tier, setTier] = useState<Tier | null>(game.tier ?? null);
@@ -23,19 +24,21 @@ const [broadcast, setBroadcast] = useState(true);
 const [hours, setHours] = useState(game.hoursPlayed == null ? "" : String(game.hoursPlayed));
 const [date, setDate] = useState(game.completedOn ?? "");
 const dateInput = useRef<HTMLInputElement>(null);
+const [tags, setTags] = useState<string[]>(game.tags ?? []);
+const [tagVersion, setTagVersion] = useState(0);
 const [review, setReview] = useState(game.review ?? "");
-function resetDraft() { setScore(saved.score); setTier(saved.tier); setPlatform(saved.platform); setStatus(saved.status); setBroadcast(true); setHours(saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)); setDate(saved.completedOn ?? ""); setReview(saved.review); setSaveMessage(""); }
+function resetDraft() { setScore(saved.score); setTier(saved.tier); setPlatform(saved.platform); setStatus(saved.status); setBroadcast(true); setHours(saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)); setDate(saved.completedOn ?? ""); setReview(saved.review); setTags(saved.tags); setTagVersion((value) => value + 1); setSaveMessage(""); }
 function commit() {
   if (dateInput.current && !dateInput.current.validity.valid) { setSaveMessage("Complete a valid calendar date, or clear it. Your draft has been kept."); return; }
   const hoursPlayed = parseHours(hours);
   if (hoursPlayed === undefined) { setSaveMessage("Enter nonnegative decimal hours, or leave playtime blank. Your draft has been kept."); return; }
   const completedOn = date || null;
-  const draft = { slug: game.slug, score, tier, status, review, platform, hoursPlayed, completedOn };
+  const draft = { slug: game.slug, score, tier, status, review, platform, hoursPlayed, completedOn, tags };
   startTransition(async () => {
     try {
       const result = await saveRating(draft);
       setSaveMessage(result.message);
-      if (result.ok) { setSaved({ score, tier, status, review: review.trim(), platform, hoursPlayed, completedOn }); setReview(review.trim()); setHours(hoursPlayed == null ? "" : String(hoursPlayed)); }
+      if (result.ok) { setSaved({ score, tier, status, review: review.trim(), platform, hoursPlayed, completedOn, tags: normalizeTags(tags)! }); setReview(review.trim()); setHours(hoursPlayed == null ? "" : String(hoursPlayed)); }
     } catch { setSaveMessage("Saving is unavailable right now. Your draft has been kept; please try again."); }
   });
 }
@@ -82,7 +85,7 @@ return (<><fieldset disabled={pending} className="contents">
 </div>
 
 <div className="p-6 sm:p-8 lg:p-10 flex flex-col gap-8">
-<p className="font-body-sm text-body-sm text-on-surface-variant">{canEdit ? "Commit saves your optional score, independent tier, playback status, platform, playtime, completion date, and review. Tags and broadcast remain temporary." : <>Sample profile preview. <Link href="/login" className="text-primary underline">Sign in</Link> to save entries to your own profile.</>}</p>
+<p className="font-body-sm text-body-sm text-on-surface-variant">{canEdit ? "Commit saves your optional score, independent tier, playback status, platform, playtime, completion date, and review. Tags are saved too; broadcast remains temporary." : <>Sample profile preview. <Link href="/login" className="text-primary underline">Sign in</Link> to save entries to your own profile.</>}</p>
 <p role="status" className="font-body-sm text-body-sm text-primary">{pending ? "Saving…" : saveMessage}</p>
 <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-start">
 <div className="relative group flex-shrink-0 w-32 sm:w-40 aspect-[3/4] rounded-lg overflow-hidden bg-surface-container shadow-xl">
@@ -257,33 +260,7 @@ return (<><fieldset disabled={pending} className="contents">
 
 </div>
 
-<div className="md:col-span-12 flex flex-col gap-2.5">
-<div className="flex items-center justify-between">
-<label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{"Archival Shelves & Curatorial Badges"}</label>
-
-<span className="font-label-sm text-label-sm text-primary">{"+ New Shelf"}</span>
-
-</div>
-
-<div className="flex flex-wrap gap-2">
-<PreviewAction className="tag-pill px-3 py-1.5 rounded font-label-sm text-label-sm tracking-wider uppercase bg-primary/10 text-primary flex items-center gap-1.5" type="button" message={"Preview only: this feature is not connected yet."}>
-<span className="material-symbols-outlined text-[13px]">{"award_star"}</span>
-{" GOTY 2024 Contender\n              "}</PreviewAction>
-
-<PreviewAction className="tag-pill px-3 py-1.5 rounded font-label-sm text-label-sm tracking-wider uppercase bg-primary/10 text-primary flex items-center gap-1.5" type="button" message={"Preview only: this feature is not connected yet."}>
-<span className="material-symbols-outlined text-[13px]">{"auto_awesome"}</span>
-{" Masterpiece Tier\n              "}</PreviewAction>
-
-<PreviewAction className="tag-pill px-3 py-1.5 rounded font-label-sm text-label-sm tracking-wider uppercase bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button" message={"Preview only: this feature is not connected yet."}>{"\n                Turn-Based Essential\n              "}</PreviewAction>
-
-<PreviewAction className="tag-pill px-3 py-1.5 rounded font-label-sm text-label-sm tracking-wider uppercase bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button" message={"Preview only: this feature is not connected yet."}>{"\n                OST Pantheon\n              "}</PreviewAction>
-
-<PreviewAction className="px-2.5 py-1.5 rounded font-label-sm text-label-sm tracking-wider uppercase bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors flex items-center gap-1" type="button" message={"Preview only: this feature is not connected yet."}>
-<span className="material-symbols-outlined text-[14px]">{"add"}</span>
-{" Add Tag\n              "}</PreviewAction>
-
-</div>
-
+<div className="md:col-span-12 flex flex-col gap-2.5"><TagEditor key={tagVersion} tags={tags} onChange={setTags} /><Link href="/lists" className="font-label-sm text-label-sm text-primary hover:underline">Manage curated lists</Link>
 </div>
 
 </div>

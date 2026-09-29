@@ -14,6 +14,18 @@ export type Database = {
   }
   public: {
     Tables: {
+      curated_lists: {
+        Row: { id: number; profile_id: number; name: string; revision: number; created_at: string; updated_at: string }
+        Insert: { id?: never; profile_id: number; name: string; revision?: number; created_at?: string; updated_at?: string }
+        Update: { profile_id?: number; name?: string; revision?: number; updated_at?: string }
+        Relationships: []
+      }
+      curated_list_items: {
+        Row: { list_id: number; game_id: number; position: number }
+        Insert: { list_id: number; game_id: number; position: number }
+        Update: { list_id?: number; game_id?: number; position?: number }
+        Relationships: []
+      }
       games: {
         Row: {
           artwork_image_ids: string[]
@@ -124,6 +136,7 @@ export type Database = {
           review: string | null
           score: number | null
           status: string | null
+          tags: string[]
           tier: string | null
           updated_at: string
         }
@@ -137,6 +150,7 @@ export type Database = {
           review?: string | null
           score?: number | null
           status?: string | null
+          tags?: string[]
           tier?: string | null
           updated_at?: string
         }
@@ -150,6 +164,7 @@ export type Database = {
           review?: string | null
           score?: number | null
           status?: string | null
+          tags?: string[]
           tier?: string | null
           updated_at?: string
         }
@@ -175,7 +190,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      save_curated_list: {
+        Args: { p_profile_id: number; p_list_id: number | null; p_name: string; p_game_ids: number[]; p_expected_revision: number | null }
+        Returns: Json
+      }
+      valid_rating_tags: { Args: { value: string[] }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

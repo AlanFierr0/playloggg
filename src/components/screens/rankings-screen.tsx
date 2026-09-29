@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { usePortfolio } from "@/components/portfolio-provider";
-import { averageScore, filterRankings, ratedGames, type RankingFilter } from "@/lib/portfolio-view";
+import { averageScore, filterRankings, loggedGames, ratedGames, type RankingFilter } from "@/lib/portfolio-view";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import type { Game } from "@/types/domain";
 import { playbackLabels } from "@/lib/playback-status";
@@ -10,9 +10,11 @@ import { playbackLabels } from "@/lib/playback-status";
 export function RankingsScreen() {
 const { games, profile } = usePortfolio();
 const [filter, setFilter] = useState<RankingFilter>("all");
+const [tag, setTag] = useState("");
+const tags = [...new Map(loggedGames(games).flatMap((game) => game.tags ?? []).map((value) => [value.toLowerCase(), value])).values()].sort();
 const [page, setPage] = useState(1);
 const rated = ratedGames(games);
-const filtered = filterRankings(games, filter);
+const filtered = filterRankings(games, filter, tag);
 const pageCount = Math.max(1, Math.ceil(filtered.length / 8));
 const currentPage = Math.min(page, pageCount);
 const offset = (currentPage - 1) * 8;
@@ -76,6 +78,7 @@ return (<>
 </nav>
 
 </header>
+{tags.length > 0 && <label className="flex items-center gap-3 mb-6 font-label-md text-label-md">Filter by tag<select id="tag-filter" className="bg-surface-container rounded p-2 max-w-full" value={tag} onChange={(event) => { setTag(event.target.value); setPage(1); }}><option value="">All tags</option>{tags.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>}
 
 <div className="w-full flex items-center justify-between mb-8">
 <div className="flex items-center gap-3">
@@ -123,7 +126,7 @@ return <article className="relative group flex flex-col cursor-pointer transitio
 <div className="relative w-full aspect-[3/4] rounded bg-surface-container-low overflow-hidden shadow-xl">
 <img className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" src={game.cover} alt={game.title} />
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-surface-container-lowest/10 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
-<div className="absolute top-3 left-3 flex items-center"><span className="font-label-md text-label-md font-bold px-2 py-1 rounded bg-surface-container-lowest/80 text-on-surface backdrop-blur-md shadow-md">{rank ? "#" + String(rank).padStart(2, "0") : "Backlog"}</span></div>
+<div className="absolute top-3 left-3 flex items-center"><span className="font-label-md text-label-md font-bold px-2 py-1 rounded bg-surface-container-lowest/80 text-on-surface backdrop-blur-md shadow-md">{rank ? "#" + String(rank).padStart(2, "0") : game.status === "backlog" ? "Backlog" : "Unrated"}</span></div>
 <div className="absolute top-3 right-3 flex items-center"><span className="font-label-md text-label-md font-bold px-2.5 py-1 rounded bg-surface-container-lowest/90 text-primary backdrop-blur-md shadow-md">{game.score ?? "—"}</span></div>
 <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-surface-container-lowest/90 backdrop-blur-md flex items-center justify-between"><span className="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">{game.tier ? "Tier " + game.tier : "Unassigned tier"}</span><div className="flex items-center gap-1 text-primary">{game.score !== null && <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">star</span>}<span className="font-label-sm text-label-sm font-bold">{game.score === null ? "Unrated" : (game.score / 20).toFixed(1)}</span></div></div>
 </div>

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { parseHours, validateRating } from "../src/lib/rating-input.ts";
 
-const draft = { slug: "cyberpunk-2077", score: 95, tier: "B", status: null, platform: null, hoursPlayed: null, completedOn: null, review: "  Independent tier.  " };
+const draft = { slug: "cyberpunk-2077", score: 95, tier: "B", status: null, tags: [], platform: null, hoursPlayed: null, completedOn: null, review: "  Independent tier.  " };
 test("zero, null tier, and empty review are valid; scores do not dictate tiers", () => {
   assert.deepEqual(validateRating(draft), { ...draft, review: "Independent tier." });
   assert.deepEqual(validateRating({ ...draft, score: 0, tier: null, review: "" }), { ...draft, score: 0, tier: null, review: "" });
@@ -17,7 +17,7 @@ test("reject invalid and unbounded input before attempting writes", () => {
 });
 test("client-supplied identity fields cannot select a different profile or game ID", () => {
   const parsed = validateRating({ ...draft, profile_id: 1, game_id: 2, owner_user_id: "forged" });
-  assert.deepEqual(Object.keys(parsed).sort(), ["completedOn", "hoursPlayed", "platform", "review", "score", "slug", "status", "tier"]);
+  assert.deepEqual(Object.keys(parsed).sort(), ["completedOn", "hoursPlayed", "platform", "review", "score", "slug", "status", "tags", "tier"]);
 });
 test("unrated backlog/playing entries preserve null instead of inserting score zero", () => {
   for (const status of ["backlog", "playing", "completed", "shelved", null]) {

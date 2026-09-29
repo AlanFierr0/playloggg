@@ -31,7 +31,9 @@ for the applied follow-up migration. Upsert keeps one current
 rating per profile/game; an empty review clears it. Failed saves preserve drafts;
 discard restores saved values. The applied
 [saved play details](saved-play-details.md) milestone adds platform, hours, and
-completion date; production rollout is authorized. Tags and broadcast remain temporary. Reviews render as escaped text.
+completion date; production rollout is authorized. Tags and curated lists are
+implemented in the [pending next milestone](tags-and-curated-lists.md). Broadcast
+remains temporary. Reviews render as escaped text.
 
 ## Rollout order
 

@@ -14,11 +14,15 @@ export function averageScore(games: RatedGame[]): string {
 }
 
 export function loggedGames(games: Game[]): Game[] {
-  return games.filter((game) => game.logged ?? (game.score !== null || game.status != null || game.tier != null || Boolean(game.review) || game.platform != null || game.hoursPlayed != null || game.completedOn != null))
+  return games.filter((game) => game.logged ?? (game.score !== null || game.status != null || game.tier != null || Boolean(game.review) || game.platform != null || game.hoursPlayed != null || game.completedOn != null || Boolean(game.tags?.length)))
     .sort((a, b) => (b.score ?? -1) - (a.score ?? -1) || (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0));
 }
 
-export function filterRankings(games: Game[], filter: RankingFilter): Game[] {
+export function filterRankings(games: Game[], filter: RankingFilter, tag = ""): Game[] {
+  if (tag) {
+    const matching = loggedGames(games).filter((game) => game.tags?.some((value) => value.toLowerCase() === tag.toLowerCase()));
+    return filter === "all" ? matching : filterRankings(matching, filter);
+  }
   if (filter === "backlog") return loggedGames(games).filter((game) => game.status === "backlog");
   const rated = ratedGames(games);
   if (filter === "masterpieces") return rated.filter((game) => game.score >= 90);
@@ -38,8 +42,9 @@ function matches(query: string, content: string): boolean {
 
 export function getSearchMatches(query: string, portfolio: Portfolio) {
   return {
-    titles: portfolio.games.filter((game) => matches(query, `${game.title} ${game.keywords} ${(game.genres ?? []).join(" ")}`)),
+    titles: portfolio.games.filter((game) => matches(query, `${game.title} ${game.keywords} ${(game.genres ?? []).join(" ")} ${(game.tags ?? []).join(" ")}`)),
     profiles: matches(query, `${portfolio.profile.displayName} ${portfolio.profile.handle}`) ? [portfolio.profile] : [],
-    listMatches: false, // Curated lists are not persisted yet.
+    lists: (portfolio.lists ?? []).filter((list) => matches(query, list.name)),
+    listMatches: (portfolio.lists ?? []).some((list) => matches(query, list.name)),
   };
 }

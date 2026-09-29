@@ -15,6 +15,7 @@ export interface Game {
   platform?: PlayedPlatform | null;
   hoursPlayed?: number | null;
   completedOn?: string | null;
+  tags?: string[];
   keywords: string;
   releasedOn?: string | null;
   genres?: string[];
@@ -34,6 +35,7 @@ export interface Profile {
 export interface Portfolio {
   games: Game[];
   profile: Profile;
+  lists?: CuratedListSummary[];
   access?: { signedIn: boolean; canEdit: boolean };
 }
 
@@ -47,4 +49,8 @@ export interface Rating {
   platform: PlayedPlatform | null;
   hoursPlayed: number | null;
   completedOn: string | null;
+  tags: string[];
 }
+
+export interface CuratedListSummary { id: number; name: string; revision: number }
+export interface CuratedList extends CuratedListSummary { slugs: string[] }
