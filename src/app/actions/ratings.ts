@@ -1,15 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getOwner } from "@/lib/owner";
+import { getAccount } from "@/lib/owner";
 import { validateRating } from "@/lib/rating-input";
 
 export async function saveRating(input: unknown): Promise<{ ok: boolean; message: string }> {
   const rating = validateRating(input);
   if (!rating) return { ok: false, message: "Use a score from 0 to 100, a valid tier/status/platform, nonnegative decimal hours, a valid calendar date, up to 20 tags of 1–48 characters, and a review of at most 20,000 characters. Score, platform, hours, and date may be blank." };
   try {
-    const owner = await getOwner();
-    if (!owner?.profile) return { ok: false, message: "Sign in to your owner account before saving." };
+    const owner = await getAccount();
+    if (!owner?.profile) return { ok: false, message: "Sign in to your account before saving." };
     const { data: game, error: gameError } = await owner.supabase.from("games").select("id").eq("slug", rating.slug).single();
     if (gameError || !game) return { ok: false, message: "This game is unavailable. Your draft has been kept." };
     const { error } = await owner.supabase.from("ratings").upsert({

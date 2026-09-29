@@ -128,7 +128,7 @@ return (<div onKeyDown={onKeyDown}>
 
 </div>
 
-{portfolio.access?.canEdit && <div className="flex shrink-0 flex-wrap gap-2 px-3 sm:px-5 pt-3"><button aria-pressed={source === "catalog"} onClick={() => setSource("catalog")} className={`rounded px-3 py-2 font-label-md text-label-md ${source === "catalog" ? "bg-surface-container-high text-primary" : "text-on-surface-variant"}`}>Saved catalog</button><button aria-pressed={source === "igdb"} onClick={() => setSource("igdb")} className={`rounded px-3 py-2 font-label-md text-label-md ${source === "igdb" ? "bg-surface-container-high text-primary" : "text-on-surface-variant"}`}>Find on IGDB</button></div>}
+{portfolio.access?.canImportCatalog && <div className="flex shrink-0 flex-wrap gap-2 px-3 sm:px-5 pt-3"><button aria-pressed={source === "catalog"} onClick={() => setSource("catalog")} className={`rounded px-3 py-2 font-label-md text-label-md ${source === "catalog" ? "bg-surface-container-high text-primary" : "text-on-surface-variant"}`}>Saved catalog</button><button aria-pressed={source === "igdb"} onClick={() => setSource("igdb")} className={`rounded px-3 py-2 font-label-md text-label-md ${source === "igdb" ? "bg-surface-container-high text-primary" : "text-on-surface-variant"}`}>Find on IGDB</button></div>}
 
 {source === "catalog" && <div className="flex shrink-0 flex-wrap items-center gap-2 px-3 sm:px-5 py-2.5 bg-surface-container-low text-on-surface-variant">
 <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant/70 mr-1 flex items-center gap-1">

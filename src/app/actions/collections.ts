@@ -1,6 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { getOwner } from "@/lib/owner";
+import { getAccount } from "@/lib/owner";
 import { positiveId, validateList } from "@/lib/collection-input";
 import type { CuratedListSummary } from "@/types/domain";
 
@@ -9,8 +9,8 @@ export async function saveList(input: unknown): Promise<Result> {
   const draft = validateList(input);
   if (!draft) return { ok: false, message: "Use a name of 1–80 characters and up to 500 different catalog games. Your draft has been kept." };
   try {
-    const owner = await getOwner();
-    if (!owner?.profile) return { ok: false, message: "Sign in to your owner account before saving lists." };
+    const owner = await getAccount();
+    if (!owner?.profile) return { ok: false, message: "Sign in to your account before saving lists." };
     let ids: number[] = [];
     if (draft.slugs.length) {
       const { data, error } = await owner.supabase.from("games").select("id,slug").in("slug", draft.slugs);
@@ -34,8 +34,8 @@ export async function saveList(input: unknown): Promise<Result> {
 export async function deleteList(id: unknown, revision: unknown): Promise<Result> {
   if (!positiveId(id) || !positiveId(revision)) return { ok: false, message: "This list is unavailable." };
   try {
-    const owner = await getOwner();
-    if (!owner?.profile) return { ok: false, message: "Sign in to your owner account before deleting lists." };
+    const owner = await getAccount();
+    if (!owner?.profile) return { ok: false, message: "Sign in to your account before deleting lists." };
     const { data, error } = await owner.supabase.from("curated_lists").delete()
       .eq("id", id).eq("profile_id", owner.profile.id).eq("revision", revision).select("id").maybeSingle();
     if (error || !data) return { ok: false, message: "This list changed or could not be deleted. Reload and try again." };

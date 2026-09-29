@@ -3,7 +3,7 @@ import { cache } from "react";
 import type { Database } from "@/types/database";
 import type { Game, Portfolio } from "@/types/domain";
 import { getLists } from "@/lib/collections";
-import { getOwner } from "@/lib/owner";
+import { getAccount, isOwnerEmail } from "@/lib/owner";
 
 type GameRow = Database["public"]["Tables"]["games"]["Row"];
 type RatingRow = Database["public"]["Tables"]["ratings"]["Row"];
@@ -35,7 +35,7 @@ export const getCatalog = cache(async () => {
 });
 
 export const getPortfolio = cache(async (): Promise<Portfolio> => {
-  const [owner, rows] = await Promise.all([getOwner(), getCatalog()]);
+  const [owner, rows] = await Promise.all([getAccount(), getCatalog()]);
   let profile: Pick<ProfileRow, "id" | "handle" | "display_name" | "is_sample" | "is_public"> | undefined;
   let ratings: Pick<RatingRow, "game_id" | "score" | "tier" | "review" | "status" | "platform" | "hours_played" | "completed_on" | "tags">[];
   if (owner?.profile) {
@@ -73,7 +73,7 @@ export const getPortfolio = cache(async (): Promise<Portfolio> => {
     };
   });
   games.sort((a, b) => (b.score ?? -1) - (a.score ?? -1) || a.slug.localeCompare(b.slug));
-  return { games, lists: await getLists(profile.id), profile: { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: profile.is_sample, isPublic: profile.is_public }, access: { signedIn: Boolean(owner), canEdit: Boolean(owner?.profile) } };
+  return { games, lists: await getLists(profile.id), profile: { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: profile.is_sample, isPublic: profile.is_public }, access: { signedIn: Boolean(owner), canEdit: Boolean(owner?.profile), canImportCatalog: Boolean(owner?.profile && isOwnerEmail(owner.user.email)) } };
 });
 
 export async function getPublicGame(slug: string) {

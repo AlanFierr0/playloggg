@@ -1,0 +1,36 @@
+import { cookies } from "next/headers";
+import { NextResponse, type NextRequest } from "next/server";
+import { steamSite, verifySteam } from "@/lib/steam-openid";
+import { createAuthAdmin } from "@/lib/supabase/auth-admin";
+import { createClient } from "@/lib/supabase/server";
+
+export const runtime = "nodejs";
+export async function GET(request: NextRequest) {
+  const store = await cookies();
+  const state = store.get("playlogg-steam-state")?.value;
+  store.set("playlogg-steam-state", "", { path: "/auth/steam", maxAge: 0, httpOnly: true, sameSite: "lax", secure: request.nextUrl.protocol === "https:" });
+  let destination = "/login?error=steam";
+  try {
+    const site = steamSite(process.env.PLAYLOGG_SITE_URL);
+    if (request.nextUrl.origin !== site) throw new Error("Invalid origin");
+    const steamId = await verifySteam(request.nextUrl.searchParams, state, site);
+    if (!steamId) throw new Error("Invalid assertion");
+    const admin = createAuthAdmin();
+    // Reserved, non-deliverable address: no email or browser-provided identity is used.
+    const email = `steam.${steamId}@users.playlogg.invalid`;
+    const created = await admin.auth.admin.createUser({ email, email_confirm: true, app_metadata: { playlogg_steam_id: steamId } });
+    if (created.error && !["email_exists", "user_already_exists"].includes(created.error.code ?? "")) throw new Error("Account creation failed");
+    const { data, error } = await admin.auth.admin.generateLink({ type: "magiclink", email });
+    if (error || data.user.app_metadata.playlogg_steam_id !== steamId) throw new Error("Identity mismatch");
+    const supabase = await createClient();
+    const verified = await supabase.auth.verifyOtp({ token_hash: data.properties.hashed_token, type: "magiclink" });
+    if (verified.error || verified.data.user?.id !== data.user.id) throw new Error("Session failed");
+    const { data: profile, error: profileError } = await supabase.from("profiles").select("id").eq("owner_user_id", data.user.id).eq("is_sample", false).maybeSingle();
+    if (profileError) throw new Error("Profile read failed");
+    destination = profile ? "/profile" : "/signup";
+  } catch { /* Never log assertions, auth tokens, emails or provider responses. */ }
+  const response = NextResponse.redirect(new URL(destination, request.url));
+  response.headers.set("Cache-Control", "private, no-store");
+  response.headers.set("Referrer-Policy", "no-referrer");
+  return response;
+}

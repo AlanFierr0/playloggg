@@ -43,7 +43,7 @@ export interface Portfolio {
   games: Game[];
   profile: Profile;
   lists?: CuratedListSummary[];
-  access?: { signedIn: boolean; canEdit: boolean };
+  access?: { signedIn: boolean; canEdit: boolean; canImportCatalog?: boolean };
 }
 
 export interface Rating {

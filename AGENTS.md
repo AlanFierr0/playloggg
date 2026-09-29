@@ -49,6 +49,15 @@ Prototype edits are memory-only and reset on refresh. Clearly distinguish
 sample content and unavailable features from real persistence.
 
 ## Infrastructure
+Public Steam registration is approved. The local Steam OpenID bridge creates
+Supabase sessions and lets users choose names for their own empty, private
+profiles. Use verified server-owned Steam metadata and existing per-profile RLS;
+never derive ownership from user metadata or browser-supplied IDs. `getAccount`
+permits personal edits; `getOwner` remains the original email owner's catalog
+administration check. Keep email owner login, do not auto-merge accounts, and do
+not expose the Auth admin client. No schema/grant changes are needed. Production
+rollout and real Steam verification are pending. See docs/steam-sign-in.md.
+
 A new Supabase project exists and the prototype is deployed through Vercel from
 GitHub `main`. The first backend seed uses clearly identified sample data.
 The shared schema is applied: shared `profiles`, `games`, and `ratings` tables.

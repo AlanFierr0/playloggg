@@ -41,7 +41,7 @@ export function SiteHeader() {
             <kbd className="absolute right-2 hidden xl:block font-label-sm text-label-sm text-on-surface-variant px-1.5 py-0.5 rounded bg-surface-container-high pointer-events-none">⌘K</kbd>
           </Link>
           <Link aria-label="Log a game" className="inline-flex shrink-0 min-h-11 min-w-11 justify-center items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded bg-primary-container text-on-primary-container hover:bg-primary transition-colors font-label-md text-label-md tracking-wider uppercase font-semibold" href="/log"><span className="material-symbols-outlined text-[16px]" aria-hidden="true">add</span><span className="hidden sm:inline">Log</span></Link>
-          <Link className="flex h-11 w-11 shrink-0 items-center justify-center" href="/login" aria-label={access?.signedIn ? "Account and sign out" : "Owner sign-in"}><ProfileAvatar name={access?.signedIn ? profile.displayName : "Account"} className="w-8 h-8 rounded-full ring-1 ring-surface-variant hover:ring-primary transition-all" /></Link>
+          <Link className="flex h-11 w-11 shrink-0 items-center justify-center" href="/login" aria-label={access?.signedIn ? "Account and sign out" : "Sign in"}><ProfileAvatar name={access?.canEdit ? profile.displayName : "Account"} className="w-8 h-8 rounded-full ring-1 ring-surface-variant hover:ring-primary transition-all" /></Link>
         </div>
       </div>
       <nav aria-label="Main navigation" className="lg:hidden flex h-12 items-center justify-between gap-1 px-4 sm:px-6 bg-surface-container-low/80">
