@@ -152,6 +152,9 @@ The user authorized merging the read-only integration into `main` and using
 branch. The user subsequently approved owner-only access and email magic links.
 That milestone is implemented under the separately documented
 [ownership/access design](owner-persistence.md). The migration is applied and
-production rollout is authorized; owner account/Auth configuration remains.
+production rollout is complete. The owner account/profile is provisioned and
+the user confirmed production magic-link sign-in. A first production save remains
+to be verified. The proposed next milestone is persistent playback status and
+a real Backlog; whether entries can be unrated is awaiting the user's decision.
 Comparison and discovery remain illustrative screens; curated lists, playback
 status, community statistics and editorial reviews have no persistence yet.

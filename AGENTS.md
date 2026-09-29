@@ -42,8 +42,8 @@ rating/review exists per profile/game. Rank by score descending, then game slug.
 RLS exposes published profiles and their ratings; application roles have reads only.
 The application reads published Supabase data on the server using a publishable key.
 Owner-only authentication and rating writes are implemented; the migration is
-applied and the user approved production rollout. Account/Auth configuration
-is still required for activation. Use email magic links and
+applied and production rollout is complete. The confirmed owner account is linked
+to its private profile; the user verified production magic-link sign-in. Use email magic links and
 administratively assigned ownership. Keep the owner's email in ignored/server-only
 configuration. Personal profiles start empty and private; never transfer sample
 ratings into them. See docs/owner-persistence.md. Rankings, tiers and search use

@@ -1,7 +1,9 @@
 # Owner sign-in and saved ratings
 
-Status: implemented and checked on `main`; database migration applied and
-production rollout authorized. Owner account and Auth/environment setup remain.
+Status: deployed from `main`; database migration applied, confirmed owner account
+linked to a private profile, and the user confirmed production magic-link sign-in
+works. A first real production rating save is still to be verified; the last
+inspection found zero ratings on `sakapatate`.
 The user approved owner-only access, email magic links, and handle `sakapatate`
 with display name `Sakapatate`. The actual email is private server configuration.
 The personal profile starts empty and private, separate from Alex Vance's samples.
@@ -38,13 +40,18 @@ broadcast remain explicitly temporary. Reviews render as escaped text.
    ignored `.env.owner-setup.sql`. Never insert real users directly into `auth.users`.
 3. Set Auth Site URL to `https://playloggg.vercel.app`. Allow redirect URLs
    `https://playloggg.vercel.app/auth/confirm` and
-   `http://localhost:3000/auth/confirm`. Use this magic-link email body:
+   `http://localhost:3000/auth/confirm`. The default Magic Link template can be
+   tested with the callback's PKCE authorization-code exchange. Open the email
+   link in the same browser that requested it, where the verifier cookie exists.
+   A custom template is optional and the hosted dashboard may require custom
+   SMTP before allowing template changes. If configuring SMTP, this body supports
+   the direct token-hash callback:
 
    ```html
    <a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email">Sign in to Playlogg</a>
    ```
 
-   The callback also accepts PKCE codes. It verifies the owner's email and
+   The callback accepts either PKCE codes or token hashes. It verifies the owner's email and
    redirects to the fixed `/profile` destination. Invalid/expired links return
    to sign-in with a generic error. Tokens never appear in error messages.
 4. Set Vercel Production `PLAYLOGG_OWNER_EMAIL` to the chosen email, and
@@ -55,6 +62,10 @@ broadcast remain explicitly temporary. Reviews render as escaped text.
 
 The connector has no tools for creating Auth users or changing Auth settings;
 these operations require dashboard or authorized Management/Admin API access.
+Supabase's default email sender is limited to project organization team-member
+addresses and currently two messages per hour. Creating an Auth user alone does
+not authorize that email as a recipient. Configure custom SMTP for recipients
+outside that set and reliable production delivery.
 
 ## Verification
 
@@ -71,7 +82,9 @@ save denial, score/tier/review saves, reload persistence, calculated profile
 statistics, escaped review rendering and draft recovery after failed saves.
 Sign-out restores the sample portfolio. The 390px mobile account screen was
 visually checked with no horizontal overflow or browser runtime errors.
-Actual production email delivery and owner sessions remain rollout checks.
+The user confirmed production magic-link sign-in works after configuring Auth
+URLs and Vercel environment variables and redeploying. Production save/reload
+verification remains; no test rating was written to the owner's profile.
 
 References: [Supabase SSR](https://supabase.com/docs/guides/auth/server-side/creating-a-client),
 [email templates](https://supabase.com/docs/guides/auth/auth-email-templates),
