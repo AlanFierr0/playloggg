@@ -14,17 +14,73 @@ export type Database = {
   }
   public: {
     Tables: {
-      curated_lists: {
-        Row: { id: number; profile_id: number; name: string; revision: number; created_at: string; updated_at: string }
-        Insert: { id?: never; profile_id: number; name: string; revision?: number; created_at?: string; updated_at?: string }
-        Update: { profile_id?: number; name?: string; revision?: number; updated_at?: string }
-        Relationships: []
-      }
       curated_list_items: {
-        Row: { list_id: number; game_id: number; position: number }
-        Insert: { list_id: number; game_id: number; position: number }
-        Update: { list_id?: number; game_id?: number; position?: number }
-        Relationships: []
+        Row: {
+          game_id: number
+          list_id: number
+          position: number
+        }
+        Insert: {
+          game_id: number
+          list_id: number
+          position: number
+        }
+        Update: {
+          game_id?: number
+          list_id?: number
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curated_list_items_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curated_list_items_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "curated_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curated_lists: {
+        Row: {
+          created_at: string
+          id: number
+          name: string
+          profile_id: number
+          revision: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          name: string
+          profile_id: number
+          revision?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          name?: string
+          profile_id?: number
+          revision?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curated_lists_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       games: {
         Row: {
@@ -191,7 +247,13 @@ export type Database = {
     }
     Functions: {
       save_curated_list: {
-        Args: { p_profile_id: number; p_list_id: number | null; p_name: string; p_game_ids: number[]; p_expected_revision: number | null }
+        Args: {
+          p_expected_revision: number
+          p_game_ids: number[]
+          p_list_id: number
+          p_name: string
+          p_profile_id: number
+        }
         Returns: Json
       }
       valid_rating_tags: { Args: { value: string[] }; Returns: boolean }

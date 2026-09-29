@@ -43,7 +43,7 @@ Next.js ESLint configuration fail on ESLint 10's rule API.
 | `/search` | Search overlay; Ctrl/Cmd+K also opens it |
 | `/log` | Owner rating/review and playback-status editor |
 | `/login` | Owner email magic-link sign-in |
-| `/lists`, `/lists/[id]` | Curated lists and custom game order (pending rollout) |
+| `/lists`, `/lists/[id]` | Curated lists and custom game order |
 | `/game/[slug]` | Game detail using the existing detail-page layout |
 
 Search reads the public Supabase catalog and sample profile, with categories, arrow keys, Enter,
@@ -53,7 +53,7 @@ status and reviews reload from Supabase. Scores are optional; zero is a real
 score. Saved optional platform, playtime and completion date reload from Supabase.
 Their migration is applied and production rollout is authorized; see
 [saved play details](docs/saved-play-details.md). Personal tags and ordered lists
-are implemented locally with production rollout pending; see
+use the applied Supabase schema; production rollout is authorized. See
 [tags and curated lists](docs/tags-and-curated-lists.md). Broadcast remains temporary.
 
 “Commit to Log” saves the signed-in owner's optional score, independent tier,

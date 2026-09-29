@@ -46,12 +46,14 @@ Chrome coarse-pointer emulation verified 44px control heights. Browser flows
 verified the tier menu placement, tag editing/Discard, mobile search, Escape
 return navigation and the desktop Ctrl+K shortcut. No browser runtime errors
 were reported. Typecheck, lint, production build, 17 input/data tests and demo
-seed reproducibility pass. The production build uses the isolated local API
-fixture because the prior tags/lists production migration is still pending.
+seed reproducibility pass. The initial build used an isolated local API
+fixture. After the tags/lists migration was applied, the production build also
+passed against the live Supabase schema.
 An additional production-preview server launch was rejected by automatic
 approval review as "blocked by policy". Browser checks used the development
 server; the optimized build compiled successfully but was not browser-tested.
 
 No real owner data, credentials, infrastructure or deployment settings changed.
-The responsive update introduces no dependencies or schema changes. Production
-rollout still depends on the previously prepared tags/lists migration.
+The responsive update introduces no dependencies or schema changes. The
+required tags/lists migration is applied, and the user authorized production
+rollout of both milestones from `main`.

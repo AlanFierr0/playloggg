@@ -66,11 +66,11 @@ Entries save optional platform, decimal playtime, and completion date
 independently of playback status. Preserve the four existing platform labels.
 The migration is applied; the user authorized production rollout from `main`. See
 docs/saved-play-details.md. Blank values mean unknown; zero hours remain real.
-Personal tags and curated lists are implemented locally; their migration and
-production rollout await approval. Lists follow profile visibility and preserve
+Personal tags and curated lists are implemented; their migration is applied and
+the user authorized production rollout from `main`. Lists follow profile visibility and preserve
 custom game order independently of ratings. Keep existing navigation, link to
 curated lists from the tier board, and use the editor's functional tag controls.
-See docs/tags-and-curated-lists.md for the prepared schema and verification.
+See docs/tags-and-curated-lists.md for the applied schema and verification.
 Do not enable public database writes without an
 agreed ownership/access design. Inspect Supabase before finalizing a schema;
 track approved changes in versioned migrations. Keep credentials in ignored
