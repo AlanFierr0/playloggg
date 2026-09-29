@@ -1,6 +1,6 @@
 # Backlog and saved playback status
 
-Status: implemented locally on `main`; deployment approval pending.
+Status: migration applied; production rollout from `main` authorized.
 The user approved adding backlog and playing games without rating them.
 
 ## Behavior
@@ -25,13 +25,13 @@ The user approved adding backlog and playing games without rating them.
 
 ## Schema and access
 
-Prepared migration: `20260929022859_optional_scores_and_playback_status.sql`.
+Applied migration: `20260929024025_optional_scores_and_playback_status.sql`.
 Drop score NOT NULL, retain its range constraint, add nullable checked `status`,
 and grant authenticated INSERT/UPDATE for that column. Existing owner-only RLS
 and all other grant restrictions remain. No anonymous writes, profile claiming,
 catalog writes, or rating deletion are added. Existing records retain scores
-and receive null status. Database types describe the prepared schema; regenerate
-from Supabase after applying it and align the filename with remote history.
+and receive null status. Database types were regenerated
+from Supabase after applying it; the filename matches remote migration history.
 
 ## Verification and rollout
 
@@ -48,8 +48,13 @@ tiers surviving score/status clearing, failed-save draft retention, discard to
 saved values, escaped review rendering and sign-out. The 390px mobile layout
 has no horizontal overflow; browser runtime checks report no errors.
 
-After deployment approval, apply the migration, regenerate types, rerun
+After applying the migration, both
 `supabase/tests/optional_scores_and_playback_status.sql` and
-`supabase/tests/owner_rating_access.sql`, and check security advisors. Push `main`
-to deploy the application. No additional Auth settings or environment variables
-are required. Verify a real owner save and reload in production.
+`supabase/tests/owner_rating_access.sql` passed against the deployed schema.
+Their test fixtures were rolled back. The user authorized pushing `main` to
+deploy the application. No additional Auth settings or environment variables
+are required. A real owner save and reload still needs production verification.
+
+The security advisor reported no database/RLS findings. It did report disabled
+[leaked-password protection](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection)
+in Auth. This rollout did not change Auth settings.

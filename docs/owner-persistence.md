@@ -24,10 +24,12 @@ signup in Supabase too. Authenticated data and responses are uncached; only the
 shared catalog and public sample retain the previous cache. No privileged key
 or owner-email configuration is sent to the browser.
 
-Commit saves score (0–100), independent tier (S/A/B/C/D/F or unassigned), and an
-optional plain-text review (20,000 characters maximum). Upsert keeps one current
+Commit saves optional score (0–100; null means unrated), independent tier
+(S/A/B/C/D/F or unassigned), optional playback status, and a plain-text review
+(20,000 characters maximum). See [Backlog and playback status](backlog-and-playback-status.md)
+for the applied follow-up migration. Upsert keeps one current
 rating per profile/game; an empty review clears it. Failed saves preserve drafts;
-discard restores saved values. Platform, playback status, hours, date, tags and
+discard restores saved values. Platform, hours, date, tags and
 broadcast remain explicitly temporary. Reviews render as escaped text.
 
 ## Rollout order

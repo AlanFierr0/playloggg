@@ -36,10 +36,11 @@ sample content and unavailable features from real persistence.
 ## Infrastructure
 A new Supabase project exists and the prototype is deployed through Vercel from
 GitHub `main`. The first backend seed uses clearly identified sample data.
-The read-only schema is applied: shared `profiles`, `games`, and `ratings` tables.
+The shared schema is applied: shared `profiles`, `games`, and `ratings` tables.
 Scores belong to ratings; tiers are independent and may be unassigned. One current
 rating/review exists per profile/game. Rank by score descending, then game slug.
-RLS exposes published profiles and their ratings; application roles have reads only.
+RLS exposes published profiles and their ratings for public reads. Authenticated
+owners can insert/update their own ratings; other application writes remain denied.
 The application reads published Supabase data on the server using a publishable key.
 Owner-only authentication and rating writes are implemented; the migration is
 applied and production rollout is complete. The confirmed owner account is linked
@@ -48,8 +49,8 @@ administratively assigned ownership. Keep the owner's email in ignored/server-on
 configuration. Personal profiles start empty and private; never transfer sample
 ratings into them. See docs/owner-persistence.md. Rankings, tiers and search use
 the selected profile's records.
-The next milestone allows unscored logged entries and saves playback status.
-It is implemented locally with a prepared migration, awaiting deployment approval.
+Logged entries may be unscored and can save playback status. The migration is
+applied; the user authorized the production rollout from `main`.
 Null scores mean unrated; zero is a real score. Rankings and averages use scored
 games only. Backlog and tiers may include logged unscored games; do not display
 unlogged catalog games as personal entries. See docs/backlog-and-playback-status.md.

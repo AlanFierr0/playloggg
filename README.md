@@ -41,22 +41,22 @@ Next.js ESLint configuration fail on ESLint 10's rule API.
 | `/tiers` | S–F tier board |
 | `/compare` | Sample profile comparison |
 | `/search` | Search overlay; Ctrl/Cmd+K also opens it |
-| `/log` | Rating/review editor; owner saves after Auth rollout |
+| `/log` | Owner rating/review and playback-status editor |
 | `/login` | Owner email magic-link sign-in |
 | `/game/[slug]` | Game detail using the existing detail-page layout |
 
 Search reads the public Supabase catalog and sample profile, with categories, arrow keys, Enter,
 Escape and modal focus trapping. “Switch Game” opens search in rating mode.
-Score and tier are independently editable. Saved owner scores, tiers and reviews
-reload from Supabase. Playback status is included in the next prepared milestone;
-platform, hours, date, shelves/tags and broadcast remain temporary controls.
+Score and tier are independently editable. Saved owner scores, tiers, playback
+status and reviews reload from Supabase. Scores are optional; zero is a real
+score. Platform, hours, date, shelves/tags and broadcast remain temporary controls.
 
-The prepared owner milestone lets “Commit to Log” save the signed-in owner's score,
-independent tier and review. It is disabled for the sample portfolio. Other draft
+“Commit to Log” saves the signed-in owner's optional score, independent tier,
+playback status and review. It is disabled for the sample portfolio. Other draft
 fields remain temporary and nothing is broadcast. Unsupported controls display
 a prototype notice. Counts, averages, rankings and tiers use the selected profile.
-The next prepared milestone saves playback status and supports unscored entries,
-including a real Backlog. Its migration/deployment are pending approval; see
+The Backlog uses saved entries, including unscored games. Its migration is
+applied and production rollout is authorized; see
 [Backlog and playback status](docs/backlog-and-playback-status.md).
 Comparison metrics, discovery content, public-figure profiles and editorial
 reviews remain illustrative content from Stitch. Curated lists remain unavailable.
@@ -99,13 +99,14 @@ state; fixtures are not silently substituted.
 Authenticated Supabase plugin inspection confirmed the project is healthy in
 `us-east-1` (North Virginia, within Americas). The approved `profiles`, `games` and
 `ratings` schema is now applied, with 32 sample games, one sample profile and
-32 ratings. Public reads and blocked writes have been verified. The security
-advisor reported no findings.
+32 sample ratings. Public reads and owner-only writes have been verified. See
+the Backlog rollout document for the current security-advisor result.
 
 The application reads public data with the publishable key. Search, profile
 rankings, calculated statistics and tiers share the loaded portfolio.
-Owner sign-in and persistent score/tier/review editing are implemented, and the
-ownership migration is applied. Account/Auth configuration is still required. See
+Owner sign-in and persistent entry editing are implemented. Ownership and
+optional-score/status migrations are applied; the user verified production
+magic-link sign-in after completing account/Auth configuration. See
 [owner persistence and rollout](docs/owner-persistence.md) for the access model,
 tested migration and required Auth settings. Other editing remains deferred.
 See [backend setup and verification](docs/read-only-backend-proposal.md) for the

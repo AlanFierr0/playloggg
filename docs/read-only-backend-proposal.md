@@ -155,7 +155,7 @@ That milestone is implemented under the separately documented
 production rollout is complete. The owner account/profile is provisioned and
 the user confirmed production magic-link sign-in. A first production save remains
 to be verified. The user approved unscored backlog/playing entries. Persistent
-playback status and a real Backlog are implemented locally with a prepared
-[migration and rollout](backlog-and-playback-status.md), awaiting deployment approval.
-Comparison and discovery remain illustrative screens; curated lists, playback
-status, community statistics and editorial reviews have no persistence yet.
+playback status and a real Backlog are implemented with an applied
+[migration and authorized rollout](backlog-and-playback-status.md).
+Comparison and discovery remain illustrative screens; curated lists, community
+statistics and editorial reviews have no persistence yet.
