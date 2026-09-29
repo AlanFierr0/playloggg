@@ -54,6 +54,10 @@ applied; the user authorized the production rollout from `main`.
 Null scores mean unrated; zero is a real score. Rankings and averages use scored
 games only. Backlog and tiers may include logged unscored games; do not display
 unlogged catalog games as personal entries. See docs/backlog-and-playback-status.md.
+The next milestone saves optional platform, decimal playtime, and completion date
+independently of playback status. Preserve the four existing platform labels.
+It is implemented locally; its migration/deployment await approval. See
+docs/saved-play-details.md. Blank values mean unknown; zero hours remain real.
 Do not enable public database writes without an
 agreed ownership/access design. Inspect Supabase before finalizing a schema;
 track approved changes in versioned migrations. Keep credentials in ignored

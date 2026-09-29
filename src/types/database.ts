@@ -115,6 +115,9 @@ export type Database = {
       }
       ratings: {
         Row: {
+          completed_on: string | null
+          hours_played: number | null
+          platform: string | null
           created_at: string
           game_id: number
           profile_id: number
@@ -125,6 +128,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          completed_on?: string | null
+          hours_played?: number | null
+          platform?: string | null
           created_at?: string
           game_id: number
           profile_id: number
@@ -135,6 +141,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          completed_on?: string | null
+          hours_played?: number | null
+          platform?: string | null
           created_at?: string
           game_id?: number
           profile_id?: number

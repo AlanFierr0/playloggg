@@ -27,16 +27,16 @@ export const getCatalog = cache(() => readPublic<GameRow>("games?select=slug,tit
 export const getPortfolio = cache(async (): Promise<Portfolio> => {
   const [owner, rows] = await Promise.all([getOwner(), getCatalog()]);
   let profile: Pick<ProfileRow, "id" | "handle" | "display_name" | "is_sample" | "is_public"> | undefined;
-  let ratings: Pick<RatingRow, "game_id" | "score" | "tier" | "review" | "status">[];
+  let ratings: Pick<RatingRow, "game_id" | "score" | "tier" | "review" | "status" | "platform" | "hours_played" | "completed_on">[];
   if (owner?.profile) {
     profile = owner.profile;
-    const { data, error } = await owner.supabase.from("ratings").select("game_id,score,tier,review,status").eq("profile_id", profile.id).limit(1000);
+    const { data, error } = await owner.supabase.from("ratings").select("game_id,score,tier,review,status,platform,hours_played,completed_on").eq("profile_id", profile.id).limit(1000);
     if (error) throw new Error("Your ratings could not be loaded.");
     ratings = data;
   } else {
     const [profiles, sampleRatings] = await Promise.all([
       readPublic<ProfileRow>("profiles?handle=eq.alexvance&select=id,handle,display_name,is_sample,is_public&limit=1"),
-      readPublic<RatingRow>("ratings?select=game_id,score,tier,review,status,profiles!inner(handle)&profiles.handle=eq.alexvance&limit=1000"),
+      readPublic<RatingRow>("ratings?select=game_id,score,tier,review,status,platform,hours_played,completed_on,profiles!inner(handle)&profiles.handle=eq.alexvance&limit=1000"),
     ]);
     profile = profiles[0];
     ratings = sampleRatings;
@@ -51,6 +51,8 @@ export const getPortfolio = cache(async (): Promise<Portfolio> => {
       score: rating?.score ?? null, tier: rating?.tier as Game["tier"] ?? null,
       review: rating?.review ?? null,
       status: rating?.status as Game["status"] ?? null, logged: Boolean(rating),
+      platform: rating?.platform as Game["platform"] ?? null,
+      hoursPlayed: rating?.hours_played ?? null, completedOn: rating?.completed_on ?? null,
       artwork: row.artwork_image_ids[0] ? image(row.artwork_image_ids[0], "screenshot_huge") : row.screenshot_image_ids[0] ? image(row.screenshot_image_ids[0], "screenshot_huge") : null,
       screenshots: row.screenshot_image_ids.map((id) => image(id, "screenshot_big")),
     };

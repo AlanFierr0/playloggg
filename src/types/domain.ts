@@ -1,4 +1,5 @@
 export type Tier = "S" | "A" | "B" | "C" | "D" | "F";
+export type PlayedPlatform = "pc" | "ps5" | "xbox_series_x" | "steam_deck";
 export type PlaybackStatus = "completed" | "playing" | "backlog" | "shelved";
 
 // Screen shape: shared game metadata plus the selected profile's sample rating.
@@ -11,6 +12,9 @@ export interface Game {
   review?: string | null;
   status?: PlaybackStatus | null;
   logged?: boolean;
+  platform?: PlayedPlatform | null;
+  hoursPlayed?: number | null;
+  completedOn?: string | null;
   keywords: string;
   releasedOn?: string | null;
   genres?: string[];
@@ -40,4 +44,7 @@ export interface Rating {
   tier: Tier | null;
   status: PlaybackStatus | null;
   review: string;
+  platform: PlayedPlatform | null;
+  hoursPlayed: number | null;
+  completedOn: string | null;
 }

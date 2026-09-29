@@ -49,7 +49,10 @@ Search reads the public Supabase catalog and sample profile, with categories, ar
 Escape and modal focus trapping. “Switch Game” opens search in rating mode.
 Score and tier are independently editable. Saved owner scores, tiers, playback
 status and reviews reload from Supabase. Scores are optional; zero is a real
-score. Platform, hours, date, shelves/tags and broadcast remain temporary controls.
+score. Saved platform, playtime and completion date are the next locally prepared
+milestone, awaiting migration/deployment approval; see
+[saved play details](docs/saved-play-details.md). Shelves/tags and broadcast
+remain temporary controls.
 
 “Commit to Log” saves the signed-in owner's optional score, independent tier,
 playback status and review. It is disabled for the sample portfolio. Other draft

@@ -14,7 +14,7 @@ export function averageScore(games: RatedGame[]): string {
 }
 
 export function loggedGames(games: Game[]): Game[] {
-  return games.filter((game) => game.logged ?? (game.score !== null || game.status != null || game.tier != null || Boolean(game.review)))
+  return games.filter((game) => game.logged ?? (game.score !== null || game.status != null || game.tier != null || Boolean(game.review) || game.platform != null || game.hoursPlayed != null || game.completedOn != null))
     .sort((a, b) => (b.score ?? -1) - (a.score ?? -1) || (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0));
 }
 

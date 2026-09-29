@@ -1,10 +1,11 @@
 "use client";
 import Link from "next/link";
 import { PreviewAction } from "@/components/preview-action";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { saveRating } from "@/app/actions/ratings";
-import type { Game, PlaybackStatus, Tier } from "@/types/domain";
+import { parseHours } from "@/lib/rating-input";
+import type { Game, PlaybackStatus, PlayedPlatform, Tier } from "@/types/domain";
 import { TierBadge, ScoreStars } from "@/components/rating-controls";
 
 export function ReviewScreen({ game }: { game: Game }) {
@@ -12,24 +13,29 @@ const { access } = usePortfolio();
 const canEdit = access?.canEdit ?? false;
 const [pending, startTransition] = useTransition();
 const [saveMessage, setSaveMessage] = useState("");
-const [saved, setSaved] = useState({ score: game.score, tier: game.tier ?? null, status: game.status ?? null, review: game.review ?? "" });
+const [saved, setSaved] = useState({ score: game.score, tier: game.tier ?? null, status: game.status ?? null, review: game.review ?? "", platform: game.platform ?? null, hoursPlayed: game.hoursPlayed ?? null, completedOn: game.completedOn ?? null });
 const isReference = game.slug === "metaphor-refantazio";
 const [score, setScore] = useState<number | null>(game.score);
 const [tier, setTier] = useState<Tier | null>(game.tier ?? null);
-const [platform, setPlatform] = useState(1);
+const [platform, setPlatform] = useState<PlayedPlatform | null>(game.platform ?? null);
 const [status, setStatus] = useState<PlaybackStatus | null>(game.status ?? null);
 const [broadcast, setBroadcast] = useState(true);
-const [hours, setHours] = useState(isReference ? "78.4 hrs" : "");
-const [date, setDate] = useState(isReference ? "October 28, 2024" : "");
+const [hours, setHours] = useState(game.hoursPlayed == null ? "" : String(game.hoursPlayed));
+const [date, setDate] = useState(game.completedOn ?? "");
+const dateInput = useRef<HTMLInputElement>(null);
 const [review, setReview] = useState(game.review ?? "");
-function resetDraft() { setScore(saved.score); setTier(saved.tier); setPlatform(1); setStatus(saved.status); setBroadcast(true); setHours(isReference ? "78.4 hrs" : ""); setDate(isReference ? "October 28, 2024" : ""); setReview(saved.review); setSaveMessage(""); }
+function resetDraft() { setScore(saved.score); setTier(saved.tier); setPlatform(saved.platform); setStatus(saved.status); setBroadcast(true); setHours(saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)); setDate(saved.completedOn ?? ""); setReview(saved.review); setSaveMessage(""); }
 function commit() {
-  const draft = { slug: game.slug, score, tier, status, review };
+  if (dateInput.current && !dateInput.current.validity.valid) { setSaveMessage("Complete a valid calendar date, or clear it. Your draft has been kept."); return; }
+  const hoursPlayed = parseHours(hours);
+  if (hoursPlayed === undefined) { setSaveMessage("Enter nonnegative decimal hours, or leave playtime blank. Your draft has been kept."); return; }
+  const completedOn = date || null;
+  const draft = { slug: game.slug, score, tier, status, review, platform, hoursPlayed, completedOn };
   startTransition(async () => {
     try {
       const result = await saveRating(draft);
       setSaveMessage(result.message);
-      if (result.ok) { setSaved({ score, tier, status, review: review.trim() }); setReview(review.trim()); }
+      if (result.ok) { setSaved({ score, tier, status, review: review.trim(), platform, hoursPlayed, completedOn }); setReview(review.trim()); setHours(hoursPlayed == null ? "" : String(hoursPlayed)); }
     } catch { setSaveMessage("Saving is unavailable right now. Your draft has been kept; please try again."); }
   });
 }
@@ -76,7 +82,7 @@ return (<><fieldset disabled={pending} className="contents">
 </div>
 
 <div className="p-6 sm:p-8 lg:p-10 flex flex-col gap-8">
-<p className="font-body-sm text-body-sm text-on-surface-variant">{canEdit ? "Commit saves your optional score, independent tier, playback status, and review. Platform, hours, date, tags, and broadcast remain temporary." : <>Sample profile preview. <Link href="/login" className="text-primary underline">Sign in</Link> to save entries to your own profile.</>}</p>
+<p className="font-body-sm text-body-sm text-on-surface-variant">{canEdit ? "Commit saves your optional score, independent tier, playback status, platform, playtime, completion date, and review. Tags and broadcast remain temporary." : <>Sample profile preview. <Link href="/login" className="text-primary underline">Sign in</Link> to save entries to your own profile.</>}</p>
 <p role="status" className="font-body-sm text-body-sm text-primary">{pending ? "Saving…" : saveMessage}</p>
 <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-start">
 <div className="relative group flex-shrink-0 w-32 sm:w-40 aspect-[3/4] rounded-lg overflow-hidden bg-surface-container shadow-xl">
@@ -113,19 +119,19 @@ return (<><fieldset disabled={pending} className="contents">
 <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{"Platform Played"}</span>
 
 <div className="flex flex-wrap gap-2" id="platform-selector">
-<button type="button" onClick={() => setPlatform(0)} aria-pressed={platform === 0} className={platform === 0 ? "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-primary/15 text-primary shadow-sm flex items-center gap-1.5" : "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface flex items-center gap-1.5"}>
+<button type="button" onClick={() => setPlatform(platform === "pc" ? null : "pc")} title="Select platform; click again to clear" aria-pressed={platform === "pc"} className={platform === "pc" ? "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-primary/15 text-primary shadow-sm flex items-center gap-1.5" : "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface flex items-center gap-1.5"}>
 <span className="material-symbols-outlined text-[14px]">{"desktop_windows"}</span>
 {" PC / Steam\n                "}</button>
 
-<button type="button" onClick={() => setPlatform(1)} aria-pressed={platform === 1} className={platform === 1 ? "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-primary/15 text-primary shadow-sm flex items-center gap-1.5" : "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface flex items-center gap-1.5"}>
+<button type="button" onClick={() => setPlatform(platform === "ps5" ? null : "ps5")} title="Select platform; click again to clear" aria-pressed={platform === "ps5"} className={platform === "ps5" ? "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-primary/15 text-primary shadow-sm flex items-center gap-1.5" : "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface flex items-center gap-1.5"}>
 <span className="material-symbols-outlined text-[14px]">{"sports_esports"}</span>
 {" PlayStation 5\n                "}</button>
 
-<button type="button" onClick={() => setPlatform(2)} aria-pressed={platform === 2} className={platform === 2 ? "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-primary/15 text-primary shadow-sm flex items-center gap-1.5" : "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface flex items-center gap-1.5"}>
+<button type="button" onClick={() => setPlatform(platform === "xbox_series_x" ? null : "xbox_series_x")} title="Select platform; click again to clear" aria-pressed={platform === "xbox_series_x"} className={platform === "xbox_series_x" ? "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-primary/15 text-primary shadow-sm flex items-center gap-1.5" : "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface flex items-center gap-1.5"}>
 <span className="material-symbols-outlined text-[14px]">{"stadia_controller"}</span>
 {" Xbox Series X\n                "}</button>
 
-<button type="button" onClick={() => setPlatform(3)} aria-pressed={platform === 3} className={platform === 3 ? "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-primary/15 text-primary shadow-sm flex items-center gap-1.5" : "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface flex items-center gap-1.5"}>
+<button type="button" onClick={() => setPlatform(platform === "steam_deck" ? null : "steam_deck")} title="Select platform; click again to clear" aria-pressed={platform === "steam_deck"} className={platform === "steam_deck" ? "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-primary/15 text-primary shadow-sm flex items-center gap-1.5" : "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface flex items-center gap-1.5"}>
 <span className="material-symbols-outlined text-[14px]">{"tablet"}</span>
 {" Steam Deck\n                "}</button>
 
@@ -221,7 +227,7 @@ return (<><fieldset disabled={pending} className="contents">
 <div className="relative flex items-center">
 <span className="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">{"schedule"}</span>
 
-<input className="w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="hours-input" placeholder="e.g. 45 hrs" type="text" value={hours} onChange={(event) => setHours(event.target.value)} />
+<input className="w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="hours-input" placeholder="Hours, e.g. 45.5" type="text" inputMode="decimal" value={hours} onChange={(event) => setHours(event.target.value)} />
 
 </div>
 
@@ -233,7 +239,7 @@ return (<><fieldset disabled={pending} className="contents">
 <div className="relative flex items-center">
 <span className="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">{"calendar_today"}</span>
 
-<input className="w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="date-input" placeholder="Log date" type="text" value={date} onChange={(event) => setDate(event.target.value)} />
+<input className="w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="date-input" ref={dateInput} type="date" min="0001-01-01" max="9999-12-31" value={date} onChange={(event) => setDate(event.target.value)} />
 
 </div>
 
