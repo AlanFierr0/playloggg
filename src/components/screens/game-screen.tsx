@@ -3,8 +3,10 @@ import Link from "next/link";
 import { PreviewAction } from "@/components/preview-action";
 import type { Game } from "@/types/domain";
 import { playbackLabels } from "@/lib/playback-status";
+import { CatalogGameScreen } from "@/components/screens/catalog-game-screen";
 
 export function GameScreen({ game, isSample = true }: { game: Game; isSample?: boolean }) {
+if (game.isSampleCatalog === false) return <CatalogGameScreen game={game} isSample={isSample} />;
 const isReference = game.slug === "elden-ring-shadow-of-the-erdtree";
 return (<>
 <div className="w-full  bg-surface"><div className="flex flex-col w-full">

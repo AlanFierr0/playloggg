@@ -1,0 +1,57 @@
+"use server";
+import { revalidatePath, updateTag } from "next/cache";
+import { getOwner } from "@/lib/owner";
+import { catalogQuery, igdbId, normalizeImport, normalizeMatch, searchBody, type IgdbMatch } from "@/lib/catalog-input";
+import { queryIgdb } from "@/lib/igdb";
+import { createCatalogAdmin } from "@/lib/supabase/catalog-admin";
+import type { Game } from "@/types/domain";
+
+type SearchResult = { ok: boolean; message: string; games: IgdbMatch[] };
+type ImportResult = { ok: boolean; message: string; game?: Game };
+const fields = "id,slug,title,cover_url,release_year,search_keywords";
+
+export async function searchIgdb(input: unknown): Promise<SearchResult> {
+  const query = catalogQuery(input);
+  if (!query) return { ok: false, message: "Enter a title of 2–100 characters.", games: [] };
+  try {
+    const owner = await getOwner();
+    if (!owner?.profile) return { ok: false, message: "Sign in to your owner account to search IGDB.", games: [] };
+    const records = await queryIgdb(searchBody(query));
+    const seen = new Set<number>();
+    const games = records.slice(0, 20).map(normalizeMatch).filter((game): game is IgdbMatch => Boolean(game && !seen.has(game.id) && seen.add(game.id)));
+    return { ok: true, games, message: games.length ? `${games.length} IGDB matches. Check the year, platforms and edition before importing.` : "No IGDB matches. Try another title." };
+  } catch {
+    return { ok: false, games: [], message: !process.env.IGDB_CLIENT_ID || !process.env.IGDB_CLIENT_SECRET ? "IGDB search is not configured yet." : "IGDB is unavailable or busy. Please wait a moment and retry." };
+  }
+}
+
+export async function importIgdb(input: unknown): Promise<ImportResult> {
+  if (!igdbId(input)) return { ok: false, message: "Choose a valid IGDB game." };
+  try {
+    const owner = await getOwner();
+    if (!owner?.profile) return { ok: false, message: "Sign in to your owner account before importing games." };
+    // Reuse the reviewed shared catalog even when provider import is unconfigured.
+    const { data: existing, error: readError } = await owner.supabase.from("games").select(fields).eq("igdb_id", input).maybeSingle();
+    if (readError) return { ok: false, message: "The catalog could not be checked. Please retry." };
+    let row = existing;
+    if (!row) {
+      const admin = createCatalogAdmin();
+      // The browser supplies only the numeric ID. Re-fetch all metadata from IGDB.
+      const records = await queryIgdb(`fields id,name,slug,first_release_date,cover.image_id,genres.name,platforms.name,artworks.image_id,screenshots.image_id,url,summary,game_type.type,involved_companies.company.name,involved_companies.developer,involved_companies.publisher; where id = ${input}; limit 1;`);
+      const game = records.length === 1 ? normalizeImport(records[0]) : null;
+      if (!game || game.igdb_id !== input) return { ok: false, message: "This IGDB game is unavailable. Nothing was imported." };
+      // Unique igdb_id + DO NOTHING handles concurrent imports without replacing
+      // existing metadata, slugs, sample flags, or personal ratings.
+      const { error } = await admin.from("games").upsert(game, { onConflict: "igdb_id", ignoreDuplicates: true });
+      if (error) return { ok: false, message: "The game could not be imported. Please retry." };
+      const { data, error: resultError } = await admin.from("games").select(fields).eq("igdb_id", input).single();
+      if (resultError || !data) return { ok: false, message: "The catalog could not be refreshed. Please retry; an existing import will be reused." };
+      row = data;
+    }
+    updateTag("game-catalog");
+    revalidatePath("/", "layout");
+    return { ok: true, message: existing ? "This game is already in the catalog." : "Game imported. Save a log entry or list separately.", game: { slug: row.slug, title: row.title, cover: row.cover_url, year: row.release_year, keywords: row.search_keywords, score: null, logged: false } };
+  } catch {
+    return { ok: false, message: !process.env.SUPABASE_SECRET_KEY ? "Catalog import is not configured yet." : !process.env.IGDB_CLIENT_ID || !process.env.IGDB_CLIENT_SECRET ? "IGDB search is not configured yet." : "Import is unavailable or busy. Please retry; existing games will be reused." };
+  }
+}

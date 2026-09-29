@@ -22,6 +22,13 @@ export interface Game {
   tier?: Tier | null;
   artwork?: string | null;
   screenshots?: string[];
+  isSampleCatalog?: boolean;
+  summary?: string | null;
+  developers?: string[];
+  publishers?: string[];
+  platforms?: string[];
+  kind?: string | null;
+  sourceUrl?: string | null;
 }
 
 export interface Profile {

@@ -87,9 +87,11 @@ change. The tier and comparison screenshots are failed exports containing error
 text; their original HTML remains available. Fonts retain their original external URLs. Game imagery uses reviewed IGDB
 covers/artwork, with verified box art for the two comparison-only classics.
 Profile portraits use initials until a real image is supplied; generated Stitch
-images are absent from the application. See [image sources](docs/image-sources.md). IGDB metadata is imported through separate
-administrative scripts; the app reads the stored catalog without contacting
-IGDB or receiving its credentials.
+images are absent from the application. See [image sources](docs/image-sources.md). Reviewed sample IGDB metadata is imported through separate administrative
+scripts. Owner-only in-app IGDB search/import is implemented locally; activation
+requires server credentials and production rollout. See the
+[IGDB catalog setup guide](docs/igdb-catalog-import.md). Credentials remain on
+the server; public browsing reads the stored catalog without provider requests.
 
 Original fixtures remain as design references. Connected screens use reconciled
 Supabase ratings and imported catalog metadata. Game cards use the catalog cover consistently across rankings, tiers, search,

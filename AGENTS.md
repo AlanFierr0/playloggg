@@ -73,6 +73,14 @@ the user authorized production rollout from `main`. Lists follow profile visibil
 custom game order independently of ratings. Keep existing navigation, link to
 curated lists from the tier board, and use the editor's functional tag controls.
 See docs/tags-and-curated-lists.md for the applied schema and verification.
+Owner-only IGDB catalog search/import is implemented locally, pending server
+credentials and production rollout. Search/import must reverify the allowlisted
+Auth user and its non-sample owned profile. Only server-fetched metadata may be
+inserted through the server-only catalog client; anonymous/authenticated games
+permissions remain read-only. Reuse existing IGDB IDs without overwriting games,
+sample flags, ratings or lists. New imports do not create personal entries. See
+docs/igdb-catalog-import.md. Never expose the Supabase secret key or provider
+credentials to Client Components.
 Do not enable public database writes without an
 agreed ownership/access design. Inspect Supabase before finalizing a schema;
 track approved changes in versioned migrations. Keep credentials in ignored
