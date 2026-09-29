@@ -42,6 +42,7 @@ export interface Profile {
 export interface Portfolio {
   games: Game[];
   profile: Profile;
+  publicBase?: string;
   lists?: CuratedListSummary[];
   access?: { signedIn: boolean; canEdit: boolean; canImportCatalog?: boolean };
 }

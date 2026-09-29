@@ -45,6 +45,9 @@ Next.js ESLint configuration fail on ESLint 10's rule API.
 | `/log` | Owner rating/review and playback-status editor |
 | `/login` | Steam sign-in and existing owner email sign-in |
 | `/signup` | Private profile name setup after first Steam sign-in |
+| `/settings` | Owner profile names and optional publishing |
+| `/u/[handle]`, `/u/[handle]/tiers`, `/u/[handle]/lists` | Shareable rankings, tiers and curated lists for published profiles |
+| `/u/[handle]/lists/[id]`, `/u/[handle]/game/[slug]` | Public list and saved-entry details |
 | `/lists`, `/lists/[id]` | Curated lists and custom game order |
 | `/game/[slug]` | Game detail using the existing detail-page layout |
 
@@ -105,6 +108,8 @@ artwork is not invented.
 Public Steam sign-in and private profile setup are deployed; real Steam sign-in
 verification is pending. Each person edits only their own entries and lists; IGDB import stays
 restricted to the original owner. See [Steam sign-in](docs/steam-sign-in.md).
+Optional profile publishing and shareable portfolio pages are implemented locally;
+production rollout is pending approval. See [public profiles](docs/public-profiles.md).
 
 The prototype is published from GitHub `main` at https://playloggg.vercel.app/.
 Use the Next.js preset on Vercel. The recommended package-manager setting is

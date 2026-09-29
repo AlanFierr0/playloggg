@@ -52,6 +52,15 @@ export const getPortfolio = cache(async (): Promise<Portfolio> => {
     ratings = sampleRatings;
   }
   if (!profile) throw new Error("The published sample profile could not be loaded.");
+  const games = portfolioGames(rows, ratings);
+  return { games, lists: await getLists(profile.id), profile: { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: profile.is_sample, isPublic: profile.is_public }, access: { signedIn: Boolean(owner), canEdit: Boolean(owner?.profile), canImportCatalog: Boolean(owner?.profile && isOwnerEmail(owner.user.email)) } };
+});
+
+export async function getPublicGame(slug: string) {
+  return (await getPortfolio()).games.find((game) => game.slug === slug);
+}
+
+export function portfolioGames(rows: GameRow[], ratings: Pick<RatingRow, "game_id" | "score" | "tier" | "review" | "status" | "platform" | "hours_played" | "completed_on" | "tags">[]): Game[] {
   const byGame = new Map(ratings.map((rating) => [rating.game_id, rating]));
   const games: Game[] = rows.map((row) => {
     const rating = byGame.get(row.id);
@@ -73,9 +82,5 @@ export const getPortfolio = cache(async (): Promise<Portfolio> => {
     };
   });
   games.sort((a, b) => (b.score ?? -1) - (a.score ?? -1) || a.slug.localeCompare(b.slug));
-  return { games, lists: await getLists(profile.id), profile: { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: profile.is_sample, isPublic: profile.is_public }, access: { signedIn: Boolean(owner), canEdit: Boolean(owner?.profile), canImportCatalog: Boolean(owner?.profile && isOwnerEmail(owner.user.email)) } };
-});
-
-export async function getPublicGame(slug: string) {
-  return (await getPortfolio()).games.find((game) => game.slug === slug);
+  return games;
 }

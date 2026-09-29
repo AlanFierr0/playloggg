@@ -15,6 +15,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       {owner ? <>
         <p className="text-on-surface-variant">{owner.profile ? `Signed in as ${owner.profile.display_name}.` : "You're signed in. Finish setting up your private profile."}</p>
         <Link href={owner.profile ? "/profile" : "/signup"} className="block text-primary">{owner.profile ? "Open profile" : "Create your profile"}</Link>
+        {owner.profile && <Link href="/settings" className="block text-primary">Profile settings and visibility</Link>}
         <form action={signOut}><button className="rounded bg-surface-container px-4 py-2 text-on-surface">Sign out</button></form>
       </> : <>
         <p className="font-body-md text-body-md text-on-surface-variant">Sign in with Steam to create your own private gaming portfolio and save ratings, tiers, reviews and lists.</p>

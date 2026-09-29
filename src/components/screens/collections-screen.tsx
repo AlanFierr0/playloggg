@@ -10,7 +10,7 @@ import { IgdbSearch } from "@/components/igdb-search";
 
 const button = "max-w-full break-words px-3 py-2 rounded bg-surface-container-high text-on-surface hover:bg-surface-bright disabled:opacity-40 font-label-md text-label-md";
 export function CollectionsScreen({ initial }: { initial?: CuratedList }) {
-  const { games, lists = [], profile, access } = usePortfolio();
+  const { games, lists = [], profile, access, publicBase } = usePortfolio();
   const router = useRouter();
   const [saved, setSaved] = useState(initial);
   const [name, setName] = useState(initial?.name ?? "");
@@ -48,13 +48,13 @@ export function CollectionsScreen({ initial }: { initial?: CuratedList }) {
     startTransition(async () => { try { const result = await deleteList(saved.id, saved.revision); setMessage(result.message); if (result.ok) { router.push("/lists"); router.refresh(); } } catch { setMessage("Deleting is unavailable. The list has been kept."); } });
   }
   return <div className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-10 space-y-8">
-    <header className="break-words space-y-3"><Link href="/tiers" className="text-primary font-label-md text-label-md">← Personal tier board</Link><h1 className="font-headline-xl text-headline-xl font-bold">Curated lists</h1><p className="text-on-surface-variant">{profile.displayName} · {profile.isPublic ? "Visible with this public profile" : "Private with this profile"}. Games follow your custom order.</p></header>
-    <nav aria-label="Curated lists" className="flex flex-wrap gap-3"><Link href="/lists" className={`inline-flex min-w-0 items-center ${button}`}>New list</Link>{lists.map((list) => <Link key={list.id} href={`/lists/${list.id}`} className={`inline-flex min-w-0 items-center ${button}`}><span className="min-w-0 break-words">{list.name}</span></Link>)}</nav>
+    <header className="break-words space-y-3"><Link href={publicBase ? `${publicBase}/tiers` : "/tiers"} className="text-primary font-label-md text-label-md">← Tier board</Link><h1 className="font-headline-xl text-headline-xl font-bold">Curated lists</h1><p className="text-on-surface-variant">{profile.displayName} · {profile.isPublic ? "Visible with this public profile" : "Private with this profile"}. Games follow this profile’s custom order.</p></header>
+    <nav aria-label="Curated lists" className="flex flex-wrap gap-3">{canEdit && <Link href="/lists" className={`inline-flex min-w-0 items-center ${button}`}>New list</Link>}{lists.map((list) => <Link key={list.id} href={`${publicBase ?? ""}/lists/${list.id}`} className={`inline-flex min-w-0 items-center ${button}`}><span className="min-w-0 break-words">{list.name}</span></Link>)}</nav>
     {!initial && !canEdit ? <p className="text-on-surface-variant">{lists.length ? "Choose a list to view its games." : "This profile has no curated lists."}</p> : <section className="bg-surface-container-low rounded-lg p-4 sm:p-6 space-y-6">
-      <h2 className="font-headline-lg text-headline-lg">{initial ? "Your selection" : "Create a list"}</h2>
+      <h2 className="font-headline-lg text-headline-lg">{initial ? publicBase ? "Selected games" : "Your selection" : "Create a list"}</h2>
       {canEdit ? <label className="block space-y-2"><span className="font-label-sm text-label-sm uppercase tracking-wider">List name</span><input id="list-name" className="block min-w-0 w-full rounded bg-surface-container p-3" value={name} maxLength={80} onChange={(event) => setName(event.target.value)} disabled={pending || importBusy} /></label> : <h3 className="font-headline-md text-headline-md break-words">{name}</h3>}
       <ol id="list-games" className="space-y-3">{slugs.map((slug, index) => { const game = bySlug.get(slug); if (!game) return null; return <li key={slug} data-game={slug} className="flex flex-wrap items-center gap-3 bg-surface-container rounded p-3">
-        <span className="text-primary font-label-md text-label-md">{index + 1}</span><img src={game.cover} alt="" className="w-10 h-14 object-cover rounded" /><Link href={`/game/${slug}`} className="flex-1 min-w-0 break-words">{game.title}</Link>
+        <span className="text-primary font-label-md text-label-md">{index + 1}</span><img src={game.cover} alt="" className="w-10 h-14 object-cover rounded" /><Link href={`${publicBase ?? ""}/game/${slug}`} className="flex-1 min-w-0 break-words">{game.title}</Link>
         {canEdit && <div className="flex gap-2 justify-end w-full sm:w-auto"><button className={button} aria-label={`Move ${game.title} up`} disabled={pending || importBusy || index === 0} onClick={() => move(index, -1)}>↑</button><button className={button} aria-label={`Move ${game.title} down`} disabled={pending || importBusy || index === slugs.length - 1} onClick={() => move(index, 1)}>↓</button><button className={button} aria-label={`Remove ${game.title}`} disabled={pending || importBusy} onClick={() => setSlugs(slugs.filter((item) => item !== slug))}>Remove</button></div>}
       </li>; })}</ol>
       {slugs.length === 0 && <p className="text-on-surface-variant">No games in this list yet.</p>}

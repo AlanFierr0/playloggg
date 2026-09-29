@@ -7,7 +7,7 @@ import type { Game } from "@/types/domain";
 import { PreviewAction } from "@/components/preview-action";
 
 export function TiersScreen() {
-const { games, profile } = usePortfolio();
+const { games, profile, publicBase } = usePortfolio();
 const logged = loggedGames(games);
 const groups = groupTiers(logged);
 return (<>
@@ -30,7 +30,7 @@ return (<>
 
 <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold">{"\n          Personal Tier Board\n        "}</h1>
 
-<Link href="/lists" className="text-primary font-label-md text-label-md hover:underline">Curated lists</Link>
+<Link href={publicBase ? `${publicBase}/lists` : "/lists"} className="text-primary font-label-md text-label-md hover:underline">Curated lists</Link>
 <p className="font-body-md text-body-md text-on-surface-variant">{logged.length + " logged titles grouped by independently selected tiers."}</p>
 
 </div>
@@ -92,7 +92,7 @@ return (<>
  <div className="flex items-center gap-1.5 pt-0 md:pt-6"><span className="font-label-sm text-label-sm text-on-surface-variant">{group.games.length} {group.games.length === 1 ? "game" : "games"}</span><span className={"w-1.5 h-1.5 rounded-full bg-current " + theme.color}></span></div>
  </div>
  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 flex-1 min-w-0">
- {group.games.map((game) => <TierCard key={game.slug} game={game} color={theme.color} />)}
+ {group.games.map((game) => <TierCard key={game.slug} game={game} color={theme.color} publicBase={publicBase} />)}
  {group.games.length === 0 && <p className="col-span-full py-8 font-body-sm text-body-sm text-on-surface-variant">No games assigned to this tier.</p>}
  </div>
  </section>;
@@ -102,16 +102,16 @@ return (<>
 <div className="flex items-center gap-3">
 <span className="material-symbols-outlined text-primary text-xl">{"auto_awesome"}</span>
 
-<span className="font-body-sm text-body-sm">{profile.isSample ? "Sample ratings. Sign in to save your own scores and independent tiers." : "Your saved ratings. Edit scores and independent tiers in the game log."}</span>
+<span className="font-body-sm text-body-sm">{publicBase ? "Published ratings and independent tiers from this profile." : profile.isSample ? "Sample ratings. Sign in to save your own scores and independent tiers." : "Your saved ratings. Edit scores and independent tiers in the game log."}</span>
 
 </div>
 
-<div className="flex flex-wrap items-center gap-3">
+{!publicBase && <div className="flex flex-wrap items-center gap-3">
 <PreviewAction className="px-3.5 py-1.5 rounded bg-surface-container hover:bg-surface-bright text-on-surface font-label-md text-label-md transition-colors" message={"Preview only: this feature is not connected yet."}>{"\n          Share Matrix\n        "}</PreviewAction>
 
 <PreviewAction className="px-3.5 py-1.5 rounded bg-primary-container text-on-primary-container hover:bg-primary font-label-md text-label-md font-semibold transition-colors" message={"Preview only: this feature is not connected yet."}>{"\n          Organize Tiers\n        "}</PreviewAction>
 
-</div>
+</div>}
 
 </div>
 
@@ -123,11 +123,11 @@ return (<>
 }
 
 const tierThemes: Record<string, { label: string; color: string }> = {"S":{"label":"Pinnacle","color":"text-primary"},"A":{"label":"Essential","color":"text-secondary"},"B":{"label":"Commendable","color":"text-tertiary"},"C":{"label":"Average","color":"text-outline"},"D":{"label":"Subpar","color":"text-on-surface-variant"},"F":{"label":"Unplayable","color":"text-error"},"Unassigned":{"label":"Unassigned","color":"text-on-surface-variant"}};
-function TierCard({ game, color }: { game: Game; color: string }) {
+function TierCard({ game, color, publicBase }: { game: Game; color: string; publicBase?: string }) {
 
  return <div className="group relative rounded-lg overflow-hidden bg-surface-container transition-transform duration-200 hover:-translate-y-1">
  <div className="aspect-[3/4] w-full overflow-hidden bg-surface-container-high"><img className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src={game.cover} alt={game.title} /></div>
  <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-surface/90 backdrop-blur-md shadow"><span className={"font-label-sm text-label-sm font-bold " + color}>{game.score ?? "—"}</span></div>
- <div className="p-2.5 flex flex-col bg-surface-container"><h2 className="font-headline-md text-body-md font-semibold text-on-surface truncate"><Link className="block truncate after:absolute after:inset-0" href={"/game/" + game.slug}>{game.title}</Link></h2><span className="font-label-sm text-label-sm text-on-surface-variant truncate">{game.year ?? "Release year unavailable"}</span></div>
+ <div className="p-2.5 flex flex-col bg-surface-container"><h2 className="font-headline-md text-body-md font-semibold text-on-surface truncate"><Link className="block truncate after:absolute after:inset-0" href={(publicBase ?? "") + "/game/" + game.slug}>{game.title}</Link></h2><span className="font-label-sm text-label-sm text-on-surface-variant truncate">{game.year ?? "Release year unavailable"}</span></div>
  </div>;
 }

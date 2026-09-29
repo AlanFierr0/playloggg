@@ -4,6 +4,24 @@ import { revalidatePath } from "next/cache";
 import { getAccount } from "@/lib/owner";
 import { validSteamId, profileNames } from "@/lib/steam-openid";
 import { createAuthAdmin } from "@/lib/supabase/auth-admin";
+import { profileSettings } from "@/lib/profile-settings";
+
+export async function updateProfile(_previous: { message: string }, form: FormData) {
+  const input = profileSettings(form);
+  if (!input) return { message: "Check your profile settings. Handles need 3–30 lowercase letters, numbers or underscores; display names need 1–80 characters." };
+  try {
+    const account = await getAccount();
+    if (!account?.profile) return { message: "Sign in to edit your own profile." };
+    // Public roles cannot update profiles. Whitelist fields and fix ownership from Auth.
+    const { data, error } = await createAuthAdmin().from("profiles")
+      .update({ ...input.values, updated_at: new Date().toISOString() })
+      .eq("id", account.profile.id).eq("owner_user_id", account.user.id).eq("is_sample", false)
+      .select("handle,is_public").maybeSingle();
+    if (error || !data) return { message: error?.code === "23505" ? "That handle is taken. Choose another one." : "Your profile could not be updated. Please retry." };
+    revalidatePath("/", "layout");
+    return { message: input.setting === "names" ? "Profile names saved." : data.is_public ? "Your profile and curated lists are now public." : "Your profile and curated lists are now private." };
+  } catch { return { message: "Saving is unavailable. Your draft has been kept; please retry." }; }
+}
 
 export async function createProfile(_previous: { message: string }, form: FormData) {
   const names = profileNames({ handle: form.get("handle"), displayName: form.get("displayName") });
