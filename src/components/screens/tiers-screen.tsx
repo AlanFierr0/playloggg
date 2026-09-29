@@ -1,15 +1,15 @@
 "use client";
 import Link from "next/link";
 import { usePortfolio } from "@/components/portfolio-provider";
-import { groupTiers, ratedGames } from "@/lib/portfolio-view";
+import { groupTiers, loggedGames } from "@/lib/portfolio-view";
 import type { Game } from "@/types/domain";
 import art from "@/data/portfolio-art.json";
 import { PreviewAction } from "@/components/preview-action";
 
 export function TiersScreen() {
 const { games, profile } = usePortfolio();
-const rated = ratedGames(games);
-const groups = groupTiers(rated);
+const logged = loggedGames(games);
+const groups = groupTiers(logged);
 return (<>
 <div className="w-full  bg-surface"><div className="flex flex-col w-full">
 
@@ -30,7 +30,7 @@ return (<>
 
 <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold">{"\n          Personal Tier Board\n        "}</h1>
 
-<p className="font-body-md text-body-md text-on-surface-variant">{rated.length + " rated titles grouped by independently selected tiers."}</p>
+<p className="font-body-md text-body-md text-on-surface-variant">{logged.length + " logged titles grouped by independently selected tiers."}</p>
 
 </div>
 

@@ -47,16 +47,19 @@ Next.js ESLint configuration fail on ESLint 10's rule API.
 
 Search reads the public Supabase catalog and sample profile, with categories, arrow keys, Enter,
 Escape and modal focus trapping. “Switch Game” opens search in rating mode.
-Score and tier are independently editable. Platform, playback status and review
-fields are temporary controls. Refresh restores the original defaults.
+Score and tier are independently editable. Saved owner scores, tiers and reviews
+reload from Supabase. Playback status is included in the next prepared milestone;
+platform, hours, date, shelves/tags and broadcast remain temporary controls.
 
 The prepared owner milestone lets “Commit to Log” save the signed-in owner's score,
 independent tier and review. It is disabled for the sample portfolio. Other draft
 fields remain temporary and nothing is broadcast. Unsupported controls display
 a prototype notice. Counts, averages, rankings and tiers use the selected profile.
+The next prepared milestone saves playback status and supports unscored entries,
+including a real Backlog. Its migration/deployment are pending approval; see
+[Backlog and playback status](docs/backlog-and-playback-status.md).
 Comparison metrics, discovery content, public-figure profiles and editorial
-reviews remain illustrative content from Stitch. Curated lists and backlog
-are unavailable until their persistence is agreed.
+reviews remain illustrative content from Stitch. Curated lists remain unavailable.
 
 ## Structure and design
 

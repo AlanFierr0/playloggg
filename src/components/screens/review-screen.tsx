@@ -4,7 +4,7 @@ import { PreviewAction } from "@/components/preview-action";
 import { useState, useTransition } from "react";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { saveRating } from "@/app/actions/ratings";
-import type { Game, Tier } from "@/types/domain";
+import type { Game, PlaybackStatus, Tier } from "@/types/domain";
 import { TierBadge, ScoreStars } from "@/components/rating-controls";
 
 export function ReviewScreen({ game }: { game: Game }) {
@@ -12,24 +12,24 @@ const { access } = usePortfolio();
 const canEdit = access?.canEdit ?? false;
 const [pending, startTransition] = useTransition();
 const [saveMessage, setSaveMessage] = useState("");
-const [saved, setSaved] = useState({ score: game.score ?? 0, tier: game.tier ?? null, review: game.review ?? "" });
+const [saved, setSaved] = useState({ score: game.score, tier: game.tier ?? null, status: game.status ?? null, review: game.review ?? "" });
 const isReference = game.slug === "metaphor-refantazio";
-const [score, setScore] = useState(game.score ?? 0);
+const [score, setScore] = useState<number | null>(game.score);
 const [tier, setTier] = useState<Tier | null>(game.tier ?? null);
 const [platform, setPlatform] = useState(1);
-const [status, setStatus] = useState(0);
+const [status, setStatus] = useState<PlaybackStatus | null>(game.status ?? null);
 const [broadcast, setBroadcast] = useState(true);
 const [hours, setHours] = useState(isReference ? "78.4 hrs" : "");
 const [date, setDate] = useState(isReference ? "October 28, 2024" : "");
 const [review, setReview] = useState(game.review ?? "");
-function resetDraft() { setScore(saved.score); setTier(saved.tier); setPlatform(1); setStatus(0); setBroadcast(true); setHours(isReference ? "78.4 hrs" : ""); setDate(isReference ? "October 28, 2024" : ""); setReview(saved.review); setSaveMessage(""); }
+function resetDraft() { setScore(saved.score); setTier(saved.tier); setPlatform(1); setStatus(saved.status); setBroadcast(true); setHours(isReference ? "78.4 hrs" : ""); setDate(isReference ? "October 28, 2024" : ""); setReview(saved.review); setSaveMessage(""); }
 function commit() {
-  const draft = { slug: game.slug, score, tier, review };
+  const draft = { slug: game.slug, score, tier, status, review };
   startTransition(async () => {
     try {
       const result = await saveRating(draft);
       setSaveMessage(result.message);
-      if (result.ok) { setSaved({ score, tier, review: review.trim() }); setReview(review.trim()); }
+      if (result.ok) { setSaved({ score, tier, status, review: review.trim() }); setReview(review.trim()); }
     } catch { setSaveMessage("Saving is unavailable right now. Your draft has been kept; please try again."); }
   });
 }
@@ -76,7 +76,7 @@ return (<><fieldset disabled={pending} className="contents">
 </div>
 
 <div className="p-6 sm:p-8 lg:p-10 flex flex-col gap-8">
-<p className="font-body-sm text-body-sm text-on-surface-variant">{canEdit ? "Commit saves your score, tier, and review. Platform, status, hours, date, tags, and broadcast remain temporary." : <>Sample profile preview. <Link href="/login" className="text-primary underline">Sign in</Link> to save ratings to your own profile.</>}</p>
+<p className="font-body-sm text-body-sm text-on-surface-variant">{canEdit ? "Commit saves your optional score, independent tier, playback status, and review. Platform, hours, date, tags, and broadcast remain temporary." : <>Sample profile preview. <Link href="/login" className="text-primary underline">Sign in</Link> to save entries to your own profile.</>}</p>
 <p role="status" className="font-body-sm text-body-sm text-primary">{pending ? "Saving…" : saveMessage}</p>
 <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-start">
 <div className="relative group flex-shrink-0 w-32 sm:w-40 aspect-[3/4] rounded-lg overflow-hidden bg-surface-container shadow-xl">
@@ -146,18 +146,19 @@ return (<><fieldset disabled={pending} className="contents">
 
 <div className="flex flex-col items-center justify-center gap-1 my-2">
 <div className="flex items-baseline gap-2">
-<span className="font-display-lg text-display-lg font-bold tracking-tighter text-primary font-headline-xl" id="score-display">{score}</span>
+<span className="font-display-lg text-display-lg font-bold tracking-tighter text-primary font-headline-xl" id="score-display">{score ?? "—"}</span>
 
 <span className="font-headline-md text-headline-md text-on-surface-variant/50">{"/100"}</span>
 
 </div>
 
-<ScoreStars score={score} />
+{score === null ? <p className="font-body-sm text-body-sm text-on-surface-variant">Unrated · a score is optional</p> : <ScoreStars score={score} />}
+<button id="toggle-score" type="button" className="mt-2 rounded bg-surface-container px-3 py-1.5 font-label-sm text-label-sm text-on-surface-variant hover:text-primary" onClick={() => setScore(score === null ? 0 : null)}>{score === null ? "Add score" : "Remove score"}</button>
 </div>
 
 <div className="w-full max-w-xl flex flex-col gap-3">
 <div className="relative w-full flex items-center">
-<input className="w-full h-2 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary focus:outline-none" id="score-slider" max="100" min="0" type="range" value={score} onChange={(event) => setScore(Number(event.target.value))} aria-label={"Numerical score from 0 to 100"} />
+<input className="w-full h-2 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary focus:outline-none disabled:opacity-30" id="score-slider" disabled={score === null} max="100" min="0" type="range" value={score ?? 0} onChange={(event) => setScore(Number(event.target.value))} aria-label={"Numerical score from 0 to 100"} />
 
 </div>
 
@@ -173,15 +174,15 @@ return (<><fieldset disabled={pending} className="contents">
 </div>
 
 <div className="flex items-center justify-center gap-2 mt-2">
-<button className="px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" onClick={() => setScore((previous) => Math.max(0, Math.min(100, previous + -5)))}>{"-5"}</button>
+<button className="px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" disabled={score === null} onClick={() => setScore((previous) => Math.max(0, Math.min(100, (previous ?? 0) + -5)))}>{"-5"}</button>
 
-<button className="px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" onClick={() => setScore((previous) => Math.max(0, Math.min(100, previous + -1)))}>{"-1"}</button>
+<button className="px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" disabled={score === null} onClick={() => setScore((previous) => Math.max(0, Math.min(100, (previous ?? 0) + -1)))}>{"-1"}</button>
 
 <div className="w-px h-4 bg-surface-container-highest mx-1"></div>
 
-<button className="px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" onClick={() => setScore((previous) => Math.max(0, Math.min(100, previous + 1)))}>{"+1"}</button>
+<button className="px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" disabled={score === null} onClick={() => setScore((previous) => Math.max(0, Math.min(100, (previous ?? 0) + 1)))}>{"+1"}</button>
 
-<button className="px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" onClick={() => setScore((previous) => Math.max(0, Math.min(100, previous + 5)))}>{"+5"}</button>
+<button className="px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" disabled={score === null} onClick={() => setScore((previous) => Math.max(0, Math.min(100, (previous ?? 0) + 5)))}>{"+5"}</button>
 
 </div>
 
@@ -191,22 +192,22 @@ return (<><fieldset disabled={pending} className="contents">
 
 <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
 <div className="md:col-span-12 flex flex-col gap-2.5">
-<label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{"Archival Playback Status"}</label>
+<div className="flex flex-wrap items-center justify-between gap-2"><span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{"Archival Playback Status"}</span><button id="clear-status" type="button" className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary" onClick={() => setStatus(null)}>{status === null ? "Not set" : "Clear status"}</button></div>
 
-<div className="grid grid-cols-2 sm:grid-cols-4 gap-2" id="status-group">
-<button type="button" onClick={() => setStatus(0)} aria-pressed={status === 0} className={status === 0 ? "status-btn px-4 py-2.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" : "status-btn px-4 py-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-all flex items-center justify-center gap-2"}>
+<div className="grid grid-cols-2 sm:grid-cols-4 gap-2" id="status-group" role="group" aria-label="Playback status">
+<button type="button" onClick={() => setStatus("completed")} aria-pressed={status === "completed"} className={status === "completed" ? "status-btn px-4 py-2.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" : "status-btn px-4 py-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-all flex items-center justify-center gap-2"}>
 <span className="material-symbols-outlined text-[16px]" style={{"fontVariationSettings": "'FILL' 1"}}>{"check_circle"}</span>
 {" Completed\n              "}</button>
 
-<button type="button" onClick={() => setStatus(1)} aria-pressed={status === 1} className={status === 1 ? "status-btn px-4 py-2.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" : "status-btn px-4 py-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-all flex items-center justify-center gap-2"}>
+<button type="button" onClick={() => setStatus("playing")} aria-pressed={status === "playing"} className={status === "playing" ? "status-btn px-4 py-2.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" : "status-btn px-4 py-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-all flex items-center justify-center gap-2"}>
 <span className="material-symbols-outlined text-[16px]">{"hourglass_top"}</span>
 {" In Progress\n              "}</button>
 
-<button type="button" onClick={() => setStatus(2)} aria-pressed={status === 2} className={status === 2 ? "status-btn px-4 py-2.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" : "status-btn px-4 py-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-all flex items-center justify-center gap-2"}>
+<button type="button" onClick={() => setStatus("backlog")} aria-pressed={status === "backlog"} className={status === "backlog" ? "status-btn px-4 py-2.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" : "status-btn px-4 py-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-all flex items-center justify-center gap-2"}>
 <span className="material-symbols-outlined text-[16px]">{"bookmark"}</span>
 {" Backlog\n              "}</button>
 
-<button type="button" onClick={() => setStatus(3)} aria-pressed={status === 3} className={status === 3 ? "status-btn px-4 py-2.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" : "status-btn px-4 py-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-all flex items-center justify-center gap-2"}>
+<button type="button" onClick={() => setStatus("shelved")} aria-pressed={status === "shelved"} className={status === "shelved" ? "status-btn px-4 py-2.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" : "status-btn px-4 py-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-all flex items-center justify-center gap-2"}>
 <span className="material-symbols-outlined text-[16px]">{"cancel"}</span>
 {" Shelved\n              "}</button>
 

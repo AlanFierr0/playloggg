@@ -13,15 +13,22 @@ export function averageScore(games: RatedGame[]): string {
   return games.length ? (games.reduce((sum, game) => sum + game.score, 0) / games.length).toFixed(1) : "—";
 }
 
-export function filterRankings(games: RatedGame[], filter: RankingFilter): RatedGame[] {
-  if (filter === "backlog") return []; // Playback status is not persisted yet.
-  if (filter === "masterpieces") return games.filter((game) => game.score >= 90);
-  if (filter === "recommended") return games.filter((game) => game.score >= 75);
-  return games;
+export function loggedGames(games: Game[]): Game[] {
+  return games.filter((game) => game.logged ?? (game.score !== null || game.status != null || game.tier != null || Boolean(game.review)))
+    .sort((a, b) => (b.score ?? -1) - (a.score ?? -1) || (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0));
 }
 
-export function groupTiers(games: RatedGame[]) {
-  return [...tiers, null].map((tier) => ({ tier, games: games.filter((game) => (game.tier ?? null) === tier) }));
+export function filterRankings(games: Game[], filter: RankingFilter): Game[] {
+  if (filter === "backlog") return loggedGames(games).filter((game) => game.status === "backlog");
+  const rated = ratedGames(games);
+  if (filter === "masterpieces") return rated.filter((game) => game.score >= 90);
+  if (filter === "recommended") return rated.filter((game) => game.score >= 75);
+  return rated;
+}
+
+export function groupTiers(games: Game[]) {
+  const logged = loggedGames(games);
+  return [...tiers, null].map((tier) => ({ tier, games: logged.filter((game) => (game.tier ?? null) === tier) }));
 }
 
 function matches(query: string, content: string): boolean {

@@ -119,7 +119,8 @@ export type Database = {
           game_id: number
           profile_id: number
           review: string | null
-          score: number
+          score: number | null
+          status: string | null
           tier: string | null
           updated_at: string
         }
@@ -128,7 +129,8 @@ export type Database = {
           game_id: number
           profile_id: number
           review?: string | null
-          score: number
+          score?: number | null
+          status?: string | null
           tier?: string | null
           updated_at?: string
         }
@@ -137,7 +139,8 @@ export type Database = {
           game_id?: number
           profile_id?: number
           review?: string | null
-          score?: number
+          score?: number | null
+          status?: string | null
           tier?: string | null
           updated_at?: string
         }

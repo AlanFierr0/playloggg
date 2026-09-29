@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PreviewAction } from "@/components/preview-action";
 import type { Game } from "@/types/domain";
+import { playbackLabels } from "@/lib/playback-status";
 
 export function GameScreen({ game, isSample = true }: { game: Game; isSample?: boolean }) {
 const isReference = game.slug === "elden-ring-shadow-of-the-erdtree";
@@ -137,6 +138,7 @@ return (<>
 </div>
 
 <p className="font-body-sm text-body-sm text-on-surface-variant">{game.score === null ? "This profile has not rated this game." : isSample ? "From the published sample profile. Community statistics and editorial reviews below are illustrative." : "Your saved score. Community statistics and editorial reviews below are illustrative."}</p>
+{game.status && <p className="mt-2 font-label-md text-label-md text-primary">{playbackLabels[game.status]}</p>}
 {!isSample && game.review && <div className="mt-4"><h2 className="font-label-md text-label-md text-primary">Your saved review</h2><p className="mt-2 whitespace-pre-wrap break-words font-body-md text-body-md text-on-surface">{game.review}</p></div>}
 
 <div className="flex items-center gap-3 mt-1 font-label-sm text-label-sm text-on-surface-variant/80">

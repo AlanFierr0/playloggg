@@ -5,13 +5,14 @@ import { usePortfolio } from "@/components/portfolio-provider";
 import { averageScore, filterRankings, ratedGames, type RankingFilter } from "@/lib/portfolio-view";
 import art from "@/data/portfolio-art.json";
 import type { Game } from "@/types/domain";
+import { playbackLabels } from "@/lib/playback-status";
 
 export function RankingsScreen() {
 const { games, profile } = usePortfolio();
 const [filter, setFilter] = useState<RankingFilter>("all");
 const [page, setPage] = useState(1);
 const rated = ratedGames(games);
-const filtered = filterRankings(rated, filter);
+const filtered = filterRankings(games, filter);
 const pageCount = Math.max(1, Math.ceil(filtered.length / 8));
 const currentPage = Math.min(page, pageCount);
 const offset = (currentPage - 1) * 8;
@@ -96,8 +97,8 @@ return (<>
 </div>
 
 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10" aria-live="polite">
-{filtered.length === 0 && <p className="col-span-full py-10 font-body-md text-body-md text-on-surface-variant">{filter === "backlog" ? "Backlog is not available yet; playback status is not saved." : "No ratings match this filter."}</p>}
-{visible.map((game) => <RankingCard key={game.slug} game={game} rank={ranksBySlug.get(game.slug)!} />)}
+{filtered.length === 0 && <p className="col-span-full py-10 font-body-md text-body-md text-on-surface-variant">{filter === "backlog" ? "Your backlog is empty. Choose Backlog in the game log and save; a score is optional." : "No ratings match this filter."}</p>}
+{visible.map((game) => <RankingCard key={game.slug} game={game} rank={ranksBySlug.get(game.slug)} />)}
 </div>
 
 <footer className="pt-16 pb-6 flex items-center justify-between text-on-surface-variant">
@@ -116,16 +117,16 @@ return (<>
 </>);
 }
 
-function RankingCard({ game, rank }: { game: Game & { score: number }; rank: number }) {
+function RankingCard({ game, rank }: { game: Game; rank?: number }) {
 const image = (art.ranking as Record<string, { cover: string; alt: string }>)[game.slug];
 return <article className="relative group flex flex-col cursor-pointer transition-transform duration-300" data-rank={rank} data-score={game.score}>
 <div className="relative w-full aspect-[3/4] rounded bg-surface-container-low overflow-hidden shadow-xl">
 <img className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" src={image?.cover ?? game.cover} alt={image?.alt ?? game.title} />
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-surface-container-lowest/10 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
-<div className="absolute top-3 left-3 flex items-center"><span className="font-label-md text-label-md font-bold px-2 py-1 rounded bg-surface-container-lowest/80 text-on-surface backdrop-blur-md shadow-md">#{String(rank).padStart(2, "0")}</span></div>
-<div className="absolute top-3 right-3 flex items-center"><span className="font-label-md text-label-md font-bold px-2.5 py-1 rounded bg-surface-container-lowest/90 text-primary backdrop-blur-md shadow-md">{game.score}</span></div>
-<div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-surface-container-lowest/90 backdrop-blur-md flex items-center justify-between"><span className="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">{game.tier ? "Tier " + game.tier : "Unassigned tier"}</span><div className="flex items-center gap-1 text-primary"><span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">star</span><span className="font-label-sm text-label-sm font-bold">{(game.score / 20).toFixed(1)}</span></div></div>
+<div className="absolute top-3 left-3 flex items-center"><span className="font-label-md text-label-md font-bold px-2 py-1 rounded bg-surface-container-lowest/80 text-on-surface backdrop-blur-md shadow-md">{rank ? "#" + String(rank).padStart(2, "0") : "Backlog"}</span></div>
+<div className="absolute top-3 right-3 flex items-center"><span className="font-label-md text-label-md font-bold px-2.5 py-1 rounded bg-surface-container-lowest/90 text-primary backdrop-blur-md shadow-md">{game.score ?? "—"}</span></div>
+<div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-surface-container-lowest/90 backdrop-blur-md flex items-center justify-between"><span className="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">{game.tier ? "Tier " + game.tier : "Unassigned tier"}</span><div className="flex items-center gap-1 text-primary">{game.score !== null && <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">star</span>}<span className="font-label-sm text-label-sm font-bold">{game.score === null ? "Unrated" : (game.score / 20).toFixed(1)}</span></div></div>
 </div>
-<div className="mt-3.5 space-y-1"><div className="flex items-baseline justify-between gap-2"><h2 className="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight truncate group-hover:text-primary transition-colors"><Link className="after:absolute after:inset-0" href={"/game/" + game.slug}>{game.title}</Link></h2><span className="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">{game.year ?? "—"}</span></div><p className="font-body-sm text-body-sm text-on-surface-variant truncate">{game.genres?.join(" · ") || "Profile rating"}</p></div>
+<div className="mt-3.5 space-y-1"><div className="flex items-baseline justify-between gap-2"><h2 className="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight truncate group-hover:text-primary transition-colors"><Link className="after:absolute after:inset-0" href={"/game/" + game.slug}>{game.title}</Link></h2><span className="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">{game.year ?? "—"}</span></div><p className="font-body-sm text-body-sm text-on-surface-variant truncate">{game.status ? playbackLabels[game.status] : game.genres?.join(" · ") || "Profile rating"}</p></div>
 </article>;
 }

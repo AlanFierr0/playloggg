@@ -9,6 +9,8 @@ export interface Game {
   year: number | null;
   score: number | null;
   review?: string | null;
+  status?: PlaybackStatus | null;
+  logged?: boolean;
   keywords: string;
   releasedOn?: string | null;
   genres?: string[];
@@ -34,7 +36,8 @@ export interface Portfolio {
 export interface Rating {
   profileId: Profile["id"];
   gameSlug: Game["slug"];
-  score: number;
-  tier: Tier;
+  score: number | null;
+  tier: Tier | null;
+  status: PlaybackStatus | null;
   review: string;
 }

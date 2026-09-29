@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { averageScore, filterRankings, getSearchMatches, groupTiers, ratedGames } from "../src/lib/portfolio-view.ts";
+import { averageScore, filterRankings, getSearchMatches, groupTiers, loggedGames, ratedGames } from "../src/lib/portfolio-view.ts";
 
 const game = (slug, score, tier = null) => ({ slug, title: slug, score, tier, cover: "/cover.jpg", year: null, keywords: "" });
 
@@ -45,4 +45,24 @@ test("search uses the supplied catalog and profile, including unrated titles", (
   assert.equal(getSearchMatches("kojima", portfolio).profiles.length, 0);
   assert.equal(getSearchMatches("Cyberpunk", portfolio).titles.length, 0);
   assert.equal(getSearchMatches("", portfolio).listMatches, false);
+});
+test("real backlog includes unrated entries and responds to status changes without altering scored rankings", () => {
+  const backlog = { ...game("next-game", null), status: "backlog", logged: true };
+  const playing = { ...game("playing-game", null), status: "playing", logged: true };
+  const zero = { ...game("zero", 0), status: "completed", logged: true };
+  const catalog = [backlog, playing, zero, { ...game("catalog-only", null), logged: false }];
+  assert.deepEqual(filterRankings(catalog, "backlog").map(g => g.slug), ["next-game"]);
+  assert.deepEqual(filterRankings(catalog, "all").map(g => g.slug), ["zero"]);
+  assert.equal(averageScore(ratedGames(catalog)), "0.0");
+  assert.equal(loggedGames(catalog).length, 3);
+  assert.equal(filterRankings([{ ...backlog, status: "playing" }], "backlog").length, 0);
+});
+test("tier board includes logged unrated games without pulling unlogged catalog into Unassigned", () => {
+  const logged = { ...game("unrated-b", null, "B"), logged: true, status: "playing" };
+  const backlog = { ...game("unassigned-backlog", null), logged: true, status: "backlog" };
+  const groups = groupTiers([logged, backlog, { ...game("catalog-only", null), logged: false }]);
+  assert.equal(groups.find(g => g.tier === "B").games[0].slug, "unrated-b");
+  assert.deepEqual(groups.find(g => g.tier === null).games.map(g => g.slug), ["unassigned-backlog"]);
+  assert.equal(groups.reduce((total,g) => total + g.games.length, 0), 2);
+  assert.equal(averageScore(ratedGames([logged,backlog])), "—");
 });

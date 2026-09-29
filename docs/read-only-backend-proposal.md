@@ -154,7 +154,8 @@ That milestone is implemented under the separately documented
 [ownership/access design](owner-persistence.md). The migration is applied and
 production rollout is complete. The owner account/profile is provisioned and
 the user confirmed production magic-link sign-in. A first production save remains
-to be verified. The proposed next milestone is persistent playback status and
-a real Backlog; whether entries can be unrated is awaiting the user's decision.
+to be verified. The user approved unscored backlog/playing entries. Persistent
+playback status and a real Backlog are implemented locally with a prepared
+[migration and rollout](backlog-and-playback-status.md), awaiting deployment approval.
 Comparison and discovery remain illustrative screens; curated lists, playback
 status, community statistics and editorial reviews have no persistence yet.

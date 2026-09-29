@@ -48,6 +48,11 @@ administratively assigned ownership. Keep the owner's email in ignored/server-on
 configuration. Personal profiles start empty and private; never transfer sample
 ratings into them. See docs/owner-persistence.md. Rankings, tiers and search use
 the selected profile's records.
+The next milestone allows unscored logged entries and saves playback status.
+It is implemented locally with a prepared migration, awaiting deployment approval.
+Null scores mean unrated; zero is a real score. Rankings and averages use scored
+games only. Backlog and tiers may include logged unscored games; do not display
+unlogged catalog games as personal entries. See docs/backlog-and-playback-status.md.
 Do not enable public database writes without an
 agreed ownership/access design. Inspect Supabase before finalizing a schema;
 track approved changes in versioned migrations. Keep credentials in ignored
