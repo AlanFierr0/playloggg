@@ -1,6 +1,7 @@
 # Owner sign-in and saved ratings
 
-Status: implemented and checked locally on `main`; production rollout pending.
+Status: implemented and checked on `main`; database migration applied and
+production rollout authorized. Owner account and Auth/environment setup remain.
 The user approved owner-only access, email magic links, and handle `sakapatate`
 with display name `Sakapatate`. The actual email is private server configuration.
 The personal profile starts empty and private, separate from Alex Vance's samples.
@@ -29,9 +30,8 @@ broadcast remain explicitly temporary. Reviews render as escaped text.
 
 ## Rollout order
 
-1. After deployment approval, apply migration
-   `20260929014836_owner_rating_access.sql` and regenerate database types.
-   The current type addition describes this prepared migration.
+1. Migration `20260929021103_owner_rating_access.sql` is applied. Its filename
+   matches the remote migration history; database types were regenerated.
 2. Create the confirmed owner account administratively in Supabase Auth.
    Keep public signups disabled. Create a private, empty `sakapatate` profile
    linked to this account's UUID. Exact provisioning SQL is prepared locally in
@@ -50,7 +50,7 @@ broadcast remain explicitly temporary. Reviews render as escaped text.
 4. Set Vercel Production `PLAYLOGG_OWNER_EMAIL` to the chosen email, and
    `PLAYLOGG_SITE_URL=https://playloggg.vercel.app`. Neither variable uses a
    public prefix. Existing public Supabase configuration remains required.
-5. Push this milestone to `main` after approval and verify real email delivery,
+5. The user approved pushing this milestone to `main`. Verify real email delivery,
    owner sign-in, saving, refresh and sign-out in production.
 
 The connector has no tools for creating Auth users or changing Auth settings;
@@ -63,7 +63,8 @@ pass. A rolled-back transaction against the actual project tested the migration
 and temporary owner fixtures: private reads, insert and upsert passed. Cross-owner
 reads/writes, ownership reassignment, sample writes, anonymous writes, catalog
 edits, profile claiming and deletion were denied. No test rows or schema changes
-remain. `supabase/tests/owner_rating_access.sql` repeats these checks after rollout.
+remain. After applying the migration, `supabase/tests/owner_rating_access.sql`
+passed again against the deployed schema, and security advisors returned no findings.
 
 An isolated local Auth/Data API verified owner-only magic-link requests, anonymous
 save denial, score/tier/review saves, reload persistence, calculated profile

@@ -101,8 +101,8 @@ advisor reported no findings.
 
 The application reads public data with the publishable key. Search, profile
 rankings, calculated statistics and tiers share the loaded portfolio.
-Owner sign-in and persistent score/tier/review editing are implemented locally,
-with deployment and account setup pending. See
+Owner sign-in and persistent score/tier/review editing are implemented, and the
+ownership migration is applied. Account/Auth configuration is still required. See
 [owner persistence and rollout](docs/owner-persistence.md) for the access model,
 tested migration and required Auth settings. Other editing remains deferred.
 See [backend setup and verification](docs/read-only-backend-proposal.md) for the

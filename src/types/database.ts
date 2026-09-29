@@ -79,7 +79,6 @@ export type Database = {
       }
       profiles: {
         Row: {
-          owner_user_id: string | null
           avatar_url: string | null
           created_at: string
           display_name: string
@@ -87,10 +86,10 @@ export type Database = {
           id: number
           is_public: boolean
           is_sample: boolean
+          owner_user_id: string | null
           updated_at: string
         }
         Insert: {
-          owner_user_id?: string | null
           avatar_url?: string | null
           created_at?: string
           display_name: string
@@ -98,10 +97,10 @@ export type Database = {
           id?: never
           is_public?: boolean
           is_sample?: boolean
+          owner_user_id?: string | null
           updated_at?: string
         }
         Update: {
-          owner_user_id?: string | null
           avatar_url?: string | null
           created_at?: string
           display_name?: string
@@ -109,6 +108,7 @@ export type Database = {
           id?: never
           is_public?: boolean
           is_sample?: boolean
+          owner_user_id?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -296,3 +296,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
