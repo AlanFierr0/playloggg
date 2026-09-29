@@ -17,7 +17,7 @@ export function PreviewNoticeProvider({ children }: { children: ReactNode }) {
       {message && (
         <div role="status" className="fixed bottom-5 left-5 right-5 z-[100] mx-auto flex max-w-xl items-start gap-3 rounded-lg bg-surface-container-high px-5 py-4 text-body-md text-on-surface shadow-2xl ring-1 ring-outline-variant">
           <span className="material-symbols-outlined text-primary" aria-hidden="true">info</span>
-          <span className="flex-1">{message}</span>
+          <span className="min-w-0 flex-1 break-words">{message}</span>
           <button type="button" aria-label="Dismiss notice" onClick={() => setMessage("")} className="text-on-surface-variant hover:text-primary">
             <span className="material-symbols-outlined" aria-hidden="true">close</span>
           </button>

@@ -23,23 +23,23 @@ const ranksBySlug = new Map(rated.map((game, index) => [game.slug, index + 1]));
 return (<>
 <div className="w-full  bg-surface"><div className="flex flex-col w-full">
 
-<div className="relative w-full max-w-7xl mx-auto px-6 lg:px-12 py-10 overflow-x-clip">
+<div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-10 overflow-x-clip">
 <div className="absolute -top-12 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
 <div className="absolute top-48 right-10 w-80 h-80 bg-secondary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
 <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-12">
-<div className="flex items-center gap-6">
-<div className="relative group">
-<ProfileAvatar className="w-20 h-20 md:w-24 md:h-24 rounded object-cover shadow-2xl transition-transform duration-500 group-hover:scale-105" name={profile.displayName} />
+<div className="flex min-w-0 items-center gap-4 sm:gap-6">
+<div className="relative shrink-0 group">
+<ProfileAvatar className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded object-cover shadow-2xl transition-transform duration-500 group-hover:scale-105" name={profile.displayName} />
 
 <span className="absolute bottom-1 right-1 w-3 h-3 bg-secondary rounded-full ring-2 ring-surface shadow-sm"></span>
 
 </div>
 
-<div className="space-y-1.5">
-<div className="flex items-center gap-3">
-<h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-semibold">{profile.displayName}</h1>
+<div className="min-w-0 space-y-1.5">
+<div className="flex flex-wrap items-center gap-2 sm:gap-3">
+<h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-semibold break-words">{profile.displayName}</h1>
 
 <span className="font-label-sm text-label-sm uppercase tracking-wider px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-medium">{profile.isSample ? "Sample profile" : profile.isPublic ? "Public profile" : "Private profile"}</span>
 
@@ -58,7 +58,7 @@ return (<>
 
 </div>
 
-<nav aria-label="Ranking Categories" className="flex items-center gap-6 md:gap-8 overflow-x-auto pb-1">
+<nav aria-label="Ranking Categories" className="flex flex-wrap items-center gap-x-4 gap-y-2 md:gap-x-8 pb-1">
 <button data-filter="all" onClick={() => { setPage(1); setFilter("all"); }} aria-pressed={filter === "all"} className={filter === "all" ? "filter-btn active font-body-md text-body-md text-on-surface font-semibold tracking-tight transition-colors relative py-1" : "filter-btn font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors relative py-1"}>{"\n          All\n          "}<span className={"filter-indicator absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" + (filter === "all" ? "" : " hidden")}></span>
 
 </button>
@@ -78,9 +78,9 @@ return (<>
 </nav>
 
 </header>
-{tags.length > 0 && <label className="flex items-center gap-3 mb-6 font-label-md text-label-md">Filter by tag<select id="tag-filter" className="bg-surface-container rounded p-2 max-w-full" value={tag} onChange={(event) => { setTag(event.target.value); setPage(1); }}><option value="">All tags</option>{tags.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>}
+{tags.length > 0 && <label className="flex flex-wrap items-center gap-3 mb-6 font-label-md text-label-md">Filter by tag<select id="tag-filter" className="min-w-0 bg-surface-container rounded p-2 max-w-full" value={tag} onChange={(event) => { setTag(event.target.value); setPage(1); }}><option value="">All tags</option>{tags.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>}
 
-<div className="w-full flex items-center justify-between mb-8">
+<div className="w-full flex flex-wrap gap-3 items-center justify-between mb-8">
 <div className="flex items-center gap-3">
 <span className="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant font-medium">{"Shelf / Personal Canon"}</span>
 
@@ -99,7 +99,7 @@ return (<>
 
 </div>
 
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10" aria-live="polite">
+<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-3 sm:gap-x-6 gap-y-6 sm:gap-y-10" aria-live="polite">
 {filtered.length === 0 && <p className="col-span-full py-10 font-body-md text-body-md text-on-surface-variant">{filter === "backlog" ? "Your backlog is empty. Choose Backlog in the game log and save; a score is optional." : "No ratings match this filter."}</p>}
 {visible.map((game) => <RankingCard key={game.slug} game={game} rank={ranksBySlug.get(game.slug)} />)}
 </div>

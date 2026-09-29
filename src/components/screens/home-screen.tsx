@@ -9,24 +9,24 @@ return (<>
 <div className="relative w-full overflow-hidden">
 <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-primary/5 rounded-full blur-[140px] pointer-events-none"></div>
 
-<section className="max-w-7xl mx-auto px-6 lg:px-12 pt-8 pb-20">
-<div className="relative rounded-xl overflow-hidden bg-surface-container-lowest shadow-2xl group">
+<section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pt-6 sm:pt-8 pb-8 sm:pb-20">
+<div className="relative flex min-h-[560px] sm:min-h-[600px] flex-col justify-end rounded-xl overflow-hidden bg-surface-container-lowest shadow-2xl group">
 
-<div className="bg-cover bg-center h-[520px] sm:h-[600px] w-full transition-transform duration-700 ease-out group-hover:scale-[1.015]" role="img" aria-label="Elden Ring: Shadow of the Erdtree artwork" style={{ backgroundImage: `url(${gameImages("elden-ring-shadow-of-the-erdtree").artwork})` }}>
+<div className="absolute inset-0 bg-cover bg-center h-full w-full transition-transform duration-700 ease-out group-hover:scale-[1.015]" role="img" aria-label="Elden Ring: Shadow of the Erdtree artwork" style={{ backgroundImage: `url(${gameImages("elden-ring-shadow-of-the-erdtree").artwork})` }}>
 </div>
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/60 to-transparent"></div>
 
 <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/40 to-transparent"></div>
 
-<div className="absolute top-8 left-8 sm:left-12 flex items-center gap-3">
+<div className="relative z-10 mx-5 mt-5 sm:mx-12 sm:mt-8 flex flex-wrap items-center gap-3">
 <span className="px-2.5 py-1 rounded bg-surface-container-high/80 backdrop-blur-md font-label-sm text-label-sm text-primary uppercase tracking-widest">{"Editor's Spotlight"}</span>
 
 <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{"Vol. XIV • Curated Feature"}</span>
 
 </div>
 
-<div className="absolute bottom-0 left-0 right-0 p-8 sm:p-12 max-w-3xl flex flex-col gap-5">
+<div className="relative z-10 mt-auto p-5 sm:p-12 max-w-3xl flex flex-col gap-5">
 <div className="flex flex-wrap items-center gap-3">
 <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">{"FromSoftware"}</span>
 
@@ -57,7 +57,7 @@ return (<>
 
 <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl font-light leading-relaxed">{"\n            “An extraordinary elegy of ruin and majesty, where Miyazaki's subterranean architecture redefines the melancholic beauty of the open world.”\n          "}</p>
 
-<div className="flex items-center gap-4 pt-2">
+<div className="flex flex-wrap items-center gap-2 sm:gap-4 pt-2">
 <Link className="inline-flex items-center gap-2 px-6 py-3 rounded bg-primary text-on-primary hover:bg-primary-fixed-dim transition-all duration-200 font-label-md text-label-md uppercase tracking-wider font-semibold shadow-lg shadow-primary/10 hover:shadow-primary/20" data-path="game/elden-ring-shadow-of-the-erdtree" href="/game/elden-ring-shadow-of-the-erdtree">
 <span className="">{"View Title"}</span>
 
@@ -85,8 +85,8 @@ return (<>
 
 </section>
 
-<section className="max-w-7xl mx-auto px-6 lg:px-12 py-12">
-<div className="flex items-end justify-between mb-8">
+<section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-12">
+<div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
 <div>
 <span className="font-label-sm text-label-sm text-primary uppercase tracking-widest block mb-1">{"Archival Selection"}</span>
 
@@ -103,7 +103,7 @@ return (<>
 
 </div>
 
-<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5">
+<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-5">
 
 <Link className="group flex flex-col" data-path="game/baldurs-gate-3" href="/game/baldurs-gate-3">
 <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl">
@@ -219,14 +219,14 @@ return (<>
 
 </section>
 
-<section className="max-w-7xl mx-auto px-6 lg:px-12 py-12">
+<section className="hidden sm:block max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-12">
 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
 </div>
 
 </section>
 
-<section className="max-w-7xl mx-auto px-6 lg:px-12 pt-8 pb-16">
+<section className="hidden sm:block max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pt-8 pb-16">
 </section>
 
 </div>

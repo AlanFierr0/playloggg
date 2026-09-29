@@ -26,7 +26,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body className="bg-surface font-body-md text-on-surface antialiased">
         <PortfolioProvider portfolio={portfolio}><PreviewNoticeProvider>
           <SiteHeader />
-          <main className="w-full pt-16 bg-surface">{children}</main>
+          <main id="main-content" className="w-full min-w-0 pt-[var(--site-header-height)] bg-surface">{children}</main>
           <SiteFooter />
         </PreviewNoticeProvider></PortfolioProvider>
       </body>

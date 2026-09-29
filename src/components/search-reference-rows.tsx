@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { Game, Profile } from "@/types/domain";
 
 export function ReferenceGame0({ game, query, mode }: { game: Game; query: string; mode: "browse" | "log" }) { return (<Link data-search-result className="group relative flex items-center justify-between p-2.5 rounded-lg bg-surface-container-high shadow-md transition-all" href={mode === "log" ? "/log?game=" + game.slug : "/game/" + game.slug}>
-<div className="flex items-center gap-3.5 min-w-0">
+<div className="flex flex-1 items-center gap-2 sm:gap-3.5 min-w-0">
 <div className="relative w-12 h-16 rounded overflow-hidden flex-shrink-0 bg-surface-container-highest shadow">
 <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src={game.cover} alt={game.title} />
 
@@ -14,7 +14,7 @@ export function ReferenceGame0({ game, query, mode }: { game: Game; query: strin
 
 <div className="min-w-0 flex flex-col gap-0.5">
 <div className="flex items-center gap-2 flex-wrap">
-<span className="font-headline-md text-headline-md text-on-surface font-semibold truncate group-hover:text-primary transition-colors">
+<span className="font-headline-md text-headline-md text-on-surface font-semibold break-words group-hover:text-primary transition-colors">
 <HighlightedTitle title={game.title} query={query} /></span>
 
 <span className="px-1.5 py-0.5 rounded bg-surface-container font-label-sm text-label-sm text-on-surface-variant font-medium">{game.year ?? "—"}</span>
@@ -23,7 +23,7 @@ export function ReferenceGame0({ game, query, mode }: { game: Game; query: strin
 
 </div>
 
-<div className="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-on-surface-variant font-body-sm text-body-sm">
 <span>{game.genres?.[0] ?? "Catalog entry"}</span>
 
 <span className="text-on-surface-variant/40">{"•"}</span>
@@ -42,11 +42,11 @@ export function ReferenceGame0({ game, query, mode }: { game: Game; query: strin
 
 </div>
 
-<div className="flex items-center gap-3 pl-4 flex-shrink-0">
+<div className="flex items-center gap-3 pl-2 sm:pl-4 flex-shrink-0">
 <div className="flex flex-col items-end">
 <span className="px-2 py-0.5 rounded bg-primary text-on-primary font-label-md text-label-md font-bold shadow-sm">{game.score ?? "—"}</span>
 
-<span className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5">{game.score === null ? "Unrated" : "Profile score"}</span>
+<span className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5 hidden sm:block">{game.score === null ? "Unrated" : "Profile score"}</span>
 
 </div>
 
@@ -61,7 +61,7 @@ export function ReferenceGame0({ game, query, mode }: { game: Game; query: strin
 ); }
 
 export function ReferenceGame1({ game, query, mode }: { game: Game; query: string; mode: "browse" | "log" }) { return (<Link data-search-result className="group flex items-center justify-between p-2.5 rounded-lg hover:bg-surface-container transition-all" href={mode === "log" ? "/log?game=" + game.slug : "/game/" + game.slug}>
-<div className="flex items-center gap-3.5 min-w-0">
+<div className="flex flex-1 items-center gap-2 sm:gap-3.5 min-w-0">
 <div className="relative w-12 h-16 rounded overflow-hidden flex-shrink-0 bg-surface-container-highest shadow">
 <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src={game.cover} alt={game.title} />
 
@@ -71,7 +71,7 @@ export function ReferenceGame1({ game, query, mode }: { game: Game; query: strin
 
 <div className="min-w-0 flex flex-col gap-0.5">
 <div className="flex items-center gap-2 flex-wrap">
-<span className="font-headline-md text-headline-md text-on-surface font-semibold truncate group-hover:text-primary transition-colors">
+<span className="font-headline-md text-headline-md text-on-surface font-semibold break-words group-hover:text-primary transition-colors">
 <HighlightedTitle title={game.title} query={query} /></span>
 
 <span className="px-1.5 py-0.5 rounded bg-surface-container-high font-label-sm text-label-sm text-on-surface-variant">{game.year ?? "—"}</span>
@@ -80,7 +80,7 @@ export function ReferenceGame1({ game, query, mode }: { game: Game; query: strin
 
 </div>
 
-<div className="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-on-surface-variant font-body-sm text-body-sm">
 <span>{game.genres?.[0] ?? "Catalog entry"}</span>
 
 <span className="text-on-surface-variant/40">{"•"}</span>
@@ -99,11 +99,11 @@ export function ReferenceGame1({ game, query, mode }: { game: Game; query: strin
 
 </div>
 
-<div className="flex items-center gap-3 pl-4 flex-shrink-0">
+<div className="flex items-center gap-3 pl-2 sm:pl-4 flex-shrink-0">
 <div className="flex flex-col items-end">
 <span className="px-2 py-0.5 rounded bg-surface-container-highest text-on-surface font-label-md text-label-md font-semibold">{game.score ?? "—"}</span>
 
-<span className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5">{game.score === null ? "Unrated" : "Profile score"}</span>
+<span className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5 hidden sm:block">{game.score === null ? "Unrated" : "Profile score"}</span>
 
 </div>
 
@@ -113,7 +113,7 @@ export function ReferenceGame1({ game, query, mode }: { game: Game; query: strin
 ); }
 
 export function ReferenceGame2({ game, query, mode }: { game: Game; query: string; mode: "browse" | "log" }) { return (<Link data-search-result className="group flex items-center justify-between p-2.5 rounded-lg hover:bg-surface-container transition-all" href={mode === "log" ? "/log?game=" + game.slug : "/game/" + game.slug}>
-<div className="flex items-center gap-3.5 min-w-0">
+<div className="flex flex-1 items-center gap-2 sm:gap-3.5 min-w-0">
 <div className="relative w-12 h-16 rounded overflow-hidden flex-shrink-0 bg-surface-container-highest shadow">
 <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src={game.cover} alt={game.title} />
 
@@ -123,7 +123,7 @@ export function ReferenceGame2({ game, query, mode }: { game: Game; query: strin
 
 <div className="min-w-0 flex flex-col gap-0.5">
 <div className="flex items-center gap-2 flex-wrap">
-<span className="font-headline-md text-headline-md text-on-surface font-semibold truncate group-hover:text-primary transition-colors"><HighlightedTitle title={game.title} query={query} /></span>
+<span className="font-headline-md text-headline-md text-on-surface font-semibold break-words group-hover:text-primary transition-colors"><HighlightedTitle title={game.title} query={query} /></span>
 
 <span className="px-1.5 py-0.5 rounded bg-surface-container-high font-label-sm text-label-sm text-on-surface-variant">{game.year ?? "—"}</span>
 
@@ -133,7 +133,7 @@ export function ReferenceGame2({ game, query, mode }: { game: Game; query: strin
 
 </div>
 
-<div className="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-on-surface-variant font-body-sm text-body-sm">
 <span>{game.genres?.[0] ?? "Catalog entry"}</span>
 
 <span className="text-on-surface-variant/40">{"•"}</span>
@@ -148,11 +148,11 @@ export function ReferenceGame2({ game, query, mode }: { game: Game; query: strin
 
 </div>
 
-<div className="flex items-center gap-3 pl-4 flex-shrink-0">
+<div className="flex items-center gap-3 pl-2 sm:pl-4 flex-shrink-0">
 <div className="flex flex-col items-end">
 <span className="px-2 py-0.5 rounded bg-secondary/20 text-secondary font-label-md text-label-md font-bold">{game.score ?? "—"}</span>
 
-<span className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5">{game.score === null ? "Unrated" : "Profile score"}</span>
+<span className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5 hidden sm:block">{game.score === null ? "Unrated" : "Profile score"}</span>
 
 </div>
 
@@ -208,7 +208,7 @@ export function ReferenceProfile1() { return (<Link data-search-result className
 ); }
 
 export function ReferenceList() { return (<Link data-search-result className="group flex items-center justify-between p-3 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors" href="/tiers">
-<div className="flex items-center gap-3.5 min-w-0">
+<div className="flex flex-1 items-center gap-2 sm:gap-3.5 min-w-0">
 <div className="flex -space-x-4 flex-shrink-0">
 <div className="w-8 h-11 rounded bg-surface-container-highest overflow-hidden shadow">
 <img className="w-full h-full object-cover" src={gameImages("cyberpunk-2077").cover} alt="cyberpunk 2077 cover" />
@@ -228,7 +228,7 @@ export function ReferenceList() { return (<Link data-search-result className="gr
 </div>
 
 <div className="min-w-0">
-<div className="font-headline-md text-body-lg text-on-surface font-semibold truncate group-hover:text-primary transition-colors">
+<div className="font-headline-md text-body-lg text-on-surface font-semibold break-words group-hover:text-primary transition-colors">
 <mark className="bg-transparent text-primary">{"Cyber"}</mark>
 {"punk & Dystopian Sci-Fi Atmospheres\n                "}</div>
 

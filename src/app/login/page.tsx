@@ -9,8 +9,8 @@ export const metadata: Metadata = { title: "Owner sign-in", robots: { index: fal
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const owner = await getOwner();
   const { error } = await searchParams;
-  return <section className="mx-auto max-w-md px-6 py-16">
-    <div className="space-y-6 rounded-xl bg-surface-container-low p-6 sm:p-8">
+  return <section className="mx-auto max-w-md px-4 sm:px-6 py-8 sm:py-16">
+    <div className="space-y-6 break-words rounded-xl bg-surface-container-low p-5 sm:p-8">
       <h1 className="font-headline-xl text-headline-xl text-on-surface">Owner sign-in</h1>
       {owner ? <>
         <p className="text-on-surface-variant">{owner.profile ? `Signed in as ${owner.profile.display_name}.` : "You're signed in. Your personal profile still needs to be linked to this account."}</p>

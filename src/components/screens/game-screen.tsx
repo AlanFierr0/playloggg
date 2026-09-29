@@ -17,9 +17,9 @@ return (<>
 
 <div className="absolute inset-0 bg-gradient-to-r from-surface via-transparent to-surface/80 pointer-events-none"></div>
 
-<div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 pt-28 pb-12">
+<div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pt-8 lg:pt-28 pb-8 sm:pb-12">
 
-<nav className="flex items-center gap-2 mb-8">
+<nav className="flex min-w-0 items-center gap-2 mb-6 sm:mb-8">
 <Link className="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md uppercase tracking-wider group" data-path="discover" href="/">
 <span className="material-symbols-outlined text-[15px] group-hover:-translate-x-0.5 transition-transform">{"arrow_back"}</span>
 
@@ -33,13 +33,13 @@ return (<>
 
 <span className="text-surface-variant font-label-sm">{"/"}</span>
 
-<span className="text-primary font-label-md text-label-md uppercase tracking-wider font-semibold truncate max-w-xs md:max-w-none">{game.title}</span>
+<span className="text-primary font-label-md text-label-md uppercase tracking-wider font-semibold min-w-0 flex-1 truncate">{game.title}</span>
 
 </nav>
 
-<div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+<div className="grid grid-cols-1 sm:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-start">
 
-<div className="lg:col-span-4 xl:col-span-3 flex flex-col gap-4">
+<div className="sm:col-span-4 xl:col-span-3 w-full max-w-[240px] sm:max-w-none mx-auto flex min-w-0 flex-col gap-4">
 <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden bg-surface-container-high shadow-2xl group">
 <img className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" alt={game.title} src={game.cover} />
 
@@ -82,7 +82,7 @@ return (<>
 
 </div>
 
-<div className="lg:col-span-8 xl:col-span-9 flex flex-col justify-between">
+<div className="sm:col-span-8 xl:col-span-9 min-w-0 flex flex-col justify-between">
 <div className="flex flex-col gap-4">
 
 <div className="flex flex-wrap items-center gap-2">
@@ -121,16 +121,16 @@ return (<>
 </div>
 
 <div className="mt-4 p-5 rounded-lg bg-surface-container-low flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm">
-<div className="flex flex-col min-[360px]:flex-row items-start min-[360px]:items-center gap-5">
+<div className="flex min-w-0 flex-col min-[360px]:flex-row items-start min-[360px]:items-center gap-5">
 
-<div className="flex items-baseline gap-1 bg-surface-container-lowest px-4 py-3 rounded-lg text-primary">
+<div className="flex shrink-0 items-baseline gap-1 bg-surface-container-lowest px-4 py-3 rounded-lg text-primary">
 <span className="font-display-lg text-display-lg font-bold tracking-tight">{game.score ?? "—"}</span>
 
 <span className="font-label-md text-label-md text-on-surface-variant/70">{"/100"}</span>
 
 </div>
 
-<div className="flex flex-col gap-0.5">
+<div className="flex min-w-0 flex-col gap-0.5">
 <div className="flex items-center gap-2">
 <span className="font-headline-md text-headline-md text-on-surface font-bold">{game.score === null ? "No rating yet" : isSample ? "Sample profile rating" : "Your rating"}</span>
 
@@ -142,7 +142,7 @@ return (<>
 {game.status && <p className="mt-2 font-label-md text-label-md text-primary">{playbackLabels[game.status]}</p>}
 {!isSample && game.review && <div className="mt-4"><h2 className="font-label-md text-label-md text-primary">Your saved review</h2><p className="mt-2 whitespace-pre-wrap break-words font-body-md text-body-md text-on-surface">{game.review}</p></div>}
 
-<div className="flex items-center gap-3 mt-1 font-label-sm text-label-sm text-on-surface-variant/80">
+<div className="flex flex-wrap items-center gap-3 mt-1 font-label-sm text-label-sm text-on-surface-variant/80">
 <span className="text-secondary font-semibold">{game.tier ? "Tier " + game.tier : "Unassigned tier"}</span>
 
 <span>{"•"}</span>
@@ -179,7 +179,7 @@ return (<>
 
 </div>
 
-<div className="mt-2 flex flex-wrap items-center gap-3">
+<div className="mt-2 grid grid-cols-1 min-[360px]:grid-cols-2 sm:flex sm:flex-wrap items-center gap-3">
 
 <Link className="inline-flex items-center gap-2 px-5 py-2.5 rounded bg-primary-container text-on-primary-container hover:bg-primary font-label-md text-label-md tracking-wider uppercase font-semibold transition-all shadow-md active:scale-[0.98]" href={"/log?game=" + game.slug}>
 <span className="material-symbols-outlined text-[18px]">{"add_circle"}</span>
@@ -226,20 +226,20 @@ return (<>
 
 </div>
 
-<div className="max-w-7xl mx-auto px-6 lg:px-12 py-10 w-full">
+<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-10 w-full">
 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
 
-<div className="lg:col-span-8 flex flex-col gap-10">
+<div className="lg:col-span-8 min-w-0 flex flex-col gap-6 sm:gap-10">
 
 <section className="bg-surface-container-low rounded-xl p-5 shadow-sm relative overflow-hidden">
 <div className="absolute -top-12 -right-12 w-48 h-48 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
 
 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-<div className="flex items-center gap-4">
-<ProfileAvatar name={isSample ? "Alex Vance" : "Owner"} className="w-12 h-12 rounded-full object-cover" />
+<div className="flex min-w-0 items-center gap-3 sm:gap-4">
+<ProfileAvatar name={isSample ? "Alex Vance" : "Owner"} className="w-12 h-12 shrink-0 rounded-full object-cover" />
 
-<div className="flex flex-col">
-<div className="flex items-center gap-2">
+<div className="flex min-w-0 flex-col">
+<div className="flex flex-wrap gap-y-2 items-center gap-2">
 <span className="font-headline-md text-headline-md text-on-surface font-semibold">{"Your Personal Standpoint"}</span>
 
 <span className="px-2 py-0.5 rounded bg-primary/15 text-primary font-label-sm text-label-sm font-bold uppercase">{"Rank #1"}</span>
@@ -282,7 +282,7 @@ return (<>
 </section>
 
 <section className="flex flex-col gap-4">
-<div className="flex items-center justify-between">
+<div className="flex flex-wrap gap-3 items-center justify-between">
 <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight flex items-center gap-2">
 <span>{"Curatorial Overview"}</span>
 
@@ -320,7 +320,7 @@ return (<>
 </section>
 
 <section className="flex flex-col gap-4">
-<div className="flex items-center justify-between">
+<div className="flex flex-wrap gap-3 items-center justify-between">
 <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight flex items-center gap-2">
 <span>{"Following Concordance"}</span>
 
@@ -335,7 +335,7 @@ return (<>
 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
 
 <div className="p-4 rounded-lg bg-surface-container-low flex flex-col justify-between gap-3 shadow-sm hover:bg-surface-container transition-colors">
-<div className="flex items-center justify-between">
+<div className="flex flex-wrap gap-3 items-center justify-between">
 <div className="flex items-center gap-2.5">
 <div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center font-label-md text-on-surface font-bold">{"HK"}</div>
 
@@ -357,7 +357,7 @@ return (<>
 </div>
 
 <div className="p-4 rounded-lg bg-surface-container-low flex flex-col justify-between gap-3 shadow-sm hover:bg-surface-container transition-colors">
-<div className="flex items-center justify-between">
+<div className="flex flex-wrap gap-3 items-center justify-between">
 <div className="flex items-center gap-2.5">
 <div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center font-label-md text-secondary font-bold">{"ER"}</div>
 
@@ -379,7 +379,7 @@ return (<>
 </div>
 
 <div className="p-4 rounded-lg bg-surface-container-low flex flex-col justify-between gap-3 shadow-sm hover:bg-surface-container transition-colors">
-<div className="flex items-center justify-between">
+<div className="flex flex-wrap gap-3 items-center justify-between">
 <div className="flex items-center gap-2.5">
 <div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center font-label-md text-on-surface font-bold">{"JS"}</div>
 
@@ -405,7 +405,7 @@ return (<>
 </section>
 
 <section className="flex flex-col gap-4">
-<div className="flex items-center justify-between">
+<div className="flex flex-wrap gap-3 items-center justify-between">
 <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight flex items-center gap-2">
 <span>{"Curator Dispatches"}</span>
 
@@ -413,7 +413,7 @@ return (<>
 
 </h2>
 
-<div className="flex items-center gap-3">
+<div className="flex min-w-0 flex-wrap items-center gap-3">
 <PreviewAction className="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold" message={"Preview only: this feature is not connected yet."}>{"Most Helpful"}</PreviewAction>
 
 <span className="text-surface-variant">{"|"}</span>
@@ -427,12 +427,12 @@ return (<>
 <div className="flex flex-col gap-4">
 
 <article className="p-6 rounded-lg bg-surface-container-low flex flex-col gap-4 shadow-sm">
-<div className="flex flex-col min-[360px]:flex-row items-start justify-between gap-4">
-<div className="flex items-center gap-3">
+<div className="flex min-w-0 flex-col min-[360px]:flex-row items-start justify-between gap-4">
+<div className="flex min-w-0 flex-wrap items-center gap-3">
 <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary font-label-md font-bold">{"\n                    MK\n                  "}</div>
 
-<div className="flex flex-col">
-<div className="flex items-center gap-2">
+<div className="flex min-w-0 flex-col">
+<div className="flex flex-wrap gap-y-2 items-center gap-2">
 <span className="font-headline-md text-headline-md text-on-surface font-semibold">{"Marius Kane"}</span>
 
 <span className="px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm uppercase">{"Senior Fellow"}</span>
@@ -455,7 +455,7 @@ return (<>
 <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">{isReference ? (<>{"\n                Shadow of the Erdtree is not content to simply provide more Lands Between. It reshapes the grammar of FromSoftware's open space: no longer a planar field dotted with ruins, but an interlocking origami of plateaus, subterranean waterways, and abyssal descent. The final confrontation demands rhythm and discipline that feels almost musical.\n              "}</>) : "This is a preview entry. Its editorial details and reviews are sample content."}</p>
 
 <div className="flex items-center justify-between pt-2">
-<div className="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
+<div className="flex flex-wrap items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
 <PreviewAction className="inline-flex items-center gap-1 hover:text-primary transition-colors" message={"Preview only: this feature is not connected yet."}>
 <span className="material-symbols-outlined text-[16px]">{"thumb_up"}</span>
 
@@ -479,12 +479,12 @@ return (<>
 </article>
 
 <article className="p-6 rounded-lg bg-surface-container-low flex flex-col gap-4 shadow-sm">
-<div className="flex flex-col min-[360px]:flex-row items-start justify-between gap-4">
-<div className="flex items-center gap-3">
+<div className="flex min-w-0 flex-col min-[360px]:flex-row items-start justify-between gap-4">
+<div className="flex min-w-0 flex-wrap items-center gap-3">
 <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-secondary font-label-md font-bold">{"\n                    SA\n                  "}</div>
 
-<div className="flex flex-col">
-<div className="flex items-center gap-2">
+<div className="flex min-w-0 flex-col">
+<div className="flex flex-wrap gap-y-2 items-center gap-2">
 <span className="font-headline-md text-headline-md text-on-surface font-semibold">{"Sora Takahashi"}</span>
 
 <span className="px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm uppercase">{"Curator"}</span>
@@ -507,7 +507,7 @@ return (<>
 <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">{isReference ? (<>{"\n                The Scadutree fragment progression elegantly circumvents the base game’s endgame over-leveling crisis, creating an unyielding tension reminiscent of our initial hours entering Limgrave. Yuka Kitamura's musical motifs echo through the scorched tombs with tragic grace.\n              "}</>) : "This is a preview entry. Its editorial details and reviews are sample content."}</p>
 
 <div className="flex items-center justify-between pt-2">
-<div className="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
+<div className="flex flex-wrap items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
 <PreviewAction className="inline-flex items-center gap-1 hover:text-primary transition-colors" message={"Preview only: this feature is not connected yet."}>
 <span className="material-symbols-outlined text-[16px]">{"thumb_up"}</span>
 
@@ -531,12 +531,12 @@ return (<>
 </article>
 
 <article className="p-6 rounded-lg bg-surface-container-low flex flex-col gap-4 shadow-sm">
-<div className="flex flex-col min-[360px]:flex-row items-start justify-between gap-4">
-<div className="flex items-center gap-3">
+<div className="flex min-w-0 flex-col min-[360px]:flex-row items-start justify-between gap-4">
+<div className="flex min-w-0 flex-wrap items-center gap-3">
 <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface font-label-md font-bold">{"\n                    DL\n                  "}</div>
 
-<div className="flex flex-col">
-<div className="flex items-center gap-2">
+<div className="flex min-w-0 flex-col">
+<div className="flex flex-wrap gap-y-2 items-center gap-2">
 <span className="font-headline-md text-headline-md text-on-surface font-semibold">{"David Lindqvist"}</span>
 
 <span className="px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm uppercase">{"Archivist"}</span>
@@ -559,7 +559,7 @@ return (<>
 <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">{isReference ? (<>{"\n                A relentless, unapologetic expansion that asks players to unlearn complacency. The Scadualtar and Abyssal Woods explore dread with horror-game intimacy. Minor camera frictions during hyper-dense boss animations keep it just shy of absolute formal perfection.\n              "}</>) : "This is a preview entry. Its editorial details and reviews are sample content."}</p>
 
 <div className="flex items-center justify-between pt-2">
-<div className="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
+<div className="flex flex-wrap items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
 <PreviewAction className="inline-flex items-center gap-1 hover:text-primary transition-colors" message={"Preview only: this feature is not connected yet."}>
 <span className="material-symbols-outlined text-[16px]">{"thumb_up"}</span>
 
@@ -588,10 +588,10 @@ return (<>
 
 </div>
 
-<div className="lg:col-span-4 flex flex-col gap-8">
+<div className="lg:col-span-4 min-w-0 flex flex-col gap-6 sm:gap-8">
 
 <div className="bg-surface-container-low p-6 rounded-xl flex flex-col gap-5 shadow-sm">
-<div className="flex items-center justify-between">
+<div className="flex flex-wrap gap-3 items-center justify-between">
 <span className="font-headline-md text-headline-md text-on-surface font-semibold">{"Curator Rating Curve"}</span>
 
 <span className="font-label-sm text-label-sm text-primary uppercase tracking-widest font-bold">{"Skew S-Tier"}</span>
@@ -600,7 +600,7 @@ return (<>
 
 <div className="flex flex-col gap-3 font-label-sm text-label-sm">
 
-<div className="flex items-center gap-3">
+<div className="flex min-w-0 flex-wrap items-center gap-3">
 <span className="w-14 text-on-surface font-semibold text-right">{"95–100"}</span>
 
 <div className="flex-1 bg-surface-container-high h-4 rounded overflow-hidden p-0.5">
@@ -612,7 +612,7 @@ return (<>
 
 </div>
 
-<div className="flex items-center gap-3">
+<div className="flex min-w-0 flex-wrap items-center gap-3">
 <span className="w-14 text-on-surface font-semibold text-right">{"90–94"}</span>
 
 <div className="flex-1 bg-surface-container-high h-4 rounded overflow-hidden p-0.5">
@@ -624,7 +624,7 @@ return (<>
 
 </div>
 
-<div className="flex items-center gap-3">
+<div className="flex min-w-0 flex-wrap items-center gap-3">
 <span className="w-14 text-on-surface-variant text-right">{"80–89"}</span>
 
 <div className="flex-1 bg-surface-container-high h-4 rounded overflow-hidden p-0.5">
@@ -636,7 +636,7 @@ return (<>
 
 </div>
 
-<div className="flex items-center gap-3">
+<div className="flex min-w-0 flex-wrap items-center gap-3">
 <span className="w-14 text-on-surface-variant text-right">{"< 80"}</span>
 
 <div className="flex-1 bg-surface-container-high h-4 rounded overflow-hidden p-0.5">
@@ -660,7 +660,7 @@ return (<>
 </div>
 
 <div className="bg-surface-container-low p-6 rounded-xl flex flex-col gap-4 shadow-sm">
-<div className="flex items-center justify-between">
+<div className="flex flex-wrap gap-3 items-center justify-between">
 <span className="font-headline-md text-headline-md text-on-surface font-semibold">{"Curated In Lists"}</span>
 
 <Link className="font-label-sm text-label-sm text-primary hover:underline uppercase tracking-wider" data-path="lists" href="/tiers">{"All 84 Lists"}</Link>
@@ -670,7 +670,7 @@ return (<>
 <div className="flex flex-col gap-3">
 
 <PreviewAction className="p-3 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors flex flex-col gap-1 group" message={"Preview only: this feature is not connected yet."}>
-<div className="flex items-center justify-between">
+<div className="flex flex-wrap gap-3 items-center justify-between">
 <span className="font-label-md text-label-md font-semibold text-on-surface group-hover:text-primary transition-colors">{"\n                  All-Time Masterpieces (95+)\n                "}</span>
 
 <span className="font-label-sm text-label-sm text-on-surface-variant">{"#3 / 48"}</span>
@@ -682,7 +682,7 @@ return (<>
 </PreviewAction>
 
 <PreviewAction className="p-3 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors flex flex-col gap-1 group" message={"Preview only: this feature is not connected yet."}>
-<div className="flex items-center justify-between">
+<div className="flex flex-wrap gap-3 items-center justify-between">
 <span className="font-label-md text-label-md font-semibold text-on-surface group-hover:text-primary transition-colors">{"\n                  FromSoftware Architecture & Lore\n                "}</span>
 
 <span className="font-label-sm text-label-sm text-on-surface-variant">{"#1 / 14"}</span>
@@ -694,7 +694,7 @@ return (<>
 </PreviewAction>
 
 <PreviewAction className="p-3 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors flex flex-col gap-1 group" message={"Preview only: this feature is not connected yet."}>
-<div className="flex items-center justify-between">
+<div className="flex flex-wrap gap-3 items-center justify-between">
 <span className="font-label-md text-label-md font-semibold text-on-surface group-hover:text-primary transition-colors">{"\n                  GOTY 2024 Contenders\n                "}</span>
 
 <span className="font-label-sm text-label-sm text-on-surface-variant">{"#1 / 25"}</span>

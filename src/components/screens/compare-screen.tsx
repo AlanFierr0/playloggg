@@ -7,7 +7,7 @@ return (<>
 <h1 className="sr-only">Compare gaming taste</h1>
 <div className="w-full  bg-surface"><div className="flex flex-col w-full">
 
-<div className="relative overflow-x-clip w-full max-w-7xl mx-auto px-6 lg:px-12 py-10 md:py-16">
+<div className="relative overflow-x-clip w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-10 md:py-16">
 <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
 <div className="absolute top-3/4 left-1/4 w-72 h-72 bg-tertiary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
@@ -17,17 +17,17 @@ return (<>
 
 <span className="font-label-sm text-label-sm uppercase tracking-widest text-outline mb-4">{"Archival Concordance Analysis"}</span>
 
-<div className="w-full flex flex-col md:flex-row items-center justify-between gap-8 md:gap-4 bg-surface-container-low/70 backdrop-blur-md rounded-xl p-8 lg:p-12 shadow-xl">
+<div className="w-full flex flex-col xl:flex-row items-center justify-between gap-6 xl:gap-4 bg-surface-container-low/70 backdrop-blur-md rounded-xl p-5 sm:p-8 lg:p-12 shadow-xl">
 
-<div className="flex items-center gap-6 w-full md:w-auto justify-start">
+<div className="flex items-center gap-4 sm:gap-6 min-w-0 w-full xl:w-auto justify-start">
 <div className="relative flex-shrink-0">
-<ProfileAvatar className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover shadow-md" name="Alex Vance" />
+<ProfileAvatar className="w-16 h-16 sm:w-20 sm:h-20 xl:w-24 xl:h-24 rounded-full object-cover shadow-md" name="Alex Vance" />
 
 <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-secondary"></span>
 
 </div>
 
-<div className="flex flex-col">
+<div className="flex min-w-0 flex-col">
 <span className="font-label-md text-label-md uppercase tracking-wider text-outline">{"Senior Critic"}</span>
 
 <h1 className="font-headline-xl text-headline-xl text-on-surface font-semibold tracking-tight">{"Alex Vance"}</h1>
@@ -38,7 +38,7 @@ return (<>
 
 </div>
 
-<div className="flex flex-col items-center justify-center my-4 md:my-0 text-center px-6 py-4 rounded-xl bg-surface-container/80 shadow-inner">
+<div className="flex flex-col items-center justify-center my-2 xl:my-0 text-center px-6 py-4 rounded-xl bg-surface-container/80 shadow-inner">
 <div className="flex items-center gap-2 mb-1">
 <span className="material-symbols-outlined text-primary text-[20px]" style={{"fontVariationSettings": "'FILL' 1"}}>{"auto_awesome"}</span>
 
@@ -55,8 +55,8 @@ return (<>
 
 </div>
 
-<div className="flex items-center gap-6 w-full md:w-auto justify-end flex-row-reverse md:flex-row">
-<div className="flex flex-col items-end">
+<div className="flex items-center gap-4 sm:gap-6 min-w-0 w-full xl:w-auto justify-end flex-row-reverse xl:flex-row">
+<div className="flex min-w-0 flex-col items-end">
 <span className="font-label-md text-label-md uppercase tracking-wider text-outline">{"Director & Auteur"}</span>
 
 <h2 className="font-headline-xl text-headline-xl text-on-surface font-semibold tracking-tight">{"Hideo Kojima"}</h2>
@@ -66,7 +66,7 @@ return (<>
 </div>
 
 <div className="relative flex-shrink-0">
-<ProfileAvatar className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover shadow-md" name="Hideo Kojima" />
+<ProfileAvatar className="w-16 h-16 sm:w-20 sm:h-20 xl:w-24 xl:h-24 rounded-full object-cover shadow-md" name="Hideo Kojima" />
 
 <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-primary"></span>
 
@@ -76,7 +76,7 @@ return (<>
 
 </div>
 
-<div className="w-full max-w-xl mt-6 flex items-center justify-between font-label-sm text-label-sm text-outline px-4">
+<div className="w-full max-w-xl mt-6 flex flex-wrap gap-3 items-center justify-center sm:justify-between font-label-sm text-label-sm text-outline px-4">
 <span>{"78 Consensus Agreements"}</span>
 
 <span className="w-1.5 h-1.5 rounded-full bg-surface-bright"></span>
@@ -146,7 +146,7 @@ return (<>
 
 </div>
 
-<div className="flex flex-col items-end">
+<div className="flex min-w-0 flex-col items-end">
 <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">{"Hideo Kojima"}</span>
 
 <span className="font-display-lg text-[32px] leading-8 font-bold font-headline-md text-primary mt-1">{"100"}</span>
@@ -195,7 +195,7 @@ return (<>
 
 </div>
 
-<div className="flex flex-col items-end">
+<div className="flex min-w-0 flex-col items-end">
 <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">{"Hideo Kojima"}</span>
 
 <span className="font-display-lg text-[32px] leading-8 font-bold font-headline-md text-primary mt-1">{"86"}</span>
@@ -223,7 +223,7 @@ return (<>
 
 </div>
 
-<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
 <div className="bg-surface-container-low rounded-xl p-5 flex flex-col justify-between shadow-md hover:bg-surface-container transition-colors group">
 <div className="w-full aspect-[16/10] rounded-lg overflow-hidden mb-4 relative bg-surface-container">
@@ -331,7 +331,7 @@ return (<>
 
 </div>
 
-<div className="flex items-center gap-2">
+<div className="flex flex-wrap items-center gap-2">
 <PreviewAction className="px-3 py-1.5 rounded bg-surface-container text-primary font-label-md text-label-md transition-colors" message={"Preview only: this feature is not connected yet."}>{"All Shared (142)"}</PreviewAction>
 
 <PreviewAction className="px-3 py-1.5 rounded bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md transition-colors" message={"Preview only: this feature is not connected yet."}>{"Ties (18)"}</PreviewAction>
@@ -343,8 +343,9 @@ return (<>
 </div>
 
 <div className="w-full bg-surface-container-low rounded-xl overflow-hidden shadow-xl">
-<div className="overflow-x-auto">
-<table className="w-full text-left border-collapse">
+<p className="sm:hidden px-4 pt-4 font-body-sm text-body-sm text-on-surface-variant">Scroll sideways to compare all columns.</p>
+<div className="scroll-region overflow-x-auto" role="region" aria-label="Shared catalog comparison table" tabIndex={0}>
+<table className="min-w-[640px] w-full text-left border-collapse">
 <thead>
 <tr className="bg-surface-container-high/40 text-outline font-label-sm text-label-sm uppercase tracking-wider">
 <th className="py-4 px-6 font-semibold">{"Title"}</th>

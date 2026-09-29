@@ -55,7 +55,7 @@ return (<><fieldset disabled={pending} className="contents">
 </div>
 
 <div className="relative w-full max-w-4xl bg-surface-container-low rounded-xl shadow-2xl overflow-hidden flex flex-col my-auto">
-<div className="w-full bg-surface-container px-6 py-4 flex items-center justify-between gap-4">
+<div className="w-full bg-surface-container px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
 <div className="flex items-center gap-3 min-w-0">
 <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
 
@@ -84,7 +84,7 @@ return (<><fieldset disabled={pending} className="contents">
 
 </div>
 
-<div className="p-6 sm:p-8 lg:p-10 flex flex-col gap-8">
+<div className="p-4 sm:p-8 lg:p-10 flex flex-col gap-8">
 <p className="font-body-sm text-body-sm text-on-surface-variant">{canEdit ? "Commit saves your optional score, independent tier, playback status, platform, playtime, completion date, and review. Tags are saved too; broadcast remains temporary." : <>Sample profile preview. <Link href="/login" className="text-primary underline">Sign in</Link> to save entries to your own profile.</>}</p>
 <p role="status" className="font-body-sm text-body-sm text-primary">{pending ? "Saving…" : saveMessage}</p>
 <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-start">
@@ -104,14 +104,14 @@ return (<><fieldset disabled={pending} className="contents">
 
 <div className="flex flex-col flex-1 min-w-0 justify-between self-stretch">
 <div className="flex flex-col gap-2">
-<div className="flex items-center gap-2">
+<div className="flex flex-wrap items-center gap-2">
 <span className="font-label-sm text-label-sm uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">{"Selected Subject"}</span>
 
 <span className="font-label-sm text-label-sm text-on-surface-variant tracking-wider">{"ID: 881290"}</span>
 
 </div>
 
-<h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight truncate">{game.title}</h1>
+<h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight break-words">{game.title}</h1>
 
 <p className="font-body-md text-body-md text-on-surface-variant">{isReference ? "Directed by Katsura Hashino " : "Sample game metadata "}<span className="text-outline-variant mx-1.5">{"·"}</span>
 {isReference ? " Studio Zero / ATLUS" : "Prototype catalog"}</p>
@@ -146,8 +146,8 @@ return (<><fieldset disabled={pending} className="contents">
 
 </div>
 
-<div className="bg-surface-container/60 rounded-xl p-6 sm:p-8 flex flex-col items-center gap-6 relative">
-<div className="w-full flex items-center justify-between">
+<div className="bg-surface-container/60 rounded-xl p-4 sm:p-8 flex flex-col items-center gap-6 relative">
+<div className="w-full flex flex-wrap gap-2 items-center justify-between">
 <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{"Archival Evaluation"}</span>
 
 <TierBadge value={tier} onChange={setTier} />
@@ -171,7 +171,7 @@ return (<><fieldset disabled={pending} className="contents">
 
 </div>
 
-<div className="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm px-1">
+<div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-on-surface-variant font-label-sm text-label-sm px-1">
 <span>{"0 (Deficient)"}</span>
 
 <span>{"50 (Median)"}</span>
@@ -230,7 +230,7 @@ return (<><fieldset disabled={pending} className="contents">
 <div className="relative flex items-center">
 <span className="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">{"schedule"}</span>
 
-<input className="w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="hours-input" placeholder="Hours, e.g. 45.5" type="text" inputMode="decimal" value={hours} onChange={(event) => setHours(event.target.value)} />
+<input className="min-w-0 w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="hours-input" placeholder="Hours, e.g. 45.5" type="text" inputMode="decimal" value={hours} onChange={(event) => setHours(event.target.value)} />
 
 </div>
 
@@ -242,14 +242,14 @@ return (<><fieldset disabled={pending} className="contents">
 <div className="relative flex items-center">
 <span className="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">{"calendar_today"}</span>
 
-<input className="w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="date-input" ref={dateInput} type="date" min="0001-01-01" max="9999-12-31" value={date} onChange={(event) => setDate(event.target.value)} />
+<input className="min-w-0 w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="date-input" ref={dateInput} type="date" min="0001-01-01" max="9999-12-31" value={date} onChange={(event) => setDate(event.target.value)} />
 
 </div>
 
 </div>
 
 <div className="md:col-span-12 flex flex-col gap-2">
-<div className="flex items-center justify-between">
+<div className="flex flex-wrap gap-2 items-center justify-between">
 <label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" htmlFor="dispatch-textarea">{"Critical Dispatch / Review"}</label>
 
 <span className="font-label-sm text-label-sm text-on-surface-variant/70">{"Plain text · 20,000 characters max"}</span>
@@ -260,14 +260,14 @@ return (<><fieldset disabled={pending} className="contents">
 
 </div>
 
-<div className="md:col-span-12 flex flex-col gap-2.5"><TagEditor key={tagVersion} tags={tags} onChange={setTags} /><Link href="/lists" className="font-label-sm text-label-sm text-primary hover:underline">Manage curated lists</Link>
+<div className="md:col-span-12 flex flex-col gap-2.5"><TagEditor key={tagVersion} tags={tags} onChange={setTags} /><Link href="/lists" className="inline-flex items-center font-label-sm text-label-sm text-primary hover:underline">Manage curated lists</Link>
 </div>
 
 </div>
 
 </div>
 
-<div className="w-full bg-surface-container-lowest px-6 py-4 sm:px-10 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 mt-auto">
+<div className="w-full bg-surface-container-lowest px-4 py-4 sm:px-10 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 mt-auto">
 <label className="flex items-center gap-3 cursor-pointer group select-none self-start sm:self-auto">
 <input checked={broadcast} onChange={(event) => setBroadcast(event.target.checked)} className="sr-only peer" type="checkbox" />
 
@@ -280,7 +280,7 @@ return (<><fieldset disabled={pending} className="contents">
 
 </label>
 
-<div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+<div className="flex flex-col min-[360px]:flex-row items-center gap-3 w-full sm:w-auto justify-end">
 <button id="discard-rating" className="w-full sm:w-auto px-4 py-2 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-colors" type="button" onClick={resetDraft}>{"\n            Discard Draft\n          "}</button>
 
 <button id="commit-rating" className="w-full sm:w-auto px-6 py-2 rounded bg-primary-container text-on-primary-container hover:bg-primary font-label-md text-label-md uppercase tracking-wider font-semibold shadow-lg shadow-primary-container/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50" type="button" disabled={!canEdit || pending} onClick={commit}>

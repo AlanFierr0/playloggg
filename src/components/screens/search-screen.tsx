@@ -37,9 +37,9 @@ function onKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
 }
 return (<div onKeyDown={onKeyDown}>
 <h1 className="sr-only">Search the sample catalog</h1>
-<div className="w-full  bg-surface"><div className="flex flex-col w-full relative min-h-[calc(100vh-4rem)]">
+<div className="w-full  bg-surface"><div className="flex flex-col w-full relative min-h-[calc(100dvh-var(--site-header-height))]">
 
-<div aria-hidden="true" className="w-full max-w-7xl mx-auto px-6 lg:px-12 py-8 opacity-25 filter blur-[3px] pointer-events-none select-none">
+<div aria-hidden="true" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 opacity-25 filter blur-[3px] pointer-events-none select-none">
 <div className="flex items-center justify-between pb-6">
 <div className="space-y-1">
 <span className="font-label-sm text-label-sm uppercase tracking-widest text-primary">{"Archival Index"}</span>
@@ -102,28 +102,28 @@ return (<div onKeyDown={onKeyDown}>
 
 </div>
 
-<div className="fixed inset-0 top-16 z-40 bg-surface-container-lowest/80 backdrop-blur-md flex items-start justify-center p-4 sm:p-6 md:p-10 overflow-y-auto" onClick={(event) => { if (event.target === event.currentTarget) close(); }}>
+<div className="fixed inset-0 top-[var(--site-header-height)] z-40 bg-surface-container-lowest/80 backdrop-blur-md flex items-start justify-center p-3 sm:p-6 overflow-hidden" onClick={(event) => { if (event.target === event.currentTarget) close(); }}>
 
-<div className="w-full max-w-3xl bg-surface-container-low shadow-2xl rounded-xl overflow-hidden flex flex-col my-auto sm:my-8 transition-all animate-in fade-in duration-200" id="palette-dialog" ref={dialog} role={"dialog"} aria-modal={true} aria-label={"Search the sample catalog"}>
+<div className="search-dialog w-full min-h-0 max-w-3xl bg-surface-container-low shadow-2xl rounded-xl overflow-hidden flex flex-col my-auto transition-all animate-in fade-in duration-200" id="palette-dialog" ref={dialog} role={"dialog"} aria-modal={true} aria-label={"Search the sample catalog"}>
 
-<div className="relative flex items-center px-5 py-4 bg-surface-container">
+<div className="relative flex shrink-0 items-center px-3 sm:px-5 py-3 sm:py-4 bg-surface-container">
 <span className="material-symbols-outlined text-primary text-[22px] mr-3.5 flex-shrink-0 animate-pulse">{"search"}</span>
 
-<div className="flex-1 relative flex items-center">
+<div className="min-w-0 flex-1 relative flex items-center">
 <input className="w-full bg-transparent text-on-surface font-headline-md text-headline-md tracking-tight focus:outline-none placeholder:text-on-surface-variant/40 caret-primary" id="command-input" placeholder="Search titles, directors, lists, or commands..." type="text" ref={input} value={query} onChange={(event) => setQuery(event.target.value)} aria-label={"Search titles, profiles and commands"} />
 
 <span className="hidden sm:inline-block w-2 h-5 bg-primary/80 ml-0.5 animate-pulse"></span>
 
 </div>
 
-<div className="flex items-center gap-2 ml-4">
+<div className="flex shrink-0 items-center gap-2 ml-2 sm:ml-4">
 <button className="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm tracking-widest uppercase transition-colors" title="Close search" onClick={close}>{"\n            ESC\n          "}</button>
 
 </div>
 
 </div>
 
-<div className="flex items-center gap-2 px-5 py-2.5 bg-surface-container-low text-on-surface-variant overflow-x-auto">
+<div className="flex shrink-0 flex-wrap items-center gap-2 px-3 sm:px-5 py-2.5 bg-surface-container-low text-on-surface-variant">
 <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant/70 mr-1 flex items-center gap-1">
 <span className="material-symbols-outlined text-[14px]">{"tune"}</span>
 {" Scope:\n        "}</span>
@@ -142,8 +142,8 @@ return (<div onKeyDown={onKeyDown}>
 
 <SearchResults query={query} scope={scope} mode={mode} />
 
-<div className="flex items-center justify-between px-5 py-3 bg-surface-container-lowest text-on-surface-variant font-label-sm text-label-sm">
-<div className="flex items-center gap-4 flex-wrap">
+<div className="search-help flex shrink-0 flex-wrap gap-3 items-center justify-between px-3 sm:px-5 py-3 bg-surface-container-lowest text-on-surface-variant font-label-sm text-label-sm">
+<div className="flex items-center gap-2 sm:gap-4 flex-wrap">
 <span className="flex items-center gap-1.5">
 <kbd className="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-semibold">{"↵"}</kbd>
 

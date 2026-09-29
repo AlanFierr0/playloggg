@@ -5,12 +5,34 @@
 /* Preserve the base behavior of the Stitch export. */
 @layer base {
   html, body { margin: 0; padding: 0; }
+  html { --site-header-height: 7rem; scroll-padding-top: calc(var(--site-header-height) + 1rem); }
+  @media (min-width: 1024px) { html { --site-header-height: 4rem; } }
   body { overscroll-behavior: none; }
   main > :first-child { margin-top: 0 !important; }
   main > :last-child { margin-bottom: 0 !important; }
   :focus-visible { outline: 2px solid #ffc665; outline-offset: 3px; }
 }
+/* Smaller screens use the export's mobile type scale; desktop tokens stay intact. */
+@layer utilities {
+  @media (max-width: 639px) {
+    .text-headline-xl { font-size: 26px; line-height: 32px; }
+    .text-display-lg { font-size: 34px; line-height: 40px; }
+    .text-headline-md { font-size: 16px; line-height: 22px; }
+    input:not([type="checkbox"]):not([type="range"]), select, textarea { font-size: 16px; }
+  }
+}
+@media (pointer: coarse) {
+  button, a.inline-flex, a.flex, input:not([type="checkbox"]):not([type="range"]), select { min-height: 44px; }
+}
 ::-webkit-scrollbar { display: none; }
+.scroll-region { scrollbar-width: thin; scrollbar-color: #504535 #1b1b1f; }
+.scroll-region::-webkit-scrollbar { display: block; height: 6px; width: 6px; }
+.scroll-region::-webkit-scrollbar-thumb { background: #504535; border-radius: 3px; }
+.search-dialog { max-height: calc(100dvh - var(--site-header-height) - 1.5rem); }
+@media (min-width: 640px) {
+  .search-dialog { max-height: calc(100dvh - var(--site-header-height) - 3rem); }
+}
+@media (max-height: 500px) { .search-help { display: none; } }
 
 /* Google's icon stylesheet follows Next's CSS. Match the export's icon sizes
    with enough specificity to preserve Tailwind's original sizing. */

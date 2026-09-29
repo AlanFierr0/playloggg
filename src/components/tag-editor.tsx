@@ -12,9 +12,9 @@ export function TagEditor({ tags, onChange }: { tags: string[]; onChange: (tags:
     onChange(next); setLabel(""); setAdding(false); setError("");
   }
   return <div className="flex flex-col gap-2.5">
-    <div className="flex items-center justify-between gap-3"><span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Archival Shelves &amp; Curatorial Badges</span><span className="font-label-sm text-label-sm text-on-surface-variant">{tags.length}/20 tags</span></div>
+    <div className="flex flex-wrap items-center justify-between gap-3"><span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Archival Shelves &amp; Curatorial Badges</span><span className="font-label-sm text-label-sm text-on-surface-variant">{tags.length}/20 tags</span></div>
     <div className="flex flex-wrap gap-2" id="tag-pills">
-      {tags.map((tag) => <button key={tag.toLowerCase()} type="button" aria-label={`Remove tag ${tag}`} onClick={() => onChange(tags.filter((item) => item !== tag))} className="tag-pill px-3 py-1.5 rounded font-label-sm text-label-sm uppercase bg-primary/10 text-primary flex items-center gap-1.5"><span>{tag}</span><span aria-hidden="true" className="material-symbols-outlined text-[13px]">close</span></button>)}
+      {tags.map((tag) => <button key={tag.toLowerCase()} type="button" aria-label={`Remove tag ${tag}`} onClick={() => onChange(tags.filter((item) => item !== tag))} className="tag-pill max-w-full min-w-0 break-words text-left px-3 py-1.5 rounded font-label-sm text-label-sm uppercase bg-primary/10 text-primary flex items-center gap-1.5"><span className="min-w-0 break-words">{tag}</span><span aria-hidden="true" className="material-symbols-outlined text-[13px]">close</span></button>)}
       <button id="add-tag" type="button" disabled={tags.length >= 20} onClick={() => setAdding(true)} className="px-2.5 py-1.5 rounded font-label-sm text-label-sm uppercase bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center gap-1 disabled:opacity-50"><span className="material-symbols-outlined text-[14px]" aria-hidden="true">add</span>Add Tag</button>
     </div>
     {adding && <div className="flex flex-wrap items-center gap-2">
