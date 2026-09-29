@@ -13,7 +13,7 @@ const groups = groupTiers(logged);
 return (<>
 <div className="w-full  bg-surface"><div className="flex flex-col w-full">
 
-<div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-10 flex flex-col gap-10">
+<div className="relative w-full site-container mx-auto px-4 sm:px-6 lg:px-12 py-10 flex flex-col gap-10">
 
 <div className="absolute top-10 left-1/2 -translate-x-1/2 w-3/4 h-64 bg-gradient-to-b from-primary/10 via-tertiary/5 to-transparent blur-3xl pointer-events-none -z-10"></div>
 

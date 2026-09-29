@@ -23,7 +23,7 @@ export function SiteHeader() {
   }, [pathname, router, searchHref]);
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
-      <div className="h-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 flex items-center justify-between gap-2 lg:gap-6">
+      <div className="h-16 site-container mx-auto px-4 sm:px-6 lg:px-12 flex items-center justify-between gap-2 lg:gap-6">
         <div className="flex min-w-0 items-center gap-8">
           <Link className="flex shrink-0 items-center gap-2 lg:gap-3 group min-h-11" href="/" aria-label="Playlogg home">
             <span aria-hidden="true" className="material-symbols-outlined text-primary text-[28px]">sports_esports</span>

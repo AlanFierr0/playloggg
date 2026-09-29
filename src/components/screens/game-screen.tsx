@@ -17,7 +17,7 @@ return (<>
 
 <div className="absolute inset-0 bg-gradient-to-r from-surface via-transparent to-surface/80 pointer-events-none"></div>
 
-<div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pt-8 lg:pt-28 pb-8 sm:pb-12">
+<div className="relative z-10 site-container mx-auto px-4 sm:px-6 lg:px-12 pt-8 lg:pt-28 pb-8 sm:pb-12">
 
 <nav className="flex min-w-0 items-center gap-2 mb-6 sm:mb-8">
 <Link className="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md uppercase tracking-wider group" data-path="discover" href="/">
@@ -226,7 +226,7 @@ return (<>
 
 </div>
 
-<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-10 w-full">
+<div className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-10 w-full">
 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
 
 <div className="lg:col-span-8 min-w-0 flex flex-col gap-6 sm:gap-10">

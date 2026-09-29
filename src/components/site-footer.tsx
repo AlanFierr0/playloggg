@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PreviewAction } from "@/components/preview-action";
 
-export function SiteFooter() { return (<footer className="w-full bg-surface-container-lowest mt-space-xl"><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-10 flex flex-col md:flex-row items-center justify-between gap-4"><div className="flex items-center gap-3"><span className="font-headline-md text-headline-md tracking-tight uppercase text-on-surface-variant">{"Playlog"}<span className="text-primary">{".gg"}</span>
+export function SiteFooter() { return (<footer className="w-full bg-surface-container-lowest mt-space-xl"><div className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-10 flex flex-col md:flex-row items-center justify-between gap-4"><div className="flex items-center gap-3"><span className="font-headline-md text-headline-md tracking-tight uppercase text-on-surface-variant">{"Playlog"}<span className="text-primary">{".gg"}</span>
 </span>
 <span className="font-label-sm text-label-sm text-on-surface-variant">{"© 2025"}</span>
 </div>

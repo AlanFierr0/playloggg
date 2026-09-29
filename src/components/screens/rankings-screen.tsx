@@ -23,7 +23,7 @@ const ranksBySlug = new Map(rated.map((game, index) => [game.slug, index + 1]));
 return (<>
 <div className="w-full  bg-surface"><div className="flex flex-col w-full">
 
-<div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-10 overflow-x-clip">
+<div className="relative w-full site-container mx-auto px-4 sm:px-6 lg:px-12 py-10 overflow-x-clip">
 <div className="absolute -top-12 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
 <div className="absolute top-48 right-10 w-80 h-80 bg-secondary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>

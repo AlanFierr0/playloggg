@@ -39,7 +39,7 @@ return (<div onKeyDown={onKeyDown}>
 <h1 className="sr-only">Search the sample catalog</h1>
 <div className="w-full  bg-surface"><div className="flex flex-col w-full relative min-h-[calc(100dvh-var(--site-header-height))]">
 
-<div aria-hidden="true" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 opacity-25 filter blur-[3px] pointer-events-none select-none">
+<div aria-hidden="true" className="w-full site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 opacity-25 filter blur-[3px] pointer-events-none select-none">
 <div className="flex items-center justify-between pb-6">
 <div className="space-y-1">
 <span className="font-label-sm text-label-sm uppercase tracking-widest text-primary">{"Archival Index"}</span>

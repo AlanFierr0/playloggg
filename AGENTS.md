@@ -26,7 +26,9 @@ The user requested full responsive layouts. Preserve the desktop design while
 using the exported mobile type scale and responsive spacing/grids. Keep all
 navigation and search accessible below desktop widths. The shared header-height
 CSS variable must also position page content, search and anchor scrolling. See
-docs/responsive-layouts.md for behavior and viewport verification.
+docs/responsive-layouts.md for behavior and viewport verification. Use the shared
+`site-container` for full-page layouts so they expand beyond 1440px while keeping
+header, content and footer aligned; preserve bounded editor/dialog text widths.
 
 ## Development
 Work directly on `main`. Do not create feature branches or pull requests unless

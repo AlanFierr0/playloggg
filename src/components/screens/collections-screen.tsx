@@ -42,7 +42,7 @@ export function CollectionsScreen({ initial }: { initial?: CuratedList }) {
     if (!saved) return;
     startTransition(async () => { try { const result = await deleteList(saved.id, saved.revision); setMessage(result.message); if (result.ok) { router.push("/lists"); router.refresh(); } } catch { setMessage("Deleting is unavailable. The list has been kept."); } });
   }
-  return <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-10 space-y-8">
+  return <div className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-10 space-y-8">
     <header className="break-words space-y-3"><Link href="/tiers" className="text-primary font-label-md text-label-md">← Personal tier board</Link><h1 className="font-headline-xl text-headline-xl font-bold">Curated lists</h1><p className="text-on-surface-variant">{profile.displayName} · {profile.isPublic ? "Visible with this public profile" : "Private with this profile"}. Games follow your custom order.</p></header>
     <nav aria-label="Curated lists" className="flex flex-wrap gap-3"><Link href="/lists" className={`inline-flex min-w-0 items-center ${button}`}>New list</Link>{lists.map((list) => <Link key={list.id} href={`/lists/${list.id}`} className={`inline-flex min-w-0 items-center ${button}`}><span className="min-w-0 break-words">{list.name}</span></Link>)}</nav>
     {!initial && !canEdit ? <p className="text-on-surface-variant">{lists.length ? "Choose a list to view its games." : "This profile has no curated lists."}</p> : <section className="bg-surface-container-low rounded-lg p-4 sm:p-6 space-y-6">

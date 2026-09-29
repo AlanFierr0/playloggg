@@ -57,3 +57,19 @@ No real owner data, credentials, infrastructure or deployment settings changed.
 The responsive update introduces no dependencies or schema changes. The
 required tags/lists migration is applied, and the user authorized production
 rollout of both milestones from `main`.
+
+## Wide-screen correction
+
+The first responsive audit checked navigation and overflow but missed the fixed
+1280px maximum width on wide monitors. Shared `site-container` layouts now keep
+the original desktop sizing through 1440px and expand smoothly up to 1792px. At
+1920px the container is 1760px; the header, page sections and footer align. The
+home spotlight height scales on wide screens, and portrait editorial cards use
+the reviewed cover rather than cropping landscape artwork.
+
+A follow-up browser audit passed nine routes at 320, 768, 1280, 1440, 1920 and
+2560px (54 route/viewport checks). It also checks that the wide container and
+spotlight actually grow. Desktop/mobile screenshots were visually inspected.
+No browser runtime errors were reported; typecheck, lint and production build
+pass. These checks used the local development server with the live read-only
+catalog; no owner records were changed.

@@ -9,8 +9,8 @@ return (<>
 <div className="relative w-full overflow-hidden">
 <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-primary/5 rounded-full blur-[140px] pointer-events-none"></div>
 
-<section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pt-6 sm:pt-8 pb-8 sm:pb-20">
-<div className="relative flex min-h-[560px] sm:min-h-[600px] flex-col justify-end rounded-xl overflow-hidden bg-surface-container-lowest shadow-2xl group">
+<section className="site-container mx-auto px-4 sm:px-6 lg:px-12 pt-6 sm:pt-8 pb-8 sm:pb-20">
+<div className="home-spotlight relative flex min-h-[560px] sm:min-h-[600px] flex-col justify-end rounded-xl overflow-hidden bg-surface-container-lowest shadow-2xl group">
 
 <div className="absolute inset-0 bg-cover bg-center h-full w-full transition-transform duration-700 ease-out group-hover:scale-[1.015]" role="img" aria-label="Elden Ring: Shadow of the Erdtree artwork" style={{ backgroundImage: `url(${gameImages("elden-ring-shadow-of-the-erdtree").artwork})` }}>
 </div>
@@ -85,7 +85,7 @@ return (<>
 
 </section>
 
-<section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-12">
+<section className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-12">
 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
 <div>
 <span className="font-label-sm text-label-sm text-primary uppercase tracking-widest block mb-1">{"Archival Selection"}</span>
@@ -107,7 +107,7 @@ return (<>
 
 <Link className="group flex flex-col" data-path="game/baldurs-gate-3" href="/game/baldurs-gate-3">
 <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl">
-<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={gameImages("baldurs-gate-3").artwork ?? gameImages("baldurs-gate-3").cover} alt="Baldur's Gate III artwork" />
+<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={gameImages("baldurs-gate-3").cover} alt="Baldur's Gate III cover" />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
@@ -129,7 +129,7 @@ return (<>
 
 <Link className="group flex flex-col" data-path="game/disco-elysium" href="/game/disco-elysium">
 <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl">
-<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={gameImages("disco-elysium").artwork ?? gameImages("disco-elysium").cover} alt="Disco Elysium artwork" />
+<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={gameImages("disco-elysium").cover} alt="Disco Elysium cover" />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
@@ -151,7 +151,7 @@ return (<>
 
 <Link className="group flex flex-col" data-path="game/metaphor-refantazio" href="/game/metaphor-refantazio">
 <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl">
-<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={gameImages("metaphor-refantazio").artwork ?? gameImages("metaphor-refantazio").cover} alt="Metaphor: ReFantazio artwork" />
+<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={gameImages("metaphor-refantazio").cover} alt="Metaphor: ReFantazio cover" />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
@@ -173,7 +173,7 @@ return (<>
 
 <Link className="group flex flex-col" data-path="game/alan-wake-2" href="/game/alan-wake-2">
 <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl">
-<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={gameImages("alan-wake-2").artwork ?? gameImages("alan-wake-2").cover} alt="Alan Wake II artwork" />
+<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={gameImages("alan-wake-2").cover} alt="Alan Wake II cover" />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
@@ -195,7 +195,7 @@ return (<>
 
 <Link className="group flex flex-col" data-path="game/half-life-2" href="/game/half-life-2">
 <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl">
-<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={gameImages("half-life-2").artwork ?? gameImages("half-life-2").cover} alt="Half-Life 2 artwork" />
+<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={gameImages("half-life-2").cover} alt="Half-Life 2 cover" />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
@@ -219,14 +219,14 @@ return (<>
 
 </section>
 
-<section className="hidden sm:block max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-12">
+<section className="hidden sm:block site-container mx-auto px-4 sm:px-6 lg:px-12 py-12">
 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
 </div>
 
 </section>
 
-<section className="hidden sm:block max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pt-8 pb-16">
+<section className="hidden sm:block site-container mx-auto px-4 sm:px-6 lg:px-12 pt-8 pb-16">
 </section>
 
 </div>
