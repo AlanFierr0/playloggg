@@ -6,6 +6,10 @@ and temporary browser interactions. All people use the same profile concepts.
 
 ## Local development
 
+Use `main` for ongoing work, with logical commits directly on that branch.
+Feature branches and pull requests are used only when explicitly requested.
+Pushing `main` triggers the Vercel production deployment.
+
 Use Node.js 22.13+ and pnpm 11.19.0 (the version pinned in `package.json`).
 
 ```sh
