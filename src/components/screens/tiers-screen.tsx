@@ -7,7 +7,7 @@ import art from "@/data/portfolio-art.json";
 import { PreviewAction } from "@/components/preview-action";
 
 export function TiersScreen() {
-const { games } = usePortfolio();
+const { games, profile } = usePortfolio();
 const rated = ratedGames(games);
 const groups = groupTiers(rated);
 return (<>
@@ -101,7 +101,7 @@ return (<>
 <div className="flex items-center gap-3">
 <span className="material-symbols-outlined text-primary text-xl">{"auto_awesome"}</span>
 
-<span className="font-body-sm text-body-sm">{"Sample ratings. Tiers are independent of scores; edits are not saved yet."}</span>
+<span className="font-body-sm text-body-sm">{profile.isSample ? "Sample ratings. Sign in to save your own scores and independent tiers." : "Your saved ratings. Edit scores and independent tiers in the game log."}</span>
 
 </div>
 

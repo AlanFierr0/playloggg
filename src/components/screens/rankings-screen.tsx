@@ -38,7 +38,7 @@ return (<>
 <div className="flex items-center gap-3">
 <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-semibold">{profile.displayName}</h1>
 
-<span className="font-label-sm text-label-sm uppercase tracking-wider px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-medium">{"Sample profile"}</span>
+<span className="font-label-sm text-label-sm uppercase tracking-wider px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-medium">{profile.isSample ? "Sample profile" : profile.isPublic ? "Public profile" : "Private profile"}</span>
 
 </div>
 
@@ -106,7 +106,7 @@ return (<>
 <span className="font-label-md text-label-md text-on-surface font-medium tracking-widest">{currentPage} <span className="text-outline-variant font-normal">of</span> {pageCount}</span>
 <button type="button" aria-label="Next Page" className="p-2 rounded hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-30 disabled:pointer-events-none" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}><span className="material-symbols-outlined text-[20px]" aria-hidden="true">east</span></button>
 </div>
-<div className="hidden sm:flex items-center gap-4 font-label-sm text-label-sm"><span className="text-on-surface-variant/70">Displaying entries {filtered.length ? offset + 1 : 0}–{offset + visible.length} of {filtered.length}</span><span className="w-1 h-1 rounded-full bg-surface-container-highest"></span><span className="text-on-surface-variant/70">Sample ratings</span></div>
+<div className="hidden sm:flex items-center gap-4 font-label-sm text-label-sm"><span className="text-on-surface-variant/70">Displaying entries {filtered.length ? offset + 1 : 0}–{offset + visible.length} of {filtered.length}</span><span className="w-1 h-1 rounded-full bg-surface-container-highest"></span><span className="text-on-surface-variant/70">{profile.isSample ? "Sample ratings" : "Saved ratings"}</span></div>
 </footer>
 
 </div>
@@ -126,6 +126,6 @@ return <article className="relative group flex flex-col cursor-pointer transitio
 <div className="absolute top-3 right-3 flex items-center"><span className="font-label-md text-label-md font-bold px-2.5 py-1 rounded bg-surface-container-lowest/90 text-primary backdrop-blur-md shadow-md">{game.score}</span></div>
 <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-surface-container-lowest/90 backdrop-blur-md flex items-center justify-between"><span className="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">{game.tier ? "Tier " + game.tier : "Unassigned tier"}</span><div className="flex items-center gap-1 text-primary"><span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">star</span><span className="font-label-sm text-label-sm font-bold">{(game.score / 20).toFixed(1)}</span></div></div>
 </div>
-<div className="mt-3.5 space-y-1"><div className="flex items-baseline justify-between gap-2"><h2 className="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight truncate group-hover:text-primary transition-colors"><Link className="after:absolute after:inset-0" href={"/game/" + game.slug}>{game.title}</Link></h2><span className="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">{game.year ?? "—"}</span></div><p className="font-body-sm text-body-sm text-on-surface-variant truncate">{game.genres?.join(" · ") || "Sample rating"}</p></div>
+<div className="mt-3.5 space-y-1"><div className="flex items-baseline justify-between gap-2"><h2 className="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight truncate group-hover:text-primary transition-colors"><Link className="after:absolute after:inset-0" href={"/game/" + game.slug}>{game.title}</Link></h2><span className="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">{game.year ?? "—"}</span></div><p className="font-body-sm text-body-sm text-on-surface-variant truncate">{game.genres?.join(" · ") || "Profile rating"}</p></div>
 </article>;
 }

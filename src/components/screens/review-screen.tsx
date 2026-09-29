@@ -1,11 +1,18 @@
 "use client";
 import Link from "next/link";
 import { PreviewAction } from "@/components/preview-action";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { usePortfolio } from "@/components/portfolio-provider";
+import { saveRating } from "@/app/actions/ratings";
 import type { Game, Tier } from "@/types/domain";
 import { TierBadge, ScoreStars } from "@/components/rating-controls";
 
 export function ReviewScreen({ game }: { game: Game }) {
+const { access } = usePortfolio();
+const canEdit = access?.canEdit ?? false;
+const [pending, startTransition] = useTransition();
+const [saveMessage, setSaveMessage] = useState("");
+const [saved, setSaved] = useState({ score: game.score ?? 0, tier: game.tier ?? null, review: game.review ?? "" });
 const isReference = game.slug === "metaphor-refantazio";
 const [score, setScore] = useState(game.score ?? 0);
 const [tier, setTier] = useState<Tier | null>(game.tier ?? null);
@@ -14,9 +21,19 @@ const [status, setStatus] = useState(0);
 const [broadcast, setBroadcast] = useState(true);
 const [hours, setHours] = useState(isReference ? "78.4 hrs" : "");
 const [date, setDate] = useState(isReference ? "October 28, 2024" : "");
-const [review, setReview] = useState(isReference ? "Hashino delivers an impeccably stylized political dissertation disguised as a peak turn-based odyssey. The Archetype hierarchy rewards relentless tactical friction, while Meguro's monastic choral brass anchors every election-trial confrontation with staggering momentum. A peerless apex for contemporary JRPGs." : "");
-function resetDraft() { setScore(game.score ?? 0); setTier(game.tier ?? null); setPlatform(1); setStatus(0); setBroadcast(true); setHours(isReference ? "78.4 hrs" : ""); setDate(isReference ? "October 28, 2024" : ""); setReview(isReference ? "Hashino delivers an impeccably stylized political dissertation disguised as a peak turn-based odyssey. The Archetype hierarchy rewards relentless tactical friction, while Meguro's monastic choral brass anchors every election-trial confrontation with staggering momentum. A peerless apex for contemporary JRPGs." : ""); }
-return (<>
+const [review, setReview] = useState(game.review ?? "");
+function resetDraft() { setScore(saved.score); setTier(saved.tier); setPlatform(1); setStatus(0); setBroadcast(true); setHours(isReference ? "78.4 hrs" : ""); setDate(isReference ? "October 28, 2024" : ""); setReview(saved.review); setSaveMessage(""); }
+function commit() {
+  const draft = { slug: game.slug, score, tier, review };
+  startTransition(async () => {
+    try {
+      const result = await saveRating(draft);
+      setSaveMessage(result.message);
+      if (result.ok) { setSaved({ score, tier, review: review.trim() }); setReview(review.trim()); }
+    } catch { setSaveMessage("Saving is unavailable right now. Your draft has been kept; please try again."); }
+  });
+}
+return (<><fieldset disabled={pending} className="contents">
 <div className="w-full  bg-surface"><div className="flex flex-col w-full">
 <div className="relative w-full min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 sm:p-6 lg:p-12 overflow-hidden">
 <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -33,11 +50,11 @@ return (<>
 <div className="flex items-center gap-3 min-w-0">
 <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
 
-<span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{"Archival Dispatch · Entry #4092"}</span>
+<span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{"Archival Dispatch"}</span>
 
 <span className="hidden sm:inline text-outline-variant font-label-sm">{"/"}</span>
 
-<span className="hidden sm:inline font-label-sm text-label-sm text-on-surface-variant/80">{"Temporary draft · resets on refresh"}</span>
+<span className="hidden sm:inline font-label-sm text-label-sm text-on-surface-variant/80">{canEdit ? "Draft · save to keep changes" : "Preview · sign in to save"}</span>
 
 </div>
 
@@ -59,6 +76,8 @@ return (<>
 </div>
 
 <div className="p-6 sm:p-8 lg:p-10 flex flex-col gap-8">
+<p className="font-body-sm text-body-sm text-on-surface-variant">{canEdit ? "Commit saves your score, tier, and review. Platform, status, hours, date, tags, and broadcast remain temporary." : <>Sample profile preview. <Link href="/login" className="text-primary underline">Sign in</Link> to save ratings to your own profile.</>}</p>
+<p role="status" className="font-body-sm text-body-sm text-primary">{pending ? "Saving…" : saveMessage}</p>
 <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-start">
 <div className="relative group flex-shrink-0 w-32 sm:w-40 aspect-[3/4] rounded-lg overflow-hidden bg-surface-container shadow-xl">
 <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt={game.title} src={game.cover} />
@@ -223,11 +242,11 @@ return (<>
 <div className="flex items-center justify-between">
 <label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" htmlFor="dispatch-textarea">{"Critical Dispatch / Review"}</label>
 
-<span className="font-label-sm text-label-sm text-on-surface-variant/70">{"Markdown Supported"}</span>
+<span className="font-label-sm text-label-sm text-on-surface-variant/70">{"Plain text · 20,000 characters max"}</span>
 
 </div>
 
-<textarea className="w-full bg-surface-container p-4 rounded text-on-surface font-body-md text-body-md placeholder:text-on-surface-variant/50 focus:outline-none focus:bg-surface-container-high transition-colors resize-none leading-relaxed" id="dispatch-textarea" placeholder="Write a dispatch or critical thoughts (optional)..." rows={4} value={review} onChange={(event) => setReview(event.target.value)}></textarea>
+<textarea className="w-full bg-surface-container p-4 rounded text-on-surface font-body-md text-body-md placeholder:text-on-surface-variant/50 focus:outline-none focus:bg-surface-container-high transition-colors resize-none leading-relaxed" id="dispatch-textarea" placeholder="Write a dispatch or critical thoughts (optional)..." rows={4} maxLength={20000} value={review} onChange={(event) => setReview(event.target.value)}></textarea>
 
 </div>
 
@@ -278,11 +297,11 @@ return (<>
 </label>
 
 <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-<button className="w-full sm:w-auto px-4 py-2 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-colors" type="button" onClick={resetDraft}>{"\n            Discard Draft\n          "}</button>
+<button id="discard-rating" className="w-full sm:w-auto px-4 py-2 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-colors" type="button" onClick={resetDraft}>{"\n            Discard Draft\n          "}</button>
 
-<PreviewAction className="w-full sm:w-auto px-6 py-2 rounded bg-primary-container text-on-primary-container hover:bg-primary font-label-md text-label-md uppercase tracking-wider font-semibold shadow-lg shadow-primary-container/20 transition-all flex items-center justify-center gap-2" type="button" message={"Preview only: your draft stays on this screen and resets when you leave or refresh. Nothing was saved or broadcast."}>
+<button id="commit-rating" className="w-full sm:w-auto px-6 py-2 rounded bg-primary-container text-on-primary-container hover:bg-primary font-label-md text-label-md uppercase tracking-wider font-semibold shadow-lg shadow-primary-container/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50" type="button" disabled={!canEdit || pending} onClick={commit}>
 <span className="material-symbols-outlined text-[18px]">{"bookmark_added"}</span>
-{"\n            Commit to Log\n          "}</PreviewAction>
+{pending ? "Saving…" : "Commit to Log"}</button>
 
 </div>
 
@@ -295,5 +314,5 @@ return (<>
 </div>
 
 </div>
-</>);
+</fieldset></>);
 }

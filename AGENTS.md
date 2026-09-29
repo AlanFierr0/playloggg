@@ -41,7 +41,12 @@ Scores belong to ratings; tiers are independent and may be unassigned. One curre
 rating/review exists per profile/game. Rank by score descending, then game slug.
 RLS exposes published profiles and their ratings; application roles have reads only.
 The application reads published Supabase data on the server using a publishable key.
-Authentication is deferred. Profile rankings, tiers and search use those records.
+Owner-only authentication and rating writes are implemented locally; the migration
+and production rollout await deployment approval. Use email magic links and
+administratively assigned ownership. Keep the owner's email in ignored/server-only
+configuration. Personal profiles start empty and private; never transfer sample
+ratings into them. See docs/owner-persistence.md. Rankings, tiers and search use
+the selected profile's records.
 Do not enable public database writes without an
 agreed ownership/access design. Inspect Supabase before finalizing a schema;
 track approved changes in versioned migrations. Keep credentials in ignored

@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import type { Database } from "@/types/database";
 import type { Game, Portfolio } from "@/types/domain";
+import { getOwner } from "@/lib/owner";
 
 type GameRow = Database["public"]["Tables"]["games"]["Row"];
 type RatingRow = Database["public"]["Tables"]["ratings"]["Row"];
@@ -20,14 +21,26 @@ async function readPublic<T>(resource: string): Promise<T[]> {
 
 const image = (id: string, size: "screenshot_huge" | "screenshot_big") => `https://images.igdb.com/igdb/image/upload/t_${size}/${id}.jpg`;
 
-// Only publishable-key reads; no IGDB credentials, provider calls or privileged writes.
+// Shared catalog can be cached; authenticated profile data is always request-local.
+export const getCatalog = cache(() => readPublic<GameRow>("games?select=slug,title,cover_url,release_year,released_on,genres,artwork_image_ids,screenshot_image_ids,search_keywords,id&order=slug.asc&limit=1000"));
+
 export const getPortfolio = cache(async (): Promise<Portfolio> => {
-  const [profiles, rows, ratings] = await Promise.all([
-    readPublic<ProfileRow>("profiles?handle=eq.alexvance&select=id,handle,display_name&limit=1"),
-    readPublic<GameRow>("games?select=slug,title,cover_url,release_year,released_on,genres,artwork_image_ids,screenshot_image_ids,search_keywords,id&order=slug.asc&limit=1000"),
-    readPublic<RatingRow & { profiles: { handle: string } }>("ratings?select=game_id,score,tier,profiles!inner(handle)&profiles.handle=eq.alexvance&limit=1000"),
-  ]);
-  const profile = profiles[0];
+  const [owner, rows] = await Promise.all([getOwner(), getCatalog()]);
+  let profile: Pick<ProfileRow, "id" | "handle" | "display_name" | "is_sample" | "is_public"> | undefined;
+  let ratings: Pick<RatingRow, "game_id" | "score" | "tier" | "review">[];
+  if (owner?.profile) {
+    profile = owner.profile;
+    const { data, error } = await owner.supabase.from("ratings").select("game_id,score,tier,review").eq("profile_id", profile.id).limit(1000);
+    if (error) throw new Error("Your ratings could not be loaded.");
+    ratings = data;
+  } else {
+    const [profiles, sampleRatings] = await Promise.all([
+      readPublic<ProfileRow>("profiles?handle=eq.alexvance&select=id,handle,display_name,is_sample,is_public&limit=1"),
+      readPublic<RatingRow>("ratings?select=game_id,score,tier,review,profiles!inner(handle)&profiles.handle=eq.alexvance&limit=1000"),
+    ]);
+    profile = profiles[0];
+    ratings = sampleRatings;
+  }
   if (!profile) throw new Error("The published sample profile could not be loaded.");
   const byGame = new Map(ratings.map((rating) => [rating.game_id, rating]));
   const games: Game[] = rows.map((row) => {
@@ -36,12 +49,13 @@ export const getPortfolio = cache(async (): Promise<Portfolio> => {
       slug: row.slug, title: row.title, cover: row.cover_url, year: row.release_year,
       releasedOn: row.released_on, genres: row.genres, keywords: row.search_keywords,
       score: rating?.score ?? null, tier: rating?.tier as Game["tier"] ?? null,
+      review: rating?.review ?? null,
       artwork: row.artwork_image_ids[0] ? image(row.artwork_image_ids[0], "screenshot_huge") : row.screenshot_image_ids[0] ? image(row.screenshot_image_ids[0], "screenshot_huge") : null,
       screenshots: row.screenshot_image_ids.map((id) => image(id, "screenshot_big")),
     };
   });
   games.sort((a, b) => (b.score ?? -1) - (a.score ?? -1) || a.slug.localeCompare(b.slug));
-  return { games, profile: { id: String(profile.id), handle: profile.handle, displayName: profile.display_name } };
+  return { games, profile: { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: profile.is_sample, isPublic: profile.is_public }, access: { signedIn: Boolean(owner), canEdit: Boolean(owner?.profile) } };
 });
 
 export async function getPublicGame(slug: string) {

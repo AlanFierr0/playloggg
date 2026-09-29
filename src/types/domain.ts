@@ -8,6 +8,7 @@ export interface Game {
   cover: string;
   year: number | null;
   score: number | null;
+  review?: string | null;
   keywords: string;
   releasedOn?: string | null;
   genres?: string[];
@@ -20,11 +21,14 @@ export interface Profile {
   id: string;
   displayName: string;
   handle: string;
+  isSample?: boolean;
+  isPublic?: boolean;
 }
 
 export interface Portfolio {
   games: Game[];
   profile: Profile;
+  access?: { signedIn: boolean; canEdit: boolean };
 }
 
 export interface Rating {

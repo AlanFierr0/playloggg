@@ -41,7 +41,8 @@ Next.js ESLint configuration fail on ESLint 10's rule API.
 | `/tiers` | S–F tier board |
 | `/compare` | Sample profile comparison |
 | `/search` | Search overlay; Ctrl/Cmd+K also opens it |
-| `/log` | Temporary rating/review draft |
+| `/log` | Rating/review editor; owner saves after Auth rollout |
+| `/login` | Owner email magic-link sign-in |
 | `/game/[slug]` | Game detail using the existing detail-page layout |
 
 Search reads the public Supabase catalog and sample profile, with categories, arrow keys, Enter,
@@ -49,10 +50,10 @@ Escape and modal focus trapping. “Switch Game” opens search in rating mode.
 Score and tier are independently editable. Platform, playback status and review
 fields are temporary controls. Refresh restores the original defaults.
 
-Drafts do not update stored ratings. “Commit to Log” explains that
-nothing is saved or broadcast. Unsupported visual controls display a prototype
-notice. Profile counts, averages, rankings, pagination and tiers use the loaded
-ratings.
+The prepared owner milestone lets “Commit to Log” save the signed-in owner's score,
+independent tier and review. It is disabled for the sample portfolio. Other draft
+fields remain temporary and nothing is broadcast. Unsupported controls display
+a prototype notice. Counts, averages, rankings and tiers use the selected profile.
 Comparison metrics, discovery content, public-figure profiles and editorial
 reviews remain illustrative content from Stitch. Curated lists and backlog
 are unavailable until their persistence is agreed.
@@ -100,7 +101,10 @@ advisor reported no findings.
 
 The application reads public data with the publishable key. Search, profile
 rankings, calculated statistics and tiers share the loaded portfolio.
-Authentication and persistent editing remain deferred.
+Owner sign-in and persistent score/tier/review editing are implemented locally,
+with deployment and account setup pending. See
+[owner persistence and rollout](docs/owner-persistence.md) for the access model,
+tested migration and required Auth settings. Other editing remains deferred.
 See [backend setup and verification](docs/read-only-backend-proposal.md) for the
 applied migration, seed rules and checks. Rebuild or verify the seed with:
 

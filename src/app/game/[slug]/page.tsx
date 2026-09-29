@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { GameScreen } from "@/components/screens/game-screen";
-import { getPortfolio, getPublicGame } from "@/lib/portfolio";
+import { getCatalog, getPortfolio, getPublicGame } from "@/lib/portfolio";
 
-export async function generateStaticParams() { return (await getPortfolio()).games.map((game) => ({ slug: game.slug })); }
+export async function generateStaticParams() { return (await getCatalog()).map((game) => ({ slug: game.slug })); }
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const game = await getPublicGame(slug);
@@ -15,5 +15,6 @@ export default async function GamePage({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const game = await getPublicGame(slug);
   if (!game) notFound();
-  return <GameScreen game={game} />;
+  const portfolio = await getPortfolio();
+  return <GameScreen game={game} isSample={portfolio.profile.isSample} />;
 }

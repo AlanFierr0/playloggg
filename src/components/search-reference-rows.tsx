@@ -28,11 +28,11 @@ export function ReferenceGame0({ game, query, mode }: { game: Game; query: strin
 
 <span className="inline-flex items-center gap-1 text-secondary font-medium">
 <span className="material-symbols-outlined text-[14px]">{"check_circle"}</span>
-{game.score === null ? " Unrated" : " Sample rating"}</span>
+{game.score === null ? " Unrated" : " Profile rating"}</span>
 
 <span className="text-on-surface-variant/40">{"•"}</span>
 
-<span className="font-label-md text-label-md text-on-surface-variant">{"Read only"}</span>
+<span className="font-label-md text-label-md text-on-surface-variant">{"Stored rating"}</span>
 
 </div>
 
@@ -44,7 +44,7 @@ export function ReferenceGame0({ game, query, mode }: { game: Game; query: strin
 <div className="flex flex-col items-end">
 <span className="px-2 py-0.5 rounded bg-primary text-on-primary font-label-md text-label-md font-bold shadow-sm">{game.score ?? "—"}</span>
 
-<span className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5">{game.score === null ? "Unrated" : "Sample score"}</span>
+<span className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5">{game.score === null ? "Unrated" : "Profile score"}</span>
 
 </div>
 
@@ -85,11 +85,11 @@ export function ReferenceGame1({ game, query, mode }: { game: Game; query: strin
 
 <span className="inline-flex items-center gap-1 text-on-surface-variant font-medium">
 <span className="material-symbols-outlined text-[14px]">{"done_all"}</span>
-{game.score === null ? " Unrated" : " Sample rating"}</span>
+{game.score === null ? " Unrated" : " Profile rating"}</span>
 
 <span className="text-on-surface-variant/40">{"•"}</span>
 
-<span className="font-label-md text-label-md text-on-surface-variant">{"Read only"}</span>
+<span className="font-label-md text-label-md text-on-surface-variant">{"Stored rating"}</span>
 
 </div>
 
@@ -101,7 +101,7 @@ export function ReferenceGame1({ game, query, mode }: { game: Game; query: strin
 <div className="flex flex-col items-end">
 <span className="px-2 py-0.5 rounded bg-surface-container-highest text-on-surface font-label-md text-label-md font-semibold">{game.score ?? "—"}</span>
 
-<span className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5">{game.score === null ? "Unrated" : "Sample score"}</span>
+<span className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5">{game.score === null ? "Unrated" : "Profile score"}</span>
 
 </div>
 
@@ -138,7 +138,7 @@ export function ReferenceGame2({ game, query, mode }: { game: Game; query: strin
 
 <span className="inline-flex items-center gap-1 text-tertiary font-medium">
 <span className="material-symbols-outlined text-[14px]">{"bookmark"}</span>
-{game.score === null ? " Unrated" : " Sample rating"}</span>
+{game.score === null ? " Unrated" : " Profile rating"}</span>
 
 </div>
 
@@ -150,7 +150,7 @@ export function ReferenceGame2({ game, query, mode }: { game: Game; query: strin
 <div className="flex flex-col items-end">
 <span className="px-2 py-0.5 rounded bg-secondary/20 text-secondary font-label-md text-label-md font-bold">{game.score ?? "—"}</span>
 
-<span className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5">{game.score === null ? "Unrated" : "Sample score"}</span>
+<span className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5">{game.score === null ? "Unrated" : "Profile score"}</span>
 
 </div>
 
@@ -169,7 +169,7 @@ export function ReferenceProfile0({ profile, count, average }: { profile: Profil
 <div className="flex items-center gap-1.5">
 <span className="font-headline-md text-body-lg font-bold text-on-surface truncate group-hover:text-primary transition-colors">{profile.displayName}</span>
 
-<span className="font-label-sm text-label-sm text-primary bg-primary/10 px-1 rounded uppercase font-semibold">{"Sample"}</span>
+<span className="font-label-sm text-label-sm text-primary bg-primary/10 px-1 rounded uppercase font-semibold">{profile.isSample ? "Sample" : profile.isPublic ? "Public" : "Private"}</span>
 
 </div>
 

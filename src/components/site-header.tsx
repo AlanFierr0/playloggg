@@ -4,10 +4,12 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import branding from "@/data/branding.json";
+import { usePortfolio } from "@/components/portfolio-provider";
 
 const navigation = [{ href: "/", label: "Discover" }, { href: "/profile", label: "Rankings" }, { href: "/tiers", label: "Lists" }, { href: "/compare", label: "Compare" }];
 
 export function SiteHeader() {
+  const { access } = usePortfolio();
   const pathname = usePathname();
   const router = useRouter();
   const searchHref = `/search?q=&from=${encodeURIComponent(pathname === "/search" ? "/" : pathname)}`;
@@ -37,7 +39,7 @@ export function SiteHeader() {
             <kbd className="absolute right-2 font-label-sm text-label-sm text-on-surface-variant px-1.5 py-0.5 rounded bg-surface-container-high pointer-events-none">⌘K</kbd>
           </div>
           <Link className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-primary-container text-on-primary-container hover:bg-primary transition-colors font-label-md text-label-md tracking-wider uppercase font-semibold" href="/log"><span className="material-symbols-outlined text-[16px]" aria-hidden="true">add</span><span>Log</span></Link>
-          <Link className="flex-shrink-0" href="/profile" aria-label="My profile"><img alt="Profile" className="w-8 h-8 rounded-full object-cover ring-1 ring-surface-variant hover:ring-primary transition-all" src={branding.avatar} /></Link>
+          <Link className="flex-shrink-0" href="/login" aria-label={access?.signedIn ? "Account and sign out" : "Owner sign-in"}><img alt="Account" className="w-8 h-8 rounded-full object-cover ring-1 ring-surface-variant hover:ring-primary transition-all" src={branding.avatar} /></Link>
         </div>
       </div>
     </header>
