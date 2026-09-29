@@ -150,7 +150,8 @@ environment settings were restored; these checks did not alter Supabase data.
 The user authorized merging the read-only integration into `main` and using
 `main` directly for ongoing work. Production deployment follows pushes to that
 branch. The user subsequently approved owner-only access and email magic links.
-That milestone is implemented locally under the separately documented
-[ownership/access design](owner-persistence.md); production rollout is pending.
+That milestone is implemented under the separately documented
+[ownership/access design](owner-persistence.md). The migration is applied and
+production rollout is authorized; owner account/Auth configuration remains.
 Comparison and discovery remain illustrative screens; curated lists, playback
 status, community statistics and editorial reviews have no persistence yet.
