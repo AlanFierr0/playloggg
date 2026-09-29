@@ -29,9 +29,9 @@ Commit saves optional score (0–100; null means unrated), independent tier
 (20,000 characters maximum). See [Backlog and playback status](backlog-and-playback-status.md)
 for the applied follow-up migration. Upsert keeps one current
 rating per profile/game; an empty review clears it. Failed saves preserve drafts;
-discard restores saved values. The locally prepared
+discard restores saved values. The applied
 [saved play details](saved-play-details.md) milestone adds platform, hours, and
-completion date after migration/deployment approval. Tags and broadcast remain temporary. Reviews render as escaped text.
+completion date; production rollout is authorized. Tags and broadcast remain temporary. Reviews render as escaped text.
 
 ## Rollout order
 

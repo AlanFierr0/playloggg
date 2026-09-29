@@ -124,8 +124,8 @@ consume the same server-loaded portfolio as game detail and rating drafts.
   games remain searchable and display an explicit unrated state. It does not
   advertise fixture profiles or nonexistent curated lists as database results.
 - Original per-screen cover variants are retained in
-  `src/data/portfolio-art.json`; games without an original variant use their
-  catalog cover. Layout, typography, navigation and tier colors are preserved.
+  the original design exports. This earlier choice is superseded by the user's
+  request to remove generated images; application cards now use catalog covers. Layout, typography, navigation and tier colors are preserved.
 - Game detail labels its score as the sample profile's rating; community and
   editorial material remains illustrative. Draft tiers initialize and reset
   to the saved tier, including no assignment. Draft editing stays memory-only.

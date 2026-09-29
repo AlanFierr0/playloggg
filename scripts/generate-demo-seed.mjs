@@ -27,7 +27,7 @@ end
 $seed_guard$;
 
 insert into public.profiles (handle, display_name, avatar_url, is_public, is_sample)
-values (${literal(profile.handle)}, ${literal(profile.display_name)}, ${literal(profile.avatar_url)}, true, true)
+values (${literal(profile.handle)}, ${literal(profile.display_name)}, ${profile.avatar_url === null ? "null" : literal(profile.avatar_url)}, true, true)
 on conflict (handle) do nothing;
 
 insert into public.games (slug, title, cover_url, release_year, search_keywords, is_sample)

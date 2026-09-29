@@ -1,10 +1,12 @@
+import { ProfileAvatar } from "@/components/profile-avatar";
+import { gameImages } from "@/lib/game-images";
 import Link from "next/link";
 import type { Game, Profile } from "@/types/domain";
 
 export function ReferenceGame0({ game, query, mode }: { game: Game; query: string; mode: "browse" | "log" }) { return (<Link data-search-result className="group relative flex items-center justify-between p-2.5 rounded-lg bg-surface-container-high shadow-md transition-all" href={mode === "log" ? "/log?game=" + game.slug : "/game/" + game.slug}>
 <div className="flex items-center gap-3.5 min-w-0">
 <div className="relative w-12 h-16 rounded overflow-hidden flex-shrink-0 bg-surface-container-highest shadow">
-<img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAB_4g_lDi59xZBF98BIwVrApVThkis9Q56RTuHZdyX3q7ds0YVEdchiYT17z3Dek4fxidPQAKG-Lv3BtktGDXnNznBp03OKO72jkL5l8iE9gTbbdl89zDI8nv3SQ8jvXg2bWPuqhQLIOFljPGGs7c1Qrkd-gjNHpzXDDRWSqUe0xdbp4V_dv9ajEmuohd0gX4r-UmJ5OKVKnEq2fIxC4giapwkR5g_tBUJ5lx9v3x8gBp1YCYFXmrX" alt="Moody cinematic box art poster for Cyberpunk 2077 Phantom Liberty featuring high contrast neon amber and dark obsidian shadows with a solitary spy silhouette in a dystopian retro-futuristic city." />
+<img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src={game.cover} alt={game.title} />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/80 via-transparent to-transparent"></div>
 
@@ -61,7 +63,7 @@ export function ReferenceGame0({ game, query, mode }: { game: Game; query: strin
 export function ReferenceGame1({ game, query, mode }: { game: Game; query: string; mode: "browse" | "log" }) { return (<Link data-search-result className="group flex items-center justify-between p-2.5 rounded-lg hover:bg-surface-container transition-all" href={mode === "log" ? "/log?game=" + game.slug : "/game/" + game.slug}>
 <div className="flex items-center gap-3.5 min-w-0">
 <div className="relative w-12 h-16 rounded overflow-hidden flex-shrink-0 bg-surface-container-highest shadow">
-<img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRfWK-EIqNC8BRJjm-esKfllBT8NsqDaudcYBsGdfb6aVtolgHsqVOFZ976IH-VBhAoX32bO1gu-xps5D9KuR3UJRq_UVPiUJd2YnblMhwli9iB_p6XRLe-3CE8vnNDlpuvFmIESXxf2M4LZxzvCBsC2nnuB-q_5Npl-xGjCUYRnQ-SX1p174f4VH7QclfPHqYgdtmmgAt0CMDwzerbJivygQ-JQYS9GnVmiwnZgOPta6WrKqneV1a" alt="Dystopian neon aesthetic game cover for Cyberpunk 2077 with yellow background hue, futuristic cyberware warrior character profile with dark obsidian cinematic palette." />
+<img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src={game.cover} alt={game.title} />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/80 via-transparent to-transparent"></div>
 
@@ -113,7 +115,7 @@ export function ReferenceGame1({ game, query, mode }: { game: Game; query: strin
 export function ReferenceGame2({ game, query, mode }: { game: Game; query: string; mode: "browse" | "log" }) { return (<Link data-search-result className="group flex items-center justify-between p-2.5 rounded-lg hover:bg-surface-container transition-all" href={mode === "log" ? "/log?game=" + game.slug : "/game/" + game.slug}>
 <div className="flex items-center gap-3.5 min-w-0">
 <div className="relative w-12 h-16 rounded overflow-hidden flex-shrink-0 bg-surface-container-highest shadow">
-<img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtBc6YqCTsYfTis5J6jZdvzCYHtxHHhCdcrcS5N_ztQeB_PYssJdh8-_7CR7OHm735PqhYj0Jf7gKhXqyUuOTbnSMcxzvJyU538ww0aaA5r3PgCIIQ9FZrPN1W_8FtL3eT-ROOvis0mBL8208J8p7LbT95Pc5GEwzcWBx5tOkVGSkYWE9EGPCtujUtF2CYkZI0qMx9TRBX0gw5uh8fhR2sxR_fTn1fp43FN6m0GH_MSNapyxfUqQZa" alt="Minimalist dark sci-fi poster artwork for System Shock 2023 remake, menacing green electronic wireframe face of SHODAN artificial intelligence peering from dark void." />
+<img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src={game.cover} alt={game.title} />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/80 via-transparent to-transparent"></div>
 
@@ -161,7 +163,7 @@ export function ReferenceGame2({ game, query, mode }: { game: Game; query: strin
 
 export function ReferenceProfile0({ profile, count, average }: { profile: Profile; count: number; average: string }) { return (<Link data-search-result className="group flex items-center gap-3 p-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors" href="/profile">
 <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-surface-container-highest shadow">
-<img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPR3kE6YXPh0KcbLB3QdntYw9Fur-K2Xwb06_RrKu21UnICzGWkoNyFVhMMidS1ncft6NyJSyWZR3gy8Z7qfEMRxjov1ssU2ObkYQT_M9LTnqpIBAHHa7UUW4B5MhoDtu0wBqGAEOZgh5feeC_BW_hJvTrOuTomxItaobb8mSBp5K5gGiTSBCnUcCb9rUByhMEV_3QAX1MyFEm9KKWic0jpPHQq43FznLNkqURWot_nJyKlvnJqM6b" alt="Monochrome minimal portrait of a digital game curator with clean framing, soft lighting, and high contrast cinematic mood." />
+<ProfileAvatar className="w-full h-full object-cover" name={profile.displayName} />
 
 </div>
 
@@ -184,7 +186,7 @@ export function ReferenceProfile0({ profile, count, average }: { profile: Profil
 
 export function ReferenceProfile1() { return (<Link data-search-result className="group flex items-center gap-3 p-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors" href="/compare">
 <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-surface-container-highest shadow">
-<img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEtR9byXm7ZjLBZF0UBD0ISuEXlkZRVwRnTF3HVd5ZRuPaSK_fxzKrG9Ua42HiNvU37ACIPE9SgOUnHU7qszYaO9JEMDN7XNqvhxsz9EZ17KLpvA61Jfmq_bLkC3QLOdkA-cdOaqMAlpaXK2-9XqwXKbGyP_Zjn4HBo8W10nrkBDNT9pOTF5TLH7XAIAMtPOCkASnxW2VTP2_XGFq655q0s0C9ra1JWHYXLj4rMT4pWrRBWdK_v1MM" alt="Atmospheric studio portrait of acclaimed game director with glasses under subtle amber rim lighting, dark moody studio background." />
+<ProfileAvatar className="w-full h-full object-cover" name="Hideo Kojima" />
 
 </div>
 
@@ -209,17 +211,17 @@ export function ReferenceList() { return (<Link data-search-result className="gr
 <div className="flex items-center gap-3.5 min-w-0">
 <div className="flex -space-x-4 flex-shrink-0">
 <div className="w-8 h-11 rounded bg-surface-container-highest overflow-hidden shadow">
-<img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQNPQeG3Qmgp4H50Xo8L4GbFJ3-sFTqAMWj0ySuRQu3fsX7monV1jPc4qGWsJqLMBt8S4xixHOBl7yGU0gRk4Q-0vspL9AgW4Ealc-m7gb-SXm-9Z1Zb5HWEmL-i495dN-tNZHVgHh6VziQkQGkDbUTLFFuFCeXdWxztvKt1EU9eNR8T9loYTSSliRQXFRQubW_gk4EiQ7Zkjhzqp5KMJKV89cl4KMEtiBcIHjbTS5Sp6cI7wZjKIo" alt="Dark neon cityscape poster thumbnail for sci-fi atmosphere ranking." />
+<img className="w-full h-full object-cover" src={gameImages("cyberpunk-2077").cover} alt="cyberpunk 2077 cover" />
 
 </div>
 
 <div className="w-8 h-11 rounded bg-surface-container-high overflow-hidden shadow">
-<img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDiiY0_jteuov2-LxX_IYok4YMHeE1UnGu4twbJwbZCb_rCkalwGraOxHdndMHro9H3U7IF6W7CzPw6gxdpP54dplTkgRMp_968PeD2L6PMQl3bprCgVwO4bdakt_-Gvw3rIdMs4JQq6Kb9RfwkMzK79w-1zxAlFXx7rpkV6TxOgqQl8j4lLf9CsZfEXR0zQpdP7jl9qO8aLC9eZHp7v-spJbJgIipUkep3VLNC8728Bk5PMeHcTlz1" alt="Obsidian tech terminal interface poster thumbnail for retro sci-fi games." />
+<img className="w-full h-full object-cover" src={gameImages("system-shock").cover} alt="system shock cover" />
 
 </div>
 
 <div className="w-8 h-11 rounded bg-surface-container overflow-hidden shadow">
-<img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRH7KnRnOnfZbyB3C9Gia_Jra8n6iCisrgweHjwx0NFhNnEEIj69Kq6akCyYK4Lw4PS-iR1Gl7Ikp-ct6C8gc_G6FsN3HZjQfGAZXH-EGJzHJQDKfgszZ80mH3kFhswIlVARXbUSGU_GNa7Umz9qeAHNoQPVgzPs-ylBqCy2ZOIBVg7lwklOWylryYsEkb6FNtmwIKt4JQ4wMqHJod4D3Iq48PynwKtSJY9Jtxxc6oCoZobM9SHTnV" alt="Moody cinematic portrait poster thumbnail of an android in torrential rain." />
+<img className="w-full h-full object-cover" src={gameImages("nier-automata").cover} alt="nier automata cover" />
 
 </div>
 

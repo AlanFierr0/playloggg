@@ -116,10 +116,10 @@ export type Database = {
       ratings: {
         Row: {
           completed_on: string | null
-          hours_played: number | null
-          platform: string | null
           created_at: string
           game_id: number
+          hours_played: number | null
+          platform: string | null
           profile_id: number
           review: string | null
           score: number | null
@@ -129,10 +129,10 @@ export type Database = {
         }
         Insert: {
           completed_on?: string | null
-          hours_played?: number | null
-          platform?: string | null
           created_at?: string
           game_id: number
+          hours_played?: number | null
+          platform?: string | null
           profile_id: number
           review?: string | null
           score?: number | null
@@ -142,10 +142,10 @@ export type Database = {
         }
         Update: {
           completed_on?: string | null
-          hours_played?: number | null
-          platform?: string | null
           created_at?: string
           game_id?: number
+          hours_played?: number | null
+          platform?: string | null
           profile_id?: number
           review?: string | null
           score?: number | null

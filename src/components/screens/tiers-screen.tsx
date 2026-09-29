@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { groupTiers, loggedGames } from "@/lib/portfolio-view";
 import type { Game } from "@/types/domain";
-import art from "@/data/portfolio-art.json";
+
 import { PreviewAction } from "@/components/preview-action";
 
 export function TiersScreen() {
@@ -123,9 +123,9 @@ return (<>
 
 const tierThemes: Record<string, { label: string; color: string }> = {"S":{"label":"Pinnacle","color":"text-primary"},"A":{"label":"Essential","color":"text-secondary"},"B":{"label":"Commendable","color":"text-tertiary"},"C":{"label":"Average","color":"text-outline"},"D":{"label":"Subpar","color":"text-on-surface-variant"},"F":{"label":"Unplayable","color":"text-error"},"Unassigned":{"label":"Unassigned","color":"text-on-surface-variant"}};
 function TierCard({ game, color }: { game: Game; color: string }) {
- const image = (art.tiers as Record<string, { cover: string; alt: string }>)[game.slug];
+
  return <div className="group relative rounded-lg overflow-hidden bg-surface-container transition-transform duration-200 hover:-translate-y-1">
- <div className="aspect-[3/4] w-full overflow-hidden bg-surface-container-high"><img className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src={image?.cover ?? game.cover} alt={image?.alt ?? game.title} /></div>
+ <div className="aspect-[3/4] w-full overflow-hidden bg-surface-container-high"><img className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src={game.cover} alt={game.title} /></div>
  <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-surface/90 backdrop-blur-md shadow"><span className={"font-label-sm text-label-sm font-bold " + color}>{game.score ?? "—"}</span></div>
  <div className="p-2.5 flex flex-col bg-surface-container"><h2 className="font-headline-md text-body-md font-semibold text-on-surface truncate"><Link className="after:absolute after:inset-0" href={"/game/" + game.slug}>{game.title}</Link></h2><span className="font-label-sm text-label-sm text-on-surface-variant truncate">{game.year ?? "Release year unavailable"}</span></div>
  </div>;

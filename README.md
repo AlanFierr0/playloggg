@@ -49,8 +49,8 @@ Search reads the public Supabase catalog and sample profile, with categories, ar
 Escape and modal focus trapping. “Switch Game” opens search in rating mode.
 Score and tier are independently editable. Saved owner scores, tiers, playback
 status and reviews reload from Supabase. Scores are optional; zero is a real
-score. Saved platform, playtime and completion date are the next locally prepared
-milestone, awaiting migration/deployment approval; see
+score. Saved optional platform, playtime and completion date reload from Supabase.
+Their migration is applied and production rollout is authorized; see
 [saved play details](docs/saved-play-details.md). Shelves/tags and broadcast
 remain temporary controls.
 
@@ -76,14 +76,17 @@ reviews remain illustrative content from Stitch. Curated lists remain unavailabl
 The user approved the HTML values when they conflict with `DESIGN.md` for this
 prototype. Ask again about any newly encountered conflict or visible design
 change. The tier and comparison screenshots are failed exports containing error
-text; their original HTML remains available. Fonts and artwork still use the
-original external URLs. IGDB metadata is imported through separate
+text; their original HTML remains available. Fonts retain their original external URLs. Game imagery uses reviewed IGDB
+covers/artwork, with verified box art for the two comparison-only classics.
+Profile portraits use initials until a real image is supplied; generated Stitch
+images are absent from the application. See [image sources](docs/image-sources.md). IGDB metadata is imported through separate
 administrative scripts; the app reads the stored catalog without contacting
 IGDB or receiving its credentials.
 
 Original fixtures remain as design references. Connected screens use reconciled
-Supabase ratings and imported catalog metadata. Original cover variants are
-retained per screen; missing metadata is not invented.
+Supabase ratings and imported catalog metadata. Game cards use the catalog cover consistently across rankings, tiers, search,
+and the editor. Detail backgrounds use the selected game's artwork; missing
+artwork is not invented.
 
 ## Infrastructure
 

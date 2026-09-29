@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { averageScore, filterRankings, ratedGames, type RankingFilter } from "@/lib/portfolio-view";
-import art from "@/data/portfolio-art.json";
+import { ProfileAvatar } from "@/components/profile-avatar";
 import type { Game } from "@/types/domain";
 import { playbackLabels } from "@/lib/playback-status";
 
@@ -29,7 +29,7 @@ return (<>
 <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-12">
 <div className="flex items-center gap-6">
 <div className="relative group">
-<img className="w-20 h-20 md:w-24 md:h-24 rounded object-cover shadow-2xl transition-transform duration-500 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC10WJHQ6xcmCtI2XkDbAxNeCgHlTziNZCIa6dyUePhcgmillWuI7XgKGaA5K4Uu_IborQAlk_k7IbxskrCFDF9Gm0vqdtNYekQEmKf4ey8b5B3eqFIv7JGO21pzkFGV2cFYTQ48B2wiJa8r4wPRlLSi3x79XASkYLnyh0j6NjwrfDcdDscRZ_Rz0p1yvfYYOwqYMYxK76w62uX44_x4ezYtBrzXVvqetuk0Lih35IEFX9cHPTtbSD6" alt="Editorial square-cut cinematic portrait of a creative media archivist in soft dramatic chiaroscuro lighting, deep graphite tones with warm amber keylight edge, textured film grain" />
+<ProfileAvatar className="w-20 h-20 md:w-24 md:h-24 rounded object-cover shadow-2xl transition-transform duration-500 group-hover:scale-105" name={profile.displayName} />
 
 <span className="absolute bottom-1 right-1 w-3 h-3 bg-secondary rounded-full ring-2 ring-surface shadow-sm"></span>
 
@@ -118,10 +118,10 @@ return (<>
 }
 
 function RankingCard({ game, rank }: { game: Game; rank?: number }) {
-const image = (art.ranking as Record<string, { cover: string; alt: string }>)[game.slug];
+
 return <article className="relative group flex flex-col cursor-pointer transition-transform duration-300" data-rank={rank} data-score={game.score}>
 <div className="relative w-full aspect-[3/4] rounded bg-surface-container-low overflow-hidden shadow-xl">
-<img className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" src={image?.cover ?? game.cover} alt={image?.alt ?? game.title} />
+<img className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" src={game.cover} alt={game.title} />
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-surface-container-lowest/10 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
 <div className="absolute top-3 left-3 flex items-center"><span className="font-label-md text-label-md font-bold px-2 py-1 rounded bg-surface-container-lowest/80 text-on-surface backdrop-blur-md shadow-md">{rank ? "#" + String(rank).padStart(2, "0") : "Backlog"}</span></div>
 <div className="absolute top-3 right-3 flex items-center"><span className="font-label-md text-label-md font-bold px-2.5 py-1 rounded bg-surface-container-lowest/90 text-primary backdrop-blur-md shadow-md">{game.score ?? "—"}</span></div>

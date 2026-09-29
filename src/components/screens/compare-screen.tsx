@@ -1,3 +1,5 @@
+import { gameImages } from "@/lib/game-images";
+import { ProfileAvatar } from "@/components/profile-avatar";
 import { PreviewAction } from "@/components/preview-action";
 
 export function CompareScreen() {
@@ -19,7 +21,7 @@ return (<>
 
 <div className="flex items-center gap-6 w-full md:w-auto justify-start">
 <div className="relative flex-shrink-0">
-<img className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover shadow-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCijOdZCxU12oY9lvcM7UuDUgu27G_DJlwP9x23FYVAjh6pXdpPsl4vDC5Wz-H8x5toeS5OupfQczeuUlG4tm9gcwbuKbgxI0cuSUwQubEn5aJMgjsZdt0kdEyEfHtIg8lk3vpwBpTnFBzwNXtW9Did7iLSoMEMuvg9OicXRJVNO3RgoEGD6PEvjkKAzMSLW7qZt-9BE8Aj7-oK_ZBviEr6wbwD2plOBJPd-httn5j-4J756QJZ2fxQ" alt="Editorial close portrait photograph of games journalist and media critic Alex Vance, contemplative gaze, soft warm cinematic lighting, dark textured background, deep amber tones, natural skin texture, studio lighting" />
+<ProfileAvatar className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover shadow-md" name="Alex Vance" />
 
 <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-secondary"></span>
 
@@ -64,7 +66,7 @@ return (<>
 </div>
 
 <div className="relative flex-shrink-0">
-<img className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover shadow-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPLHDThzi2bKIFTYYfybjyUX0LjJugOoKVeXlYUCpHPS5E2tA7CTow90XD0GiCatOAtJlTH2Kd_01nx0_Y5DF2pjf1VC_Mz4MG9H_rxZyLXYypH3708EYP0AJQLYlyLVVpxxHSUPCNL8n8y63UFwkwBSv4fxDqrryylWfzQdCguLtJVM7yX-MTLjzbR3OocBQX6Rb0M2v8jafvwmVjFArVk_j2W7z592o7ZfKR34bYwrXIEwwLgCcI" alt="Editorial portrait photograph of famed video game auteur director Hideo Kojima wearing modern minimalist glasses against deep volcanic graphite studio backdrop, soft cinematic spotlighting, contemplative expression" />
+<ProfileAvatar className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover shadow-md" name="Hideo Kojima" />
 
 <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-primary"></span>
 
@@ -109,7 +111,7 @@ return (<>
 <article className="bg-surface-container-low rounded-xl overflow-hidden p-6 md:p-8 flex flex-col justify-between shadow-lg transition-transform duration-300 hover:scale-[1.01]">
 <div className="flex flex-col sm:flex-row gap-6 items-start">
 <div className="w-28 sm:w-32 aspect-[3/4] flex-shrink-0 rounded-lg overflow-hidden shadow-md relative bg-surface-container">
-<img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqxuLFlOZ80-fDFOBHrBozixjtFwr362XtbVmhrSoZhYnITd5jiye-8kH79-hPx2thJuoUPjHf0u-xQAhCqnaJZwKJ_72e8NgbDi-npLNYnkq4DnX7YE94GIqqNSLoKIWQs_sWjFFbcXIKDoV19aFvUqlI_yE2oVkcHPFczlxFLyBfQ0pYNEAqs5HMKAJgfz7m6Jw4R6wxY9sAwF08RUqsLf2WaoIbnEIUBlGL2sVoJt70JqnhK0yn" alt="Cinematic high contrast video game cover art for Death Stranding showing a lonely futuristic courier crossing expansive misty mossy volcanic Icelandic mountains under a heavy slate sky" />
+<img className="w-full h-full object-cover" src={gameImages("death-stranding").cover} alt="death stranding cover" />
 
 <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-surface/85 backdrop-blur font-label-sm text-label-sm font-mono text-primary font-bold">{"2019"}</span>
 
@@ -158,7 +160,7 @@ return (<>
 <article className="bg-surface-container-low rounded-xl overflow-hidden p-6 md:p-8 flex flex-col justify-between shadow-lg transition-transform duration-300 hover:scale-[1.01]">
 <div className="flex flex-col sm:flex-row gap-6 items-start">
 <div className="w-28 sm:w-32 aspect-[3/4] flex-shrink-0 rounded-lg overflow-hidden shadow-md relative bg-surface-container">
-<img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoIXYOfoa5RU-YvOFalMXGzN3kJvaUWGFF1CEsmAEEQKZeJrLAtMilnUyTxfsOyxQrAtBbmsNyzm5bGrgrMahAIF-3Mz953wu5PPbsfUVudyiHJYh693vLfweHhmHhuw6O_vvE6splGP6_W89Y1L39a9rMBWEYk4mZFl278WkI2NgXMINY3QFmKIrjI3DB2a48D5JZyiZ3pJj19yofN9lSJYek8M6ySE7E8LrBq6xGWvl_phhz6KF5" alt="Futuristic astronomical sci-fi box art for Starfield featuring a lone deep space astronaut in a heavy pressurized spacesuit looking toward a distant glowing celestial nebula and barren planetary surface" />
+<img className="w-full h-full object-cover" src={gameImages("starfield").cover} alt="starfield cover" />
 
 <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-surface/85 backdrop-blur font-label-sm text-label-sm font-mono text-primary font-bold">{"2023"}</span>
 
@@ -225,7 +227,7 @@ return (<>
 
 <div className="bg-surface-container-low rounded-xl p-5 flex flex-col justify-between shadow-md hover:bg-surface-container transition-colors group">
 <div className="w-full aspect-[16/10] rounded-lg overflow-hidden mb-4 relative bg-surface-container">
-<img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIKxeCf69bFE2CnB_lRUi4wSxd4qi1_jccrfbcNO8NgTiIU-AJLlfrVxYTcoKde_xUxcTBCynDmFZgp3klEBdveBjfDpulQLYOVMnKMCG-H1jGhlEtdTLkTFNetIHqlgyjO6MBvPBujDBGXjZl5lkDfLoS3wRV8moOoyIyAP5mzXxWlpyGX-ZveZVHwsKmNW0CFdKoRBlKVb7xeH3EOVXBS0YOZC8dnu9fCkzstutSCjG2fTlG_6dd" alt="Dramatic high fantasy key art of a glowing golden Erdtree towering over misty dark cliffs with a lone tarnished warrior kneeling in atmospheric golden light" />
+<img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={gameImages("elden-ring").cover} alt="elden ring cover" />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-low via-transparent to-transparent opacity-80"></div>
 
@@ -256,7 +258,7 @@ return (<>
 
 <div className="bg-surface-container-low rounded-xl p-5 flex flex-col justify-between shadow-md hover:bg-surface-container transition-colors group">
 <div className="w-full aspect-[16/10] rounded-lg overflow-hidden mb-4 relative bg-surface-container">
-<img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuByfSGaN_-nyLmrqW7XxkyAo8MmGgwY0kDEnn7nXf7QB3Xca7qtjp4GptGe1kEIIC6bGQr3juwU-YlmxwQBUlZZH-0HSLI9xmqHVd0LAxWVuscnf2tEsYeK4-P1TDqzougdvwenToUQ0uxNR5kEFT9rfVsuWr2jez8jM-8E0ldsbQhqq-VvECgrEIXjkKVSU8Tqrj5IybEUgg0xb52cwEtastahTm7m7XC6Vr72RvyhJl1lavpyibVy" alt="Atmospheric cold-war jungle survival stealth key art showing a tactical soldier blending in lush deep green foliage and white lily petals under soft moonlight" />
+<img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={gameImages("metal-gear-solid-3-snake-eater").cover} alt="metal gear solid 3 snake eater cover" />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-low via-transparent to-transparent opacity-80"></div>
 
@@ -287,7 +289,7 @@ return (<>
 
 <div className="bg-surface-container-low rounded-xl p-5 flex flex-col justify-between shadow-md hover:bg-surface-container transition-colors group">
 <div className="w-full aspect-[16/10] rounded-lg overflow-hidden mb-4 relative bg-surface-container">
-<img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfcTa0RodZxjMfXJ61j8xaq_5TELQGIufesduNmlG2xwirJvwXNH3pJpDDDgpP38lCVe0Jx7JmgGDX4a4mzsXs2dKp7HcZqC-v8Tl4A8oq2QquBfO2uOWPf0DyYHqeLcLTEeOL5oC2Bvyo04yi1xQAnLKp1dgGI1sp1ePjoeX22uc3f1WQ6FB-FztDr-h3BGoWDAN-CP-HtFUrOTYt-LaGQ62TETmXqUYx6uaxN3nvqaKf9VXwckRv" alt="Minimalist vintage video game illustration concept inspired by 8-bit whimsical platformers, bold bright canary yellow canvas with a silhouetted retro character silhouette and theatrical curtain stage lighting" />
+<img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={gameImages("super-mario-bros-3").cover} alt="super mario bros 3 cover" />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-low via-transparent to-transparent opacity-80"></div>
 

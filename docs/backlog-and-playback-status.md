@@ -20,8 +20,9 @@ The user approved adding backlog and playing games without rating them.
 - Tier groups include logged games even without a score, respecting their
   independent tier. Unassigned includes logged entries without a tier, excluding
   unlogged catalog games. Empty averages stay unavailable, not zero.
-- Game detail displays saved playback status. Platform, hours, completion date,
-  shelves/tags, and broadcast remain temporary.
+- Game detail displays saved playback status. Platform, hours, and completion date are covered by the applied
+  [saved play details](saved-play-details.md) migration. Shelves/tags and broadcast
+  remain temporary.
 
 ## Schema and access
 

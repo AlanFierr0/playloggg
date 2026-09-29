@@ -1,3 +1,4 @@
+import { gameImages } from "@/lib/game-images";
 import Link from "next/link";
 import { PreviewAction } from "@/components/preview-action";
 
@@ -11,7 +12,7 @@ return (<>
 <section className="max-w-7xl mx-auto px-6 lg:px-12 pt-8 pb-20">
 <div className="relative rounded-xl overflow-hidden bg-surface-container-lowest shadow-2xl group">
 
-<div className="bg-cover bg-center h-[520px] sm:h-[600px] w-full transition-transform duration-700 ease-out group-hover:scale-[1.015]" data-alt="Cinematic atmospheric vista of a towering withered spectral gold tree bleeding sap against a tempestuous twilight charcoal sky. Somber muted palette of deep obsidian, charcoal ash, and subtle golden amber luminescence, dark fantasy editorial key art style with immense sense of scale, moody, solitary knight standing on a distant jagged ridge." style={{"backgroundImage": "url(\"https://lh3.googleusercontent.com/aida-public/AB6AXuD0NnT2Y_Nz3MroWPy-S8FfVfig5bFH4m2hhLxfuFdoZXCUmDbHFZ9ADG0BUC_XgHadWbAFftpkYoEL5l91LbMieia6ld2wiKCrRDqLtEZxEKQuMfFpVeoi5pJweGAKWVKdXuTSB9jFMflsHYeU9UgkJTnc5_8eey6Gq1mjK4F3vSezEqTj_2vrOR4g4_h_chNU8nGszmGx-HaR6pRVDzAHTroUXoClWvdvmlyzl_ty_CTb3XuNykL_\")"}}>
+<div className="bg-cover bg-center h-[520px] sm:h-[600px] w-full transition-transform duration-700 ease-out group-hover:scale-[1.015]" role="img" aria-label="Elden Ring: Shadow of the Erdtree artwork" style={{ backgroundImage: `url(${gameImages("elden-ring-shadow-of-the-erdtree").artwork})` }}>
 </div>
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/60 to-transparent"></div>
@@ -106,7 +107,7 @@ return (<>
 
 <Link className="group flex flex-col" data-path="game/baldurs-gate-3" href="/game/baldurs-gate-3">
 <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl">
-<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDK2U3PzNCWB3y5Jnqs2Q_oIiisOznnbfOV9jnX4CUJMBcHOmSIp1tZ_e1-jWZV8SSHNcpEuszWG4mWIVOe3KthSn7b_PQ7oF9NIFqNjzstwbd9MxhPY6mgn8oKlMFTQCA93twZyA5zYcaMycnlSunKpne9HU-5ZM7Qrn5rp0CqleKXX2veTaGtqsqqWTQ3Gbcsyaq1lVegqRSxrO2Io1hF9oQ6imD38EhnyDRjQZvL98p0IgI0jWmG" alt="Editorial artistic game portrait of a silver-haired vampire elf rogue with crimson eyes against a dark moody twilight gothic forest backdrop, high fantasy portraiture, cinematic lighting, muted shadows with subtle gold embers, deep charcoal tone." />
+<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={gameImages("baldurs-gate-3").artwork ?? gameImages("baldurs-gate-3").cover} alt="Baldur's Gate III artwork" />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
@@ -128,7 +129,7 @@ return (<>
 
 <Link className="group flex flex-col" data-path="game/disco-elysium" href="/game/disco-elysium">
 <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl">
-<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-h5CKf7Ik-rT86iVNmmQXhF1klJb-9Psf1vYqYYJnx30RTrtJ8j4FZgdRDe2r3glGnLdlYcPPfmJkiORjA2G4KSu_ek-ngdepCtdskMOIoP2cQxOs-S8HZ8KsYXnmpy5tVPJb-bIZf66E0VP4k14rRRgGvcQxeCB4UP0Oxp178oS0GTIi3MutYtF5SYFEfugoMJU0yGYXQKt-74-oB114dVppRjFMcILSa56CWJwkJhTsg5wcQP0s" alt="Oil painted expressionist portrait of a melancholic disheveled detective in a stained green blazer against a stark, winter coastal European seaside slum with dilapidated pale brick buildings and muted olive gray sky, artistic painterly brushstrokes." />
+<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={gameImages("disco-elysium").artwork ?? gameImages("disco-elysium").cover} alt="Disco Elysium artwork" />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
@@ -150,7 +151,7 @@ return (<>
 
 <Link className="group flex flex-col" data-path="game/metaphor-refantazio" href="/game/metaphor-refantazio">
 <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl">
-<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAai175ca8B5tiQvS4VkQ_MqckPgmsMaXKBfK45rGnZo31ObUboBFIAbNaXwh_AsmkMwIY8qDnSIkQIbkU2soXO1FFC-23WYX37O-E2yKmx90_Rqe5VPJe8nRRB-87lR5E9mBpRyTgOqjQpqgBMUKmH6wxen--dCOedClT2b_S6fo9whKRDhj45xoOUZxFKGejDiuZ3Ys57Z49IrksjZV827dUsBKzXZmWU1R6BkysK4YVhHCN1HgJ" alt="Stylized anime-influenced fantasy art piece showing an ethereal young protagonist with azure eyes looking towards a floating colossal gothic cathedral in a crimson twilight sky, sleek modern typographic contrast, subtle gold filigree, Studio Zero aesthetic." />
+<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={gameImages("metaphor-refantazio").artwork ?? gameImages("metaphor-refantazio").cover} alt="Metaphor: ReFantazio artwork" />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
@@ -172,7 +173,7 @@ return (<>
 
 <Link className="group flex flex-col" data-path="game/alan-wake-2" href="/game/alan-wake-2">
 <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl">
-<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYd9aDwZ6JCUqFqC6dYyeZVhun4XJ6_7m3qeHdsHj2NqC_Hkzd7Tya56rM-mZHHDMrTNEYTHQY78D_QIA8dne2G_houQSK-RyRVO51NCbKqDgNHrU3jIa9c7kxnmERnlDamWvI5GPa6EY8WXJvEvv4wfKe4HC1XtUVThoBed-PR4aF0-JLZNViJPFJFZYkBccc-tpGPm73L3ffAibwxR-jU7Zwynswf8uor40LOtr5ufjAH4p_UTZL" alt="Psychological horror neo-noir composition of a man with a flashlight in dense misty Pacific Northwest rain forest at night, deep saturated crimson illumination overlapping shadowy pine silhouettes, cinematic film grain, Twin Peaks evocative mood." />
+<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={gameImages("alan-wake-2").artwork ?? gameImages("alan-wake-2").cover} alt="Alan Wake II artwork" />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
@@ -194,7 +195,7 @@ return (<>
 
 <Link className="group flex flex-col" data-path="game/half-life-2" href="/game/half-life-2">
 <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl">
-<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFLFzx6mxMCqAZetfA9IJEHRyYPzTz7Ij-bkaZsBwlScBDx-_yoZIjDl8o5ImFJQgaqMNYn3XC-v_vI62fC6MoEqa4MIuK2u0P3z-k6_WhbZ7iUluRByKbfr3DLFmlia3dN54GGaFT8QCPDxoZ8t43slNKFaq6iErXtVX7MKlDfg2jn_23sgXUMMLZh3IGnpqN9Y6V0WBTG5229ncrDjjjIxip3jUZjzQDnAynrOsIHqzAOhpTuVGx" alt="Brutalist dystopian urban sci-fi vista of City 17 featuring a colossal dark metallic Citadel rising through cold overcast slate clouds over crumbling Eastern European neoclassical brick buildings, atmospheric muted industrial tones, quiet dystopia." />
+<img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={gameImages("half-life-2").artwork ?? gameImages("half-life-2").cover} alt="Half-Life 2 artwork" />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 

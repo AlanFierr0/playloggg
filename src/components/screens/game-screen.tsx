@@ -1,3 +1,4 @@
+import { ProfileAvatar } from "@/components/profile-avatar";
 import Link from "next/link";
 import { PreviewAction } from "@/components/preview-action";
 import type { Game } from "@/types/domain";
@@ -10,7 +11,7 @@ return (<>
 
 <div className="relative w-full -mt-16 overflow-hidden bg-surface-container-lowest">
 
-<div className="absolute inset-0 w-full h-[620px] bg-cover bg-top opacity-35 filter brightness-75 contrast-125" data-alt="Elden Ring Shadow of the Erdtree expansion key art concept. Vast, somber panorama of the monolithic twisted black Scadutree towering over the ruined Realm of Shadow under a veiled golden-ash sky. Intricate gothic stone structures, veil of ethereal gold dripping like sap, brooding obsidian silhouettes, dark fantasy cinematic mood with warm amber rim light." style={{"backgroundImage": "url('https://lh3.googleusercontent.com/aida-public/AB6AXuC7N4JFIXFYZ6uyzSW9aEjh7SPMJLKlR1wJfv42WzrZTT-L7pvz0YaUToA3xO87qEYQ5O2mw69ZF0O45lP7PbNRrp2w_qXA4BaXuNvCgd8vaHVnxjpVt7Ha9WYrqLM-6QVaw8dAxjDmhTuzLkDWMvle179-aSqHXKXByNkiWR_-v7ywdfSxOUD_QVc83XtREbM5vr0AEsf75syHqgAHk_kiRyLY1_CdTL1381FIaZPooKfpY47Qitcg')"}}></div>
+<div className="absolute inset-0 w-full h-[620px] bg-cover bg-top opacity-35 filter brightness-75 contrast-125" role="img" aria-label={`${game.title} artwork`} style={{ backgroundImage: game.artwork ? `url(${game.artwork})` : undefined }}></div>
 
 <div className="absolute inset-0 bg-gradient-to-b from-surface/70 via-surface/85 to-surface pointer-events-none"></div>
 
@@ -235,7 +236,7 @@ return (<>
 
 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
 <div className="flex items-center gap-4">
-<img alt="Alex Vance" className="w-12 h-12 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1Uj7oX5IeIx6GsQRBuZhtpXniSBfDG3f7hQvxiIHe5BLa8ZXfahWEi91J_3xZM-wYZ82SUL3f4OtTBvABtfIVYIWDQIHDKW4b-FsswCawrncUUSCQ7JyYf02lZUWe54k20DG6C5h3pMOoKSBIMjkuj5AszhzZ25dBwhgOF5pirFYl7qu1_wa9i1LInq12QSIwF3rL-NHBD5uSfuxdNhSEhaKDX615dqS_DdI1dW7lwhn3PSkW9Ld6tl-Ks" />
+<ProfileAvatar name={isSample ? "Alex Vance" : "Owner"} className="w-12 h-12 rounded-full object-cover" />
 
 <div className="flex flex-col">
 <div className="flex items-center gap-2">

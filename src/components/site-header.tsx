@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import branding from "@/data/branding.json";
+import { ProfileAvatar } from "@/components/profile-avatar";
 import { usePortfolio } from "@/components/portfolio-provider";
 
 const navigation = [{ href: "/", label: "Discover" }, { href: "/profile", label: "Rankings" }, { href: "/tiers", label: "Lists" }, { href: "/compare", label: "Compare" }];
 
 export function SiteHeader() {
-  const { access } = usePortfolio();
+  const { access, profile } = usePortfolio();
   const pathname = usePathname();
   const router = useRouter();
   const searchHref = `/search?q=&from=${encodeURIComponent(pathname === "/search" ? "/" : pathname)}`;
@@ -25,7 +25,7 @@ export function SiteHeader() {
       <div className="h-16 max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between gap-6">
         <div className="flex items-center gap-8">
           <Link className="flex items-center gap-3 group" href="/" aria-label="Playlogg home">
-            <img alt="Playlogg logo" className="h-7 w-auto object-contain" src={branding.logo} />
+            <span aria-hidden="true" className="material-symbols-outlined text-primary text-[28px]">sports_esports</span>
             <span className="font-headline-md text-headline-md tracking-tight uppercase text-on-surface font-bold">Playlog<span className="text-primary">.gg</span></span>
           </Link>
           <nav aria-label="Main navigation" className="hidden md:flex items-center gap-6">
@@ -39,7 +39,7 @@ export function SiteHeader() {
             <kbd className="absolute right-2 font-label-sm text-label-sm text-on-surface-variant px-1.5 py-0.5 rounded bg-surface-container-high pointer-events-none">⌘K</kbd>
           </div>
           <Link className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-primary-container text-on-primary-container hover:bg-primary transition-colors font-label-md text-label-md tracking-wider uppercase font-semibold" href="/log"><span className="material-symbols-outlined text-[16px]" aria-hidden="true">add</span><span>Log</span></Link>
-          <Link className="flex-shrink-0" href="/login" aria-label={access?.signedIn ? "Account and sign out" : "Owner sign-in"}><img alt="Account" className="w-8 h-8 rounded-full object-cover ring-1 ring-surface-variant hover:ring-primary transition-all" src={branding.avatar} /></Link>
+          <Link className="flex-shrink-0" href="/login" aria-label={access?.signedIn ? "Account and sign out" : "Owner sign-in"}><ProfileAvatar name={access?.signedIn ? profile.displayName : "Account"} className="w-8 h-8 rounded-full ring-1 ring-surface-variant hover:ring-primary transition-all" /></Link>
         </div>
       </div>
     </header>
