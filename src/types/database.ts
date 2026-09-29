@@ -1,4 +1,3 @@
-// Generated from the applied Supabase schema; regenerate after approved migrations.
 export type Json =
   | string
   | number
@@ -17,33 +16,60 @@ export type Database = {
     Tables: {
       games: {
         Row: {
+          artwork_image_ids: string[]
+          cover_image_id: string | null
           cover_url: string
           created_at: string
+          genres: string[]
           id: number
+          igdb_id: number | null
+          igdb_metadata: Json
+          igdb_synced_at: string | null
+          igdb_url: string | null
           is_sample: boolean
           release_year: number | null
+          released_on: string | null
+          screenshot_image_ids: string[]
           search_keywords: string
           slug: string
           title: string
           updated_at: string
         }
         Insert: {
+          artwork_image_ids?: string[]
+          cover_image_id?: string | null
           cover_url: string
           created_at?: string
+          genres?: string[]
           id?: never
+          igdb_id?: number | null
+          igdb_metadata?: Json
+          igdb_synced_at?: string | null
+          igdb_url?: string | null
           is_sample?: boolean
           release_year?: number | null
+          released_on?: string | null
+          screenshot_image_ids?: string[]
           search_keywords?: string
           slug: string
           title: string
           updated_at?: string
         }
         Update: {
+          artwork_image_ids?: string[]
+          cover_image_id?: string | null
           cover_url?: string
           created_at?: string
+          genres?: string[]
           id?: never
+          igdb_id?: number | null
+          igdb_metadata?: Json
+          igdb_synced_at?: string | null
+          igdb_url?: string | null
           is_sample?: boolean
           release_year?: number | null
+          released_on?: string | null
+          screenshot_image_ids?: string[]
           search_keywords?: string
           slug?: string
           title?: string

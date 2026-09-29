@@ -1,0 +1,194 @@
+[
+  {
+    "slug": "elden-ring",
+    "igdbId": 119133,
+    "igdbTitle": "Elden Ring",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "baldurs-gate-3",
+    "igdbId": 119171,
+    "igdbTitle": "Baldur's Gate III",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "cyberpunk-2077",
+    "igdbId": 1877,
+    "igdbTitle": "Cyberpunk 2077",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "disco-elysium",
+    "igdbId": 26472,
+    "igdbTitle": "Disco Elysium",
+    "reason": "User confirmed original 2019 edition"
+  },
+  {
+    "slug": "half-life-2",
+    "igdbId": 233,
+    "igdbTitle": "Half-Life 2",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "alan-wake-2",
+    "igdbId": 185246,
+    "igdbTitle": "Alan Wake II",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "hades",
+    "igdbId": 113112,
+    "igdbTitle": "Hades",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "bloodborne",
+    "igdbId": 7334,
+    "igdbTitle": "Bloodborne",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "metaphor-refantazio",
+    "igdbId": 26602,
+    "igdbTitle": "Metaphor: ReFantazio",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "elden-ring-shadow-of-the-erdtree",
+    "igdbId": 240009,
+    "igdbTitle": "Elden Ring: Shadow of the Erdtree",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "cyberpunk-2077-phantom-liberty",
+    "igdbId": 215769,
+    "igdbTitle": "Cyberpunk 2077: Phantom Liberty",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "system-shock",
+    "igdbId": 18375,
+    "igdbTitle": "System Shock",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "persona-5-royal",
+    "igdbId": 114283,
+    "igdbTitle": "Persona 5 Royal",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "the-legend-of-zelda-tears-of-the-kingdom",
+    "igdbId": 119388,
+    "igdbTitle": "The Legend of Zelda: Tears of the Kingdom",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "hollow-knight",
+    "igdbId": 14593,
+    "igdbTitle": "Hollow Knight",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "sekiro-shadows-die-twice",
+    "igdbId": 76882,
+    "igdbTitle": "Sekiro: Shadows Die Twice",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "armored-core-vi",
+    "igdbId": 228542,
+    "igdbTitle": "Armored Core VI: Fires of Rubicon",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "final-fantasy-vii-rebirth",
+    "igdbId": 133236,
+    "igdbTitle": "Final Fantasy VII Rebirth",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "lies-of-p",
+    "igdbId": 148241,
+    "igdbTitle": "Lies of P",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "dead-space",
+    "igdbId": 159119,
+    "igdbTitle": "Dead Space",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "resident-evil-4",
+    "igdbId": 132181,
+    "igdbTitle": "Resident Evil 4",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "returnal",
+    "igdbId": 134584,
+    "igdbTitle": "Returnal",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "nier-automata",
+    "igdbId": 11208,
+    "igdbTitle": "NieR: Automata",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "dragons-dogma-2",
+    "igdbId": 115060,
+    "igdbTitle": "Dragon's Dogma II",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "starfield",
+    "igdbId": 96437,
+    "igdbTitle": "Starfield",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "death-stranding",
+    "igdbId": 19564,
+    "igdbTitle": "Death Stranding",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "hogwarts-legacy",
+    "igdbId": 136625,
+    "igdbTitle": "Hogwarts Legacy",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "forspoken",
+    "igdbId": 134583,
+    "igdbTitle": "Forspoken",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "redfall",
+    "igdbId": 152247,
+    "igdbTitle": "Redfall",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "lords-of-fallen",
+    "igdbId": 21593,
+    "igdbTitle": "Lords of the Fallen",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "the-day-before",
+    "igdbId": 142901,
+    "igdbTitle": "The Day Before",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  },
+  {
+    "slug": "the-lord-of-the-rings-gollum",
+    "igdbId": 116584,
+    "igdbTitle": "The Lord of the Rings: Gollum",
+    "reason": "Matched title, existing release year and game type; excluded bundles, editions, mods and unrelated games"
+  }
+]

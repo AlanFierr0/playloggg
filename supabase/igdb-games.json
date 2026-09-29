@@ -1,0 +1,2612 @@
+{
+  "fetchedAt": "2026-09-28T23:06:29.518Z",
+  "games": [
+    {
+      "slug": "elden-ring",
+      "igdb_id": 119133,
+      "title": "Elden Ring",
+      "released_on": "2022-02-25",
+      "genres": [
+        "Role-playing (RPG)",
+        "Adventure"
+      ],
+      "cover_image_id": "co4jni",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co4jni.jpg",
+      "artwork_image_ids": [
+        "ar3m1o",
+        "ar3m1p",
+        "ar1481",
+        "ar3m1n"
+      ],
+      "screenshot_image_ids": [
+        "scagdo",
+        "scu5kw",
+        "scu5kx",
+        "scf2s1",
+        "scagdq",
+        "scagdr",
+        "scagds",
+        "scagdm",
+        "scagdp",
+        "scagdn"
+      ],
+      "igdb_url": "https://www.igdb.com/games/elden-ring",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 48,
+            "name": "PlayStation 4"
+          },
+          {
+            "id": 508,
+            "name": "Nintendo Switch 2"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          },
+          {
+            "id": 49,
+            "name": "Xbox One"
+          }
+        ],
+        "developers": [
+          {
+            "id": 1012,
+            "name": "FromSoftware"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 248,
+            "name": "Bandai Namco Entertainment"
+          },
+          {
+            "id": 1012,
+            "name": "FromSoftware"
+          }
+        ],
+        "summary": "Elden Ring is an action RPG developed by FromSoftware and published by Bandai Namco Entertainment, released in February 2022. Directed by Hidetaka Miyazaki, with world-building contributions from novelist George R. R. Martin, the game features an expansive open world called the Lands Between. Players assume the role of a customisable character known as the Tarnished, who must explore this world, battle formidable enemies, and seek to restore the Elden Ring to become the Elden Lord.\n\nThe game builds on the challenging gameplay mechanics familiar from the Dark Souls series but introduces a more open-ended structure with vast exploration, dynamic weather, and a day-night cycle. It offers deep lore, complex characters, and an interconnected world filled with secrets, dungeons, and powerful bosses.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "baldurs-gate-3",
+      "igdb_id": 119171,
+      "title": "Baldur's Gate III",
+      "released_on": "2023-08-03",
+      "genres": [
+        "Role-playing (RPG)",
+        "Strategy",
+        "Turn-based strategy (TBS)"
+      ],
+      "cover_image_id": "co670h",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co670h.jpg",
+      "artwork_image_ids": [
+        "ar3n2t",
+        "ar6j53",
+        "ar3tfx",
+        "ar3n2r",
+        "ar3n2s"
+      ],
+      "screenshot_image_ids": [
+        "sc81fj",
+        "scxvxn",
+        "scxvy0",
+        "scxvy1",
+        "sc81fh",
+        "sc81fe",
+        "sctm4z",
+        "scxtb7",
+        "scxtb8",
+        "scxtb4",
+        "scxvxo",
+        "scxtb6",
+        "sc81fn",
+        "scxtb5",
+        "sc81ff",
+        "sc81fl"
+      ],
+      "igdb_url": "https://www.igdb.com/games/baldurs-gate-iii",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 15,
+            "name": "Strategy"
+          },
+          {
+            "id": 16,
+            "name": "Turn-based strategy (TBS)"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 170,
+            "name": "Google Stadia"
+          },
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 3,
+            "name": "Linux"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          },
+          {
+            "id": 14,
+            "name": "Mac"
+          }
+        ],
+        "developers": [
+          {
+            "id": 510,
+            "name": "Larian Studios"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 510,
+            "name": "Larian Studios"
+          }
+        ],
+        "summary": "An ancient evil has returned to Baldur's Gate, intent on devouring it from the inside out. The fate of Faerun lies in your hands. Alone, you may resist. But together, you can overcome.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "cyberpunk-2077",
+      "igdb_id": 1877,
+      "title": "Cyberpunk 2077",
+      "released_on": "2020-12-10",
+      "genres": [
+        "Shooter",
+        "Role-playing (RPG)",
+        "Adventure"
+      ],
+      "cover_image_id": "coaih8",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/coaih8.jpg",
+      "artwork_image_ids": [
+        "ig0frvvkkz4jx7cyqt3f",
+        "j3edunidfkbuivcingaw",
+        "pgrmxtckblxm3pfdu5hu",
+        "c6gonpyuhueh0eq38n8l",
+        "whzi8cruaewea9k2tbgn",
+        "ar682",
+        "ar6qv",
+        "ar3m0i",
+        "ar3m0k",
+        "ar3m0j",
+        "ar3m0m",
+        "ar3m0l",
+        "ar3nl8",
+        "ar3m0n"
+      ],
+      "screenshot_image_ids": [
+        "vnv5cd9kvonsjvazpotx",
+        "quphnww1axg2mmsvxfux",
+        "scxw04",
+        "scxw02",
+        "ubbe5gewccx5ig3xy30t",
+        "c7usjg7gpo8rs0bfjkph",
+        "jmi4y3q12o4uitdcaf7i",
+        "w4plqrhe04byymfksmux",
+        "ydyq0pixly7vt29fnzci",
+        "scxw05",
+        "c6ruovzsugjlnlcmm8b0",
+        "scxw03",
+        "ybliaszwqkwui7djaou4",
+        "lelfskpwy4slftl3qdeb",
+        "ts8wtae3t6aghttvtt2s"
+      ],
+      "igdb_url": "https://www.igdb.com/games/cyberpunk-2077",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 5,
+            "name": "Shooter"
+          },
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 170,
+            "name": "Google Stadia"
+          },
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 48,
+            "name": "PlayStation 4"
+          },
+          {
+            "id": 508,
+            "name": "Nintendo Switch 2"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          },
+          {
+            "id": 14,
+            "name": "Mac"
+          },
+          {
+            "id": 49,
+            "name": "Xbox One"
+          }
+        ],
+        "developers": [
+          {
+            "id": 908,
+            "name": "CD Projekt RED"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 4291,
+            "name": "CD Projekt"
+          }
+        ],
+        "summary": "Cyberpunk 2077 is an open-world action-adventure game set in Night City, a sprawling metropolis driven by power, glamour, and body modification. Players assume the role of V, a mercenary outlaw in pursuit of a unique implant that holds the key to immortality. The game allows extensive customization of cyberware, skills, and playstyle. Choices made throughout the journey influence both the narrative and the world.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "disco-elysium",
+      "igdb_id": 26472,
+      "title": "Disco Elysium",
+      "released_on": "2019-10-15",
+      "genres": [
+        "Role-playing (RPG)",
+        "Adventure",
+        "Indie"
+      ],
+      "cover_image_id": "co1sfj",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co1sfj.jpg",
+      "artwork_image_ids": [
+        "ar4pd7",
+        "ar4ma",
+        "ar4m5",
+        "ar4m8",
+        "ar4m9",
+        "ar4m7",
+        "ar4m6",
+        "ar4ytw"
+      ],
+      "screenshot_image_ids": [
+        "vqxtn7qqv5qns9pneqzm",
+        "jgfwlctsfh8yljnjdeab",
+        "qfml0sjrmeiv5gf6tgg1",
+        "i53pbmgl9oga7zmqchqw",
+        "ftni2bw4ygi0eyaqo2hv"
+      ],
+      "igdb_url": "https://www.igdb.com/games/disco-elysium",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          },
+          {
+            "id": 32,
+            "name": "Indie"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 14,
+            "name": "Mac"
+          }
+        ],
+        "developers": [
+          {
+            "id": 15094,
+            "name": "ZA/UM"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 15094,
+            "name": "ZA/UM"
+          }
+        ],
+        "summary": "Disco Elysium is a role-playing game developed and published by ZA/UM. It is set in the fictional city of Revachol, where players assume the role of an amnesic detective investigating a murder. The game emphasizes dialogue and skill-based choices, with character attributes represented by internal voices that influence decisions and interactions. Its narrative explores themes of politics, philosophy, and personal identity, and it is known for its unconventional gameplay and deep storytelling.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "half-life-2",
+      "igdb_id": 233,
+      "title": "Half-Life 2",
+      "released_on": "2004-11-16",
+      "genres": [
+        "Shooter"
+      ],
+      "cover_image_id": "co1nmw",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co1nmw.jpg",
+      "artwork_image_ids": [
+        "ar6kbh",
+        "ar6kbi",
+        "ar4koc",
+        "ar4u6p"
+      ],
+      "screenshot_image_ids": [
+        "iau5t12jemoelx0xuzna",
+        "nnlfbf8blflrlmuarfej",
+        "muyxb9cljgsy245fcimx",
+        "mpphkihhk8yh9m2zaafd",
+        "ga0lj5zqeqd7moyzxij9"
+      ],
+      "igdb_url": "https://www.igdb.com/games/half-life-2",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 5,
+            "name": "Shooter"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 11,
+            "name": "Xbox"
+          },
+          {
+            "id": 9,
+            "name": "PlayStation 3"
+          },
+          {
+            "id": 3,
+            "name": "Linux"
+          },
+          {
+            "id": 34,
+            "name": "Android"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 14,
+            "name": "Mac"
+          },
+          {
+            "id": 12,
+            "name": "Xbox 360"
+          }
+        ],
+        "developers": [
+          {
+            "id": 56,
+            "name": "Valve"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 56,
+            "name": "Valve"
+          },
+          {
+            "id": 22994,
+            "name": "NVIDIA Lightspeed Studios"
+          },
+          {
+            "id": 1,
+            "name": "Electronic Arts"
+          },
+          {
+            "id": 24,
+            "name": "Sierra Entertainment"
+          }
+        ],
+        "summary": "1998. HALF-LIFE sends a shock through the game industry with its combination of pounding action and continuous, immersive storytelling.\n\nNOW. By taking the suspense, challenge and visceral charge of the original, and adding startling new realism and responsiveness, Half-Life 2 opens the door to a world where the player's presence affects everything around them, from the physical environment to the behaviors even the emotions of both friends and enemies.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "alan-wake-2",
+      "igdb_id": 185246,
+      "title": "Alan Wake II",
+      "released_on": "2023-10-27",
+      "genres": [
+        "Shooter",
+        "Adventure"
+      ],
+      "cover_image_id": "co6jar",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co6jar.jpg",
+      "artwork_image_ids": [
+        "ar3nuh",
+        "ar3nui",
+        "ar3nug"
+      ],
+      "screenshot_image_ids": [
+        "scmnco",
+        "scmncn",
+        "scmnck",
+        "scmncl",
+        "scmncj",
+        "scmncm",
+        "scmnci"
+      ],
+      "igdb_url": "https://www.igdb.com/games/alan-wake-ii",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 5,
+            "name": "Shooter"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          }
+        ],
+        "developers": [
+          {
+            "id": 305,
+            "name": "Remedy Entertainment"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 37382,
+            "name": "Epic Games Publishing"
+          }
+        ],
+        "summary": "Alan Wake 2 marks Remedy Entertainment’s first foray into the survival horror genre. Ritualistic murders in a small town. A writer trapped in a nightmare. An FBI agent looking for answers. Two realities. Two hero characters. One horror story that wants them dead.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "hades",
+      "igdb_id": 113112,
+      "title": "Hades",
+      "released_on": "2020-09-17",
+      "genres": [
+        "Role-playing (RPG)",
+        "Hack and slash/Beat 'em up",
+        "Adventure",
+        "Indie"
+      ],
+      "cover_image_id": "cob9kr",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/cob9kr.jpg",
+      "artwork_image_ids": [
+        "ar17ut",
+        "ar17uq",
+        "ar17uu",
+        "ar17ur",
+        "ar17uv",
+        "ar17uw",
+        "ar17ux",
+        "ar3m4o",
+        "ar6685",
+        "ar57k",
+        "ar10j1",
+        "ar17uy",
+        "ar17us",
+        "ar3m4s",
+        "ar3m4q",
+        "ar3m4r",
+        "ar3m4p"
+      ],
+      "screenshot_image_ids": [
+        "sc8lik",
+        "sc8lim",
+        "sc8lij",
+        "sc8lil",
+        "sc8lin",
+        "sc5r7z",
+        "sc5r7x",
+        "sc8lio",
+        "sc5r7v",
+        "sc5r7y"
+      ],
+      "igdb_url": "https://www.igdb.com/games/hades--1",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 25,
+            "name": "Hack and slash/Beat 'em up"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          },
+          {
+            "id": 32,
+            "name": "Indie"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 48,
+            "name": "PlayStation 4"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 39,
+            "name": "iOS"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          },
+          {
+            "id": 14,
+            "name": "Mac"
+          },
+          {
+            "id": 49,
+            "name": "Xbox One"
+          },
+          {
+            "id": 130,
+            "name": "Nintendo Switch"
+          }
+        ],
+        "developers": [
+          {
+            "id": 928,
+            "name": "Supergiant Games"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 928,
+            "name": "Supergiant Games"
+          },
+          {
+            "id": 27224,
+            "name": "Netflix"
+          }
+        ],
+        "summary": "A rogue-lite hack and slash dungeon crawler in which Zagreus, son of Hades the Greek god of the dead, attempts to escape his home and his oppressive father by fighting the souls of the dead through the various layers of the ever-shifting underworld, while getting to know and forging relationships with its inhabitants.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "bloodborne",
+      "igdb_id": 7334,
+      "title": "Bloodborne",
+      "released_on": "2015-03-24",
+      "genres": [
+        "Role-playing (RPG)",
+        "Adventure"
+      ],
+      "cover_image_id": "cob99l",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/cob99l.jpg",
+      "artwork_image_ids": [
+        "ar3mkv",
+        "ar3mkw",
+        "ar3mkx"
+      ],
+      "screenshot_image_ids": [
+        "uqmif3sshdrbbcd0pu8l",
+        "adssvwsfbaxcrucjolv9",
+        "aokcsspzrqyaaoug7jnn",
+        "bklmdxphzoflbgtushg0",
+        "hc9nb80b0xni5wxm5zh3"
+      ],
+      "igdb_url": "https://www.igdb.com/games/bloodborne",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 48,
+            "name": "PlayStation 4"
+          }
+        ],
+        "developers": [
+          {
+            "id": 1012,
+            "name": "FromSoftware"
+          },
+          {
+            "id": 27364,
+            "name": "Japan Studio"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 13634,
+            "name": "Sony Computer Entertainment"
+          }
+        ],
+        "summary": "An action RPG in which the player embodies a Hunter who, after being transfused with the mysterious blood local to the city of Yharnam, sets off into a \"night of the Hunt\", an extended night in which Hunters may phase in and out of dream and reality in order to thin the outbreak of abominable beasts that plague the land and, for the more resilient and insightful Hunters, uncover the answers to the Hunt's many mysteries.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "metaphor-refantazio",
+      "igdb_id": 26602,
+      "title": "Metaphor: ReFantazio",
+      "released_on": "2024-10-11",
+      "genres": [
+        "Role-playing (RPG)",
+        "Turn-based strategy (TBS)",
+        "Adventure"
+      ],
+      "cover_image_id": "co8d9t",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co8d9t.jpg",
+      "artwork_image_ids": [
+        "ar3moq",
+        "ar3mox",
+        "ar3moo",
+        "ar3mow",
+        "ar6kik",
+        "ar6kil",
+        "ar6kim",
+        "ar6kin",
+        "ar6kio",
+        "ar6kij",
+        "ar3mot",
+        "ar3mov",
+        "ar3mou",
+        "ar5k8s",
+        "ar3mop",
+        "ar3mos",
+        "ar3mor",
+        "ar5k8t",
+        "ar5k8o",
+        "ar3moy"
+      ],
+      "screenshot_image_ids": [
+        "scmwms",
+        "scmwmr",
+        "scmwmu",
+        "scmwmq",
+        "scmwmt"
+      ],
+      "igdb_url": "https://www.igdb.com/games/metaphor-refantazio",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 16,
+            "name": "Turn-based strategy (TBS)"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 48,
+            "name": "PlayStation 4"
+          },
+          {
+            "id": 508,
+            "name": "Nintendo Switch 2"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          }
+        ],
+        "developers": [
+          {
+            "id": 11839,
+            "name": "Studio Zero"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 818,
+            "name": "Atlus"
+          },
+          {
+            "id": 112,
+            "name": "Sega"
+          }
+        ],
+        "summary": "From the creative minds of the Persona series – Metaphor: ReFantazio marks ATLUS’ first ever, full-scale fantasy RPG, brought to you by director Katsura Hashino, character designer Shigenori Soejima, and composer Shoji Meguro.\n\nWrite your destiny and rise above fear as you step into a fantasy world unlike anything you’ve seen before. Fraught with unsettling mystery, the kingdom stands on a precipice. Now, you must embark on a journey, overcoming obstacles and forging bonds with friends.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "elden-ring-shadow-of-the-erdtree",
+      "igdb_id": 240009,
+      "title": "Elden Ring: Shadow of the Erdtree",
+      "released_on": "2024-06-21",
+      "genres": [
+        "Role-playing (RPG)",
+        "Adventure"
+      ],
+      "cover_image_id": "co7sly",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co7sly.jpg",
+      "artwork_image_ids": [
+        "ar27k5"
+      ],
+      "screenshot_image_ids": [
+        "scqpgm",
+        "scqpgi",
+        "scqpgk",
+        "scqpgj",
+        "scqpgl",
+        "scqr39",
+        "scqr38",
+        "scqr3a"
+      ],
+      "igdb_url": "https://www.igdb.com/games/elden-ring-shadow-of-the-erdtree",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 48,
+            "name": "PlayStation 4"
+          },
+          {
+            "id": 508,
+            "name": "Nintendo Switch 2"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          },
+          {
+            "id": 49,
+            "name": "Xbox One"
+          }
+        ],
+        "developers": [
+          {
+            "id": 1012,
+            "name": "FromSoftware"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 248,
+            "name": "Bandai Namco Entertainment"
+          }
+        ],
+        "summary": "The Shadow of the Erdtree is a fully-fledged expansion that features an all-new story set in the Land of Shadow. It adds a whole new map with 70 new weapons, ten new shields, 39 new Talismans, 14 new sorceries, 28 new incantations, 20 new Spirit Ashes, 25 New Ashes of War, 30 new armour sets, and new consumables and craftables.",
+        "game_type": "Expansion"
+      }
+    },
+    {
+      "slug": "cyberpunk-2077-phantom-liberty",
+      "igdb_id": 215769,
+      "title": "Cyberpunk 2077: Phantom Liberty",
+      "released_on": "2023-09-26",
+      "genres": [
+        "Shooter",
+        "Role-playing (RPG)",
+        "Adventure"
+      ],
+      "cover_image_id": "co7566",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co7566.jpg",
+      "artwork_image_ids": [
+        "ar2cnt"
+      ],
+      "screenshot_image_ids": [
+        "scoc9p",
+        "scoc9m",
+        "scoc9q",
+        "scpzog",
+        "scpzok",
+        "scpzof",
+        "scpzoj",
+        "scoc9n",
+        "scoc9o",
+        "scoc9r",
+        "scpzoh",
+        "scpzoi",
+        "scpzol"
+      ],
+      "igdb_url": "https://www.igdb.com/games/cyberpunk-2077-phantom-liberty",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 5,
+            "name": "Shooter"
+          },
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 508,
+            "name": "Nintendo Switch 2"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          },
+          {
+            "id": 14,
+            "name": "Mac"
+          }
+        ],
+        "developers": [
+          {
+            "id": 908,
+            "name": "CD Projekt RED"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 908,
+            "name": "CD Projekt RED"
+          }
+        ],
+        "summary": "Phantom Liberty is a spy-thriller expansion for the open-world action RPG Cyberpunk 2077. The narrative centers on the aftermath of the President of the New United States of America's orbital shuttle being shot down over Dogtown, one of Night City’s most dangerous districts. Players control V, a mercenary tasked with navigating a complex web of espionage and political intrigue.\n\nThe expansion introduces Dogtown, a heavily militarized, autonomous zone ruled by a strict and authoritarian leader. With support from NUSA sleeper agent Solomon Reed (voiced by Idris Elba) and returning character Johnny Silverhand (voiced by Keanu Reeves), players engage in a story involving shifting alliances and covert operations. Designed for next-generation hardware, Phantom Liberty features new gameplay mechanics, side activities, and a main storyline centered on themes of power, trust, and survival.",
+        "game_type": "Expansion"
+      }
+    },
+    {
+      "slug": "system-shock",
+      "igdb_id": 18375,
+      "title": "System Shock",
+      "released_on": "2023-05-30",
+      "genres": [
+        "Shooter",
+        "Role-playing (RPG)",
+        "Simulator",
+        "Adventure"
+      ],
+      "cover_image_id": "co1ik8",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co1ik8.jpg",
+      "artwork_image_ids": [
+        "ar4rb"
+      ],
+      "screenshot_image_ids": [
+        "schdyr",
+        "schdz0",
+        "schdyx",
+        "schdyw",
+        "schdyy",
+        "schdyz",
+        "schdz2",
+        "schdys",
+        "schdyt",
+        "schdyu",
+        "schdyv",
+        "schdz1"
+      ],
+      "igdb_url": "https://www.igdb.com/games/system-shock--1",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 5,
+            "name": "Shooter"
+          },
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 13,
+            "name": "Simulator"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 48,
+            "name": "PlayStation 4"
+          },
+          {
+            "id": 3,
+            "name": "Linux"
+          },
+          {
+            "id": 508,
+            "name": "Nintendo Switch 2"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          },
+          {
+            "id": 14,
+            "name": "Mac"
+          },
+          {
+            "id": 49,
+            "name": "Xbox One"
+          },
+          {
+            "id": 130,
+            "name": "Nintendo Switch"
+          }
+        ],
+        "developers": [
+          {
+            "id": 13169,
+            "name": "Nightdive Studios"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 34936,
+            "name": "Prime Matter"
+          }
+        ],
+        "summary": "After 22 years, cyberpunk cult classic System Shock is getting an update. A \"reimagined\" version of the 1994 Windows PC game is in the works at Night Dive Studios for PC and Xbox One, and it's a project that company founder Stephen Kick says he can hardly believe is really happening.",
+        "game_type": "Remake"
+      }
+    },
+    {
+      "slug": "persona-5-royal",
+      "igdb_id": 114283,
+      "title": "Persona 5 Royal",
+      "released_on": "2019-10-31",
+      "genres": [
+        "Role-playing (RPG)",
+        "Adventure"
+      ],
+      "cover_image_id": "coclf1",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/coclf1.jpg",
+      "artwork_image_ids": [
+        "ar616",
+        "ar615",
+        "ar3u1t",
+        "ar3u1u",
+        "ar4pdg"
+      ],
+      "screenshot_image_ids": [
+        "sc6vq2",
+        "sc6vps",
+        "sc6vpt",
+        "sc6vpu",
+        "sc6vpw",
+        "sc6vq0",
+        "sc6vpz",
+        "sc6vpv",
+        "sc6vq1",
+        "sc6vpy",
+        "sc6vpx"
+      ],
+      "igdb_url": "https://www.igdb.com/games/persona-5-royal",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 48,
+            "name": "PlayStation 4"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          },
+          {
+            "id": 49,
+            "name": "Xbox One"
+          },
+          {
+            "id": 130,
+            "name": "Nintendo Switch"
+          }
+        ],
+        "developers": [
+          {
+            "id": 9969,
+            "name": "P Studio"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 112,
+            "name": "Sega"
+          },
+          {
+            "id": 818,
+            "name": "Atlus"
+          }
+        ],
+        "summary": "Persona 5 Royal is an enhanced version of the turn-based role-playing game Persona 5, set in modern-day Tokyo. Players control a high school student who leads a group of secret vigilantes called the Phantom Thieves of Hearts, exploring supernatural dungeons called Palaces to change the hearts of corrupt adults. The game combines dungeon crawling and turn-based combat with social simulation elements, where players manage daily activities, build relationships, and develop character statistics across a school year. Royal adds new characters, a third semester, an additional Palace, new music, and expanded story content to the original game.",
+        "game_type": "Expanded Game"
+      }
+    },
+    {
+      "slug": "the-legend-of-zelda-tears-of-the-kingdom",
+      "igdb_id": 119388,
+      "title": "The Legend of Zelda: Tears of the Kingdom",
+      "released_on": "2023-05-12",
+      "genres": [
+        "Puzzle",
+        "Adventure"
+      ],
+      "cover_image_id": "co5vmg",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co5vmg.jpg",
+      "artwork_image_ids": [
+        "ar3m45",
+        "ar3m47",
+        "ar3m46",
+        "ar3m48"
+      ],
+      "screenshot_image_ids": [
+        "scaoj8",
+        "scaoj9",
+        "scaoj7",
+        "scaoj6",
+        "sc6lnr"
+      ],
+      "igdb_url": "https://www.igdb.com/games/the-legend-of-zelda-tears-of-the-kingdom",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 9,
+            "name": "Puzzle"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 130,
+            "name": "Nintendo Switch"
+          }
+        ],
+        "developers": [
+          {
+            "id": 45209,
+            "name": "Nintendo EPD Production Group No. 3"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 70,
+            "name": "Nintendo"
+          }
+        ],
+        "summary": "An epic adventure across the land and skies of Hyrule awaits in The Legend of Zelda: Tears of the Kingdom for Nintendo Switch. The adventure is yours to create in a world fueled by your imagination.\n\nIn this sequel to The Legend of Zelda: Breath of the Wild, you'll decide your own path through the sprawling landscapes of Hyrule and the mysterious islands floating in the vast skies above. Can you harness the power of Link's new abilities to fight back against the malevolent forces that threaten the kingdom?",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "hollow-knight",
+      "igdb_id": 14593,
+      "title": "Hollow Knight",
+      "released_on": "2017-02-24",
+      "genres": [
+        "Platform",
+        "Adventure",
+        "Indie"
+      ],
+      "cover_image_id": "cobfzp",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/cobfzp.jpg",
+      "artwork_image_ids": [
+        "ar584b",
+        "ar584c",
+        "ar3ptm",
+        "ylrp6zuf9e7tcu1nvuir",
+        "eygmqwtcvjwc8xpjc8jq",
+        "ar6bjg",
+        "ar6bjh",
+        "yfx8udozg2xathxuzroi",
+        "tvfbpcmuonwiugjcbc45",
+        "rdlcclxpscvrpkiq5kkv",
+        "m18xmrbbbzlmh8bru5lm",
+        "ar3ptn"
+      ],
+      "screenshot_image_ids": [
+        "p3svrq6ewzxnn7p1a3v9",
+        "ityinxmtkakwbokpcwws",
+        "q634ullxbvipm6q6mcq9",
+        "bkgxmg2m4h8wf5g9tblh",
+        "a3f72xprqkfuqdmha5ks"
+      ],
+      "igdb_url": "https://www.igdb.com/games/hollow-knight",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 8,
+            "name": "Platform"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          },
+          {
+            "id": 32,
+            "name": "Indie"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 48,
+            "name": "PlayStation 4"
+          },
+          {
+            "id": 3,
+            "name": "Linux"
+          },
+          {
+            "id": 508,
+            "name": "Nintendo Switch 2"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          },
+          {
+            "id": 14,
+            "name": "Mac"
+          },
+          {
+            "id": 41,
+            "name": "Wii U"
+          },
+          {
+            "id": 49,
+            "name": "Xbox One"
+          },
+          {
+            "id": 130,
+            "name": "Nintendo Switch"
+          }
+        ],
+        "developers": [
+          {
+            "id": 7263,
+            "name": "Team Cherry"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 7263,
+            "name": "Team Cherry"
+          }
+        ],
+        "summary": "A 2D metroidvania with an emphasis on close combat and exploration in which the player enters the once-prosperous now-bleak insect kingdom of Hallownest, travels through its various districts, meets friendly inhabitants, fights hostile ones and uncovers the kingdom's history while improving their combat abilities and movement arsenal by fighting bosses and accessing out-of-the-way areas.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "sekiro-shadows-die-twice",
+      "igdb_id": 76882,
+      "title": "Sekiro: Shadows Die Twice",
+      "released_on": "2019-03-22",
+      "genres": [
+        "Adventure"
+      ],
+      "cover_image_id": "co2a23",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co2a23.jpg",
+      "artwork_image_ids": [
+        "ar5kdp",
+        "ar5kdr",
+        "ar5kdn",
+        "ar5kdo",
+        "ar5kdq",
+        "ar5kdt",
+        "ar5kds",
+        "ar5f1",
+        "ar5f4",
+        "ar5kdl",
+        "ar5kdk",
+        "ar5kdm",
+        "ar5kdu"
+      ],
+      "screenshot_image_ids": [
+        "sn1rmqcvrwomyuttaoyq",
+        "ocxemodvr6oa72argpyo",
+        "tjxbj2hryec06ahdi2ep",
+        "sk8lqukaqalhq2mrzkqd",
+        "jo1pi5md3myj0pxynz9p",
+        "ozcogbafdzztevnidcvt",
+        "jjn6e6ivua5u142iukql",
+        "sri6brei6tvapyyk6tse",
+        "smay0rol1vbibwop2t7n",
+        "cmootzhyx1l7scxeihej"
+      ],
+      "igdb_url": "https://www.igdb.com/games/sekiro-shadows-die-twice",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 170,
+            "name": "Google Stadia"
+          },
+          {
+            "id": 48,
+            "name": "PlayStation 4"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 49,
+            "name": "Xbox One"
+          }
+        ],
+        "developers": [
+          {
+            "id": 1012,
+            "name": "FromSoftware"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 66,
+            "name": "Activision"
+          }
+        ],
+        "summary": "Sekiro: Shadows Die Twice is an action-adventure game set in a reimagined late 1500s Sengoku-era Japan.\n\nPlayers control Wolf, a shinobi on a mission to rescue his kidnapped lord and seek revenge on his enemies. The game emphasizes precise sword combat, stealth, and mobility, replacing traditional RPG elements with a posture-based dueling system.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "armored-core-vi",
+      "igdb_id": 228542,
+      "title": "Armored Core VI: Fires of Rubicon",
+      "released_on": "2023-08-24",
+      "genres": [
+        "Shooter"
+      ],
+      "cover_image_id": "coc408",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/coc408.jpg",
+      "artwork_image_ids": [
+        "ar4ek8",
+        "ar4eka",
+        "ar67fj",
+        "ar21ry"
+      ],
+      "screenshot_image_ids": [
+        "scn7m4",
+        "scn7mc",
+        "scka8s",
+        "scka8r",
+        "scn7m3",
+        "scka8q",
+        "scn7m2",
+        "scn7m7",
+        "scka8p",
+        "scn7m8",
+        "scn7m9",
+        "scn7mb",
+        "scka8t",
+        "scka8o",
+        "scn7m5",
+        "scn7m1",
+        "scn7me",
+        "scn7md",
+        "scn7m6",
+        "scn7ma"
+      ],
+      "igdb_url": "https://www.igdb.com/games/armored-core-vi-fires-of-rubicon",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 5,
+            "name": "Shooter"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 48,
+            "name": "PlayStation 4"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          },
+          {
+            "id": 49,
+            "name": "Xbox One"
+          }
+        ],
+        "developers": [
+          {
+            "id": 1012,
+            "name": "FromSoftware"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 248,
+            "name": "Bandai Namco Entertainment"
+          },
+          {
+            "id": 1012,
+            "name": "FromSoftware"
+          }
+        ],
+        "summary": "By combining FromSoftware’s longstanding expertise in mech games and their signature robust gameplay, Armored Core VI: Fires of Rubicon will be a new action experience.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "final-fantasy-vii-rebirth",
+      "igdb_id": 133236,
+      "title": "Final Fantasy VII Rebirth",
+      "released_on": "2024-02-29",
+      "genres": [
+        "Role-playing (RPG)",
+        "Strategy",
+        "Adventure"
+      ],
+      "cover_image_id": "cob9k6",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/cob9k6.jpg",
+      "artwork_image_ids": [
+        "ar61fz",
+        "ar6by1",
+        "ar6by2",
+        "ar3nl5",
+        "ar58fq",
+        "ar5cd6",
+        "ar5za5"
+      ],
+      "screenshot_image_ids": [
+        "scojfl",
+        "scojfp",
+        "scojfs",
+        "scojfu",
+        "scojfm",
+        "scojfi",
+        "scojfk",
+        "scojfn",
+        "scojfo",
+        "scojfq",
+        "scmwdh",
+        "scmwdf",
+        "scmwdg",
+        "scuw8p",
+        "scojfj",
+        "scojfr",
+        "scojft",
+        "sckt29",
+        "sckt2a"
+      ],
+      "igdb_url": "https://www.igdb.com/games/final-fantasy-vii-rebirth",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 15,
+            "name": "Strategy"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 508,
+            "name": "Nintendo Switch 2"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          }
+        ],
+        "developers": [
+          {
+            "id": 45304,
+            "name": "Square Enix Creative Business Unit I"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 26,
+            "name": "Square Enix"
+          }
+        ],
+        "summary": "Final Fantasy VII Rebirth is the second entry in the Final Fantasy VII remake project, which retells the story of the genre-redefining RPG across three distinct games. Iconic heroes Cloud, Barret, Tifa, Aerith and Red XIII have escaped from the dystopian city Midgar and are now in pursuit of Sephiroth, the vengeful swordsman from Cloud’s past who was thought to be dead.",
+        "game_type": "Remake"
+      }
+    },
+    {
+      "slug": "lies-of-p",
+      "igdb_id": 148241,
+      "title": "Lies of P",
+      "released_on": "2023-09-18",
+      "genres": [
+        "Role-playing (RPG)",
+        "Adventure"
+      ],
+      "cover_image_id": "co6lxr",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co6lxr.jpg",
+      "artwork_image_ids": [
+        "ar243v",
+        "ar5iqy",
+        "ar5io5"
+      ],
+      "screenshot_image_ids": [
+        "sc9oa8",
+        "sc9oa7",
+        "sc9oa9",
+        "sc9oab",
+        "sc9oaa"
+      ],
+      "igdb_url": "https://www.igdb.com/games/lies-of-p",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 48,
+            "name": "PlayStation 4"
+          },
+          {
+            "id": 508,
+            "name": "Nintendo Switch 2"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          },
+          {
+            "id": 14,
+            "name": "Mac"
+          },
+          {
+            "id": 49,
+            "name": "Xbox One"
+          }
+        ],
+        "developers": [
+          {
+            "id": 34183,
+            "name": "Round8 Studio"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 30237,
+            "name": "Neowiz"
+          }
+        ],
+        "summary": "Lies of P is an action role-playing game set in a dark, Belle Époque-inspired city overrun by deadly puppets. Players control Pinocchio, reimagined as a mechanical warrior, navigating a decaying world while making choices that affect the unfolding narrative. The game features challenging melee combat, weapon customization, and a mechanical arm with various abilities.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "dead-space",
+      "igdb_id": 159119,
+      "title": "Dead Space",
+      "released_on": "2023-01-27",
+      "genres": [
+        "Shooter",
+        "Role-playing (RPG)",
+        "Adventure"
+      ],
+      "cover_image_id": "cobkv5",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/cobkv5.jpg",
+      "artwork_image_ids": [
+        "arxuo"
+      ],
+      "screenshot_image_ids": [
+        "scinmc",
+        "scinme",
+        "scinmd",
+        "sckeeq",
+        "sckees",
+        "sckeep",
+        "sckeeo",
+        "sckeer"
+      ],
+      "igdb_url": "https://www.igdb.com/games/dead-space--1",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 5,
+            "name": "Shooter"
+          },
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          }
+        ],
+        "developers": [
+          {
+            "id": 12478,
+            "name": "Motive Studios"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 1,
+            "name": "Electronic Arts"
+          }
+        ],
+        "summary": "The sci-fi survival-horror classic Dead Space returns, completely rebuilt from the ground up to offer a deeper, more immersive experience. This remake brings jaw-dropping visual fidelity, suspenseful atmospheric audio, and improvements to gameplay while staying faithful to the original game’s thrilling vision.",
+        "game_type": "Remake"
+      }
+    },
+    {
+      "slug": "resident-evil-4",
+      "igdb_id": 132181,
+      "title": "Resident Evil 4",
+      "released_on": "2023-03-24",
+      "genres": [
+        "Shooter",
+        "Puzzle",
+        "Adventure"
+      ],
+      "cover_image_id": "co6bo0",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co6bo0.jpg",
+      "artwork_image_ids": [
+        "ar1xhu"
+      ],
+      "screenshot_image_ids": [
+        "scixzc",
+        "sch7rk",
+        "sch7rl",
+        "sch7rm",
+        "scixzd",
+        "sch7rn"
+      ],
+      "igdb_url": "https://www.igdb.com/games/resident-evil-4--1",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 5,
+            "name": "Shooter"
+          },
+          {
+            "id": 9,
+            "name": "Puzzle"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 48,
+            "name": "PlayStation 4"
+          },
+          {
+            "id": 508,
+            "name": "Nintendo Switch 2"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 39,
+            "name": "iOS"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          },
+          {
+            "id": 14,
+            "name": "Mac"
+          }
+        ],
+        "developers": [
+          {
+            "id": 42265,
+            "name": "Capcom Development Division 1"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 37,
+            "name": "Capcom"
+          }
+        ],
+        "summary": "Resident Evil 4 is a remake of the 2005 original Resident Evil 4 reimagined for 2023 to bring state-of-the-art survival horror. Resident Evil 4 preserves the essence of the original game, while introducing modernized gameplay, a reimagined storyline,\nand vividly detailed graphics to make this the latest survival horror game where life and death, terror and catharsis intersect.",
+        "game_type": "Remake"
+      }
+    },
+    {
+      "slug": "returnal",
+      "igdb_id": 134584,
+      "title": "Returnal",
+      "released_on": "2021-04-30",
+      "genres": [
+        "Shooter"
+      ],
+      "cover_image_id": "co3wc1",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co3wc1.jpg",
+      "artwork_image_ids": [
+        "ar7fb",
+        "ar64vj",
+        "ar3d08"
+      ],
+      "screenshot_image_ids": [
+        "sc8bj6",
+        "sc8bj8",
+        "sc8bja",
+        "sc8bj9",
+        "sc8bj7"
+      ],
+      "igdb_url": "https://www.igdb.com/games/returnal",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 5,
+            "name": "Shooter"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          }
+        ],
+        "developers": [
+          {
+            "id": 1006,
+            "name": "Housemarque"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 10100,
+            "name": "Sony Interactive Entertainment"
+          }
+        ],
+        "summary": "Returnal is a 2021 roguelike third-person shooter video game developed by Housemarque and published by Sony Interactive Entertainment.\n\nIt follows Selene Vassos, an astronaut who lands on the planet Atropos in search of the mysterious \"White Shadow\" signal and finds herself trapped in a time loop.\n\nAfter crash-landing on a shape-shifting alien planet, Selene finds herself fighting tooth and nail for survival. Every time she’s defeated, the player is forced to restart the journey.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "nier-automata",
+      "igdb_id": 11208,
+      "title": "NieR: Automata",
+      "released_on": "2017-02-23",
+      "genres": [
+        "Role-playing (RPG)",
+        "Hack and slash/Beat 'em up"
+      ],
+      "cover_image_id": "co5pcj",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co5pcj.jpg",
+      "artwork_image_ids": [
+        "ar4n6u",
+        "vs2dj7rxsxgehcuq9gmb",
+        "mg2psdb1i6gosejsnugx",
+        "npzkrvfpuhzkm5iudyax",
+        "odo9d54dmfivebhp9f9v",
+        "ar5l1",
+        "ar4n6s",
+        "ar4n6t"
+      ],
+      "screenshot_image_ids": [
+        "gzkc9kfusk2qss9vnuj4",
+        "m5ytymipeljiatfrblhs",
+        "bgmyc8eupb0coy0giatf",
+        "banme9peksg7gcxr26oa",
+        "et43nztghwnyzqd0br9q",
+        "sc942d",
+        "sc942e",
+        "sc942f",
+        "sc942g"
+      ],
+      "igdb_url": "https://www.igdb.com/games/nier-automata",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 25,
+            "name": "Hack and slash/Beat 'em up"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 48,
+            "name": "PlayStation 4"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 49,
+            "name": "Xbox One"
+          }
+        ],
+        "developers": [
+          {
+            "id": 852,
+            "name": "PlatinumGames"
+          },
+          {
+            "id": 53031,
+            "name": "Square Enix Business Division 6"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 26,
+            "name": "Square Enix"
+          }
+        ],
+        "summary": "NieR: Automata tells the story of androids 2B, 9S and A2 and their battle to reclaim the machine-driven dystopia overrun by powerful machines.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "dragons-dogma-2",
+      "igdb_id": 115060,
+      "title": "Dragon's Dogma II",
+      "released_on": "2024-03-22",
+      "genres": [
+        "Role-playing (RPG)",
+        "Adventure"
+      ],
+      "cover_image_id": "co833w",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co833w.jpg",
+      "artwork_image_ids": [
+        "ar67fb",
+        "ar2fc4"
+      ],
+      "screenshot_image_ids": [
+        "sctxzh",
+        "sctxzc",
+        "sctxzf",
+        "sctxzi",
+        "sctxzd",
+        "sctxze",
+        "sctxzg"
+      ],
+      "igdb_url": "https://www.igdb.com/games/dragons-dogma-ii",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 508,
+            "name": "Nintendo Switch 2"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          }
+        ],
+        "developers": [
+          {
+            "id": 42265,
+            "name": "Capcom Development Division 1"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 37,
+            "name": "Capcom"
+          }
+        ],
+        "summary": "Dragon's Dogma is a single player, narrative driven action-RPG that challenges players to choose their own experience – from the appearance of their Arisen, their vocation, their party, how to approach different situations and more.\n\nOn your journey, you’ll be joined by Pawns, mysterious otherworldly beings, in an adventure so unique you will feel as if accompanied by other players while on your own adventure.\n\nAll of these elements are elevated further by the latest in graphics, artificial intelligence (AI) and physics technology to create a truly immersive fantasy world in Dragon's Dogma 2.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "starfield",
+      "igdb_id": 96437,
+      "title": "Starfield",
+      "released_on": "2023-09-06",
+      "genres": [
+        "Shooter",
+        "Role-playing (RPG)",
+        "Adventure"
+      ],
+      "cover_image_id": "co39vv",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co39vv.jpg",
+      "artwork_image_ids": [
+        "ar91m",
+        "ar67ei"
+      ],
+      "screenshot_image_ids": [
+        "ygiajg3ypevvmhoo0cea",
+        "tg9zupved8b6aroc0fob",
+        "schdmi",
+        "schdmk",
+        "schdmh",
+        "schdmj",
+        "scmlzk",
+        "scu1aj",
+        "scu1ak",
+        "scmlzm",
+        "scogaf",
+        "scmlzl",
+        "scmlzj",
+        "sctkeu",
+        "sctkev",
+        "scu1al",
+        "scu1ai"
+      ],
+      "igdb_url": "https://www.igdb.com/games/starfield",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 5,
+            "name": "Shooter"
+          },
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          }
+        ],
+        "developers": [
+          {
+            "id": 126,
+            "name": "Bethesda Game Studios"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 16565,
+            "name": "Bethesda Softworks"
+          }
+        ],
+        "summary": "Starfield is a single-player action role-playing game developed by Bethesda Game Studios and set in an open-world space environment. Players create a customizable character and explore a region of the Milky Way galaxy spanning approximately 50 light-years, landing on over 1,000 planets with procedurally generated landscapes. Gameplay includes first-person and third-person combat using firearms, explosives, and melee weapons, as well as spaceship construction, outpost building, resource gathering, and crafting. Players recruit companion characters, join factions, and progress through skill trees spanning Physical, Social, Combat, Science, and Tech categories.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "death-stranding",
+      "igdb_id": 19564,
+      "title": "Death Stranding",
+      "released_on": "2019-11-08",
+      "genres": [
+        "Shooter",
+        "Role-playing (RPG)",
+        "Adventure"
+      ],
+      "cover_image_id": "cocsvh",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/cocsvh.jpg",
+      "artwork_image_ids": [
+        "fq9mae2ruszujzbybiif",
+        "porotx4upzdqpesaywl1",
+        "cepvgymrtpjledmcljbd",
+        "lcledoactdqw9jdugn5i",
+        "ar3s0u",
+        "ar3ptf"
+      ],
+      "screenshot_image_ids": [
+        "sc6l0a",
+        "sc6l0g",
+        "sc6l0i",
+        "ot22cc6wsmhbrcnuo8ti",
+        "u8ylruedniehtc18wzin",
+        "sc6l0e",
+        "sc6l0b",
+        "sc6l0j",
+        "sc6l0c",
+        "sc6l0f",
+        "sc6l0h",
+        "sc6l0d"
+      ],
+      "igdb_url": "https://www.igdb.com/games/death-stranding",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 5,
+            "name": "Shooter"
+          },
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 48,
+            "name": "PlayStation 4"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          }
+        ],
+        "developers": [
+          {
+            "id": 170,
+            "name": "Kojima Productions"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 10100,
+            "name": "Sony Interactive Entertainment"
+          },
+          {
+            "id": 445,
+            "name": "505 Games"
+          }
+        ],
+        "summary": "Death Stranding is an action game set in a post-apocalyptic United States.\n\nPlayers control Sam Porter Bridges, a courier tasked with reconnecting isolated cities via a communication network while delivering essential cargo. The gameplay blends traversal, resource management, and narrative elements, with a focus on social connectivity through asynchronous multiplayer. It is known for its unique mechanics, atmospheric world, and philosophical themes.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "hogwarts-legacy",
+      "igdb_id": 136625,
+      "title": "Hogwarts Legacy",
+      "released_on": "2023-02-10",
+      "genres": [
+        "Role-playing (RPG)",
+        "Adventure"
+      ],
+      "cover_image_id": "coaav6",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/coaav6.jpg",
+      "artwork_image_ids": [
+        "ar79n",
+        "ar5vnz"
+      ],
+      "screenshot_image_ids": [
+        "sclo16",
+        "sclo10",
+        "sclo11",
+        "sclo13",
+        "sclo15",
+        "sclo14",
+        "sclo17",
+        "sclo0z",
+        "sclo12"
+      ],
+      "igdb_url": "https://www.igdb.com/games/hogwarts-legacy",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 48,
+            "name": "PlayStation 4"
+          },
+          {
+            "id": 508,
+            "name": "Nintendo Switch 2"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          },
+          {
+            "id": 49,
+            "name": "Xbox One"
+          },
+          {
+            "id": 130,
+            "name": "Nintendo Switch"
+          }
+        ],
+        "developers": [
+          {
+            "id": 1309,
+            "name": "Avalanche Software"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 30651,
+            "name": "Warner Bros. Games"
+          }
+        ],
+        "summary": "Hogwarts Legacy is an immersive, open-world action RPG set in the world first introduced in the Harry Potter books. Now you can take control of the action and be at the center of your own adventure in the wizarding world. Embark on a journey through familiar and new locations as you explore and discover fantastic beasts, customize your character and craft potions, master spell casting, upgrade talents, and become the wizard you want to be. Discover the feeling of living at Hogwarts as you make allies, battle Dark wizards, and ultimately decide the fate of the wizarding world. Your legacy is what you make of it.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "forspoken",
+      "igdb_id": 134583,
+      "title": "Forspoken",
+      "released_on": "2023-01-24",
+      "genres": [
+        "Role-playing (RPG)",
+        "Adventure"
+      ],
+      "cover_image_id": "co4u6r",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co4u6r.jpg",
+      "artwork_image_ids": [
+        "ar3orj",
+        "ar3ori"
+      ],
+      "screenshot_image_ids": [
+        "sc8bj3",
+        "sc8bj4",
+        "sc8bj5"
+      ],
+      "igdb_url": "https://www.igdb.com/games/forspoken",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          }
+        ],
+        "developers": [
+          {
+            "id": 37969,
+            "name": "Luminous Productions"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 26,
+            "name": "Square Enix"
+          }
+        ],
+        "summary": "Forspoken follows the journey of Frey, a young New Yorker transported to the beautiful and cruel land of Athia. In search of a way home, Frey must use her newfound magical abilities to traverse sprawling landscapes and battle monstrous creatures.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "redfall",
+      "igdb_id": 152247,
+      "title": "Redfall",
+      "released_on": "2023-05-02",
+      "genres": [
+        "Shooter",
+        "Role-playing (RPG)",
+        "Adventure"
+      ],
+      "cover_image_id": "co52ds",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co52ds.jpg",
+      "artwork_image_ids": [
+        "ar90u",
+        "ar90r",
+        "ar90t",
+        "ar90v",
+        "ar90p",
+        "ar90q",
+        "ar90s",
+        "ar90w",
+        "ar90x"
+      ],
+      "screenshot_image_ids": [
+        "schdmy",
+        "schdmw",
+        "schdmr",
+        "schdms",
+        "schdmt",
+        "schdmu",
+        "schdmx",
+        "schdmv"
+      ],
+      "igdb_url": "https://www.igdb.com/games/redfall",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 5,
+            "name": "Shooter"
+          },
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          }
+        ],
+        "developers": [
+          {
+            "id": 35055,
+            "name": "Arkane Austin"
+          },
+          {
+            "id": 47087,
+            "name": "Roundhouse Studios"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 16565,
+            "name": "Bethesda Softworks"
+          }
+        ],
+        "summary": "Redfall is an open-world, co-op FPS from Arkane Austin, the award-winning team behind Prey and Dishonored. Continuing Arkane’s legacy of carefully crafted worlds and immersive sims, Redfall brings the studio’s signature gameplay to this story-driven action shooter.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "lords-of-fallen",
+      "igdb_id": 21593,
+      "title": "Lords of the Fallen",
+      "released_on": "2023-10-13",
+      "genres": [
+        "Role-playing (RPG)",
+        "Adventure"
+      ],
+      "cover_image_id": "co72u9",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co72u9.jpg",
+      "artwork_image_ids": [
+        "ar1uc5"
+      ],
+      "screenshot_image_ids": [
+        "scii73",
+        "scii72",
+        "scii74",
+        "scii71",
+        "scii70",
+        "scii6z"
+      ],
+      "igdb_url": "https://www.igdb.com/games/lords-of-the-fallen--2",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 12,
+            "name": "Role-playing (RPG)"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          }
+        ],
+        "developers": [
+          {
+            "id": 42873,
+            "name": "HEXWORKS"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 1212,
+            "name": "CI Games"
+          }
+        ],
+        "summary": "Lords of the Fallen is an action role-playing game set in a dark fantasy world split between the living realm (Axiom) and the dead (Umbral). Players battle through brutal combat, uncover secrets, and shape the world’s fate with a lantern that bridges both realms. Inspired by Soulsborne games, it offers deep exploration, punishing difficulty, and a haunting atmosphere where choices matter.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "the-day-before",
+      "igdb_id": 142901,
+      "title": "The Day Before",
+      "released_on": "2023-12-07",
+      "genres": [
+        "Shooter",
+        "Adventure"
+      ],
+      "cover_image_id": "co4x13",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co4x13.jpg",
+      "artwork_image_ids": [
+        "ar139s"
+      ],
+      "screenshot_image_ids": [
+        "sc9029",
+        "sc902a",
+        "sc902b",
+        "sc902c",
+        "sc902d"
+      ],
+      "igdb_url": "https://www.igdb.com/games/the-day-before",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 5,
+            "name": "Shooter"
+          },
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          }
+        ],
+        "developers": [
+          {
+            "id": 14208,
+            "name": "Fntastic"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 22685,
+            "name": "MYTONA"
+          }
+        ],
+        "summary": "The Day Before was a multiplayer survival horror extraction shooter video game developed by Fntastic and published by Mytona. Set in the future, players controlled a character who must traverse and survive in the fictional, post-apocalyptic \"New Fortune City\", which has been overrun by zombies. It was released in early access on 7 December 2023 for Microsoft Windows on Steam.\n\nThe game's lengthy development led to questions of its legitimacy, and it drew early criticism for its perceived status as a scam. The development was marred by legal disputes involving Fntastic, as well as accusations of plagiarism and soliciting unpaid labour. The Day Before was panned by critics for its technical issues and lack of creativity. Four days later, it was removed from sale—with its servers remaining open until the following month—and Fntastic was closed due to its poor sales performance.",
+        "game_type": "Main Game"
+      }
+    },
+    {
+      "slug": "the-lord-of-the-rings-gollum",
+      "igdb_id": 116584,
+      "title": "The Lord of the Rings: Gollum",
+      "released_on": "2023-05-25",
+      "genres": [
+        "Adventure"
+      ],
+      "cover_image_id": "co4sdl",
+      "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co4sdl.jpg",
+      "artwork_image_ids": [
+        "ar6se"
+      ],
+      "screenshot_image_ids": [
+        "sc87r1",
+        "sch5j9",
+        "sch5jc",
+        "sch5jd",
+        "sc87r0",
+        "sch5jb",
+        "sch5ja",
+        "sch5j8",
+        "sch5je",
+        "sch5jf",
+        "sch5jg"
+      ],
+      "igdb_url": "https://www.igdb.com/games/the-lord-of-the-rings-gollum",
+      "igdb_metadata": {
+        "genres": [
+          {
+            "id": 31,
+            "name": "Adventure"
+          }
+        ],
+        "platforms": [
+          {
+            "id": 169,
+            "name": "Xbox Series X|S"
+          },
+          {
+            "id": 48,
+            "name": "PlayStation 4"
+          },
+          {
+            "id": 6,
+            "name": "PC (Microsoft Windows)"
+          },
+          {
+            "id": 167,
+            "name": "PlayStation 5"
+          },
+          {
+            "id": 49,
+            "name": "Xbox One"
+          },
+          {
+            "id": 130,
+            "name": "Nintendo Switch"
+          }
+        ],
+        "developers": [
+          {
+            "id": 2248,
+            "name": "Daedalic Entertainment"
+          }
+        ],
+        "publishers": [
+          {
+            "id": 24760,
+            "name": "Nacon"
+          },
+          {
+            "id": 2248,
+            "name": "Daedalic Entertainment"
+          }
+        ],
+        "summary": "The Lord of the Rings: Gollum is an action-adventure game developed by Daedalic Entertainment. The game, set in the fictional world of Middle-earth created by J. R. R. Tolkien, takes place in between the events of The Hobbit and The Fellowship of the Ring. The player controls Gollum through a series of locations, such as Cirith Ungol, Barad-dûr, and Mirkwood, as he attempts to find Bilbo Baggins and retake the One Ring whilst battling and avoiding Sauron. The Lord of the Rings: Gollum released on 25 May 2023 for PlayStation 4, PlayStation 5, Windows, Xbox One and Xbox Series X/S. The game was a commercial failure and received negative reviews from critics. It was ranked by Metacritic as the worst game of 2023.",
+        "game_type": "Main Game"
+      }
+    }
+  ]
+}

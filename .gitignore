@@ -6,6 +6,7 @@ coverage/
 .env.*
 !.env.example
 .vercel/
+.igdb/
 *.tsbuildinfo
 next-env.d.ts
 .DS_Store

@@ -7,7 +7,7 @@ import { TierBadge, ScoreStars } from "@/components/rating-controls";
 
 export function ReviewScreen({ game }: { game: Game }) {
 const isReference = game.slug === "metaphor-refantazio";
-const [score, setScore] = useState(game.score);
+const [score, setScore] = useState(game.score ?? 0);
 const [tier, setTier] = useState<Tier>("S");
 const [platform, setPlatform] = useState(1);
 const [status, setStatus] = useState(0);
@@ -15,7 +15,7 @@ const [broadcast, setBroadcast] = useState(true);
 const [hours, setHours] = useState(isReference ? "78.4 hrs" : "");
 const [date, setDate] = useState(isReference ? "October 28, 2024" : "");
 const [review, setReview] = useState(isReference ? "Hashino delivers an impeccably stylized political dissertation disguised as a peak turn-based odyssey. The Archetype hierarchy rewards relentless tactical friction, while Meguro's monastic choral brass anchors every election-trial confrontation with staggering momentum. A peerless apex for contemporary JRPGs." : "");
-function resetDraft() { setScore(game.score); setTier("S"); setPlatform(1); setStatus(0); setBroadcast(true); setHours(isReference ? "78.4 hrs" : ""); setDate(isReference ? "October 28, 2024" : ""); setReview(isReference ? "Hashino delivers an impeccably stylized political dissertation disguised as a peak turn-based odyssey. The Archetype hierarchy rewards relentless tactical friction, while Meguro's monastic choral brass anchors every election-trial confrontation with staggering momentum. A peerless apex for contemporary JRPGs." : ""); }
+function resetDraft() { setScore(game.score ?? 0); setTier("S"); setPlatform(1); setStatus(0); setBroadcast(true); setHours(isReference ? "78.4 hrs" : ""); setDate(isReference ? "October 28, 2024" : ""); setReview(isReference ? "Hashino delivers an impeccably stylized political dissertation disguised as a peak turn-based odyssey. The Archetype hierarchy rewards relentless tactical friction, while Meguro's monastic choral brass anchors every election-trial confrontation with staggering momentum. A peerless apex for contemporary JRPGs." : ""); }
 return (<>
 <div className="w-full  bg-surface"><div className="flex flex-col w-full">
 <div className="relative w-full min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 sm:p-6 lg:p-12 overflow-hidden">

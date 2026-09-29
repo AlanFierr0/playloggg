@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PreviewNoticeProvider } from "@/components/preview-action";
+import { PortfolioProvider } from "@/components/portfolio-provider";
+import { getPortfolio } from "@/lib/portfolio";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,7 +13,8 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image" },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const portfolio = await getPortfolio();
   return (
     <html lang="en" className="dark">
       <head>
@@ -21,11 +24,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
       </head>
       <body className="bg-surface font-body-md text-on-surface antialiased">
-        <PreviewNoticeProvider>
+        <PortfolioProvider portfolio={portfolio}><PreviewNoticeProvider>
           <SiteHeader />
           <main className="w-full pt-16 bg-surface">{children}</main>
           <SiteFooter />
-        </PreviewNoticeProvider>
+        </PreviewNoticeProvider></PortfolioProvider>
       </body>
     </html>
   );
