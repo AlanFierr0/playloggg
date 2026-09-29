@@ -1,6 +1,6 @@
 # Steam sign-in
 
-Implemented locally, pending production rollout and a real Steam sign-in check.
+Deployed to production from `main`; a real Steam sign-in check remains pending.
 The user approved public Steam registration, a server-side Supabase session
 bridge, and private profiles with handle/display-name setup. Existing owner email
 login remains available. No schema migration, new public grants or dependencies
@@ -51,7 +51,7 @@ secret values must not be logged. Steam authenticates on its own site; Playlogg
 never receives Steam passwords. The owner reported the existing secret key is
 configured in Vercel Production, while the ignored local environment lacks it.
 
-After an authorized rollout, sign in with Steam, choose names, save an unscored
+On production, sign in with Steam, choose names, save an unscored
 Backlog entry and a list, reload, sign out and sign back in. Repeat with a second
 Steam account to confirm isolation. Publishing profiles, changing profile names,
 Steam library syncing and linking Steam to the owner's email account are separate
@@ -73,8 +73,12 @@ features outside this milestone.
   cross-owner RLS predicates and denied public profile/catalog inserts. The security
   advisor reports no database/RLS issues; its pre-existing password-protection
   warning remains unchanged.
-- Real Steam authentication and production credentials require a live sign-in
-  after rollout. Local fixtures do not prove those external services are configured.
+- Production checks confirm the login button, secure state cookie, redirect to
+  Steam with the production callback origin, rejection of invalid callbacks,
+  guest setup redirect, Games filters and branded tab icon. No browser or recent
+  Vercel runtime errors were found.
+- Real Steam authentication and privileged production credentials still require
+  a live sign-in. These deployment checks do not establish a real Supabase session.
 
 References: [Steam browser authentication](https://partner.steamgames.com/doc/features/auth),
 [Supabase admin users](https://supabase.com/docs/reference/javascript/auth-admin-createuser),

@@ -102,8 +102,8 @@ artwork is not invented.
 
 ## Infrastructure
 
-Public Steam sign-in and private profile setup are implemented locally, pending
-rollout. Each person edits only their own entries and lists; IGDB import stays
+Public Steam sign-in and private profile setup are deployed; real Steam sign-in
+verification is pending. Each person edits only their own entries and lists; IGDB import stays
 restricted to the original owner. See [Steam sign-in](docs/steam-sign-in.md).
 
 The prototype is published from GitHub `main` at https://playloggg.vercel.app/.
