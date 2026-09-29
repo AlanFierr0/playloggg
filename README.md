@@ -89,8 +89,8 @@ text; their original HTML remains available. Fonts retain their original externa
 covers/artwork, with verified box art for the two comparison-only classics.
 Profile portraits use initials until a real image is supplied; generated Stitch
 images are absent from the application. See [image sources](docs/image-sources.md). Reviewed sample IGDB metadata is imported through separate administrative
-scripts. Owner-only in-app IGDB search/import is implemented locally; activation
-requires server credentials and production rollout. See the
+scripts. Owner-only in-app IGDB search/import is deployed. The owner confirmed
+production credentials are configured; live authenticated verification is pending. See the
 [IGDB catalog setup guide](docs/igdb-catalog-import.md). Credentials remain on
 the server; public browsing reads the stored catalog without provider requests.
 

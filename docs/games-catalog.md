@@ -3,8 +3,8 @@
 The Games tab at `/games` browses all stored Supabase catalog games, including
 titles the selected profile has not logged. It reuses the portfolio provider,
 existing permissions, reviewed covers and responsive site container. No schema,
-credentials or new dependencies are required for browsing. Implementation is
-local pending production rollout.
+credentials or new dependencies are required for browsing. Production rollout
+from `main` is complete; Vercel deployed commit `36e9226` successfully.
 
 Catalog filters include word search across titles, keywords and genres; exact
 genre, available platform and release year; and alphabetical, release date or
@@ -40,3 +40,9 @@ The Discover page's Explore All Games link also opens the catalog.
 - The open profile filter section and all five navigation tabs fit at 320, 390,
   640, 768, 1024, 1440, 1920 and 2560 pixels without horizontal page overflow.
   Mobile and desktop screenshots were visually inspected.
+
+Production checks passed catalog pagination, combined title/year and tier/score
+filters, invalid score ranges, clearing filters, saved catalog search and return
+navigation. All five tabs fit at 320, 390, 768, 1024 and 1920 pixels without page
+overflow. Anonymous log saving remains disabled. Vercel reported no recent
+runtime errors after rollout, and all 28 current automated tests pass.

@@ -1,7 +1,9 @@
 # Owner IGDB search and catalog import
 
-Status: implemented locally. Provider/server credentials and production rollout
-remain to be configured. No schema migration or public catalog-write grant is
+Status: deployed from `main` in commit `36e9226`. The owner confirmed the three
+provider/server variables are configured in Vercel Production. An authenticated
+production search/import check remains pending. Local `.env.local` still lacks
+these three variables. No schema migration or public catalog-write grant is
 needed; the inspected live schema already has a unique `games.igdb_id`.
 
 ## Behavior
@@ -100,8 +102,9 @@ remains; Auth configuration was not changed.
 An isolated local Auth/Data API and provider fixture verified owner search,
 import/navigation, cached catalog refresh, duplicate reuse, unscored Backlog
 saving, and import/add/save/reload with a preserved list draft. Live provider
-authentication and production imports remain unverified until credentials and
-rollout are configured. Fixtures use dummy credentials; ignored real environment
+authentication and production imports remain unverified pending an authenticated
+owner check. Production rollout is complete and the owner confirmed Vercel
+credentials are configured. Fixtures use dummy credentials; ignored real environment
 files remain unchanged.
 
 Additional browser checks passed provider-failure/no-result messages, Enter to
