@@ -7,9 +7,9 @@ import { getPortfolio } from "@/lib/portfolio";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "Playlogg — Your gaming portfolio", template: "%s | Playlogg" },
+  title: { default: "Playlogg | Your gaming portfolio", template: "%s | Playlogg" },
   description: "A personal gaming portfolio of ratings, rankings, tiers and shared gaming taste. Visual prototype with sample content.",
-  openGraph: { title: "Playlogg — Your gaming portfolio", description: "Ratings, rankings and personal gaming taste.", type: "website", siteName: "Playlogg" },
+  openGraph: { title: "Playlogg | Your gaming portfolio", description: "Ratings, rankings and personal gaming taste.", type: "website", siteName: "Playlogg" },
   twitter: { card: "summary_large_image" },
 };
 
