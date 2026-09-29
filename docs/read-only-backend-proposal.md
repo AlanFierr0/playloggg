@@ -106,11 +106,48 @@ Docker, which is not available in this workspace. No remote reset was run.
   lookups and future game-detail queries. See the
   [unused-index advisor](https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index).
 
+## Read-only screen integration
+
+The user approved replacing illustrative totals and averages with calculated
+values on the sample profile. Profile rankings, the tier board and search now
+consume the same server-loaded portfolio as game detail and rating drafts.
+
+- Rankings include rated games only, ordered by score descending, then slug.
+  Filters use the displayed 90+ and 75+ thresholds. Pagination shows eight
+  records per page and resets when a filter changes.
+- Counts and the average come from that profile's loaded ratings, including
+  score zero. An empty profile displays zero rated games and no average.
+- Tier groups use saved assignments independently of scores. Ratings with no
+  tier appear in an Unassigned group. Tier counts match the actual groups;
+  score-range labels and invented overflow counts have been removed.
+- Search uses the loaded game catalog and published sample profile. Unrated
+  games remain searchable and display an explicit unrated state. It does not
+  advertise fixture profiles or nonexistent curated lists as database results.
+- Original per-screen cover variants are retained in
+  `src/data/portfolio-art.json`; games without an original variant use their
+  catalog cover. Layout, typography, navigation and tier colors are preserved.
+- Game detail labels its score as the sample profile's rating; community and
+  editorial material remains illustrative. Draft tiers initialize and reset
+  to the saved tier, including no assignment. Draft editing stays memory-only.
+- Root and route errors show a retry control, without replacing unavailable
+  database data with fixture results. The query layer still has a 1,000-row
+  limit per resource; server pagination is a future requirement for a larger
+  catalog. Current sample data is within this limit.
+
+## Integration verification
+
+Integration verification: TypeScript and lint pass; five data-rule tests and
+seed reproducibility pass. The browser confirms 32 sample ratings and an 80.6
+average, working pagination/filter reset, tier counts matching Supabase,
+keyboard search navigation and draft reset to an unassigned tier. Desktop and
+390px mobile layouts were inspected with no horizontal overflow. An isolated
+local API verified failed-read recovery through the retry control, searchable
+unrated titles and an empty profile without a fabricated average. Local
+environment settings were restored; these checks did not alter Supabase data.
+
 ## Next milestone
 
-Connect screens in a separate reviewed change, preserving layout and styling.
-The current website still uses its original fixtures and memory-only draft controls.
-
-Database-backed counts, averages and comparisons must eventually use actual
-records. Existing fabricated totals (such as 384 games) must not be presented as
-calculated values. Agree on those visible content changes before connecting UI.
+Review the read-only integration before publishing it from main. Authentication,
+profile ownership and persistence require a separately agreed access design.
+Comparison and discovery remain illustrative screens; curated lists, playback
+status, community statistics and editorial reviews have no persistence yet.

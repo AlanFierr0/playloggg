@@ -36,7 +36,8 @@ The read-only schema is applied: shared `profiles`, `games`, and `ratings` table
 Scores belong to ratings; tiers are independent and may be unassigned. One current
 rating/review exists per profile/game. Rank by score descending, then game slug.
 RLS exposes published profiles and their ratings; application roles have reads only.
-The application does not query Supabase yet. Authentication is deferred.
+The application reads published Supabase data on the server using a publishable key.
+Authentication is deferred. Profile rankings, tiers and search use those records.
 Do not enable public database writes without an
 agreed ownership/access design. Inspect Supabase before finalizing a schema;
 track approved changes in versioned migrations. Keep credentials in ignored

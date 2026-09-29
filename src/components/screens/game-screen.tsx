@@ -44,7 +44,7 @@ return (<>
 <div className="absolute top-3.5 right-3.5 bg-surface/90 backdrop-blur-md px-2.5 py-1 rounded shadow-lg flex items-center gap-1.5">
 <span className="material-symbols-outlined text-primary text-[14px]" style={{"fontVariationSettings": "'FILL' 1"}}>{"hotel_class"}</span>
 
-<span className="font-label-md text-label-md text-primary font-bold tracking-tight">{game.score}</span>
+<span className="font-label-md text-label-md text-primary font-bold tracking-tight">{game.score ?? "Unrated"}</span>
 
 <span className="text-on-surface-variant/60 font-label-sm text-label-sm">{"/100"}</span>
 
@@ -122,7 +122,7 @@ return (<>
 <div className="flex flex-col min-[360px]:flex-row items-start min-[360px]:items-center gap-5">
 
 <div className="flex items-baseline gap-1 bg-surface-container-lowest px-4 py-3 rounded-lg text-primary">
-<span className="font-display-lg text-display-lg font-bold tracking-tight">{game.score}</span>
+<span className="font-display-lg text-display-lg font-bold tracking-tight">{game.score ?? "—"}</span>
 
 <span className="font-label-md text-label-md text-on-surface-variant/70">{"/100"}</span>
 
@@ -130,21 +130,20 @@ return (<>
 
 <div className="flex flex-col gap-0.5">
 <div className="flex items-center gap-2">
-<span className="font-headline-md text-headline-md text-on-surface font-bold">{"Universal Archival Acclaim"}</span>
+<span className="font-headline-md text-headline-md text-on-surface font-bold">{game.score === null ? "No rating yet" : "Sample profile rating"}</span>
 
-<span className="material-symbols-outlined text-secondary text-[20px]" title="Curator Verified Consensus">{"verified"}</span>
+<span className="material-symbols-outlined text-secondary text-[20px]" title="Sample profile">{"verified"}</span>
 
 </div>
 
-<p className="font-body-sm text-body-sm text-on-surface-variant">{isReference ? (<>{"\n                    Based on "}<strong className="text-on-surface font-semibold">{"84 Verified Curator Critiques"}</strong>
-{" and 12,490 active community logs.\n                  "}</>) : "This is a preview entry. Its editorial details and reviews are sample content."}</p>
+<p className="font-body-sm text-body-sm text-on-surface-variant">{game.score === null ? "This profile has not rated this game." : "From the published sample profile. Community statistics and editorial reviews below are illustrative."}</p>
 
 <div className="flex items-center gap-3 mt-1 font-label-sm text-label-sm text-on-surface-variant/80">
-<span className="text-secondary font-semibold">{"99% Positive Critical Ratio"}</span>
+<span className="text-secondary font-semibold">{game.tier ? "Tier " + game.tier : "Unassigned tier"}</span>
 
 <span>{"•"}</span>
 
-<span>{"Ranked #1 All-Time Expansions"}</span>
+<span>{"Independent of score"}</span>
 
 </div>
 

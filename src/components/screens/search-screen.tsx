@@ -1,16 +1,20 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getSearchMatches, SearchResults, type SearchScope } from "@/components/search-results";
+import { SearchResults, type SearchScope } from "@/components/search-results";
+
+import { getSearchMatches } from "@/lib/portfolio-view";
+import { usePortfolio } from "@/components/portfolio-provider";
 
 export function SearchScreen({ initialQuery, returnPath, mode }: { initialQuery: string; returnPath: string; mode: "browse" | "log" }) {
 
+const portfolio = usePortfolio();
 const [query, setQuery] = useState(initialQuery);
 const [scope, setScope] = useState<SearchScope>("all");
 const dialog = useRef<HTMLDivElement>(null);
 const input = useRef<HTMLInputElement>(null);
 const router = useRouter();
-const matchCounts = getSearchMatches(query);
+const matchCounts = getSearchMatches(query, portfolio);
 const totalCount = matchCounts.titles.length + matchCounts.profiles.length + (matchCounts.listMatches ? 1 : 0) + 2;
 function close() { router.push(returnPath); }
 useEffect(() => { input.current?.focus(); input.current?.setSelectionRange(initialQuery.length, initialQuery.length); }, [initialQuery]);
@@ -45,7 +49,7 @@ return (<div onKeyDown={onKeyDown}>
 </div>
 
 <div className="flex gap-2">
-<span className="px-3 py-1 bg-surface-container rounded font-label-md text-label-md text-on-surface-variant">{"4,281 Titles Tracked"}</span>
+<span className="px-3 py-1 bg-surface-container rounded font-label-md text-label-md text-on-surface-variant">{portfolio.games.length + " Titles Tracked"}</span>
 
 </div>
 

@@ -20,6 +20,7 @@ pnpm typecheck
 pnpm lint
 pnpm build
 pnpm start
+node --experimental-strip-types --test scripts/test-portfolio-view.mjs
 ```
 
 Next.js, React, strict TypeScript and Tailwind CSS 3 provide the application
@@ -39,22 +40,25 @@ Next.js ESLint configuration fail on ESLint 10's rule API.
 | `/log` | Temporary rating/review draft |
 | `/game/[slug]` | Game detail using the existing detail-page layout |
 
-Search supports sample game matching, result categories, arrow keys, Enter,
+Search reads the public Supabase catalog and sample profile, with categories, arrow keys, Enter,
 Escape and modal focus trapping. “Switch Game” opens search in rating mode.
 Score and tier are independently editable. Platform, playback status and review
 fields are temporary controls. Refresh restores the original defaults.
 
-Drafts do not update profile/ranking fixtures. “Commit to Log” explains that
+Drafts do not update stored ratings. “Commit to Log” explains that
 nothing is saved or broadcast. Unsupported visual controls display a prototype
-notice. Comparison metrics, pagination, counts, public-figure profiles and
-reviews are illustrative content from Stitch, not factual application data.
+notice. Profile counts, averages, rankings, pagination and tiers use the loaded
+ratings.
+Comparison metrics, discovery content, public-figure profiles and editorial
+reviews remain illustrative content from Stitch. Curated lists and backlog
+are unavailable until their persistence is agreed.
 
 ## Structure and design
 
 - `src/app`: App Router pages, shared layout and metadata.
 - `src/components`: shared navigation, feedback, controls and screen components.
 - `src/data`: clearly identified sample fixtures, including 32 game entries.
-- `src/types`: frontend types; these do not establish a database schema.
+- `src/types`: shared frontend concepts and generated Supabase database types.
 - `design-reference`: original unmodified exports and screenshots.
 - `AGENTS.md`: durable development rules and product decisions.
 
@@ -62,12 +66,13 @@ The user approved the HTML values when they conflict with `DESIGN.md` for this
 prototype. Ask again about any newly encountered conflict or visible design
 change. The tier and comparison screenshots are failed exports containing error
 text; their original HTML remains available. Fonts and artwork still use the
-original external URLs. No game-data API has been integrated.
+original external URLs. IGDB metadata is imported through separate
+administrative scripts; the app reads the stored catalog without contacting
+IGDB or receiving its credentials.
 
-The sample data can disagree across original screens. Those original displayed
-values are retained for visual fidelity; they must be reconciled before real
-ratings, statistics or comparison calculations are implemented. Metadata that
-is absent from the source is not researched or invented for this milestone.
+Original fixtures remain as design references. Connected screens use reconciled
+Supabase ratings and imported catalog metadata. Original cover variants are
+retained per screen; missing metadata is not invented.
 
 ## Infrastructure
 
@@ -78,9 +83,10 @@ verify the version in Vercel's install logs.
 
 A new Supabase project exists. Its URL and publishable key are configured in
 ignored local `.env.local` using `NEXT_PUBLIC_SUPABASE_URL` and
-`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. The current prototype does not query
-Supabase and can run without these variables. A service health check succeeded;
-that alone does not verify database tables or access policies.
+`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. The application requires both variables
+to read public data on the server. The cloned repository does not include
+local environment files. A missing configuration or failed read shows a retry
+state; fixtures are not silently substituted.
 
 Authenticated Supabase plugin inspection confirmed the project is healthy in
 `us-east-1` (North Virginia, within Americas). The approved `profiles`, `games` and
@@ -88,8 +94,9 @@ Authenticated Supabase plugin inspection confirmed the project is healthy in
 32 ratings. Public reads and blocked writes have been verified. The security
 advisor reported no findings.
 
-The first backend stage provides public read-only data. The current UI still uses
-fixtures; connecting it is a separate milestone. Authentication remains deferred.
+The application reads public data with the publishable key. Search, profile
+rankings, calculated statistics and tiers share the loaded portfolio.
+Authentication and persistent editing remain deferred.
 See [backend setup and verification](docs/read-only-backend-proposal.md) for the
 applied migration, seed rules and checks. Rebuild or verify the seed with:
 
