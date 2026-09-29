@@ -9,7 +9,7 @@ export function CatalogGameScreen({ game, isSample }: { game: Game; isSample: bo
     {game.artwork && <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[620px] bg-cover bg-top opacity-25" style={{ backgroundImage: `url(${game.artwork})` }} />}
     <div className="absolute inset-0 bg-gradient-to-b from-surface/70 via-surface/90 to-surface pointer-events-none" />
     <div className="relative site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-12 space-y-8">
-      <nav aria-label="Game navigation"><Link href="/search?q=" className="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary font-label-md text-label-md uppercase tracking-wider">← Game catalog</Link></nav>
+      <nav aria-label="Game navigation"><Link href="/games" className="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary font-label-md text-label-md uppercase tracking-wider">← Game catalog</Link></nav>
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-start">
         <div className="sm:col-span-4 xl:col-span-3 w-full max-w-[240px] sm:max-w-none mx-auto"><img src={game.cover} alt={`${game.title} cover`} className="w-full aspect-[3/4] rounded-lg object-cover bg-surface-container-high shadow-2xl" /></div>
         <div className="sm:col-span-8 xl:col-span-9 min-w-0 space-y-5">

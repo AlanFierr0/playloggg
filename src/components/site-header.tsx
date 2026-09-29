@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import { usePortfolio } from "@/components/portfolio-provider";
 
-const navigation = [{ href: "/", label: "Discover" }, { href: "/profile", label: "Rankings" }, { href: "/tiers", label: "Lists" }, { href: "/compare", label: "Compare" }];
+const navigation = [{ href: "/", label: "Discover" }, { href: "/games", label: "Games" }, { href: "/profile", label: "Rankings" }, { href: "/tiers", label: "Lists" }, { href: "/compare", label: "Compare" }];
 
 export function SiteHeader() {
   const { access, profile } = usePortfolio();
@@ -24,12 +24,12 @@ export function SiteHeader() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
       <div className="h-16 site-container mx-auto px-4 sm:px-6 lg:px-12 flex items-center justify-between gap-2 lg:gap-6">
-        <div className="flex min-w-0 items-center gap-8">
+        <div className="flex min-w-0 items-center gap-4 xl:gap-8">
           <Link className="flex shrink-0 items-center gap-2 lg:gap-3 group min-h-11" href="/" aria-label="Playlogg home">
             <span aria-hidden="true" className="material-symbols-outlined text-primary text-[28px]">sports_esports</span>
             <span className="font-headline-md text-headline-md tracking-tight uppercase text-on-surface font-bold">Playlog<span className="text-primary">.gg</span></span>
           </Link>
-          <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-6">
+          <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-4 xl:gap-6">
             {navigation.map((item) => <Link key={item.href} href={item.href} aria-current={isActive(item.href) ? "page" : undefined} className={`inline-flex min-h-11 items-center font-body-md text-body-md transition-colors ${isActive(item.href) ? "text-on-surface font-semibold" : "text-on-surface-variant hover:text-on-surface"}`}>{item.label}</Link>)}
           </nav>
         </div>

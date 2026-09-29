@@ -94,8 +94,8 @@ return (<>
 
 </div>
 
-<Link className="group flex items-center gap-1.5 font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" data-path="rankings" href="/profile">
-<span className="">{"Explore All 250"}</span>
+<Link className="group flex items-center gap-1.5 font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" data-path="games" href="/games">
+<span className="">{"Explore All Games"}</span>
 
 <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-1">{"arrow_forward"}</span>
 

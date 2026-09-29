@@ -29,6 +29,11 @@ CSS variable must also position page content, search and anchor scrolling. See
 docs/responsive-layouts.md for behavior and viewport verification. Use the shared
 `site-container` for full-page layouts so they expand beyond 1440px while keeping
 header, content and footer aligned; preserve bounded editor/dialog text widths.
+The user requested a Games navigation tab for the full stored catalog. Keep it
+accessible alongside Discover, Rankings, Lists and Compare. Catalog platform
+filters use available platforms, independently of an entry's played platform.
+Profile filters use the selected profile; never infer scores or playback status
+for unlogged games. See docs/games-catalog.md.
 
 ## Development
 Work directly on `main`. Do not create feature branches or pull requests unless

@@ -37,6 +37,7 @@ Next.js ESLint configuration fail on ESLint 10's rule API.
 | Route | Screen |
 | --- | --- |
 | `/` | Discover / editorial home |
+| `/games` | Full saved game catalog with search, filters and pagination |
 | `/profile` | Personal profile and rankings |
 | `/tiers` | S–F tier board |
 | `/compare` | Sample profile comparison |
@@ -141,6 +142,11 @@ separate.
 Next.js page titles, descriptions and Open Graph metadata provide the initial
 SEO foundation. Canonical URLs, production indexing settings and sitemap
 configuration depend on the final domain and real content.
+
+The Games navigation tab browses every stored catalog game, including unlogged
+titles, with genre, available platform, release year and sorting controls.
+Optional profile filters cover logged entries, status, tier, rating and score
+range. See [Games catalog](docs/games-catalog.md) for behavior and verification.
 
 Secrets must stay in ignored environment files, never source or documentation.
 Agree on ownership and write access before exposing any database editing flow.
