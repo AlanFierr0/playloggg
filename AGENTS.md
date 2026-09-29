@@ -58,11 +58,12 @@ administration check. Keep email owner login, do not auto-merge accounts, and do
 not expose the Auth admin client. No schema/grant changes are needed. Production
 rollout is complete; real Steam sign-in verification is pending. See docs/steam-sign-in.md.
 
-Profile settings and shareable portfolios are implemented locally, awaiting
-approved production deployment. Verified owners may edit their own names and
+Profile settings and shareable portfolios are deployed from `main`. Verified
+owners may edit their own names and
 publish/unpublish their profile. Profiles start private. Public pages read as
 anonymous with fresh data; private/unknown handles and nested lists/entries
 return the same 404. No public profile write grant or schema change is needed.
+Guest production routes are verified; a signed-in publish check remains pending.
 See docs/public-profiles.md.
 
 A new Supabase project exists and the prototype is deployed through Vercel from

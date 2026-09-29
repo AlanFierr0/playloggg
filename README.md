@@ -108,8 +108,9 @@ artwork is not invented.
 Public Steam sign-in and private profile setup are deployed; real Steam sign-in
 verification is pending. Each person edits only their own entries and lists; IGDB import stays
 restricted to the original owner. See [Steam sign-in](docs/steam-sign-in.md).
-Optional profile publishing and shareable portfolio pages are implemented locally;
-production rollout is pending approval. See [public profiles](docs/public-profiles.md).
+Optional profile publishing and shareable portfolio pages are deployed. Guest
+routes work; a signed-in production publish check remains pending. See
+[public profiles](docs/public-profiles.md).
 
 The prototype is published from GitHub `main` at https://playloggg.vercel.app/.
 Use the Next.js preset on Vercel. The recommended package-manager setting is
