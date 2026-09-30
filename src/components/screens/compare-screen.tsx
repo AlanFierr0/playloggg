@@ -12,6 +12,7 @@ return (<>
 
 <div className="absolute top-3/4 left-1/4 w-72 h-72 bg-tertiary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
+<p className="mb-6 rounded bg-surface-container-low px-4 py-3 text-body-sm text-on-surface-variant">Sample comparison. Profiles, scores and affinity metrics are illustrative. Real profile comparison is not available yet.</p>
 <header className="w-full mb-16 md:mb-24">
 <div className="flex flex-col items-center">
 

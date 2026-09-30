@@ -23,8 +23,9 @@ controls were also checked in the live browser across navigation and reload.
 The published Alex Vance profile and 32-game initial seed are identified sample
 content. New Steam profiles start empty. The Discover editorial feature, community
 material on the prototype game-detail screen, and the entire Compare screen still
-contain illustrative copy or metrics. Some controls show a prototype notice rather
-than completing an action, including home Shelf/Share and footer API/Terms/Privacy.
+contain illustrative copy or metrics. Shelf opens the existing editor (guests sign in first), and Share copies a catalog
+URL without publishing a profile. Remaining prototype controls are disabled and
+labeled unavailable; footer API/Terms/Privacy placeholders are hidden.
 Imported games use real catalog metadata and do not inherit the sample editorial
 claims. [README.md](../README.md) lists the routes and existing rollout notes.
 
@@ -37,8 +38,8 @@ claims. [README.md](../README.md) lists the routes and existing rollout notes.
    [acceptance report](production-acceptance.md).
 2. **Illustrative screens can look like live data.** Compare displays fixed people,
    scores, and affinity numbers. Discover and prototype detail pages also retain
-   editorial/sample content. These need clear treatment before being presented as
-   personal or community facts.
+   editorial/sample content. Step 2 now labels these sections prominently and renders the selected
+   profile's real saved entry separately; replacing sample content remains future work.
 3. **Spanish arrives after hydration.** The current translator scans and changes
    rendered DOM text in the browser. A cold Spanish page can flash English; page
    metadata begins in English, and newly added UI strings depend on dictionary
@@ -84,6 +85,10 @@ Track observed results and pending checks in [production acceptance](production-
    documents can be updated from observed production behavior.
 
 ### 2. Make every visible action and claim honest
+
+Implemented 2026-09-30. See [action inventory and verification](visible-actions.md).
+The next implementation milestone is step 3; step 1's second-Steam-account check
+remains pending.
 
 1. Inventory `PreviewAction` controls and hard-coded numbers/copy in Discover,
    Compare, game details, and the footer. Keep a prominent sample label where

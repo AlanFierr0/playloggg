@@ -20,14 +20,13 @@ const [score, setScore] = useState<number | null>(game.score);
 const [tier, setTier] = useState<Tier | null>(game.tier ?? null);
 const [platform, setPlatform] = useState<PlayedPlatform | null>(game.platform ?? null);
 const [status, setStatus] = useState<PlaybackStatus | null>(game.status ?? null);
-const [broadcast, setBroadcast] = useState(true);
 const [hours, setHours] = useState(game.hoursPlayed == null ? "" : String(game.hoursPlayed));
 const [date, setDate] = useState(game.completedOn ?? "");
 const dateInput = useRef<HTMLInputElement>(null);
 const [tags, setTags] = useState<string[]>(game.tags ?? []);
 const [tagVersion, setTagVersion] = useState(0);
 const [review, setReview] = useState(game.review ?? "");
-function resetDraft() { setScore(saved.score); setTier(saved.tier); setPlatform(saved.platform); setStatus(saved.status); setBroadcast(true); setHours(saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)); setDate(saved.completedOn ?? ""); setReview(saved.review); setTags(saved.tags); setTagVersion((value) => value + 1); setSaveMessage(""); }
+function resetDraft() { setScore(saved.score); setTier(saved.tier); setPlatform(saved.platform); setStatus(saved.status); setHours(saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)); setDate(saved.completedOn ?? ""); setReview(saved.review); setTags(saved.tags); setTagVersion((value) => value + 1); setSaveMessage(""); }
 function commit() {
   if (dateInput.current && !dateInput.current.validity.valid) { setSaveMessage("Complete a valid calendar date, or clear it. Your draft has been kept."); return; }
   const hoursPlayed = parseHours(hours);
@@ -85,7 +84,7 @@ return (<><fieldset disabled={pending} className="contents">
 </div>
 
 <div className="p-4 sm:p-8 lg:p-10 flex flex-col gap-8">
-<p className="font-body-sm text-body-sm text-on-surface-variant">{canEdit ? "Commit saves your optional score, independent tier, playback status, platform, playtime, completion date, and review. Tags are saved too; broadcast remains temporary." : <>Sample profile preview. <Link href="/login" className="text-primary underline">Sign in</Link> to save entries to your own profile.</>}</p>
+<p className="font-body-sm text-body-sm text-on-surface-variant">{canEdit ? "Commit saves your optional score, independent tier, playback status, platform, playtime, completion date, and review. Tags are saved too. Timeline broadcasting is not available." : <>Sample profile preview. <Link href="/login" className="text-primary underline">Sign in</Link> to save entries to your own profile.</>}</p>
 <p role="status" className="font-body-sm text-body-sm text-primary">{pending ? "Saving…" : saveMessage}</p>
 <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-start">
 <div className="relative group flex-shrink-0 w-32 sm:w-40 aspect-[3/4] rounded-lg overflow-hidden bg-surface-container shadow-xl">
@@ -268,17 +267,7 @@ return (<><fieldset disabled={pending} className="contents">
 </div>
 
 <div className="w-full bg-surface-container-lowest px-4 py-4 sm:px-10 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 mt-auto">
-<label className="flex items-center gap-3 cursor-pointer group select-none self-start sm:self-auto">
-<input checked={broadcast} onChange={(event) => setBroadcast(event.target.checked)} className="sr-only peer" type="checkbox" />
-
-<div className="w-4 h-4 rounded bg-surface-container-high peer-checked:bg-primary-container flex items-center justify-center text-on-primary-container transition-colors">
-<span className="material-symbols-outlined text-[14px] font-bold">{"check"}</span>
-
-</div>
-
-<span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant group-hover:text-on-surface transition-colors">{"\n            Broadcast to Curator Timeline\n          "}</span>
-
-</label>
+<p className="font-label-sm text-label-sm text-on-surface-variant">Timeline broadcasting unavailable</p>
 
 <div className="flex flex-col min-[360px]:flex-row items-center gap-3 w-full sm:w-auto justify-end">
 <button id="discard-rating" className="w-full sm:w-auto px-4 py-2 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-colors" type="button" onClick={resetDraft}>{"\n            Discard Draft\n          "}</button>

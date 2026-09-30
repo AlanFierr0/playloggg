@@ -1,4 +1,5 @@
-import { ProfileAvatar } from "@/components/profile-avatar";
+import { ShelfLink, ShareGameButton } from "@/components/game-actions";
+import { GameStandpoint } from "@/components/game-standpoint";
 import Link from "next/link";
 import { PreviewAction } from "@/components/preview-action";
 import type { Game } from "@/types/domain";
@@ -54,10 +55,11 @@ return (<>
 
 </div>
 
-<div className="absolute bottom-3 left-3 bg-surface-container-lowest/85 backdrop-blur-sm px-2 py-0.5 rounded text-on-surface font-label-sm text-label-sm uppercase tracking-widest">{"\n              DLC · Expansion\n            "}</div>
+<div className="absolute bottom-3 left-3 bg-surface-container-lowest/85 backdrop-blur-sm px-2 py-0.5 rounded text-on-surface font-label-sm text-label-sm uppercase tracking-widest">{isReference ? "DLC · Expansion" : "Sample catalog entry"}</div>
 
 </div>
 
+<p className="text-label-sm text-on-surface-variant">Sample community statistics</p>
 <div className="grid grid-cols-3 gap-2 bg-surface-container-low p-2.5 rounded text-center">
 <div className="flex flex-col">
 <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{"Median"}</span>
@@ -88,7 +90,7 @@ return (<>
 <div className="flex flex-col gap-4">
 
 <div className="flex flex-wrap items-center gap-2">
-<span className="px-2 py-0.5 rounded bg-primary/10 text-primary font-label-sm text-label-sm tracking-wider uppercase font-semibold">{"\n                Tier S · Masterpiece\n              "}</span>
+<span className="px-2 py-0.5 rounded bg-primary/10 text-primary font-label-sm text-label-sm tracking-wider uppercase font-semibold">{game.tier ? `Tier ${game.tier}` : "Tier unassigned"}</span>
 
 <span className="text-on-surface-variant/40">{"•"}</span>
 
@@ -136,13 +138,13 @@ return (<>
 <div className="flex items-center gap-2">
 <span className="font-headline-md text-headline-md text-on-surface font-bold">{game.score === null ? "No rating yet" : isSample ? "Sample profile rating" : "Your rating"}</span>
 
-<span className="material-symbols-outlined text-secondary text-[20px]" title="Sample profile">{"verified"}</span>
+<span className="material-symbols-outlined text-secondary text-[20px]" title={isSample ? "Sample profile rating" : "Your saved rating"}>{"verified"}</span>
 
 </div>
 
 <p className="font-body-sm text-body-sm text-on-surface-variant">{game.score === null ? "This profile has not rated this game." : isSample ? "From the published sample profile. Community statistics and editorial reviews below are illustrative." : "Your saved score. Community statistics and editorial reviews below are illustrative."}</p>
 {game.status && <p className="mt-2 font-label-md text-label-md text-primary">{playbackLabels[game.status]}</p>}
-{!isSample && game.review && <div className="mt-4"><h2 className="font-label-md text-label-md text-primary">Your saved review</h2><p translate="no" className="mt-2 whitespace-pre-wrap break-words font-body-md text-body-md text-on-surface">{game.review}</p></div>}
+
 
 <div className="flex flex-wrap items-center gap-3 mt-1 font-label-sm text-label-sm text-on-surface-variant/80">
 <span className="text-secondary font-semibold">{game.tier ? "Tier " + game.tier : "Unassigned tier"}</span>
@@ -158,7 +160,7 @@ return (<>
 </div>
 
 <div className="hidden xl:flex flex-col items-end gap-1.5">
-<span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{"Score Stability"}</span>
+<span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{"Sample score trend"}</span>
 
 <div className="flex items-end gap-1 h-9 px-2 py-1 rounded bg-surface-container">
 <span className="w-1.5 bg-primary/40 h-5 rounded-xs"></span>
@@ -190,17 +192,17 @@ return (<>
 
 </Link>
 
-<PreviewAction className="inline-flex items-center gap-2 px-4 py-2.5 rounded bg-surface-container text-on-surface hover:bg-surface-container-high hover:text-primary transition-all font-label-md text-label-md uppercase tracking-wider" message={"Preview only: this feature is not connected yet."}>
+<ShelfLink slug={game.slug} className="inline-flex items-center gap-2 px-4 py-2.5 rounded bg-surface-container text-on-surface hover:bg-surface-container-high hover:text-primary transition-all font-label-md text-label-md uppercase tracking-wider">
 <span className="material-symbols-outlined text-[18px]">{"bookmark_add"}</span>
 
-<span>{"Shelve to Vault"}</span>
+<span>{"Shelf"}</span>
 
-</PreviewAction>
+</ShelfLink>
 
 <Link className="inline-flex items-center gap-2 px-4 py-2.5 rounded bg-surface-container text-on-surface hover:bg-surface-container-high transition-all font-label-md text-label-md uppercase tracking-wider" href="/tiers">
 <span className="material-symbols-outlined text-[18px]">{"format_list_bulleted_add"}</span>
 
-<span>{"Add to Tier List"}</span>
+<span>{"View tier board"}</span>
 
 </Link>
 
@@ -211,10 +213,10 @@ return (<>
 
 </Link>
 
-<PreviewAction className="p-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors ml-auto" title="Share Title" message={"Preview only: this feature is not connected yet."}>
+<ShareGameButton slug={game.slug} className="p-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors ml-auto">
 <span className="material-symbols-outlined text-[18px]">{"share"}</span>
 
-</PreviewAction>
+</ShareGameButton>
 
 </div>
 
@@ -229,59 +231,12 @@ return (<>
 </div>
 
 <div className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-10 w-full">
+<p className="mb-6 rounded bg-surface-container-low px-4 py-3 text-body-sm text-on-surface-variant">Sample editorial content. Community counts, trends, curator identities and quotes below are illustrative; unavailable controls are disabled.</p>
 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
 
 <div className="lg:col-span-8 min-w-0 flex flex-col gap-6 sm:gap-10">
 
-<section className="bg-surface-container-low rounded-xl p-5 shadow-sm relative overflow-hidden">
-<div className="absolute -top-12 -right-12 w-48 h-48 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
-
-<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-<div className="flex min-w-0 items-center gap-3 sm:gap-4">
-<ProfileAvatar name={isSample ? "Alex Vance" : "Owner"} className="w-12 h-12 shrink-0 rounded-full object-cover" />
-
-<div className="flex min-w-0 flex-col">
-<div className="flex flex-wrap gap-y-2 items-center gap-2">
-<span className="font-headline-md text-headline-md text-on-surface font-semibold">{"Your Personal Standpoint"}</span>
-
-<span className="px-2 py-0.5 rounded bg-primary/15 text-primary font-label-sm text-label-sm font-bold uppercase">{"Rank #1"}</span>
-
-</div>
-
-<div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-body-sm text-body-sm text-on-surface-variant">
-<span>{"Rated "}<strong className="text-primary font-bold">{"98 / 100"}</strong>
-{" (Tier S)"}</span>
-
-<span>{"•"}</span>
-
-<span>{"Logged in "}<strong className="text-on-surface">{"78.4 hrs"}</strong>
-</span>
-
-<span>{"•"}</span>
-
-<span>{"Completed July 4, 2024"}</span>
-
-</div>
-
-</div>
-
-</div>
-
-<div className="flex items-center gap-2 self-end sm:self-center">
-<Link className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-surface-container text-on-surface hover:text-primary hover:bg-surface-container-high transition-colors font-label-sm text-label-sm uppercase tracking-wider" href={"/log?game=" + game.slug}>
-<span className="material-symbols-outlined text-[15px]">{"edit"}</span>
-
-<span>{"Edit Standpoint"}</span>
-
-</Link>
-
-</div>
-
-</div>
-
-<div className="mt-4 pt-3 bg-surface-container-lowest/50 p-3.5 rounded text-on-surface-variant font-body-sm text-body-sm italic">{"\n            \"The vertical density of the Land of Shadow remains unrivaled in contemporary level design. The dual encounters with Messmer and Promised Consort pushed tactile timing into high art.\"\n          "}</div>
-
-</section>
+<GameStandpoint game={game} />
 
 <section className="flex flex-col gap-4">
 <div className="flex flex-wrap gap-3 items-center justify-between">
@@ -292,7 +247,7 @@ return (<>
 
 </h2>
 
-<span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{"FromSoftware Catalog ID: ER-SOTE-24"}</span>
+<span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{"Sample editorial reference: ER-SOTE-24"}</span>
 
 </div>
 
@@ -324,13 +279,13 @@ return (<>
 <section className="flex flex-col gap-4">
 <div className="flex flex-wrap gap-3 items-center justify-between">
 <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight flex items-center gap-2">
-<span>{"Following Concordance"}</span>
+<span>{"Sample curator concordance"}</span>
 
 <span className="text-primary text-[18px] font-label-md font-normal">{"/ 02"}</span>
 
 </h2>
 
-<span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{"3 Curators Followed"}</span>
+<span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{"3 Sample Curators"}</span>
 
 </div>
 
@@ -409,7 +364,7 @@ return (<>
 <section className="flex flex-col gap-4">
 <div className="flex flex-wrap gap-3 items-center justify-between">
 <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight flex items-center gap-2">
-<span>{"Curator Dispatches"}</span>
+<span>{"Sample curator reviews"}</span>
 
 <span className="text-primary text-[18px] font-label-md font-normal">{"/ 03"}</span>
 
@@ -663,9 +618,9 @@ return (<>
 
 <div className="bg-surface-container-low p-6 rounded-xl flex flex-col gap-4 shadow-sm">
 <div className="flex flex-wrap gap-3 items-center justify-between">
-<span className="font-headline-md text-headline-md text-on-surface font-semibold">{"Curated In Lists"}</span>
+<span className="font-headline-md text-headline-md text-on-surface font-semibold">{"Sample list placements"}</span>
 
-<Link className="font-label-sm text-label-sm text-primary hover:underline uppercase tracking-wider" data-path="lists" href="/tiers">{"All 84 Lists"}</Link>
+<Link className="font-label-sm text-label-sm text-primary hover:underline uppercase tracking-wider" data-path="lists" href="/lists">{"Curated lists"}</Link>
 
 </div>
 

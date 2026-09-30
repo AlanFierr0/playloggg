@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ShareGameButton } from "@/components/game-actions";
 import type { Game, Profile } from "@/types/domain";
 import { playbackLabels } from "@/lib/playback-status";
 
@@ -19,6 +20,7 @@ export function CatalogGameScreen({ game, isSample, publicProfile }: { game: Gam
           {Boolean(game.developers?.length) && <p className="break-words text-on-surface-variant font-body-md text-body-md">Developer · {game.developers!.join(", ")}</p>}
           {Boolean(game.publishers?.length) && <p className="break-words text-on-surface-variant font-body-md text-body-md">Publisher · {game.publishers!.join(", ")}</p>}
           <div className="flex flex-wrap gap-2">{game.platforms?.map((platform) => <span key={platform} className="break-words max-w-full px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">{platform}</span>)}</div>
+          <ShareGameButton slug={game.slug} className="inline-flex items-center gap-2 rounded bg-surface-container px-4 py-2 text-on-surface"><span className="material-symbols-outlined" aria-hidden="true">share</span><span>Copy game link</span></ShareGameButton>
           <section className="rounded-lg bg-surface-container-low p-4 sm:p-5 space-y-4">
             <h2 className="font-headline-md text-headline-md font-bold">{publicProfile ? `${publicProfile.displayName}'s log entry` : isSample ? "Sample profile entry" : "Your log entry"}</h2>
             {game.logged ? <>
@@ -27,7 +29,7 @@ export function CatalogGameScreen({ game, isSample, publicProfile }: { game: Gam
               {Boolean(game.tags?.length) && <div className="flex flex-wrap gap-2">{game.tags!.map((tag) => <span key={tag} className="max-w-full break-words rounded bg-surface-container px-2 py-1 font-label-sm text-label-sm">{tag}</span>)}</div>}
             </> : <p className="text-on-surface-variant">{publicProfile || isSample ? "This profile has not logged this game." : "This game is in the catalog. Add a log entry to save your status, rating or review."}</p>}
             {!publicProfile && <>
-            <Link href={isSample ? "/login" : `/log?game=${encodeURIComponent(game.slug)}`} className="inline-flex rounded px-5 py-2.5 bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider">{isSample ? "Owner sign-in" : game.logged ? "Edit log entry" : "Log this game"}</Link>
+            <Link href={isSample ? "/login" : `/log?game=${encodeURIComponent(game.slug)}`} className="inline-flex rounded px-5 py-2.5 bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider">{isSample ? "Sign in" : game.logged ? "Edit log entry" : "Log this game"}</Link>
             {!isSample && <Link href="/lists" className="inline-flex ml-3 py-2.5 text-primary font-label-md text-label-md">Curated lists →</Link>}
             </>}
           </section>

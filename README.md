@@ -63,12 +63,11 @@ score. Saved optional platform, playtime and completion date reload from Supabas
 Their migration is applied and production rollout is authorized; see
 [saved play details](docs/saved-play-details.md). Personal tags and ordered lists
 use the applied Supabase schema; production rollout is authorized. See
-[tags and curated lists](docs/tags-and-curated-lists.md). Broadcast remains temporary.
+[tags and curated lists](docs/tags-and-curated-lists.md). Timeline broadcasting is unavailable.
 
 “Commit to Log” saves the signed-in owner's optional score, independent tier,
 playback status, play details, tags and review. It is disabled for the sample
-portfolio. Nothing is broadcast. Unsupported controls display
-a prototype notice. Counts, averages, rankings and tiers use the selected profile.
+portfolio. Nothing is broadcast. Unsupported controls are disabled and visibly labeled unavailable. Counts, averages, rankings and tiers use the selected profile.
 The Backlog uses saved entries, including unscored games. Its migration is
 applied and production rollout is authorized; see
 [Backlog and playback status](docs/backlog-and-playback-status.md).
@@ -171,3 +170,7 @@ range. See [Games catalog](docs/games-catalog.md) for behavior and verification.
 Secrets must stay in ignored environment files, never source or documentation.
 Agree on ownership and write access before exposing any database editing flow.
 Track approved future database changes through versioned migrations.
+
+Step 2 adds working Shelf/editor navigation and catalog-link copying, clear sample
+labels, real personal entry cards and hidden footer placeholders. See
+[visible action inventory](docs/visible-actions.md).

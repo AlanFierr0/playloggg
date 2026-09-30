@@ -8,7 +8,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const game = await getPublicGame(slug);
   if (!game) return { title: "Game not found" };
-  const description = `${game.title}${game.year ? ` (${game.year})` : ""} — sample game detail and ratings on Playlogg.`;
+  const description = `${game.title}${game.year ? ` (${game.year})` : ""} · Game details on Playlogg.`;
   return { title: game.title, description, openGraph: { title: game.title, description, images: [{ url: game.cover, alt: game.title }] } };
 }
 export default async function GamePage({ params }: { params: Promise<{ slug: string }> }) {

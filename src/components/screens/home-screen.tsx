@@ -1,6 +1,6 @@
 import { gameImages } from "@/lib/game-images";
 import Link from "next/link";
-import { PreviewAction } from "@/components/preview-action";
+import { ShelfLink, ShareGameButton } from "@/components/game-actions";
 
 export function HomeScreen() {
 return (<>
@@ -10,6 +10,7 @@ return (<>
 <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-primary/5 rounded-full blur-[140px] pointer-events-none"></div>
 
 <section className="site-container mx-auto px-4 sm:px-6 lg:px-12 pt-6 sm:pt-8 pb-8 sm:pb-20">
+<p className="mb-4 rounded bg-surface-container-low px-4 py-3 text-body-sm text-on-surface-variant">Sample editorial selection. Scores and quotes on this page are illustrative.</p>
 <div className="home-spotlight relative flex min-h-[560px] sm:min-h-[600px] flex-col justify-end rounded-xl overflow-hidden bg-surface-container-lowest shadow-2xl group">
 
 <div className="absolute inset-0 bg-cover bg-center h-full w-full transition-transform duration-700 ease-out group-hover:scale-[1.015]" role="img" aria-label="Elden Ring: Shadow of the Erdtree artwork" style={{ backgroundImage: `url(${gameImages("elden-ring-shadow-of-the-erdtree").artwork})` }}>
@@ -65,17 +66,17 @@ return (<>
 
 </Link>
 
-<PreviewAction className="inline-flex items-center gap-2 px-5 py-3 rounded bg-surface-container-high/70 hover:bg-surface-container-highest backdrop-blur-md text-on-surface transition-colors font-label-md text-label-md uppercase tracking-wider" message={"Preview only: this feature is not connected yet."}>
+<ShelfLink slug="elden-ring-shadow-of-the-erdtree" className="inline-flex items-center gap-2 px-5 py-3 rounded bg-surface-container-high/70 hover:bg-surface-container-highest backdrop-blur-md text-on-surface transition-colors font-label-md text-label-md uppercase tracking-wider">
 <span className="material-symbols-outlined text-[16px]">{"bookmark_border"}</span>
 
 <span className="">{"Shelf"}</span>
 
-</PreviewAction>
+</ShelfLink>
 
-<PreviewAction className="inline-flex items-center justify-center w-11 h-11 rounded bg-surface-container-high/70 hover:bg-surface-container-highest backdrop-blur-md text-on-surface transition-colors" message={"Preview only: this feature is not connected yet."}>
+<ShareGameButton slug="elden-ring-shadow-of-the-erdtree" className="inline-flex items-center justify-center w-11 h-11 rounded bg-surface-container-high/70 hover:bg-surface-container-highest backdrop-blur-md text-on-surface transition-colors">
 <span className="material-symbols-outlined text-[18px]">{"share"}</span>
 
-</PreviewAction>
+</ShareGameButton>
 
 </div>
 

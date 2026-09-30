@@ -27,7 +27,11 @@ export function PreviewNoticeProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function PreviewAction({ message, children, onClick, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { message: string }) {
-  const notify = useContext(NoticeContext);
-  return <button {...props} type={props.type ?? "button"} onClick={(event) => { onClick?.(event); notify(message); }}>{children}</button>;
+export function useNotice() { return useContext(NoticeContext); }
+
+// Sample controls stay visible, but cannot imply a real action.
+export function PreviewAction({ message, children, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { message: string }) {
+  return <button {...props} type="button" disabled title={message} className={`${props.className ?? ""} cursor-not-allowed opacity-60`}>
+    {children}<span className="ml-1 text-[10px] normal-case tracking-normal">Unavailable</span>
+  </button>;
 }
