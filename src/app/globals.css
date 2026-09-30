@@ -5,8 +5,9 @@
 /* Preserve the base behavior of the Stitch export. */
 @layer base {
   html, body { margin: 0; padding: 0; }
-  html { --site-header-height: 7rem; scroll-padding-top: calc(var(--site-header-height) + 1rem); }
-  @media (min-width: 1024px) { html { --site-header-height: 4rem; } }
+  html { --site-header-height: 10rem; scroll-padding-top: calc(var(--site-header-height) + 1rem); }
+  @media (min-width: 640px) { html { --site-header-height: 7rem; } }
+  @media (min-width: 1280px) { html { --site-header-height: 4rem; } }
   body { overscroll-behavior: none; }
   main > :first-child { margin-top: 0 !important; }
   main > :last-child { margin-bottom: 0 !important; }
@@ -54,3 +55,117 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
+
+/* The original Stitch colors remain the default; light mode reuses their roles. */
+:root {
+  color-scheme: dark;
+  --color-on-error: 105 0 5;
+  --color-background: 18 19 22;
+  --color-outline-variant: 80 69 53;
+  --color-on-primary-fixed: 40 25 0;
+  --color-on-primary-container: 94 64 0;
+  --color-on-primary: 67 44 0;
+  --color-on-primary-fixed-variant: 96 65 0;
+  --color-surface-tint: 250 188 77;
+  --color-surface-bright: 56 57 60;
+  --color-primary: 255 198 101;
+  --color-on-tertiary: 0 49 93;
+  --color-surface: 18 19 22;
+  --color-on-tertiary-container: 0 70 129;
+  --color-surface-container-low: 27 27 31;
+  --color-outline: 157 143 124;
+  --color-tertiary: 179 209 255;
+  --color-on-secondary-fixed: 0 33 12;
+  --color-surface-container-highest: 52 53 56;
+  --color-tertiary-fixed: 212 227 255;
+  --color-error-container: 147 0 10;
+  --color-inverse-primary: 126 87 0;
+  --color-primary-fixed: 255 222 173;
+  --color-secondary-fixed-dim: 77 224 130;
+  --color-surface-container: 31 31 35;
+  --color-on-surface: 227 226 230;
+  --color-on-surface-variant: 212 196 176;
+  --color-on-tertiary-fixed-variant: 0 72 131;
+  --color-surface-container-lowest: 13 14 17;
+  --color-on-secondary-container: 0 62 28;
+  --color-on-background: 227 226 230;
+  --color-primary-fixed-dim: 250 188 77;
+  --color-on-secondary-fixed-variant: 0 82 39;
+  --color-on-tertiary-fixed: 0 28 57;
+  --color-tertiary-fixed-dim: 164 201 255;
+  --color-inverse-on-surface: 47 48 52;
+  --color-secondary: 77 224 130;
+  --color-on-error-container: 255 218 214;
+  --color-on-secondary: 0 57 25;
+  --color-error: 255 180 171;
+  --color-secondary-fixed: 109 254 156;
+  --color-tertiary-container: 128 182 255;
+  --color-surface-variant: 52 53 56;
+  --color-inverse-surface: 227 226 230;
+  --color-surface-container-high: 41 42 45;
+  --color-surface-dim: 18 19 22;
+  --color-secondary-container: 0 181 93;
+  --color-primary-container: 229 169 60;
+}
+html.light {
+  color-scheme: light;
+  --color-on-error: 255 255 255;
+  --color-background: 250 249 253;
+  --color-outline-variant: 212 197 175;
+  --color-on-primary-fixed: 42 25 0;
+  --color-on-primary-container: 42 25 0;
+  --color-on-primary: 255 255 255;
+  --color-on-primary-fixed-variant: 96 65 0;
+  --color-surface-tint: 121 84 0;
+  --color-surface-bright: 250 249 253;
+  --color-primary: 121 84 0;
+  --color-on-tertiary: 255 255 255;
+  --color-surface: 250 249 253;
+  --color-on-tertiary-container: 0 29 55;
+  --color-surface-container-low: 244 243 247;
+  --color-outline: 116 104 85;
+  --color-tertiary: 0 86 144;
+  --color-on-secondary-fixed: 0 33 12;
+  --color-surface-container-highest: 226 225 230;
+  --color-tertiary-fixed: 212 227 255;
+  --color-error-container: 255 218 214;
+  --color-inverse-primary: 250 188 77;
+  --color-primary-fixed: 255 222 173;
+  --color-secondary-fixed-dim: 77 224 130;
+  --color-surface-container: 238 237 241;
+  --color-on-surface: 28 27 31;
+  --color-on-surface-variant: 81 70 55;
+  --color-on-tertiary-fixed-variant: 0 72 131;
+  --color-surface-container-lowest: 255 255 255;
+  --color-on-secondary-container: 0 33 12;
+  --color-on-background: 28 27 31;
+  --color-primary-fixed-dim: 121 84 0;
+  --color-on-secondary-fixed-variant: 0 82 39;
+  --color-on-tertiary-fixed: 0 28 57;
+  --color-tertiary-fixed-dim: 164 201 255;
+  --color-inverse-on-surface: 244 240 244;
+  --color-secondary: 0 110 53;
+  --color-on-error-container: 65 0 2;
+  --color-on-secondary: 255 255 255;
+  --color-error: 186 26 26;
+  --color-secondary-fixed: 109 254 156;
+  --color-tertiary-container: 212 227 255;
+  --color-surface-variant: 226 225 230;
+  --color-inverse-surface: 49 48 52;
+  --color-surface-container-high: 232 231 235;
+  --color-surface-dim: 222 221 225;
+  --color-secondary-container: 145 244 173;
+  --color-primary-container: 255 221 170;
+}
+/* Keep the editorial artwork readable and vivid against the light page. */
+html.light .home-spotlight {
+  --color-surface: 18 19 22;
+  --color-surface-container-lowest: 13 14 17;
+  --color-surface-container-high: 41 42 45;
+  --color-on-surface: 227 226 230;
+  --color-on-surface-variant: 212 196 176;
+  --color-primary: 255 198 101;
+  --color-primary-fixed-dim: 250 188 77;
+}
+html.light :focus-visible { outline-color: #795400; }
+html.light .scroll-region { scrollbar-color: #b0a18b #f4f3f7; }

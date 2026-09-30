@@ -4,6 +4,9 @@ import { SiteFooter } from "@/components/site-footer";
 import { PreviewNoticeProvider } from "@/components/preview-action";
 import { PortfolioProvider } from "@/components/portfolio-provider";
 import { getPortfolio } from "@/lib/portfolio";
+import { cookies } from "next/headers";
+import { localeCookie, siteLocale, siteTheme, themeCookie } from "@/lib/locale/preferences";
+import { SitePreferences } from "@/components/site-preferences";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,9 +17,11 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const portfolio = await getPortfolio();
+  const [portfolio, cookieStore] = await Promise.all([getPortfolio(), cookies()]);
+  const locale = siteLocale(cookieStore.get(localeCookie)?.value);
+  const theme = siteTheme(cookieStore.get(themeCookie)?.value);
   return (
-    <html lang="en" className="dark">
+    <html lang={locale} className={theme}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -24,11 +29,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
       </head>
       <body className="bg-surface font-body-md text-on-surface antialiased">
-        <PortfolioProvider portfolio={portfolio}><PreviewNoticeProvider>
+        <PortfolioProvider portfolio={portfolio}><SitePreferences initialLocale={locale} initialTheme={theme}><PreviewNoticeProvider>
           <SiteHeader />
           <main id="main-content" className="w-full min-w-0 pt-[var(--site-header-height)] bg-surface">{children}</main>
           <SiteFooter />
-        </PreviewNoticeProvider></PortfolioProvider>
+        </PreviewNoticeProvider></SitePreferences></PortfolioProvider>
       </body>
     </html>
   );

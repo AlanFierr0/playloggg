@@ -78,6 +78,9 @@ Layouts adapt across phones, tablets, desktop and short landscape screens while
 preserving the existing style. Mobile navigation and search remain accessible;
 forms, grids, typography and spacing adapt to the viewport. See
 [responsive layouts](docs/responsive-layouts.md) for behavior and verification.
+The header also offers light/dark and English/Español (Argentina) toggles.
+Selections persist in cookies; see [display preferences](docs/display-preferences.md).
+This milestone is implemented locally and awaits production deployment approval.
 
 - `src/app`: App Router pages, shared layout and metadata.
 - `src/components`: shared navigation, feedback, controls and screen components.

@@ -39,7 +39,7 @@ return (<>
 
 <div className="min-w-0 space-y-1.5">
 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-<h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-semibold break-words">{profile.displayName}</h1>
+<h1 translate="no" className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-semibold break-words">{profile.displayName}</h1>
 
 <span className="font-label-sm text-label-sm uppercase tracking-wider px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-medium">{profile.isSample ? "Sample profile" : profile.isPublic ? "Public profile" : "Private profile"}</span>
 

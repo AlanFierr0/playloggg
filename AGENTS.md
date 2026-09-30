@@ -34,6 +34,10 @@ accessible alongside Discover, Rankings, Lists and Compare. Catalog platform
 filters use available platforms, independently of an entry's played platform.
 Profile filters use the selected profile; never infer scores or playback status
 for unlogged games. See docs/games-catalog.md.
+The user requested light mode and English/Español (Argentina) toggles. Preserve
+the dark English defaults and existing routes; store guest and owner display
+preferences in cookies. Keep icon ligatures, game titles, company names and
+user-authored content untranslated. See docs/display-preferences.md.
 
 ## Development
 Work directly on `main`. Do not create feature branches or pull requests unless

@@ -28,7 +28,7 @@ return (<>
 
 <div className="relative z-10 mt-auto p-5 sm:p-12 max-w-3xl flex flex-col gap-5">
 <div className="flex flex-wrap items-center gap-3">
-<span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">{"FromSoftware"}</span>
+<span translate="no" className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">{"FromSoftware"}</span>
 
 <span className="text-on-surface-variant/40">{"•"}</span>
 

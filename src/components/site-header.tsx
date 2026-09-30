@@ -5,11 +5,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import { usePortfolio } from "@/components/portfolio-provider";
+import { useSitePreferences } from "@/components/site-preferences";
 
 const navigation = [{ href: "/", label: "Discover" }, { href: "/games", label: "Games" }, { href: "/profile", label: "Rankings" }, { href: "/tiers", label: "Lists" }, { href: "/compare", label: "Compare" }];
 
 export function SiteHeader() {
   const { access, profile } = usePortfolio();
+  const { locale, theme, setLocale, setTheme } = useSitePreferences();
   const pathname = usePathname();
   const router = useRouter();
   const searchHref = `/search?q=&from=${encodeURIComponent(pathname === "/search" ? "/" : pathname)}`;
@@ -27,13 +29,13 @@ export function SiteHeader() {
         <div className="flex min-w-0 items-center gap-4 xl:gap-8">
           <Link className="flex shrink-0 items-center gap-2 lg:gap-3 group min-h-11" href="/" aria-label="Playlogg home">
             <span aria-hidden="true" className="material-symbols-outlined text-primary text-[28px]">sports_esports</span>
-            <span className="font-headline-md text-headline-md tracking-tight uppercase text-on-surface font-bold">Playlog<span className="text-primary">.gg</span></span>
+            <span translate="no" className="font-headline-md text-headline-md tracking-tight uppercase text-on-surface font-bold">Playlog<span className="text-primary">.gg</span></span>
           </Link>
-          <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-4 xl:gap-6">
+          <nav aria-label="Main navigation" className="hidden xl:flex items-center gap-6">
             {navigation.map((item) => <Link key={item.href} href={item.href} aria-current={isActive(item.href) ? "page" : undefined} className={`inline-flex min-h-11 items-center font-body-md text-body-md transition-colors ${isActive(item.href) ? "text-on-surface font-semibold" : "text-on-surface-variant hover:text-on-surface"}`}>{item.label}</Link>)}
           </nav>
         </div>
-        <div className="flex shrink-0 items-center gap-1 sm:gap-3 lg:gap-4 sm:flex-1 sm:max-w-xs justify-end">
+        <div className="flex min-w-0 items-center gap-1 sm:gap-3 lg:gap-4 sm:flex-1 sm:max-w-[440px] xl:max-w-[480px] justify-end">
           <Link href={searchHref} aria-label="Open game search" className="flex h-11 w-11 shrink-0 items-center justify-center rounded text-on-surface-variant hover:text-primary sm:hidden"><span className="material-symbols-outlined text-[20px]" aria-hidden="true">search</span></Link>
           <Link href={searchHref} aria-label="Open game search" className="relative hidden sm:flex items-center w-full min-w-0 max-w-[220px] min-h-11">
             <span className="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px] pointer-events-none" aria-hidden="true">search</span>
@@ -41,12 +43,23 @@ export function SiteHeader() {
             <kbd className="absolute right-2 hidden xl:block font-label-sm text-label-sm text-on-surface-variant px-1.5 py-0.5 rounded bg-surface-container-high pointer-events-none">⌘K</kbd>
           </Link>
           <Link aria-label="Log a game" className="inline-flex shrink-0 min-h-11 min-w-11 justify-center items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded bg-primary-container text-on-primary-container hover:bg-primary transition-colors font-label-md text-label-md tracking-wider uppercase font-semibold" href="/log"><span className="material-symbols-outlined text-[16px]" aria-hidden="true">add</span><span className="hidden sm:inline">Log</span></Link>
+          <div className="hidden sm:flex items-center gap-1"><PreferenceControls locale={locale} theme={theme} setLocale={setLocale} setTheme={setTheme} /></div>
           <Link className="flex h-11 w-11 shrink-0 items-center justify-center" href="/login" aria-label={access?.signedIn ? "Account and sign out" : "Sign in"}><ProfileAvatar name={access?.canEdit ? profile.displayName : "Account"} className="w-8 h-8 rounded-full ring-1 ring-surface-variant hover:ring-primary transition-all" /></Link>
         </div>
       </div>
-      <nav aria-label="Main navigation" className="lg:hidden flex h-12 items-center justify-between gap-1 px-4 sm:px-6 bg-surface-container-low/80">
-        {navigation.map((item) => <Link key={item.href} href={item.href} aria-current={isActive(item.href) ? "page" : undefined} className={`flex min-w-0 min-h-11 flex-1 items-center justify-center rounded px-1 font-body-md text-body-md transition-colors ${isActive(item.href) ? "text-primary bg-primary/10 font-semibold" : "text-on-surface-variant hover:text-on-surface"}`}>{item.label}</Link>)}
+      <nav aria-label="Main navigation" className="scroll-region xl:hidden flex h-12 items-center justify-start gap-1 overflow-x-auto px-4 sm:px-6 bg-surface-container-low/80">
+        {navigation.map((item) => <Link key={item.href} href={item.href} aria-current={isActive(item.href) ? "page" : undefined} className={`flex shrink-0 min-h-11 items-center justify-center rounded px-2 font-body-md text-body-md transition-colors ${isActive(item.href) ? "text-primary bg-primary/10 font-semibold" : "text-on-surface-variant hover:text-on-surface"}`}>{item.label}</Link>)}
       </nav>
+      <div className="sm:hidden h-12 flex items-center justify-end gap-2 px-4 bg-surface-container-low/80"><PreferenceControls locale={locale} theme={theme} setLocale={setLocale} setTheme={setTheme} /></div>
     </header>
   );
+}
+
+function PreferenceControls({ locale, theme, setLocale, setTheme }: { locale: "en" | "es-AR"; theme: "dark" | "light"; setLocale: (value: "en" | "es-AR") => void; setTheme: (value: "dark" | "light") => void }) {
+  const nextTheme = theme === "dark" ? "light" : "dark";
+  const nextLocale = locale === "en" ? "es-AR" : "en";
+  return <>
+    <button translate="no" type="button" onClick={() => setTheme(nextTheme)} aria-label={locale === "en" ? `Switch to ${nextTheme} mode` : `Cambiar a modo ${nextTheme === "light" ? "claro" : "oscuro"}`} aria-pressed={theme === "light"} title={locale === "en" ? `Switch to ${nextTheme} mode` : `Cambiar a modo ${nextTheme === "light" ? "claro" : "oscuro"}`} className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded bg-surface-container-low text-on-surface-variant hover:text-primary focus-visible:text-primary"><span className="material-symbols-outlined text-[20px]" aria-hidden="true">{theme === "dark" ? "light_mode" : "dark_mode"}</span></button>
+    <button translate="no" type="button" onClick={() => setLocale(nextLocale)} aria-label={locale === "en" ? "Switch to Spanish (Argentina)" : "Cambiar a inglés"} title={locale === "en" ? "Switch to Spanish (Argentina)" : "Cambiar a inglés"} className="inline-flex h-10 min-w-11 shrink-0 items-center justify-center rounded bg-surface-container-low px-2 text-primary font-label-sm text-label-sm font-semibold hover:bg-surface-container-high">{locale === "en" ? "EN" : "ES-AR"}</button>
+  </>;
 }

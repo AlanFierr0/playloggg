@@ -23,7 +23,7 @@ export function CatalogGameScreen({ game, isSample, publicProfile }: { game: Gam
             <h2 className="font-headline-md text-headline-md font-bold">{publicProfile ? `${publicProfile.displayName}'s log entry` : isSample ? "Sample profile entry" : "Your log entry"}</h2>
             {game.logged ? <>
               <div className="flex flex-wrap items-center gap-3 font-label-md text-label-md"><span className="text-primary">{game.score === null ? "Unrated" : `${game.score} / 100`}</span><span>{game.tier ? `Tier ${game.tier}` : "Tier unassigned"}</span>{game.status && <span>{playbackLabels[game.status]}</span>}{game.hoursPlayed != null && <span>{game.hoursPlayed} hrs</span>}{game.completedOn && <span>Completed {game.completedOn}</span>}</div>
-              {game.review && <p className="whitespace-pre-wrap break-words text-on-surface-variant font-body-md text-body-md">{game.review}</p>}
+              {game.review && <p translate="no" className="whitespace-pre-wrap break-words text-on-surface-variant font-body-md text-body-md">{game.review}</p>}
               {Boolean(game.tags?.length) && <div className="flex flex-wrap gap-2">{game.tags!.map((tag) => <span key={tag} className="max-w-full break-words rounded bg-surface-container px-2 py-1 font-label-sm text-label-sm">{tag}</span>)}</div>}
             </> : <p className="text-on-surface-variant">{publicProfile || isSample ? "This profile has not logged this game." : "This game is in the catalog. Add a log entry to save your status, rating or review."}</p>}
             {!publicProfile && <>
