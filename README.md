@@ -101,7 +101,8 @@ covers/artwork, with verified box art for the two comparison-only classics.
 Profile portraits use initials until a real image is supplied; generated Stitch
 images are absent from the application. See [image sources](docs/image-sources.md). Reviewed sample IGDB metadata is imported through separate administrative
 scripts. Owner-only in-app IGDB search/import is deployed. The owner confirmed
-production credentials are configured; live authenticated verification is pending. See the
+production credentials are configured; real owner search/import and duplicate
+reuse are verified. See the
 [IGDB catalog setup guide](docs/igdb-catalog-import.md). Credentials remain on
 the server; public browsing reads the stored catalog without provider requests.
 
@@ -112,11 +113,12 @@ artwork is not invented.
 
 ## Infrastructure
 
-Public Steam sign-in and private profile setup are deployed; real Steam sign-in
-verification is pending. Each person edits only their own entries and lists; IGDB import stays
+Public Steam sign-in and private profile setup are deployed; real sign-in,
+entry/list persistence and repeat sign-in are verified. A second Steam account
+was unavailable for its isolation scenario. Each person edits only their own entries and lists; IGDB import stays
 restricted to the original owner. See [Steam sign-in](docs/steam-sign-in.md).
 Optional profile publishing and shareable portfolio pages are deployed. Guest
-routes work; a signed-in production publish check remains pending. See
+routes and signed-in publishing/unpublishing work. See
 [public profiles](docs/public-profiles.md).
 
 The prototype is published from GitHub `main` at https://playloggg.vercel.app/.

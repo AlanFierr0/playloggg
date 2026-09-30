@@ -30,10 +30,11 @@ claims. [README.md](../README.md) lists the routes and existing rollout notes.
 
 ## Known gaps and why they matter
 
-1. **Production sign-in acceptance is incomplete.** Local and isolated fixtures
-   exercised the Steam bridge and owner actions, but the docs still record real
-   Steam sign-in, authenticated IGDB import, and signed-in publish/unpublish as
-   pending. A 200 response on a guest route cannot establish that these work.
+1. **Production acceptance has one remaining account scenario.** Real Steam
+   sign-in/persistence, owner IGDB import and publish/unpublish passed on 2026-09-30.
+   Isolation was checked between the Steam and email-owner accounts; two Steam
+   identities remain untested because a second account was unavailable. See the
+   [acceptance report](production-acceptance.md).
 2. **Illustrative screens can look like live data.** Compare displays fixed people,
    scores, and affinity numbers. Discover and prototype detail pages also retain
    editorial/sample content. These need clear treatment before being presented as
@@ -66,6 +67,8 @@ automatic Vercel deployment. Preserve the approved visual design and RLS model.
 
 ### 1. Close the production acceptance gaps
 
+Track observed results and pending checks in [production acceptance](production-acceptance.md).
+
 1. Verify a real Steam sign-in, private profile setup, sign-out, repeat sign-in,
    saved unscored Backlog entry, and list reload. Use a second account to check
    isolation. Record only outcomes, never credentials or tokens.
@@ -76,7 +79,7 @@ automatic Vercel deployment. Preserve the approved visual design and RLS model.
    and confirm all nested pages return the same 404 as an unknown handle. Test name
    changes and the resulting URL change.
 4. Record failures with the exact route and deployment, fix them, and repeat the
-   affected journey. Completion means the three pending rollout notes in the
+   affected journey. Completion means the feature rollout notes in the
    [Steam](steam-sign-in.md), [IGDB](igdb-catalog-import.md), and [public profile](public-profiles.md)
    documents can be updated from observed production behavior.
 
@@ -172,5 +175,6 @@ automatic Vercel deployment. Preserve the approved visual design and RLS model.
 - **Step 7:** Should published profiles also be discoverable in a directory, and
   should the home page remain editorial or become personalized?
 
-The immediate next action is **step 1**. It validates the already deployed
-privileged flows before more product behavior is built on them.
+Step 1's available-account flows are verified in the acceptance report; the
+second-Steam scenario remains pending. The next implementable milestone is
+**step 2**, with its action/content decisions agreed before visible changes.

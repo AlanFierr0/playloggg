@@ -1,7 +1,9 @@
 # Profile settings and shareable portfolios
 
-Deployed to production from `main`. Owner publishing on production still needs
-a signed-in check; private and published public routes were verified as a guest.
+Deployed to production from `main`. Signed-in publishing/unpublishing and handle
+changes passed on 2026-09-30 using the real Steam-owned profile and a separate
+anonymous browser. Populated entry/list pages followed visibility; the original
+handle and private visibility were restored. See [production acceptance](production-acceptance.md).
 Each non-sample owner can open `/settings` to edit their handle/display name or
 publish/unpublish their profile. Profiles remain private by default. Existing
 owner email sign-in and public Steam registration use the same verified
@@ -37,5 +39,6 @@ lists visible. The production deployment is READY: the published sample profile,
 tiers and lists return 200; a private handle and an unknown handle return 404;
 guest settings redirect to login. The browser rendered the public rankings with
 working navigation and no error overlay, and Vercel reported no recent runtime
-errors. Production owner sign-in and publishing have not yet been tested. The
-fixture used dummy credentials and did not change production data.
+errors. These initial fixture checks used dummy credentials and did not change
+production data. The later real production checks are recorded in the acceptance
+report linked above.

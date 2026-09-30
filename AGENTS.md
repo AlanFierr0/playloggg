@@ -62,14 +62,15 @@ never derive ownership from user metadata or browser-supplied IDs. `getAccount`
 permits personal edits; `getOwner` remains the original email owner's catalog
 administration check. Keep email owner login, do not auto-merge accounts, and do
 not expose the Auth admin client. No schema/grant changes are needed. Production
-rollout is complete; real Steam sign-in verification is pending. See docs/steam-sign-in.md.
+rollout is complete. Real Steam sign-in, persistence and repeat sign-in are verified;
+a second Steam account was unavailable. See docs/steam-sign-in.md.
 
 Profile settings and shareable portfolios are deployed from `main`. Verified
 owners may edit their own names and
 publish/unpublish their profile. Profiles start private. Public pages read as
 anonymous with fresh data; private/unknown handles and nested lists/entries
 return the same 404. No public profile write grant or schema change is needed.
-Guest production routes are verified; a signed-in publish check remains pending.
+Guest routes and signed-in publish/unpublish and handle changes are verified.
 See docs/public-profiles.md.
 
 A new Supabase project exists and the prototype is deployed through Vercel from
@@ -102,7 +103,8 @@ custom game order independently of ratings. Keep existing navigation, link to
 curated lists from the tier board, and use the editor's functional tag controls.
 See docs/tags-and-curated-lists.md for the applied schema and verification.
 Owner-only IGDB catalog search/import is deployed. The owner confirmed credentials
-are configured in Vercel Production; authenticated live verification is pending.
+are configured in Vercel Production; real owner search/import, duplicate reuse
+and Steam action denial are verified. See docs/production-acceptance.md.
 Local provider/admin credentials remain absent. Search/import must reverify the allowlisted
 Auth user and its non-sample owned profile. Only server-fetched metadata may be
 inserted through the server-only catalog client; anonymous/authenticated games

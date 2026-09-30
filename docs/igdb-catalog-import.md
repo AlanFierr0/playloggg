@@ -1,8 +1,9 @@
 # Owner IGDB search and catalog import
 
 Status: deployed from `main` in commit `36e9226`. The owner confirmed the three
-provider/server variables are configured in Vercel Production. An authenticated
-production search/import check remains pending. Local `.env.local` still lacks
+provider/server variables are configured in Vercel Production. Real authenticated
+search/import and duplicate reuse passed on 2026-09-30; see
+[production acceptance](production-acceptance.md). Local `.env.local` still lacks
 these three variables. No schema migration or public catalog-write grant is
 needed; the inspected live schema already has a unique `games.igdb_id`.
 
@@ -79,7 +80,7 @@ returned to the browser.
    secrets. `.env.example` contains empty placeholders only.
 4. Restart the local server after changing its environment. Production needs a
    new deployment after its variables are configured; pushing the milestone
-   to `main` triggers that deployment after user authorization.
+   to `main` triggers that deployment under the standing deployment authorization.
 5. Sign in, search a title absent from the saved catalog, check the edition,
    import it, save an unscored Backlog entry, then refresh. Re-import should
    reuse the game. Create a list with another imported game and refresh it.
@@ -102,9 +103,9 @@ remains; Auth configuration was not changed.
 An isolated local Auth/Data API and provider fixture verified owner search,
 import/navigation, cached catalog refresh, duplicate reuse, unscored Backlog
 saving, and import/add/save/reload with a preserved list draft. Live provider
-authentication and production imports remain unverified pending an authenticated
-owner check. Production rollout is complete and the owner confirmed Vercel
-credentials are configured. Fixtures use dummy credentials; ignored real environment
+authentication and production imports were initially pending. The 2026-09-30
+owner acceptance imported Clair Obscur: Expedition 33 and confirmed duplicate
+reuse plus server denial for the Steam account. Fixtures use dummy credentials; ignored real environment
 files remain unchanged.
 
 Additional browser checks passed provider-failure/no-result messages, Enter to

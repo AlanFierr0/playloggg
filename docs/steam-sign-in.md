@@ -1,6 +1,9 @@
 # Steam sign-in
 
-Deployed to production from `main`; a real Steam sign-in check remains pending.
+Deployed to production from `main`. Real Steam sign-in, private setup, save/reload,
+sign-out and repeat sign-in passed on 2026-09-30. Isolation was checked against
+the email-owner account; a second Steam account was unavailable. See
+[production acceptance](production-acceptance.md).
 The user approved public Steam registration, a server-side Supabase session
 bridge, and private profiles with handle/display-name setup. Existing owner email
 login remains available. No schema migration, new public grants or dependencies
@@ -53,9 +56,9 @@ configured in Vercel Production, while the ignored local environment lacks it.
 
 On production, sign in with Steam, choose names, save an unscored
 Backlog entry and a list, reload, sign out and sign back in. Repeat with a second
-Steam account to confirm isolation. Publishing profiles, changing profile names,
-Steam library syncing and linking Steam to the owner's email account are separate
-features outside this milestone.
+Steam account to confirm isolation. Publishing and name changes are implemented
+in [public profiles](public-profiles.md). Steam library syncing and linking Steam
+to the owner's email account remain separate features.
 
 ## Verification
 
@@ -77,8 +80,10 @@ features outside this milestone.
   Steam with the production callback origin, rejection of invalid callbacks,
   guest setup redirect, Games filters and branded tab icon. No browser or recent
   Vercel runtime errors were found.
-- Real Steam authentication and privileged production credentials still require
-  a live sign-in. These deployment checks do not establish a real Supabase session.
+- The 2026-09-30 production acceptance established a real Supabase session through
+  Steam, saved/reloaded the requested Backlog entry and a temporary list, and
+  reopened the same profile on repeat sign-in. Steam search/import actions were
+  denied on the server. No second Steam identity was available for that scenario.
 
 References: [Steam browser authentication](https://partner.steamgames.com/doc/features/auth),
 [Supabase admin users](https://supabase.com/docs/reference/javascript/auth-admin-createuser),
