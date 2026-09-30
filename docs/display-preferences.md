@@ -1,6 +1,6 @@
 # Display preferences
 
-Implemented locally on `main`; production deployment requires approval.
+Changes on `main` deploy automatically to production through Vercel.
 
 The header offers a light/dark toggle and an English/Español (Argentina)
 toggle, including at phone widths. English and the original dark design remain

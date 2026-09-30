@@ -80,7 +80,7 @@ forms, grids, typography and spacing adapt to the viewport. See
 [responsive layouts](docs/responsive-layouts.md) for behavior and verification.
 The header also offers light/dark and English/Español (Argentina) toggles.
 Selections persist in cookies; see [display preferences](docs/display-preferences.md).
-This milestone is implemented locally and awaits production deployment approval.
+Changes merged into `main` deploy automatically through Vercel.
 
 - `src/app`: App Router pages, shared layout and metadata.
 - `src/components`: shared navigation, feedback, controls and screen components.

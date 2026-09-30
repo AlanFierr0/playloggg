@@ -44,7 +44,9 @@ Work directly on `main`. Do not create feature branches or pull requests unless
 the user explicitly requests them. Keep logical commits on `main`; when the user
 requests a push to `main`, that includes its automatic Vercel production deployment.
 
-When a requirement is ambiguous or an architectural decision has multiple reasonable options with meaningful consequences, ask the user before choosing.
+Ask the user before assuming a requirement or making an architectural or product
+decision with multiple reasonable options and meaningful consequences. Proceed
+with routine implementation choices supported by the agreed plan.
 
 Work incrementally, check changes and keep logical Git milestones. Do not
 silently refactor unrelated code or introduce dependencies without a reason.
@@ -112,7 +114,8 @@ Do not enable public database writes without an
 agreed ownership/access design. Inspect Supabase before finalizing a schema;
 track approved changes in versioned migrations. Keep credentials in ignored
 environment files. Never commit secrets or place them in documentation.
-Ask before deployment, infrastructure resets/deletion or destructive Git actions.
+Push completed, verified milestones to `main` and let Vercel deploy them without
+asking again. Ask before infrastructure resets/deletion or destructive Git actions.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
