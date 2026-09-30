@@ -1,8 +1,12 @@
 # Playlogg
 
-A gaming portfolio prototype based on the original Google Stitch exports.
-The first milestone preserves the seven screen designs and connects navigation
-and temporary browser interactions. All people use the same profile concepts.
+A gaming portfolio based on the original Google Stitch exports. People can keep
+private entries and curated lists, browse a shared game catalog, and optionally
+publish a profile. All people use the same profile concepts; some editorial and
+comparison screens still contain illustrative content.
+
+For the current application inventory and prioritized next milestones, see the
+[application review and roadmap](docs/application-roadmap.md).
 
 ## Local development
 
@@ -32,7 +36,7 @@ foundation. Tailwind 3 preserves the export's existing utilities and theme
 values. ESLint 9 is pinned because the React rules shipped with the current
 Next.js ESLint configuration fail on ESLint 10's rule API.
 
-## Prototype routes
+## Application routes
 
 | Route | Screen |
 | --- | --- |

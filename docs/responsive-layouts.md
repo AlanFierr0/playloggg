@@ -5,10 +5,11 @@ catalog imagery and desktop screen design. Original design references are intact
 
 ## Layout behavior
 
-- Below 1024px, navigation stays visible in a second header row. Search, Log and
+- Below 1280px, navigation stays visible in a second header row. Search, Log and
   Account remain accessible; phones use a search icon and compact Log button.
-  `--site-header-height` controls page padding, search positioning and anchor
-  offsets: 112px below 1024px and 64px on desktop.
+  Theme/language controls occupy a third row on phones. `--site-header-height`
+  controls page padding, search positioning and anchor offsets: 160px below
+  640px, 112px from 640px to 1279px, and 64px from 1280px upward.
 - Phones use the export's mobile headline/display sizes, 16px form text,
   tighter gutters and spacing. Coarse-pointer controls have 44px minimum heights.
   Grids grow from phone columns into tablet and desktop arrangements.
@@ -35,7 +36,8 @@ An automated Chromium audit covered ten routes at 320×900, 390×844, 640×900,
 768×1024, 1024×900, 1440×900, 1920×1080 and 844×390. Every viewport retained all
 four main navigation links without document-level horizontal overflow; search
 stayed within the visible viewport. Screenshots were visually inspected for
-mobile, tablet, desktop and landscape layouts.
+mobile, tablet, desktop and landscape layouts. This historical audit preceded
+the fifth Games navigation link and the display-preference header row.
 
 Eight populated owner routes were additionally checked at six widths from
 320px to 1440px. Fixtures included a 48-character unbroken tag, an 80-character
