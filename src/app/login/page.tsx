@@ -2,7 +2,6 @@ import { localizeMetadata } from "@/lib/locale/server";
 import { getMessages } from "@/lib/locale/server";
 import Link from "next/link";
 import { PasswordForm } from "@/components/password-form";
-import { LoginForm } from "@/components/login-form";
 import { getAccount } from "@/lib/owner";
 import { signOut } from "@/app/actions/auth";
 
@@ -22,9 +21,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <form action={signOut}><button className="rounded bg-surface-container px-4 py-2 text-on-surface">{t("Sign out")}</button></form>
       </> : <>
         <p className="font-body-md text-body-md text-on-surface-variant">{t("Choose how you want to sign in.")}</p>
-        {error && <p role="alert" className="text-on-surface-variant">{error === "signout" ? t("Sign-out failed. Please try again.") : error === "steam-config" ? t("Steam sign-in is not configured yet.") : error === "steam" ? t("Steam sign-in was cancelled or could not be verified. Please try again.") : t("That sign-in link is invalid or expired. Request a new one.")}</p>}
+        {error && <p role="alert" className="text-on-surface-variant">{error === "signout" ? t("Sign-out failed. Please try again.") : error === "steam-config" ? t("Steam sign-in is not configured yet.") : error === "steam" ? t("Steam sign-in was cancelled or could not be verified. Please try again.") : t("That email verification or password reset link is invalid or expired. Request a new one.")}</p>}
         <form action="/auth/steam" method="post"><button type="submit" className="w-full rounded bg-primary-container px-5 py-3 font-label-md text-on-primary-container">{t("Sign in with Steam")}</button></form>
-        <div className="flex items-center gap-4 text-on-surface-variant text-body-sm"><span className="h-px flex-1 bg-outline-variant/30" />{t("or use email")}<span className="h-px flex-1 bg-outline-variant/30" /></div><PasswordForm /><details className="border-t border-outline-variant/20 pt-5"><summary className="cursor-pointer text-on-surface-variant text-body-sm">{t("Owner email-link sign-in")}</summary><div className="pt-4"><LoginForm /></div></details>
+        <div className="flex items-center gap-4 text-on-surface-variant text-body-sm"><span className="h-px flex-1 bg-outline-variant/30" />{t("or use email")}<span className="h-px flex-1 bg-outline-variant/30" /></div><PasswordForm />
       </>}
     </div></div>
   </section>;

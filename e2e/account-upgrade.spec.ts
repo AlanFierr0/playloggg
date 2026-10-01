@@ -5,6 +5,8 @@ import {authCookie} from './fixture-server.mjs';
 
 test('email login options, recovery and verified profile routing work without sample content',async({page},testInfo)=>{
   await page.goto('/login');
+  await expect(page.getByText('Owner email-link sign-in',{exact:true})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Send sign-in link',exact:true})).toHaveCount(0);
   await page.screenshot({path:`e2e-artifacts/login-${testInfo.project.name}.png`,fullPage:true});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   expect(await page.getByRole('button',{name:'Sign in with Steam'}).evaluate(button=>parseFloat(getComputedStyle(button).borderTopLeftRadius))).toBeGreaterThanOrEqual(12);

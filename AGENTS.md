@@ -81,7 +81,8 @@ Supabase sessions and lets users choose names for their own empty, private
 profiles. Use verified server-owned Steam metadata and existing per-profile RLS;
 never derive ownership from user metadata or browser-supplied IDs. `getAccount`
 permits personal edits; `getOwner` remains the original email owner's maintenance
-administration check. Any signed-in profile owner may search/import IGDB metadata. Keep email owner login, do not auto-merge accounts, and do
+administration check. Any signed-in profile owner may search/import IGDB metadata. The user removed owner email-link sign-in; keep Steam and verified email/password
+login, do not auto-merge accounts, and do
 not expose the Auth admin client. Email/password registration is also approved, with confirmed email accounts
 creating separate empty private profiles. No automatic account linking. Production
 rollout is complete. Real Steam sign-in, persistence and repeat sign-in are verified;

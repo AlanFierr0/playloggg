@@ -1,5 +1,10 @@
 # Owner sign-in and saved ratings
 
+Update (2026-10-01): owner email-link sign-in has been removed at the user’s
+request. Use Steam or verified email/password; an existing email account can set
+a password through Forgot password. The original email-link setup below is
+historical. Email verification/recovery and Steam’s internal session bridge remain.
+
 Status: deployed from `main`; database migration applied, confirmed owner account
 linked to a private profile, and the user confirmed production magic-link sign-in
 works. A first real production rating save is still to be verified; the last

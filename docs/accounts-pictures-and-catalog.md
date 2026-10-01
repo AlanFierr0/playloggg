@@ -2,7 +2,8 @@
 
 The user approved 1,000 well-rated released catalog games, IGDB search/import
 for any signed-in profile owner, and separate private profiles for verified
-email/password registrations. Steam and the original owner's email link remain.
+email/password registrations. Steam and email/password remain. The user subsequently removed the owner
+email-link form and its sending action; verification/recovery emails still work.
 Accounts are not automatically linked. These changes are outside the cancelled
 backup/recovery milestone.
 
