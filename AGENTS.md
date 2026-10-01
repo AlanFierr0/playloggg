@@ -55,7 +55,10 @@ The user requested a Games navigation tab for the full stored catalog. Keep it
 accessible alongside Discover, Rankings, Lists and Compare. Catalog platform
 filters use available platforms, independently of an entry's played platform.
 Profile filters use the selected profile; never infer scores or playback status
-for unlogged games. See docs/games-catalog.md.
+for unlogged games. Games uses Load more with 25/50/100/All amounts (default 25).
+Retain prior cards, reset loaded batches when filters/sort/amount change and keep
+filters, amount and loaded batches shareable/reloadable in the URL. Clear filters
+preserves the selected amount; All means all matches. See docs/games-catalog.md.
 The user requested light mode and English/Español (Argentina) toggles. Preserve
 the dark English defaults and existing routes; store guest and owner display
 preferences in cookies. Keep icon ligatures, game titles, company names and

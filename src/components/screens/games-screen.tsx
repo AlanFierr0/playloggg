@@ -5,7 +5,7 @@ import Link from "next/link";
 import { IgdbSearch } from "@/components/igdb-search";
 import { useOptimistic, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { gamesQuery } from "@/lib/games-query";
+import { gamesQuery, type GamesPageSize } from "@/lib/games-query";
 import type { GamesPageData } from "@/lib/games-page";
 import { defaultGamesFilters, validScoreRange, type GamesFilters } from "@/lib/games-view";
 import { playbackLabels } from "@/lib/playback-status";
@@ -18,10 +18,11 @@ export function GamesScreen({ data, profile, access }: { data: GamesPageData; pr
   const t = useMessages();
   const router = useRouter();
   const [filters, updateFilters] = useOptimistic(data.filters);
+  const [pageSize, updatePageSize] = useOptimistic(data.pageSize);
   const [pending, startTransition] = useTransition();
   const { games: visible, total, matched, genres, platforms, years, page: currentPage, pageCount, offset } = data;
-  function navigate(next: GamesFilters, page = 1) {
-    startTransition(() => { updateFilters(next); const query = gamesQuery(next, page); router.push(`/games${query ? `?${query}` : ""}`, { scroll: false }); });
+  function navigate(next: GamesFilters, page = 1, size: GamesPageSize = pageSize) {
+    startTransition(() => { updateFilters(next); updatePageSize(size); const query = gamesQuery(next, page, size); router.push(`/games${query ? `?${query}` : ""}`, { scroll: false }); });
   }
   function change<K extends keyof GamesFilters>(key: K, value: GamesFilters[K]) { navigate({ ...filters, [key]: value }); }
   function clear() { navigate(defaultGamesFilters); }
@@ -45,9 +46,12 @@ export function GamesScreen({ data, profile, access }: { data: GamesPageData; pr
       </div></details>}
       <div className="flex flex-wrap items-center justify-between gap-3"><p role="status" aria-live="polite" className="text-on-surface-variant font-body-sm text-body-sm">{validScoreRange(filters) ? t(`${matched} of ${total} games${matched ? ` · Showing ${offset + 1}–${offset + visible.length}` : ""}`) : t("Use whole-number scores from 0 to 100, with minimum no greater than maximum.")}</p><button type="button" className={button} onClick={clear}>{t("Clear filters")}</button></div>
     </section>
+    <div className="flex flex-wrap items-end justify-end gap-3">
+      <div className="w-full sm:w-44"><Field label={t("Games to show")}><select className={control} value={pageSize} onChange={(event) => navigate(filters, 1, event.target.value === "all" ? "all" : Number(event.target.value) as GamesPageSize)}>{[25, 50, 100].map(size => <option key={size} value={size}>{size}</option>)}<option value="all">{t("All")}</option></select></Field></div>
+    </div>
     {filters.query.trim().length >= 2 && <section className="rounded-xl bg-surface-container-low p-5 space-y-3"><h2 className="font-headline-md text-headline-md">{t("Missing a game?")}</h2>{access?.canImportCatalog ? <IgdbSearch query={filters.query} /> : <Link href="/login" className="text-primary underline">{t("Sign in to search IGDB and add a game.")}</Link>}</section>}
     <section aria-label={t("Game catalog results")}><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-3 gap-y-6 sm:gap-x-5">{visible.map((game) => <CatalogCard key={game.slug} game={game} logged={Boolean(game.logged)} canEdit={Boolean(access?.canEdit)} />)}</div>{!visible.length && <div className="py-12 text-center space-y-4"><h2 className="font-headline-lg text-headline-lg">{t("No games match these filters")}</h2><p className="text-on-surface-variant">{t("Try a broader search or clear the filters.")}</p><button className={button} onClick={clear}>{t("Show all games")}</button></div>}</section>
-    {matched > 24 && <nav aria-label={t("Catalog pages")} className="flex flex-wrap justify-center items-center gap-3"><button className={button} disabled={currentPage === 1} onClick={() => navigate(filters, currentPage - 1)}>{t("← Previous")}</button><span className="font-label-md text-label-md">{t("Page ")}{currentPage} {t("of ")}{pageCount}</span><button className={button} disabled={currentPage === pageCount} onClick={() => navigate(filters, currentPage + 1)}>{t("Next →")}</button></nav>}
+    {currentPage < pageCount && <div className="flex justify-center"><button type="button" className={button} disabled={pending} aria-label={t("Load more")} onClick={() => navigate(filters, currentPage + 1)}>{t(pending ? "Loading…" : "Load more")}</button></div>}
   </div>;
 }
 

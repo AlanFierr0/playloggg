@@ -1,4 +1,5 @@
 import { defaultGamesFilters, type GamesFilters } from "./games-view.ts";
+export type GamesPageSize = 25 | 50 | 100 | "all";
 const choices = {
   library: ["all", "logged", "unlogged"],
   status: ["all", "completed", "playing", "backlog", "shelved", "unset"],
@@ -6,7 +7,7 @@ const choices = {
   rating: ["all", "rated", "unrated"],
   sort: ["title", "newest", "oldest", "score-desc", "score-asc"],
 } as const;
-export function parseGamesQuery(params: Pick<URLSearchParams, "get">): { filters: GamesFilters; page: number } {
+export function parseGamesQuery(params: Pick<URLSearchParams, "get">): { filters: GamesFilters; page: number; pageSize: GamesPageSize } {
   const filters = { ...defaultGamesFilters };
   filters.query = (params.get("q") ?? "").slice(0, 100);
   filters.genre = (params.get("genre") ?? "").trim().slice(0, 120);
@@ -22,13 +23,16 @@ export function parseGamesQuery(params: Pick<URLSearchParams, "get">): { filters
   filters.maxScore = (params.get("maxScore") ?? "").trim().slice(0, 16);
   const rawPage = params.get("page") ?? "";
   const page = /^\d{1,7}$/.test(rawPage) && Number(rawPage) >= 1 ? Math.min(Number(rawPage), 1_000_000) : 1;
-  return { filters, page };
+  const rawSize = params.get("size");
+  const pageSize: GamesPageSize = rawSize === "all" ? "all" : rawSize === "50" ? 50 : rawSize === "100" ? 100 : 25;
+  return { filters, page, pageSize };
 }
-export function gamesQuery(filters: GamesFilters, page = 1): string {
+export function gamesQuery(filters: GamesFilters, page = 1, pageSize: GamesPageSize = 25): string {
   const params = new URLSearchParams();
   for (const key of Object.keys(defaultGamesFilters) as (keyof GamesFilters)[]) {
     if (filters[key] !== defaultGamesFilters[key]) params.set(key === "query" ? "q" : key, filters[key]);
   }
-  if (page > 1) params.set("page", String(page));
+  if (page > 1 && pageSize !== "all") params.set("page", String(page));
+  if (pageSize !== 25) params.set("size", String(pageSize));
   return params.toString();
 }

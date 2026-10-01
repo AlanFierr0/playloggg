@@ -14,7 +14,7 @@ export async function generateMetadata({searchParams}:{searchParams:Promise<Reco
 export default async function GamesPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(await searchParams)) if (value !== undefined) params.set(key, Array.isArray(value) ? value[0] : value);
-  const { filters, page } = parseGamesQuery(params);
+  const { filters, page, pageSize } = parseGamesQuery(params);
   const portfolio = await getPortfolio();
-  return <GamesScreen data={gamesPage(portfolio.games, filters, page)} profile={portfolio.profile} access={portfolio.access} />;
+  return <GamesScreen data={gamesPage(portfolio.games, filters, page, pageSize)} profile={portfolio.profile} access={portfolio.access} />;
 }

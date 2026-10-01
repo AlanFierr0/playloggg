@@ -16,21 +16,27 @@ independent tier, rated/unrated entries and inclusive integer score bounds from
 0 to 100. Blank bounds are unrestricted; zero remains a real score. A reversed
 or invalid range shows an explanation. Unlogged games never acquire fabricated
 status or scores. A logged entry with no status remains distinct from an unlogged
-game. Sample profile data is labeled in the profile filter summary.
+game. Guest catalog browsing does not invent personal entries.
 
-All filters combine. Changing a filter resets pagination to the first page;
-clearing restores the complete alphabetically sorted catalog. Each page displays
-up to 24 cards. Filters and pagination live in the URL and survive reload and Back/Forward.
-Filtering runs on the server, shipping only the current 24 cards and facets.
-They do not write to the database. See [growth and limits](catalog-growth.md).
+All filters combine. The Games to show selector offers 25 (default), 50, 100 and
+All. Load more adds another selected-size batch while retaining every previously
+shown card. The button disappears once all matching games are shown; All displays
+the complete filtered result immediately. Covers stay lazy-loaded.
+
+Changing filters, sort or amount resets the loaded batches to one. Clearing
+filters preserves the selected amount. Filters, amount (`size`) and loaded batches
+(`page`, retained for existing shared links) live in the URL and survive reload
+and Back/Forward. Loading more preserves the scroll position. Filtering runs on
+the server and only compact visible-card data and facets reach the screen. No
+browse operation writes to the database. See [growth and limits](catalog-growth.md).
 
 Cards open game details. Authenticated owners additionally get log/edit links
 and a link to search IGDB for new games. IGDB search/import remains a separate
-owner-only operation requiring the credentials documented in
+verified profile-owner operation requiring the credentials documented in
 [IGDB catalog import](igdb-catalog-import.md). Closing search returns to Games.
 The Discover page's Explore All Games link also opens the catalog.
 
-## Verification
+## Original verification (before Load more)
 
 - `node --experimental-strip-types --test scripts/test-games-view.mjs` covers
   catalog/profile filter combinations, unlogged entries, independent tiers,
@@ -47,3 +53,11 @@ filters, invalid score ranges, clearing filters, saved catalog search and return
 navigation. All five tabs fit at 320, 390, 768, 1024 and 1920 pixels without page
 overflow. Anonymous log saving remains disabled. Vercel reported no recent
 runtime errors after rollout, and all 28 current automated tests pass.
+
+## Load-more verification — 2026-10-01
+
+Unit checks cover all four amounts, retained prefixes without duplicate cards,
+end-of-results clamping, empty filters, shared amount/loaded-batch URLs and
+rejection of unsupported sizes. Existing card payload checks still exclude review
+text, full descriptions and screenshots. Browser checks cover load more, all
+amounts, filter resets, reload, history and search return on desktop and mobile.
