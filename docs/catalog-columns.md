@@ -19,3 +19,18 @@ and profile sample guards remain; `games.igdb_synced_at` still records provider 
 Previous migrations remain unchanged as schema history. Automatic demo seeding
 stays disabled; the seed is only for isolated test databases and rejects any
 existing catalog overlap. No sample players or ratings are restored.
+
+## Verification — 2026-10-01
+
+Applied to the production Supabase project after compatible commit `e09337e`
+reached Vercel READY. All three requested columns are absent. The 1,000 catalog
+rows and every retained game field have the same before/after hash. Both real
+profiles and the saved rating also have unchanged counts and hashes.
+
+Regenerated live Supabase types match the committed types. Catalog RLS stays
+on, anonymous/authenticated direct inserts stay denied, and the rollback-only
+server import/duplicate-reuse test passed with no retained test rows.
+
+Validation: 68 unit tests, TypeScript, lint, production build, eight targeted
+desktop/mobile browser tests, all 18 production smoke checks, and live filtered
+Games/game-detail requests passed after migration.
