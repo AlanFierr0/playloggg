@@ -11,7 +11,7 @@ controls were also checked in the live browser across navigation and reload.
 
 | Area | Current behavior | Source of truth |
 | --- | --- | --- |
-| Public entry | Discover shows a curated hero and game cards. Guests can browse the catalog, search, rankings, tiers, lists, game details, and an illustrative comparison. | `src/app`, `src/components/screens` |
+| Public entry | Discover shows a curated hero and game cards. Guests can browse the catalog, search, rankings, tiers, lists, game details, and published-profile comparisons. | `src/app`, `src/components/screens` |
 | Accounts | Steam OpenID signs people into separate Supabase accounts and guides new users through private profile setup. The original owner also has email magic-link sign-in. | `src/app/auth`, `src/app/login`, `src/app/signup`, [Steam flow](steam-sign-in.md) |
 | Personal portfolio | Signed-in people can save one entry per game: optional score, independent tier, playback status, platform, hours, completion date, review, and tags. Rankings, averages, Backlog, and tiers read those entries. | `src/app/actions/ratings.ts`, `src/lib/portfolio.ts`, [entry behavior](backlog-and-playback-status.md) |
 | Catalog | `/games` browses stored Supabase games with search, genre, platform, year, personal-entry filters, sort, and 24-card pages. Only the original owner can search IGDB and import new shared games. | `src/components/screens/games-screen.tsx`, [catalog](games-catalog.md), [IGDB import](igdb-catalog-import.md) |
@@ -21,9 +21,8 @@ controls were also checked in the live browser across navigation and reload.
 | Platform | Next.js 16/React 19/Tailwind 3 on Vercel from GitHub `main`; Supabase Auth, Postgres, RLS, and versioned migrations; server-side IGDB access. | `package.json`, `supabase/migrations`, `AGENTS.md` |
 
 The published Alex Vance profile and 32-game initial seed are identified sample
-content. New Steam profiles start empty. The Discover editorial feature, community
-material on the prototype game-detail screen, and the entire Compare screen still
-contain illustrative copy or metrics. Shelf opens the existing editor (guests sign in first), and Share copies a catalog
+content. New Steam profiles start empty. The Discover editorial feature and community
+material on the prototype game-detail screen still contain illustrative copy or metrics. Shelf opens the existing editor (guests sign in first), and Share copies a catalog
 URL without publishing a profile. Remaining prototype controls are disabled and
 labeled unavailable; footer API/Terms/Privacy placeholders are hidden.
 Imported games use real catalog metadata and do not inherit the sample editorial
@@ -106,7 +105,7 @@ remains pending.
 
 Implemented with local fixtures approved by the user. See
 [journey suite, isolation and post-deploy checklist](journey-tests.md).
-Step 4 implements explicit localization and accessibility. Step 5 implements catalog and profile growth; the next milestone is step 6.
+Step 4 implements explicit localization and accessibility. Steps 5 and 6 implement catalog growth and real comparisons; the next milestone is step 7.
 
 1. Keep existing unit/data/RLS tests, then add a small deterministic browser suite
    for guest catalog/search, theme/language persistence, mobile navigation, and
@@ -152,6 +151,9 @@ Implemented with the approved server-filtered 24-card pages. See
 
 ### 6. Replace the illustrative comparison with real profile comparison
 
+Implemented with published handles, shared logged entries, independent tiers and
+a five-scored-game minimum for affinity. See [comparison rules and privacy](profile-comparison.md).
+
 1. Agree on which published profiles can be compared and how people select them.
    Do not expose private accounts through search or suggestions. Decide how to
    handle unrated games and define the affinity formula before displaying a
@@ -186,11 +188,12 @@ Implemented with the approved server-filtered 24-card pages. See
 - **Step 4 (agreed):** Keep the existing dictionary, cookie preferences and URLs,
   with explicit React/server translations and no runtime i18n dependency.
 - **Step 5 (agreed):** Server-filtered Games pages with 24 cards and URL filters.
-- **Step 6:** Compare any two published profiles, or only a signed-in user's
-  profile against a published profile? What should “affinity” measure?
+- **Step 6 (agreed):** Two published handles; affinity is 100 minus mean absolute
+  score difference with at least five shared scored games. Include shared unrated
+  entries, with tiers compared separately.
 - **Step 7:** Should published profiles also be discoverable in a directory, and
   should the home page remain editorial or become personalized?
 
 Step 1's available-account flows are verified in the acceptance report; the
 second-Steam scenario remains pending. The next implementable milestone is
-**step 6**, real profile comparison, after agreeing on selection and affinity.
+**step 7**, discovery and public launch details, after agreeing on scope.

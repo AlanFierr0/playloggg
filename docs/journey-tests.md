@@ -22,7 +22,7 @@ on every push to `main`. No production secrets are configured in either job.
 ## Post-deploy smoke
 
 `pnpm test:smoke` performs anonymous, read-only checks against the fixed production
-origin. It verifies Discover, catalog, search, sign-in and sample comparison page
+origin. It verifies Discover, catalog, search, sign-in and published-profile comparison page
 markers, plus unknown-profile and nested-entry/list 404 responses. It never signs
 in, writes, deletes or accepts an arbitrary deployment URL.
 The deployment-status workflow reports a failed Vercel Production deployment or

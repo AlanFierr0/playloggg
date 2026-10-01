@@ -21,7 +21,7 @@ and approved policy text exist. No legal policy was invented.
 | Original game details | Add to Tier List navigated without adding | Renamed View tier board. Curated lists link goes to real lists without claiming 84 lists. |
 | Original game details | Review sort/reactions/replies and illustrative list buttons | Disabled controls with visible Unavailable labels. |
 | Imported game details | Real IGDB metadata and selected profile entry | Preserved, with catalog-link copying added. Public profile URLs share only the catalog URL. |
-| Compare | Fixed named profiles, scores, affinity and shared-game metrics | Prominent sample comparison notice. Real comparison is explicitly unavailable. Sample filters and pagination disabled. |
+| Compare | Fixed named profiles, scores, affinity and shared-game metrics | Replaced in step 6 with [real published-profile comparisons](profile-comparison.md), independently displayed tiers and documented score affinity. |
 | Tier board | Share Matrix / Organize Tiers notices | Disabled and visibly unavailable. Existing tier anchors and real game links retained. Edit independent tiers through the existing log editor. |
 | Editor | Checked broadcast toggle with temporary state | Replaced by visible broadcasting-unavailable text. Saves remain limited to the approved entry fields. |
 | Footer | API / Terms / Privacy notices; copyright 2025 | Placeholder controls hidden; current server year displayed. Archive navigation retained. |

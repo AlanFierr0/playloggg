@@ -61,8 +61,7 @@ test("sample actions are honest and guest Shelf requires sign-in", async ({ page
   await page.getByRole("link", { name: /Shelf/i }).click();
   await expect(page).toHaveURL(/\/login$/);
   await page.goto("/compare");
-  await expect(page.getByText(/^Sample comparison\./)).toBeVisible();
-  await expect(page.getByRole("button", { name: /Previous/ })).toBeDisabled();
+  await expect(page.getByText("Choose two published profiles to see their shared games and scores.")).toBeVisible();
   await expect(page.locator("footer").getByText("Privacy", { exact: true })).toHaveCount(0);
 });
 

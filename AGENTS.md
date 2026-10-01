@@ -73,6 +73,12 @@ return the same 404. No public profile write grant or schema change is needed.
 Guest routes and signed-in publish/unpublish and handle changes are verified.
 See docs/public-profiles.md.
 
+Real comparison supports any two published handles, with anonymous reads even
+for signed-in owners and publication rechecks after paginated ratings. No profile
+directory or private-profile suggestions are approved. Shared unrated games stay
+visible; affinity uses 100 minus mean absolute score difference for at least five
+shared scored games. Tiers are displayed independently. See docs/profile-comparison.md.
+
 A new Supabase project exists and the prototype is deployed through Vercel from
 GitHub `main`. The first backend seed uses clearly identified sample data.
 The shared schema is applied: shared `profiles`, `games`, and `ratings` tables.
