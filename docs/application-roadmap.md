@@ -1,5 +1,10 @@
 # Playlogg application review and roadmap
 
+The seven launch milestones below are implemented. The current product roadmap
+is [Playlogg: your gaming identity](product-identity-roadmap.md), supplied by the
+user after Step 7. The proposed backup/recovery Step 8 was cancelled; operations
+follow-ups remain deferred rather than the next development milestone.
+
 Reviewed 2026-09-30 at `main` commit `523080d`. This is a snapshot of the
 implemented application and a recommended order of work, not a claim that every
 signed-in production journey has been exercised. Anonymous production `HEAD`
@@ -207,5 +212,6 @@ or retention policy is promised.
   Hide invented community sections and unavailable controls while preserving layouts.
 
 Step 1's available-account flows are verified in the acceptance report; the
-second-Steam scenario remains pending. The next work is
-the data-operations follow-ups above. The seven application milestones are implemented.
+second-Steam scenario remains pending. The seven application milestones are implemented. Next is Phase 1 of the
+[product identity roadmap](product-identity-roadmap.md), starting with Profile v2
+and independent favorites.

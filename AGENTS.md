@@ -4,6 +4,17 @@ A personal gaming portfolio for ratings, rankings, independent S/A/B/C/D/F tiers
 one current review per game, and profile comparisons. Initially it serves the
 owner's profile; all people must use the same Profile/Game/Rating concepts.
 
+## Current product direction
+The user replaced the proposed backup/recovery Step 8 with the product identity
+roadmap in docs/product-identity-roadmap.md. Playlogg helps people express,
+understand and compare their gaming taste. Start with Profile v2 and independent
+favorites, then the taste engine, Compare v2, discovery and sharing/social growth.
+The roadmap authorizes this direction and visible redesign scope, but alternative
+favorite formats, customization, formulas and access changes still need agreement.
+Do not infer favorites from scores/tiers or independent preference rankings from
+score sorting. Keep private defaults and the existing no-directory policy until
+explicitly changed. Backup/recovery implementation is deferred.
+
 ## Stack and structure
 - Next.js App Router, React, strict TypeScript, compiled Tailwind CSS 3.
 - `src/app`: routes, shared layout and metadata.
