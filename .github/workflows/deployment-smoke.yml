@@ -1,0 +1,29 @@
+name: Production deployment smoke
+on:
+  deployment_status:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment.creator.login == 'vercel[bot]' &&
+       (github.event.deployment.environment == 'Production' || github.event.deployment.environment == 'production') &&
+       (github.event.deployment_status.state == 'success' || github.event.deployment_status.state == 'failure' || github.event.deployment_status.state == 'error'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.deployment.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Report failed deployment
+        if: github.event.deployment_status.state == 'failure' || github.event.deployment_status.state == 'error'
+        run: |
+          echo "Vercel reported a failed production deployment. Inspect the deployment build logs." >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+      - name: Read-only production smoke
+        run: node scripts/post-deploy-smoke.mjs

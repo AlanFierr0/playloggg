@@ -11,3 +11,9 @@ coverage/
 next-env.d.ts
 .DS_Store
 Thumbs.db
+
+# Isolated browser builds and failure artifacts
+.next-e2e/
+playwright-report/
+test-results/
+e2e-artifacts/

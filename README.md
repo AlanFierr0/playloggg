@@ -174,3 +174,8 @@ Track approved future database changes through versioned migrations.
 Step 2 adds working Shelf/editor navigation and catalog-link copying, clear sample
 labels, real personal entry cards and hidden footer placeholders. See
 [visible action inventory](docs/visible-actions.md).
+
+Repeatable browser checks use a local fixture API and fake sessions, never
+production writes. Run `pnpm test` for domain tests, `pnpm test:e2e` for desktop
+and mobile journeys, and `pnpm test:smoke` for read-only production checks. See
+[journey tests and failure reports](docs/journey-tests.md).

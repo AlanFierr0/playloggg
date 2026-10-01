@@ -87,7 +87,7 @@ Track observed results and pending checks in [production acceptance](production-
 ### 2. Make every visible action and claim honest
 
 Implemented 2026-09-30. See [action inventory and verification](visible-actions.md).
-The next implementation milestone is step 3; step 1's second-Steam-account check
+Step 3 adds repeatable fixture journeys; step 1's second-Steam-account check
 remains pending.
 
 1. Inventory `PreviewAction` controls and hard-coded numbers/copy in Discover,
@@ -103,6 +103,10 @@ remains pending.
    design unless a specific visual change is agreed first.
 
 ### 3. Add repeatable journey checks before larger features
+
+Implemented with local fixtures approved by the user. See
+[journey suite, isolation and post-deploy checklist](journey-tests.md).
+The next implementation milestone is step 4, localization and accessibility.
 
 1. Keep existing unit/data/RLS tests, then add a small deterministic browser suite
    for guest catalog/search, theme/language persistence, mobile navigation, and
