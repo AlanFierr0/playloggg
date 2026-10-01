@@ -181,7 +181,6 @@ export type Database = {
           handle: string
           id: number
           is_public: boolean
-          is_sample: boolean
           location: string | null
           owner_user_id: string | null
           platform_preference: string | null
@@ -195,7 +194,6 @@ export type Database = {
           handle: string
           id?: never
           is_public?: boolean
-          is_sample?: boolean
           location?: string | null
           owner_user_id?: string | null
           platform_preference?: string | null
@@ -209,7 +207,6 @@ export type Database = {
           handle?: string
           id?: never
           is_public?: boolean
-          is_sample?: boolean
           location?: string | null
           owner_user_id?: string | null
           platform_preference?: string | null

@@ -7,7 +7,7 @@ alter table collection_context add column list_id bigint;
 grant select, update on collection_context to authenticated, anon;
 insert into auth.users(id,aud,role,email) select user_id,'authenticated','authenticated','collections@example.invalid' from collection_context;
 insert into public.profiles(handle,display_name,owner_user_id)
-  select 'test-' || user_id,'Collections test',user_id from collection_context;
+  select 'test_' || left(replace(user_id::text,'-',''),16),'Collections test',user_id from collection_context;
 update collection_context set profile_id=(select id from public.profiles where owner_user_id=user_id);
 set local role authenticated;
 select set_config('request.jwt.claim.sub',user_id::text,true) from collection_context;
@@ -63,12 +63,13 @@ do $$ begin
 end $$;
 reset role;
 set local role authenticated;
-select set_config('request.jwt.claim.sub',user_id::text,true) from collection_context;
+select set_config('request.jwt.claim.sub',stranger_id::text,true) from collection_context;
 do $$ begin
-  begin perform public.save_curated_list((select id from public.profiles where is_sample limit 1),null,'Sample write','{}',null); raise exception 'Sample owner write accepted'; exception when insufficient_privilege then null; end;
+  begin perform public.save_curated_list((select profile_id from collection_context),null,'Cross-owner write','{}',null); raise exception 'Cross-owner write accepted'; exception when insufficient_privilege then null; end;
 end $$;
 reset role;
 set local role authenticated;
+select set_config('request.jwt.claim.sub',user_id::text,true) from collection_context;
 delete from public.curated_lists where id=(select list_id from collection_context) and revision=2;
 do $$ begin
   if exists(select 1 from public.curated_list_items where list_id=(select list_id from collection_context)) then raise exception 'Delete did not cascade items'; end if;

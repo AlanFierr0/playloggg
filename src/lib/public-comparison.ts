@@ -11,8 +11,8 @@ export async function getPublicComparison(left: string, right: string) {
   if (!publicProfilePath(left) || !publicProfilePath(right) || left === right) return null;
   const supabase = createPublicClient();
   async function read(handle: string) {
-    const { data: profile, error } = await supabase.from("profiles").select("id,handle,display_name,is_sample,is_public,avatar_url")
-      .eq("handle",handle).eq("is_public",true).eq("is_sample",false).maybeSingle();
+    const { data: profile, error } = await supabase.from("profiles").select("id,handle,display_name,is_public,avatar_url")
+      .eq("handle",handle).eq("is_public",true).maybeSingle();
     if (error) throw new Error("Comparison could not be loaded.");
     if (!profile) return null;
     const entries: Entry[] = [];
@@ -30,7 +30,7 @@ export async function getPublicComparison(left: string, right: string) {
   const rows = await getCatalog();
   // Recheck both profiles after all paginated reads, even for signed-in visitors.
   const current = await Promise.all([a,b].map(async side => {
-    const { data,error } = await supabase.from("profiles").select("id").eq("id",side.profile.id).eq("handle",side.profile.handle).eq("is_public",true).eq("is_sample",false).maybeSingle();
+    const { data,error } = await supabase.from("profiles").select("id").eq("id",side.profile.id).eq("handle",side.profile.handle).eq("is_public",true).maybeSingle();
     if (error) throw new Error("Comparison could not be loaded.");
     return data;
   }));

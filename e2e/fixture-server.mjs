@@ -8,12 +8,12 @@ const token = [Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toStrin
 const session = { access_token: token, refresh_token: "local-fixture-refresh", token_type: "bearer", expires_in: 3600, expires_at: 4102444800, user };
 export const authCookie = { name: "sb-127-auth-token", value: `base64-${Buffer.from(JSON.stringify(session)).toString("base64url")}`, url: "http://127.0.0.1:3100" };
 const profiles = [
-  { id: 1, handle: "alexvance", display_name: "Sample Player", is_sample: true, is_public: true, owner_user_id: null },
-  { id: 2, handle: "fixture_owner", display_name: "Fixture Owner", is_sample: false, is_public: false, owner_user_id: ownerId },
-  { id: 3, handle: "fixture_public", display_name: "Published Fixture", is_sample: false, is_public: true, owner_user_id: null },
+  { id: 1, handle: "alexvance", display_name: "Unavailable Fixture", is_public: false, owner_user_id: null },
+  { id: 2, handle: "fixture_owner", display_name: "Fixture Owner", is_public: false, owner_user_id: ownerId },
+  { id: 3, handle: "fixture_public", display_name: "Published Fixture", is_public: true, owner_user_id: null },
 ];
-profiles.push({id:4,handle:"fixture_peer",display_name:"Published Peer",is_sample:false,is_public:true,owner_user_id:null});
-profiles.push({id:5,handle:"fixture_empty",display_name:"Empty Profile",is_sample:false,is_public:true,owner_user_id:null});
+profiles.push({id:4,handle:"fixture_peer",display_name:"Published Peer",is_public:true,owner_user_id:null});
+profiles.push({id:5,handle:"fixture_empty",display_name:"Empty Profile",is_public:true,owner_user_id:null});
 const titles = [["hades", "Hades", "Roguelike"], ["elden-ring-shadow-of-the-erdtree", "Elden Ring: Shadow of the Erdtree", "Action RPG"], ...Array.from({ length: 24 }, (_, i) => [`fixture-game-${i}`, `Fixture Game ${String(i).padStart(2, "0")}`, "Adventure"])];
 const games = titles.map(([slug, title, genre], index) => ({ id: index + 1, slug, title, cover_url: "/icon.svg", release_year: 2020, released_on: "2020-01-01", genres: [genre], artwork_image_ids: [], screenshot_image_ids: [], search_keywords: title.toLowerCase(), igdb_metadata: { platforms: ["PC"], summary: "Deterministic test catalog entry." }, igdb_url: null }));
 let ratings;
@@ -78,7 +78,7 @@ export async function startFixtureServer() {
         ratings.push(rating); return reply(201);
       }
       if (resource === "profiles" && req.method === "PATCH") {
-        if (!admin || url.searchParams.get("id") !== "eq.2" || url.searchParams.get("owner_user_id") !== `eq.${ownerId}` || url.searchParams.get("is_sample") !== "eq.false") return reply(403, {message:"Fixture ownership denied"});
+        if (!admin || url.searchParams.get("id") !== "eq.2" || url.searchParams.get("owner_user_id") !== `eq.${ownerId}`) return reply(403, {message:"Fixture ownership denied"});
         let body=""; for await (const part of req) body+=part;
         const patch=JSON.parse(body);
         if(Object.keys(patch).some(key=>!["handle","display_name","is_public","updated_at","bio","location","platform_preference","avatar_url"].includes(key))) return reply(400,{message:"Unsupported fixture field"});

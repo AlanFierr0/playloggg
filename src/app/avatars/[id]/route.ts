@@ -11,7 +11,7 @@ export async function GET(_request: Request, {params}: {params:Promise<{id:strin
     const account = await getAccount();
     const client = account?.profile?.id === Number(id) ? account.supabase : createPublicClient();
     // RLS checks publication on every request, even if someone knows an old URL.
-    const {data: profile, error} = await client.from("profiles").select("id,avatar_url").eq("id",Number(id)).eq("is_sample",false).maybeSingle();
+    const {data: profile, error} = await client.from("profiles").select("id,avatar_url").eq("id",Number(id)).maybeSingle();
     if (error || !profile || !avatarPath(profile.avatar_url)) return new Response(null,{status:404,headers});
     const {data, error: downloadError} = await createAuthAdmin().storage.from("profile-pictures").download(profile.avatar_url);
     if (downloadError || !data) return new Response(null,{status:404,headers});

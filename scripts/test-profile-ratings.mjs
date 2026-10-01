@@ -41,7 +41,7 @@ test("guest catalog above 1000 never reads sample profiles or ratings", async ()
     fetch: async (input) => {
       const url = new URL(input); const offset = Number(url.searchParams.get("offset") ?? 0); const limit = Number(url.searchParams.get("limit") ?? 500);
       let data;
-      if (url.pathname.endsWith("/profiles")) data = [{ id: 7, handle: "alexvance", display_name: "Sample", is_sample: true, is_public: true }];
+      if (url.pathname.endsWith("/profiles")) data = [{ id: 7, handle: "alexvance", display_name: "Sample", is_public: true }];
       else if (url.pathname.endsWith("/ratings")) { assert.equal(url.searchParams.get("profiles.handle"), "eq.alexvance"); assert.equal(url.searchParams.get("order"), "game_id.asc"); calls.push(offset); data = ratings.slice(offset, offset + limit); }
       else {
         for (const column of ["is_sample", "created_at", "updated_at"]) assert.ok(!url.searchParams.get("select").split(",").includes(column));

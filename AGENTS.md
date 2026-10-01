@@ -143,7 +143,7 @@ custom game order independently of ratings. Keep existing navigation, link to
 curated lists from the tier board, and use the editor's functional tag controls.
 See docs/tags-and-curated-lists.md for the applied schema and verification.
 IGDB catalog search/import is available to any Auth-verified user with their own
-non-sample profile. The user approved an initial catalog of 1,000 well-rated
+owned profile. The user approved an initial catalog of 1,000 well-rated
 released games. An idempotent bootstrap runs only in Vercel Production builds
 until that target is met, using existing server credentials; preview/local builds
 skip it. Do not invent user scores or import ratings from the provider. Import
@@ -157,9 +157,12 @@ The user approved deleting all demo information. The unowned sample profile and
 32 invented ratings are deleted; the 32 real reviewed catalog titles were kept
 and their sample flags cleared. The user subsequently requested removing only
 `games.is_sample`, `games.created_at`, and `games.updated_at`; catalog reads/imports
-must not reference them. Keep profile/entry timestamps and profile sample guards.
+must not reference them. Keep profile/entry timestamps. The user also approved removing `profiles.is_sample`;
+all ownership checks use verified Auth IDs and publication checks use `is_public`.
+The corresponding migration preserves owner isolation for ratings, lists,
+favorites and private picture storage; never replace owner predicates with role-only access.
 The catalog retains 1,000 games and real personal
-records are unchanged. Automatic local demo seeding is disabled; never restore
+records are unchanged. Demo seeding and the completed cleanup script are retired; never restore
 sample players/ratings into production. See supabase/cleanup-demo.sql.
 Do not enable public database writes without an
 agreed ownership/access design. Inspect Supabase before finalizing a schema;

@@ -34,7 +34,7 @@ export async function emailPassword(_previous: {message: string}, form: FormData
       if (data.session) await supabase.auth.signOut();
       return {message: "Sign-in failed. Check your email and password and verify your email before signing in."};
     }
-    const {data: profile, error: profileError} = await supabase.from("profiles").select("id").eq("owner_user_id", data.user.id).eq("is_sample", false).maybeSingle();
+    const {data: profile, error: profileError} = await supabase.from("profiles").select("id").eq("owner_user_id", data.user.id).maybeSingle();
     if (profileError) return {message: "Your profile could not be loaded. Please retry."};
     destination = profile ? "/profile" : "/signup";
   } catch { return {message: "Sign-in is unavailable right now. Please try again."}; }

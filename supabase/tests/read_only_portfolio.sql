@@ -1,3 +1,6 @@
+-- Historical initial read-only/32-game seed verification, superseded by
+-- owner_rating_access.sql, catalog_import_access.sql and profile_identity_favorites.sql.
+-- Kept as reference only; do not run against the current production schema.
 -- Run through authenticated administration. All test mutations are rolled back.
 begin;
 
@@ -72,8 +75,8 @@ end
 $verify$;
 
 -- Create an unpublished profile only within this rolled-back test transaction.
-insert into public.profiles (handle, display_name, is_sample)
-values ('verification-private-' || txid_current(), 'Private verification sample', true);
+insert into public.profiles (handle, display_name)
+values ('verification-private-' || txid_current(), 'Private verification fixture');
 insert into public.ratings (profile_id, game_id, score)
 select p.id, g.id, 50 from public.profiles p cross join public.games g
 where p.handle = 'verification-private-' || txid_current() and g.slug = 'elden-ring';

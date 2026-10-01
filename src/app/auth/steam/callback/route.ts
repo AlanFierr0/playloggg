@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const verified = await supabase.auth.verifyOtp({ token_hash: data.properties.hashed_token, type: "magiclink" });
     if (verified.error || verified.data.user?.id !== data.user.id) throw new Error("Session failed");
-    const { data: profile, error: profileError } = await supabase.from("profiles").select("id").eq("owner_user_id", data.user.id).eq("is_sample", false).maybeSingle();
+    const { data: profile, error: profileError } = await supabase.from("profiles").select("id").eq("owner_user_id", data.user.id).maybeSingle();
     if (profileError) throw new Error("Profile read failed");
     destination = profile ? "/profile" : "/signup";
   } catch { /* Never log assertions, auth tokens, emails or provider responses. */ }

@@ -4,14 +4,18 @@ create temporary table owner_test_context as
   select gen_random_uuid() as owner_a, gen_random_uuid() as owner_b,
     (select id from public.games order by id limit 1) as game_a,
     (select id from public.games order by id offset 1 limit 1) as game_b,
-    (select id from public.profiles where is_sample and is_public limit 1) as sample_profile;
+    null::bigint as public_profile;
+with fixture as (
+  insert into public.profiles(handle,display_name,is_public)
+  values ('public_' || left(replace(gen_random_uuid()::text,'-',''),16),'Public fixture',true) returning id
+) update owner_test_context set public_profile=fixture.id from fixture;
 grant select on owner_test_context to authenticated, anon;
 insert into auth.users (id, aud, role, email)
   select owner_a, 'authenticated', 'authenticated', 'owner-a@example.invalid' from owner_test_context
   union all select owner_b, 'authenticated', 'authenticated', 'owner-b@example.invalid' from owner_test_context;
 insert into public.profiles (handle, display_name, owner_user_id)
-  select 'test-' || owner_a, 'Owner A', owner_a from owner_test_context
-  union all select 'test-' || owner_b, 'Owner B', owner_b from owner_test_context;
+  select 'test_' || left(replace(owner_a::text,'-',''),16), 'Owner A', owner_a from owner_test_context
+  union all select 'test_' || left(replace(owner_b::text,'-',''),16), 'Owner B', owner_b from owner_test_context;
 alter table owner_test_context add column profile_a bigint, add column profile_b bigint;
 update owner_test_context set
   profile_a = (select id from public.profiles where owner_user_id = owner_a),
@@ -43,8 +47,8 @@ begin
     raise exception 'Other profile insert allowed';
   exception when insufficient_privilege then null; end;
   begin
-    insert into public.ratings (profile_id, game_id, score) values (c.sample_profile, c.game_a, 1);
-    raise exception 'Sample profile insert allowed';
+    insert into public.ratings (profile_id, game_id, score) values (c.public_profile, c.game_a, 1);
+    raise exception 'Unowned profile insert allowed';
   exception when insufficient_privilege then null; end;
   update public.ratings set score = 1 where profile_id = c.profile_b;
   get diagnostics affected = row_count;
@@ -58,7 +62,7 @@ begin
     raise exception 'Deletion allowed';
   exception when insufficient_privilege then null; end;
   begin
-    update public.profiles set owner_user_id = c.owner_a where id = c.sample_profile;
+    update public.profiles set owner_user_id = c.owner_a where id = c.public_profile;
     raise exception 'Profile claiming allowed';
   exception when insufficient_privilege then null; end;
   begin
@@ -75,7 +79,7 @@ begin
   select * into c from owner_test_context;
   if exists (select 1 from public.profiles where id in (c.profile_a, c.profile_b)) then raise exception 'Anonymous private profile leak'; end if;
   if exists (select 1 from public.ratings where profile_id in (c.profile_a, c.profile_b)) then raise exception 'Anonymous private rating leak'; end if;
-  if not exists (select 1 from public.profiles where id = c.sample_profile) then raise exception 'Public sample reads broken'; end if;
+  if not exists (select 1 from public.profiles where id = c.public_profile) then raise exception 'Published reads broken'; end if;
   begin
     insert into public.ratings (profile_id, game_id, score) values (c.profile_a, c.game_a, 1);
     raise exception 'Anonymous write allowed';
@@ -86,5 +90,5 @@ begin
   exception when insufficient_privilege then null; end;
 end $$;
 reset role;
-select 'Owner insert/upsert, private reads, cross-owner isolation, sample protection, anonymous denial and catalog protection passed' as verification;
+select 'Owner insert/upsert, private reads, cross-owner isolation, unowned profile protection, anonymous denial and catalog protection passed' as verification;
 rollback;

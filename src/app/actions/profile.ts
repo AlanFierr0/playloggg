@@ -15,7 +15,7 @@ export async function updateProfile(_previous: { message: string }, form: FormDa
     // Public roles cannot update profiles. Whitelist fields and fix ownership from Auth.
     const { data, error } = await createAuthAdmin().from("profiles")
       .update({ ...input.values, updated_at: new Date().toISOString() })
-      .eq("id", account.profile.id).eq("owner_user_id", account.user.id).eq("is_sample", false)
+      .eq("id", account.profile.id).eq("owner_user_id", account.user.id)
       .select("handle,is_public").maybeSingle();
     if (error || !data) return { message: error?.code === "23505" ? "That handle is taken. Choose another one." : "Your profile could not be updated. Please retry." };
     revalidatePath("/", "layout");
@@ -31,7 +31,7 @@ export async function createProfile(_previous: { message: string }, form: FormDa
     if (!account) return { message: "Sign in before creating your profile." };
     if (!account.profile) {
       const admin = createAuthAdmin();
-      const { error } = await admin.from("profiles").insert({ ...names, owner_user_id: account.user.id, is_sample: false, is_public: false });
+      const { error } = await admin.from("profiles").insert({ ...names, owner_user_id: account.user.id, is_public: false });
       if (error) {
         // A concurrent submission may already have created this user's one profile.
         const { data: existing } = await account.supabase.from("profiles").select("id").eq("owner_user_id", account.user.id).maybeSingle();

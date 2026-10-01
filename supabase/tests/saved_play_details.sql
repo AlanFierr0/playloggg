@@ -7,7 +7,7 @@ grant select on details_test_context to authenticated, anon;
 insert into auth.users (id, aud, role, email)
   select user_id, 'authenticated', 'authenticated', 'details-owner@example.invalid' from details_test_context;
 insert into public.profiles (handle, display_name, owner_user_id)
-  select 'test-' || user_id, 'Details test owner', user_id from details_test_context;
+  select 'test_' || left(replace(user_id::text,'-',''),16), 'Details test owner', user_id from details_test_context;
 alter table details_test_context add column profile_id bigint;
 update details_test_context set profile_id = (select id from public.profiles where owner_user_id = user_id);
 set local role authenticated;
@@ -55,9 +55,6 @@ begin
     update public.ratings set completed_on = '2023-02-29' where profile_id = c.profile_id;
     raise exception 'Impossible date accepted';
   exception when datetime_field_overflow then null; end;
-  update public.ratings set platform = 'ps5' where profile_id in (select id from public.profiles where is_sample);
-  get diagnostics changed = row_count;
-  if changed <> 0 then raise exception 'Owner changed sample details'; end if;
 end $$;
 select set_config('request.jwt.claim.sub', gen_random_uuid()::text, true),
   set_config('request.jwt.claims', '{"role":"authenticated"}', true);

@@ -14,8 +14,8 @@ export const getAccount = cache(async () => {
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user || !eligibleAccount(user)) return null;
   const { data: profile, error: profileError } = await supabase.from("profiles")
-    .select("id,handle,display_name,is_sample,is_public,avatar_url,bio,location,platform_preference")
-    .eq("owner_user_id", user.id).eq("is_sample", false).maybeSingle();
+    .select("id,handle,display_name,is_public,avatar_url,bio,location,platform_preference")
+    .eq("owner_user_id", user.id).maybeSingle();
   if (profileError) throw new Error("Your profile could not be loaded.");
   return { supabase, user, profile };
 });

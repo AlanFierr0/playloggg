@@ -23,7 +23,7 @@ test("settings require explicit operations and whitelist names or visibility ind
   for (const handle of ["../../login", "name?public=true", "a", "Name", "x".repeat(31)]) assert.equal(publicProfilePath(handle), null);
 });
 
-test("profile mutations verify Auth ownership, prevent sample edits and never trust submitted IDs", async () => {
+test("profile mutations verify Auth ownership, never trust submitted IDs", async () => {
   let account = null, adminCalls = 0, patch, constraints, result = { data: { handle: "player", is_public: true }, error: null };
   const invalidated = [];
   const query = { update(value) { patch = value; constraints = []; return this; }, eq(key, value) { constraints.push([key, value]); return this; }, select() { return this; }, async maybeSingle() { return result; } };
@@ -41,7 +41,7 @@ test("profile mutations verify Auth ownership, prevent sample edits and never tr
   assert.equal(adminCalls, 0);
   account.profile = { id: 2, handle: "player" };
   assert.match((await updateProfile({}, publish)).message, /now public/);
-  assert.deepEqual(JSON.parse(JSON.stringify(constraints)), [["id", 2], ["owner_user_id", "verified-user"], ["is_sample", false]]);
+  assert.deepEqual(JSON.parse(JSON.stringify(constraints)), [["id", 2], ["owner_user_id", "verified-user"]]);
   assert.deepEqual(Object.keys(patch).sort(), ["is_public", "updated_at"]);
   assert.equal(patch.is_public, true);
   assert.equal(invalidated.length, 1);
@@ -56,11 +56,11 @@ test("profile mutations verify Auth ownership, prevent sample edits and never tr
 test("public portfolios use anonymous fresh reads, paginate entries and hide unpublished/unknown profiles", async () => {
   let published = true, lookups = 0;
   const calls = [];
-  const profile = { id: 5, handle: "player", display_name: "Player", is_sample: false, is_public: true };
+  const profile = { id: 5, handle: "player", display_name: "Player", is_public: true };
   const ratings = Array.from({ length: 501 }, (_, index) => ({ game_id: index + 1, score: index === 0 ? 0 : null }));
   const client = { from(table) {
     const filters = {}; let offset = 0, end = 999;
-    const query = { select() { return this; }, eq(key, value) { filters[key] = value; return this; }, order() { return this; }, range(a, b) { offset = a; end = b; return this; }, async maybeSingle() {
+    const query = { select(fields) { assert.ok(!fields.split(",").includes("is_sample")); return this; }, eq(key, value) { assert.notEqual(key, "is_sample"); filters[key] = value; return this; }, order() { return this; }, range(a, b) { offset = a; end = b; return this; }, async maybeSingle() {
       lookups++; assert.equal(filters.is_public, true);
       return { data: published && (!filters.handle || filters.handle === "player") ? profile : null, error: null };
     }, then(resolve) { calls.push({ table, filters, offset }); return Promise.resolve({ data: table === "ratings" ? ratings.slice(offset, end + 1) : [], error: null }).then(resolve); } };

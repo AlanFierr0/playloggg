@@ -16,7 +16,7 @@ export const getPublicPortfolio = cache(async (handle: string): Promise<Portfoli
   if (!publicBase) return null;
   const supabase = createPublicClient();
   const { data: profile, error } = await supabase.from("profiles")
-    .select("id,handle,display_name,is_sample,is_public,avatar_url,bio,location,platform_preference").eq("handle", handle).eq("is_public", true).eq("is_sample", false).maybeSingle();
+    .select("id,handle,display_name,is_public,avatar_url,bio,location,platform_preference").eq("handle", handle).eq("is_public", true).maybeSingle();
   if (error) throw new Error("This portfolio could not be loaded.");
   if (!profile) return null;
   const [rows, ratings, lists, favorites] = await Promise.all([
@@ -46,12 +46,12 @@ export const getPublicPortfolio = cache(async (handle: string): Promise<Portfoli
   ]);
   // Recheck after the paginated reads in case publishing changed during the request.
   const { data: current, error: currentError } = await supabase.from("profiles").select("id")
-    .eq("id", profile.id).eq("handle", handle).eq("is_public", true).eq("is_sample", false).maybeSingle();
+    .eq("id", profile.id).eq("handle", handle).eq("is_public", true).maybeSingle();
   if (currentError) throw new Error("This portfolio could not be loaded.");
   if (!current) return null;
   return {
     games: portfolioGames(rows, ratings), lists, favorites, publicBase,
-    profile: { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: profile.is_sample, avatarUrl: avatarSource(profile.id, profile.avatar_url), bio: profile.bio, location: profile.location, platformPreference: profile.platform_preference, isPublic: true },
+    profile: { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: false, avatarUrl: avatarSource(profile.id, profile.avatar_url), bio: profile.bio, location: profile.location, platformPreference: profile.platform_preference, isPublic: true },
     access: { signedIn: false, canEdit: false, canImportCatalog: false },
   };
 });
@@ -69,7 +69,7 @@ export async function getPublicList(handle: string, id: string): Promise<Curated
     .select("game_id,position").eq("list_id", list.id).order("position").limit(500);
   if (itemError) throw new Error("This list's games could not be loaded.");
   const { data: current, error: currentError } = await supabase.from("profiles").select("id")
-    .eq("id", Number(portfolio.profile.id)).eq("handle", handle).eq("is_public", true).eq("is_sample", false).maybeSingle();
+    .eq("id", Number(portfolio.profile.id)).eq("handle", handle).eq("is_public", true).maybeSingle();
   if (currentError) throw new Error("This portfolio could not be loaded.");
   if (!current) return null;
   const rows = await getCatalog();

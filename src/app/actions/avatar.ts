@@ -22,7 +22,7 @@ export async function saveAvatar(_previous: {message: string}, form: FormData) {
     const admin = createAuthAdmin();
     const {data: previous, error: readError} = await admin.from("profiles").select("avatar_url").eq("id",account.profile.id).eq("owner_user_id",account.user.id).single();
     if (readError) { await account.supabase.storage.from("profile-pictures").remove([path]); return {message:"Your picture could not be saved. Please retry."}; }
-    const {data, error} = await admin.from("profiles").update({avatar_url:path, updated_at:new Date().toISOString()}).eq("id",account.profile.id).eq("owner_user_id",account.user.id).eq("is_sample",false).select("id").maybeSingle();
+    const {data, error} = await admin.from("profiles").update({avatar_url:path, updated_at:new Date().toISOString()}).eq("id",account.profile.id).eq("owner_user_id",account.user.id).select("id").maybeSingle();
     if (error || !data) { await account.supabase.storage.from("profile-pictures").remove([path]); return {message:"Your picture could not be saved. Please retry."}; }
     if (avatarPath(previous.avatar_url) && previous.avatar_url.startsWith(`${account.profile.id}/`)) await account.supabase.storage.from("profile-pictures").remove([previous.avatar_url]);
     revalidatePath("/", "layout");
@@ -36,7 +36,7 @@ export async function removeAvatar() {
     const admin = createAuthAdmin();
     const {data: previous, error: readError} = await admin.from("profiles").select("avatar_url").eq("id",account.profile.id).eq("owner_user_id",account.user.id).single();
     if (readError) return {message:"Your picture could not be removed. Please retry."};
-    const {data, error} = await admin.from("profiles").update({avatar_url:null,updated_at:new Date().toISOString()}).eq("id",account.profile.id).eq("owner_user_id",account.user.id).eq("is_sample",false).select("id").maybeSingle();
+    const {data, error} = await admin.from("profiles").update({avatar_url:null,updated_at:new Date().toISOString()}).eq("id",account.profile.id).eq("owner_user_id",account.user.id).select("id").maybeSingle();
     if (error || !data) return {message:"Your picture could not be removed. Please retry."};
     if (avatarPath(previous.avatar_url) && previous.avatar_url.startsWith(`${account.profile.id}/`)) await account.supabase.storage.from("profile-pictures").remove([previous.avatar_url]);
     revalidatePath("/", "layout");

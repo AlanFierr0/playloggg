@@ -33,7 +33,7 @@ function loader({hidden=false,unpublish=false,fail=false}={}){
  const entries=rows.map(row=>({game_id:row.id,score:0,tier:null,status:"backlog"}));
  const db={from(table){assert.ok(["profiles","ratings"].includes(table));let filters=[],fields="";return{
  select(value){fields=value;return this},eq(key,value){filters.push([key,value]);return this},order(key){assert.equal(key,"game_id");return this},
- async maybeSingle(){assert.ok(filters.some(([key,value])=>key==="is_public"&&value===true));const handle=filters.find(([key])=>key==="handle")[1];if(fields==="id"){checks++;return{data:unpublish ? null : {id:handle==="left_user"?1:2},error:null}}return{data:hidden&&handle==="right_user" ? null : {id:handle==="left_user"?1:2,handle,display_name:handle,is_sample:false,is_public:true},error:null}},
+ async maybeSingle(){assert.ok(filters.some(([key,value])=>key==="is_public"&&value===true));const handle=filters.find(([key])=>key==="handle")[1];if(fields==="id"){checks++;return{data:unpublish ? null : {id:handle==="left_user"?1:2},error:null}}return{data:hidden&&handle==="right_user" ? null : {id:handle==="left_user"?1:2,handle,display_name:handle,is_public:true},error:null}},
  async range(start,end){assert.equal(fields,"game_id,score,tier,status");assert.ok(filters.some(([key])=>key==="profile_id"));ratingReads++;return{data:fail&&start===500 ? null : entries.slice(start,end+1),error:fail&&start===500 ? {} : null}}
  }}};
  const source=readFileSync(new URL("../src/lib/public-comparison.ts",import.meta.url),"utf8");
