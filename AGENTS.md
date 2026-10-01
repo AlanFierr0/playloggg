@@ -153,8 +153,11 @@ metadata goes through the server-only admin client. See
 docs/accounts-pictures-and-catalog.md and docs/igdb-catalog-import.md.
 Guest catalog pages have no selected profile/ratings, and personal pages require
 sign-in/profile setup. Sample public profiles and comparisons are excluded.
-The sample database cleanup scope is pending the user's answer; do not assume
-that keeping or deleting the original real game metadata was approved.
+The user approved deleting all demo information. The unowned sample profile and
+32 invented ratings are deleted; the 32 real reviewed catalog titles were kept
+and their sample flags cleared. The catalog retains 1,000 games and real personal
+records are unchanged. Automatic local demo seeding is disabled; never restore
+sample players/ratings into production. See supabase/cleanup-demo.sql.
 Do not enable public database writes without an
 agreed ownership/access design. Inspect Supabase before finalizing a schema;
 track approved changes in versioned migrations. Keep credentials in ignored

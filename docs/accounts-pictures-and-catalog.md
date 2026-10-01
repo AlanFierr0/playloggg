@@ -88,9 +88,12 @@ test fixtures remain archival/test material, not runtime portfolio records.
 
 Initial live inspection found one unowned sample profile, 32 sample ratings and
 32 seeded real game records, with no real-user references to those games. The
-database cleanup scope remains pending the user's requested choice; it has not
-been executed. Prefer removing the fake profile/ratings and keeping real reviewed
-game metadata with sample labels cleared.
+user then explicitly approved deleting all demo information. The transaction in
+`supabase/cleanup-demo.sql` deleted the unowned sample profile and its 32 invented
+ratings, retaining all real game metadata and clearing the 32 catalog sample flags.
+Before/after hashes confirmed that real profiles and entries were unchanged.
+Automatic demo seeding in `supabase/config.toml` is disabled. Historical exports
+and isolated test fixtures are not production data.
 
 Validation: 68 unit tests; typecheck/lint/production build; 44 existing browser
 checks plus six new desktop/mobile account/picture/guest checks; live rollback
@@ -99,5 +102,6 @@ checks include an already-known picture URL after unpublishing. Production
 catalog expansion and rollout are verified: commit `e40d1ce` reached READY on
 Vercel, exactly 1,000 distinct IGDB IDs are stored, 18 smoke checks passed and
 12 live browser checks across 1440/768/375 px found no overflow, broken images
-or browser exceptions. Real profiles/ratings remained at 2/1. Sample profile
-and 32 sample ratings remain in the database pending the cleanup choice.
+or browser exceptions. Real profiles/ratings remained at 2/1. Post-cleanup verification found zero sample profiles, ratings or catalog flags,
+1,000 games, two real profiles and one real saved entry. All 18 live smoke checks
+passed again after cleanup; `/u/alexvance` returns 404.

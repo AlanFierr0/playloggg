@@ -56,7 +56,7 @@ Next.js ESLint configuration fail on ESLint 10's rule API.
 | `/lists`, `/lists/[id]` | Curated lists and custom game order |
 | `/game/[slug]` | Game detail using the existing detail-page layout |
 
-Search reads the public Supabase catalog and sample profile, with categories, arrow keys, Enter,
+Search reads the public Supabase catalog and your own profile, with categories, arrow keys, Enter,
 Escape and modal focus trapping. “Switch Game” opens search in rating mode.
 Score and tier are independently editable. Saved owner scores, tiers, playback
 status and reviews reload from Supabase. Scores are optional; zero is a real
@@ -135,8 +135,7 @@ state; fixtures are not silently substituted.
 
 Authenticated Supabase plugin inspection confirmed the project is healthy in
 `us-east-1` (North Virginia, within Americas). The approved `profiles`, `games` and
-`ratings` schema is now applied, with 32 sample games, one sample profile and
-32 sample ratings. Public reads and owner-only writes have been verified. See
+`ratings` schema is now applied, with 1,000 real IGDB catalog games and no demo profiles or ratings. Public reads and owner-only writes have been verified. See
 the Backlog rollout document for the current security-advisor result.
 
 The application reads public data with the publishable key. Search, profile
@@ -147,7 +146,8 @@ magic-link sign-in after completing account/Auth configuration. See
 [owner persistence and rollout](docs/owner-persistence.md) for the access model,
 tested migration and required Auth settings. Other editing remains deferred.
 See [backend setup and verification](docs/read-only-backend-proposal.md) for the
-applied migration, seed rules and checks. Rebuild or verify the seed with:
+applied migration, seed rules and checks. Automatic demo seeding is disabled. The following commands maintain historical
+fixtures only; do not apply demo seed data to production:
 
 ```sh
 node scripts/generate-demo-seed.mjs
