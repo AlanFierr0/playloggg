@@ -158,9 +158,12 @@ CLI access for schema inspection and migrations; public application credentials
 are not administration credentials. Plugin authentication and CLI login are
 separate.
 
-Next.js page titles, descriptions and Open Graph metadata provide the initial
-SEO foundation. Canonical URLs, production indexing settings and sitemap
-configuration depend on the final domain and real content.
+Canonical URLs use https://playloggg.vercel.app. Only Discover, unfiltered Games
+and anonymous catalog details are eligible for indexing; profiles and account
+pages remain noindex. The sitemap includes catalog routes only. Discover uses
+stored catalog metadata and labels its editorial selection. See
+[public launch](docs/public-launch.md) and the
+[data operations plan](docs/data-operations.md) for scope and remaining operations.
 
 The Games navigation tab browses every stored catalog game, including unlogged
 titles, with genre, available platform, release year and sorting controls.

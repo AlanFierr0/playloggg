@@ -28,7 +28,12 @@ labeled unavailable; footer API/Terms/Privacy placeholders are hidden.
 Imported games use real catalog metadata and do not inherit the sample editorial
 claims. [README.md](../README.md) lists the routes and existing rollout notes.
 
-## Known gaps and why they matter
+## Original review gaps and current status
+
+The findings below describe the initial review. Steps 2-7 now address the sample
+controls/comparison, localization, catalog scaling, launch metadata and repeatable
+fixture coverage. The second Steam identity check, fatal-layout preference
+hydration and operational backup/restore setup remain follow-ups.
 
 1. **Production acceptance has one remaining account scenario.** Real Steam
    sign-in/persistence, owner IGDB import and publish/unpublish passed on 2026-09-30.
@@ -105,7 +110,7 @@ remains pending.
 
 Implemented with local fixtures approved by the user. See
 [journey suite, isolation and post-deploy checklist](journey-tests.md).
-Step 4 implements explicit localization and accessibility. Steps 5 and 6 implement catalog growth and real comparisons; the next milestone is step 7.
+Step 4 implements explicit localization and accessibility. Steps 5 and 6 implement catalog growth and real comparisons; step 7 completes the launch details.
 
 1. Keep existing unit/data/RLS tests, then add a small deterministic browser suite
    for guest catalog/search, theme/language persistence, mobile navigation, and
@@ -202,5 +207,5 @@ or retention policy is promised.
   Hide invented community sections and unavailable controls while preserving layouts.
 
 Step 1's available-account flows are verified in the acceptance report; the
-second-Steam scenario remains pending. The next implementable milestone is
+second-Steam scenario remains pending. The next work is
 the data-operations follow-ups above. The seven application milestones are implemented.

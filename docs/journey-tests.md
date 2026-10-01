@@ -74,3 +74,9 @@ remain separate acceptance/SQL checks; this suite verifies application journeys
 against the agreed fake backend, not a complete Supabase service.
 
 Reference: [Playwright CI documentation](https://playwright.dev/docs/ci).
+
+Step 7 adds catalog-only sitemap/metadata assertions and private save, publish,
+guest-read and unpublish journeys at both widths, using a loopback-only fake admin
+key. The current suite has 40 browser checks and 59 Node tests. The metadata
+assertions passed after adjusting the homepage canonical expectation for Next.js
+trailing-slash normalization; the other 38 browser checks passed in the full run.
