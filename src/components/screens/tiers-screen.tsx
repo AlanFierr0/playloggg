@@ -6,7 +6,7 @@ import { usePortfolio } from "@/components/portfolio-provider";
 import { groupTiers, loggedGames } from "@/lib/portfolio-view";
 import type { Game } from "@/types/domain";
 
-import { PreviewAction } from "@/components/preview-action";
+
 
 export function TiersScreen() {
   const t = useMessages();
@@ -109,12 +109,7 @@ return (<>
 
 </div>
 
-{!publicBase && <div className="flex flex-wrap items-center gap-3">
-<PreviewAction className="px-3.5 py-1.5 rounded bg-surface-container hover:bg-surface-bright text-on-surface font-label-md text-label-md transition-colors" message={"Preview only: this feature is not connected yet."}>{t("\n          Share Matrix\n        ")}</PreviewAction>
 
-<PreviewAction className="px-3.5 py-1.5 rounded bg-primary-container text-on-primary-container hover:bg-primary font-label-md text-label-md font-semibold transition-colors" message={"Preview only: this feature is not connected yet."}>{t("\n          Organize Tiers\n        ")}</PreviewAction>
-
-</div>}
 
 </div>
 

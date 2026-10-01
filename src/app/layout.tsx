@@ -7,13 +7,16 @@ import { getPortfolioShell } from "@/lib/portfolio";
 import { cookies } from "next/headers";
 import { localeCookie, siteLocale, siteTheme, themeCookie } from "@/lib/locale/preferences";
 import { SitePreferences } from "@/components/site-preferences";
+import { siteOrigin, noIndex } from "@/lib/site-url";
 import "./globals.css";
 
 export async function generateMetadata() { return localizeMetadata({
+  metadataBase: new URL(siteOrigin),
+  robots: noIndex,
   title: { default: "Playlogg | Your gaming portfolio", template: "%s | Playlogg" },
-  description: "A personal gaming portfolio of ratings, rankings, tiers and shared gaming taste. Visual prototype with sample content.",
+  description: "Track games, save ratings and independent tiers, and choose whether to share your gaming portfolio.",
   openGraph: { title: "Playlogg | Your gaming portfolio", description: "Ratings, rankings and personal gaming taste.", type: "website", siteName: "Playlogg" },
-  twitter: { card: "summary_large_image" },
+  twitter: { card: "summary" },
 }); }
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

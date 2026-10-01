@@ -2,16 +2,19 @@ import { getMessages } from "@/lib/locale/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { GameScreen } from "@/components/screens/game-screen";
-import { getCatalog, getPortfolioShell, getPublicGame } from "@/lib/portfolio";
+import { getCatalogGame, portfolioGames, getPortfolioShell, getPublicGame } from "@/lib/portfolio";
 
-export async function generateStaticParams() { return (await getCatalog()).map((game) => ({ slug: game.slug })); }
+import { siteUrl, noIndex } from "@/lib/site-url";
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const t = await getMessages();
   const { slug } = await params;
-  const game = await getPublicGame(slug);
-  if (!game) return { title: t("Game not found") };
+  const row = await getCatalogGame(slug);
+  const game = row ? portfolioGames([row],[])[0] : undefined;
+  if (!game) return { title: t("Game not found"), robots:noIndex, openGraph:{title:t("Game not found"),images:[]} };
   const description = `${game.title}${game.year ? ` (${game.year})` : ""} · ${t("Game details on Playlogg.")}`;
-  return { title: game.title, description, openGraph: { title: game.title, description, images: [{ url: game.cover, alt: game.title }] } };
+  const shell=await getPortfolioShell();
+  const url=siteUrl(`/game/${game.slug}`);
+  return { title: game.title, description, robots:{index:!shell.access?.signedIn,follow:true},alternates:{canonical:url},twitter:{card:"summary_large_image",title:game.title,description,images:[game.cover]},openGraph: { title: game.title, description, url, images: [{ url: game.cover, alt: game.title }] } };
 }
 export default async function GamePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

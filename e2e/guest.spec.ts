@@ -57,7 +57,7 @@ test("navigation stays usable and layouts avoid horizontal page overflow", async
 
 test("sample actions are honest and guest Shelf requires sign-in", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByText("Sample editorial selection. Scores and quotes on this page are illustrative.")).toBeVisible();
+  await expect(page.getByText("Curated editorial selection from the catalog. These picks are not community rankings or your personal ratings.")).toBeVisible();
   await page.getByRole("link", { name: /Shelf/i }).click();
   await expect(page).toHaveURL(/\/login$/);
   await page.goto("/compare");

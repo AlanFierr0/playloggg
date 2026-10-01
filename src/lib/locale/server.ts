@@ -12,6 +12,7 @@ export const getMessages = cache(async () => {
 export async function localizeMetadata(metadata: import("next").Metadata): Promise<import("next").Metadata> {
   const t = await getMessages();
   function localized(value: unknown): unknown {
+    if (value instanceof URL) return value;
     if (Array.isArray(value)) return value.map(localized);
     if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, typeof item === "string" && ["title", "default", "description"].includes(key) ? t(item) : localized(item)]));
     return value;

@@ -79,6 +79,18 @@ directory or private-profile suggestions are approved. Shared unrated games stay
 visible; affinity uses 100 minus mean absolute score difference for at least five
 shared scored games. Tiers are displayed independently. See docs/profile-comparison.md.
 
+Public-launch decisions are agreed: curated Discover uses stored catalog data,
+profiles remain link/handle-only without a directory, and the canonical origin
+is https://playloggg.vercel.app. Root metadata is noindex by default; anonymous
+Discover, unfiltered Games and catalog detail pages opt in. Profiles (even public),
+account/search/comparison routes and personal responses stay noindex. Keep the
+sitemap catalog-only. Invented community sections and unavailable controls are
+hidden with the user's approval; preserve existing hero and tier layouts.
+See docs/public-launch.md and docs/data-operations.md. Export/delete and backup
+procedures are documented plans, not implemented self-service controls or verified
+backup scheduling/recovery. Do not promise retention or execute deletion/restores
+without the required account verification and explicit approval.
+
 A new Supabase project exists and the prototype is deployed through Vercel from
 GitHub `main`. The first backend seed uses clearly identified sample data.
 The shared schema is applied: shared `profiles`, `games`, and `ratings` tables.

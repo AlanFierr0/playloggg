@@ -1,5 +1,6 @@
 import { createServer } from "node:http";
 
+export const fixtureAdminKey = "loopback-only-fixture-admin";
 export const fixtureOrigin = "http://127.0.0.1:3101";
 const ownerId = "11111111-1111-4111-8111-111111111111";
 const user = { id: ownerId, aud: "authenticated", role: "authenticated", email: "owner@fixture.invalid", app_metadata: {}, user_metadata: {}, created_at: "2026-01-01T00:00:00Z" };
@@ -17,7 +18,7 @@ const titles = [["hades", "Hades", "Roguelike"], ["elden-ring-shadow-of-the-erdt
 const games = titles.map(([slug, title, genre], index) => ({ id: index + 1, slug, title, cover_url: "/icon.svg", release_year: 2020, released_on: "2020-01-01", genres: [genre], artwork_image_ids: [], screenshot_image_ids: [], search_keywords: title.toLowerCase(), is_sample: index === 1, igdb_metadata: { platforms: ["PC"], summary: "Deterministic test catalog entry." }, igdb_url: null }));
 let ratings;
 let failSave;
-function reset() { ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
+function reset() { Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false}); ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
  for (const game_id of [3,4,5,6]) ratings.push({profile_id:3,game_id,score:50,tier:null,status:"playing",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  for (const game_id of [1,3,4,5,6]) ratings.push({profile_id:4,game_id,score:game_id===1 ? 10 : 40,tier:"A",status:"completed",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  ratings.push({profile_id:3,game_id:7,score:null,tier:"S",status:"backlog",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
@@ -36,6 +37,7 @@ export async function startFixtureServer() {
       if (url.pathname === "/__reset" && req.method === "POST") { reset(); return reply(200, { ok: true }); }
       if (url.pathname === "/__fail-save" && req.method === "POST") { failSave = true; return reply(200, { ok: true }); }
       if (url.pathname === "/__state") return reply(200, { ratings });
+      const admin = req.headers.authorization === `Bearer ${fixtureAdminKey}`;
       const authenticated = req.headers.authorization === `Bearer ${token}`;
       if (url.pathname === "/auth/v1/user") return authenticated ? reply(200, user) : reply(401, { message: "Fixture session required" });
       const resource = url.pathname.replace("/rest/v1/", "");
@@ -47,6 +49,15 @@ export async function startFixtureServer() {
         if (failSave) { failSave = false; return reply(503, { message: "Controlled save failure" }); }
         ratings = ratings.filter((row) => row.profile_id !== rating.profile_id || row.game_id !== rating.game_id);
         ratings.push(rating); return reply(201);
+      }
+      if (resource === "profiles" && req.method === "PATCH") {
+        if (!admin || url.searchParams.get("id") !== "eq.2" || url.searchParams.get("owner_user_id") !== `eq.${ownerId}` || url.searchParams.get("is_sample") !== "eq.false") return reply(403, {message:"Fixture ownership denied"});
+        let body=""; for await (const part of req) body+=part;
+        const patch=JSON.parse(body);
+        if(Object.keys(patch).some(key=>!["handle","display_name","is_public","updated_at"].includes(key))) return reply(400,{message:"Unsupported fixture field"});
+        Object.assign(profiles[1],patch);
+        const result={handle:profiles[1].handle,is_public:profiles[1].is_public};
+        return reply(200,req.headers.accept?.includes("application/vnd.pgrst.object+json") ? result : [result]);
       }
       if (req.method !== "GET") return reply(405, { message: "Unsupported fixture mutation" });
       let rows;

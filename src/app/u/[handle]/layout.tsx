@@ -1,3 +1,4 @@
+import { siteUrl, noIndex } from "@/lib/site-url";
 import { getMessages } from "@/lib/locale/server";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -10,8 +11,8 @@ export async function generateMetadata({ params }: { params: Promise<{ handle: s
   const t = await getMessages();
   const portfolio = await getPublicPortfolio((await params).handle);
   if (!portfolio) return { title: t("Profile unavailable"), robots: { index: false, follow: false } };
-  const title = `${"Portfolio"} · ${portfolio.profile.displayName}`;
-  return { title, description: t("Public game ratings, tiers, reviews and curated lists."), openGraph: { title, description: t("Public gaming portfolio on Playlogg.") } };
+  const title = `${t("Portfolio")} · ${portfolio.profile.displayName}`;
+  return { robots:noIndex, alternates:{canonical:siteUrl(portfolio.publicBase!)}, title, description: t("Public game ratings, tiers, reviews and curated lists."), openGraph: { url:siteUrl(portfolio.publicBase!), title, description: t("Public gaming portfolio on Playlogg.") } };
 }
 export default async function PublicProfileLayout({ params, children }: { params: Promise<{ handle: string }>; children: React.ReactNode }) {
   const t = await getMessages();

@@ -686,5 +686,21 @@
   "These profiles have no shared logged games yet.": "Estos perfiles todavía no tienen juegos registrados en común.",
   "Shared games, scores and independent tiers": "Juegos compartidos, puntajes y categorías independientes",
   "Score difference": "Diferencia de puntaje",
-  "Comparison pagination": "Paginación de la comparación"
+  "Comparison pagination": "Paginación de la comparación",
+  "Curated editorial selection from the catalog. These picks are not community rankings or your personal ratings.": "Selección editorial del catálogo. Estas recomendaciones no son rankings de la comunidad ni tus puntajes personales.",
+  "Curated feature": "Selección editorial",
+  "A curated pick from the catalog. Save your own rating, tier and review in your portfolio.": "Un juego elegido del catálogo. Guardá tu propio puntaje, categoría y reseña en tu colección.",
+  "This curated selection is not available yet. Explore the catalog.": "Esta selección todavía no está disponible. Explorá el catálogo.",
+  "Track games, save ratings and independent tiers, and choose whether to share your gaming portfolio.": "Registrá tus juegos, guardá puntajes y categorías independientes, y elegí si querés compartir tu colección.",
+  "A curated selection from the Playlogg game catalog. Track your games in a private portfolio and publish when you choose.": "Una selección del catálogo de Playlogg. Registrá tus juegos en una colección privada y publicala cuando quieras.",
+  "Discover | Playlogg": "Descubrir | Playlogg",
+  "Explore a curated selection of games on Playlogg.": "Explorá una selección de juegos en Playlogg.",
+  "Browse games in the Playlogg catalog.": "Explorá juegos del catálogo de Playlogg.",
+  "Catalog game": "Juego del catálogo",
+  "Developer unknown": "Desarrollador desconocido",
+  "Publisher unknown": "Distribuidor desconocido",
+  "From the published sample profile.": "Del perfil de ejemplo publicado.",
+  "Your saved score.": "Tu puntaje guardado.",
+  "Public curated game list on Playlogg.": "Lista de juegos publicada en Playlogg.",
+  "Public saved game entry on Playlogg.": "Registro de juego publicado en Playlogg."
 }

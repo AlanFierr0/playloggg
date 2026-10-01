@@ -1,7 +1,9 @@
 // Read-only production check: no credentials, sign-ins, writes or cleanup.
 const base = "https://playloggg.vercel.app";
 const checks = [
-  ["/", 200, "Sample editorial selection."],
+  ["/", 200, "Curated editorial selection from the catalog."],
+  ["/robots.txt", 200, "Sitemap: https://playloggg.vercel.app/sitemap.xml"],
+  ["/sitemap.xml", 200, "https://playloggg.vercel.app/games"],
   ["/games", 200, "The game archive"],
   ["/search?q=Hades&from=/games", 200, "Search the game catalog"],
   ["/login", 200, "Sign in with Steam"],

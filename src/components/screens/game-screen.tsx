@@ -2,7 +2,6 @@ import { getMessages } from "@/lib/locale/server";
 import { ShelfLink, ShareGameButton } from "@/components/game-actions";
 import { GameStandpoint } from "@/components/game-standpoint";
 import Link from "next/link";
-import { PreviewAction } from "@/components/preview-action";
 import type { Game } from "@/types/domain";
 import { playbackLabels } from "@/lib/playback-status";
 import { CatalogGameScreen } from "@/components/screens/catalog-game-screen";
@@ -10,7 +9,6 @@ import { CatalogGameScreen } from "@/components/screens/catalog-game-screen";
 export async function GameScreen({ game, isSample = true }: { game: Game; isSample?: boolean }) {
   const t = await getMessages();
 if (game.isSampleCatalog === false) return <CatalogGameScreen game={game} isSample={isSample} />;
-const isReference = game.slug === "elden-ring-shadow-of-the-erdtree";
 return (<>
 <div className="w-full  bg-surface"><div className="flex flex-col w-full">
 
@@ -57,34 +55,10 @@ return (<>
 
 </div>
 
-<div className="absolute bottom-3 left-3 bg-surface-container-lowest/85 backdrop-blur-sm px-2 py-0.5 rounded text-on-surface font-label-sm text-label-sm uppercase tracking-widest">{isReference ? t("DLC · Expansion") : t("Sample catalog entry")}</div>
+<div className="absolute bottom-3 left-3 bg-surface-container-lowest/85 backdrop-blur-sm px-2 py-0.5 rounded text-on-surface font-label-sm text-label-sm uppercase tracking-widest">{game.kind ?? t("Catalog game")}</div>
 
 </div>
 
-<p className="text-label-sm text-on-surface-variant">{t("Sample community statistics")}</p>
-<div className="grid grid-cols-3 gap-2 bg-surface-container-low p-2.5 rounded text-center">
-<div className="flex flex-col">
-<span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{t("Median")}</span>
-
-<span className="font-label-md text-label-md font-bold text-on-surface">{"42.5 hrs"}</span>
-
-</div>
-
-<div className="flex flex-col bg-surface-container/60 rounded py-0.5">
-<span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{t("Ranked")}</span>
-
-<span className="font-label-md text-label-md font-bold text-primary">{"#1 / 2024"}</span>
-
-</div>
-
-<div className="flex flex-col">
-<span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{t("Logs")}</span>
-
-<span className="font-label-md text-label-md font-bold text-on-surface">{"142.8k"}</span>
-
-</div>
-
-</div>
 
 </div>
 
@@ -96,33 +70,26 @@ return (<>
 
 <span className="text-on-surface-variant/40">{"•"}</span>
 
-<span className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">{isReference ? "FromSoftware" : t("Sample developer")}</span>
+<span className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">{game.developers?.join(" / ") || t("Developer unknown")}</span>
 
 <span className="text-on-surface-variant/40">{"•"}</span>
 
-<span className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">{isReference ? t("Bandai Namco Entertainment") : t("Sample publisher")}</span>
+<span className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">{game.publishers?.join(" / ") || t("Publisher unknown")}</span>
 
 </div>
 
 <h1 className="font-headline-xl text-headline-xl lg:text-[44px] lg:leading-[48px] text-on-surface tracking-tight font-bold">{game.title}</h1>
 
 <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 font-label-md text-label-md text-on-surface-variant">
-<span>{isReference ? t("Released June 21, 2024") : t("Release information pending")}</span>
+<span>{game.releasedOn ? t(`Released ${game.releasedOn}`) : t("Release date unknown")}</span>
 
 <span className="text-surface-variant">{"•"}</span>
 
-<span>{isReference ? t("Action RPG / Dark Fantasy") : t("Sample genre information")}</span>
+<span>{game.genres?.join(" / ") || t("Genres unknown")}</span>
 
 <span className="text-surface-variant">{"•"}</span>
 
-<div className="flex items-center gap-1.5 text-on-surface">
-<span className="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">{"PC"}</span>
-
-<span className="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">{t("PS5")}</span>
-
-<span className="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">{t("XSX")}</span>
-
-</div>
+<div className="flex flex-wrap items-center gap-1.5 text-on-surface">{game.platforms?.map(platform=><span key={platform} className="px-1.5 py-0.5 rounded bg-surface-container-high text-label-sm">{platform}</span>)}</div>
 
 </div>
 
@@ -144,7 +111,7 @@ return (<>
 
 </div>
 
-<p className="font-body-sm text-body-sm text-on-surface-variant">{game.score === null ? t("This profile has not rated this game.") : isSample ? t("From the published sample profile. Community statistics and editorial reviews below are illustrative.") : t("Your saved score. Community statistics and editorial reviews below are illustrative.")}</p>
+<p className="font-body-sm text-body-sm text-on-surface-variant">{game.score === null ? t("This profile has not rated this game.") : isSample ? t("From the published sample profile.") : t("Your saved score.")}</p>
 {game.status && <p className="mt-2 font-label-md text-label-md text-primary">{t(playbackLabels[game.status])}</p>}
 
 
@@ -161,27 +128,6 @@ return (<>
 
 </div>
 
-<div className="hidden xl:flex flex-col items-end gap-1.5">
-<span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{t("Sample score trend")}</span>
-
-<div className="flex items-end gap-1 h-9 px-2 py-1 rounded bg-surface-container">
-<span className="w-1.5 bg-primary/40 h-5 rounded-xs"></span>
-
-<span className="w-1.5 bg-primary/60 h-6 rounded-xs"></span>
-
-<span className="w-1.5 bg-primary/70 h-7 rounded-xs"></span>
-
-<span className="w-1.5 bg-primary/80 h-7 rounded-xs"></span>
-
-<span className="w-1.5 bg-primary h-8 rounded-xs"></span>
-
-<span className="w-1.5 bg-primary h-8 rounded-xs"></span>
-
-</div>
-
-<span className="font-label-sm text-label-sm text-primary font-bold">{t("Δ +0.4 pts")}</span>
-
-</div>
 
 </div>
 
@@ -232,499 +178,10 @@ return (<>
 
 </div>
 
-<div className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-10 w-full">
-<p className="mb-6 rounded bg-surface-container-low px-4 py-3 text-body-sm text-on-surface-variant">{t("Sample editorial content. Community counts, trends, curator identities and quotes below are illustrative; unavailable controls are disabled.")}</p>
-<div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-
-<div className="lg:col-span-8 min-w-0 flex flex-col gap-6 sm:gap-10">
-
+<div className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-10 w-full"><div className="grid grid-cols-1 lg:grid-cols-12 gap-10"><div className="lg:col-span-8 min-w-0 space-y-8">
 <GameStandpoint game={game} />
-
-<section className="flex flex-col gap-4">
-<div className="flex flex-wrap gap-3 items-center justify-between">
-<h2 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight flex items-center gap-2">
-<span>{t("Curatorial Overview")}</span>
-
-<span className="text-primary text-[18px] font-label-md font-normal">{"/ 01"}</span>
-
-</h2>
-
-<span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{t("Sample editorial reference: ER-SOTE-24")}</span>
-
-</div>
-
-<div className="prose max-w-none text-on-surface-variant font-body-lg text-body-lg leading-relaxed flex flex-col gap-4">
-<p>{isReference ? (<>{t("\n              Guided by Empyrean Miquella, players enter the Land of Shadow—a realm obscured by the Erdtree where the goddess Marika first set foot. Rather than merely expanding scale horizontally, ")}<em className="text-on-surface not-italic font-semibold">{"Shadow of the Erdtree"}</em>
-{t(" folds inwards, presenting a labyrinthine vertical mountainscape of ruined fortresses, subterranean abysses, and spectral moors dripping with the sap of the veiled Scadutree.\n            ")}</>) : t("This is a preview entry. Its editorial details and reviews are sample content.")}</p>
-
-<p>{isReference ? (<>{t("\n              Hidetaka Miyazaki’s design team abandons standard open-world signposting in favor of organic, architectural discoveries. Legacy dungeons like the Belurat Tower Settlement and the Shadow Keep represent the pinnacle of FromSoftware's environmental composition, seamlessly blending somber environmental storytelling with brutally choreographed encounters that test even max-level Tarnished.\n            ")}</>) : t("This is a preview entry. Its editorial details and reviews are sample content.")}</p>
-
-</div>
-
-<div className="flex flex-wrap items-center gap-2 pt-2">
-<span className="px-2.5 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm uppercase tracking-wider hover:bg-surface-container-high transition-colors">{"\n              #Soulslike\n            "}</span>
-
-<span className="px-2.5 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm uppercase tracking-wider hover:bg-surface-container-high transition-colors">{"\n              #Vertical Architecture\n            "}</span>
-
-<span className="px-2.5 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm uppercase tracking-wider hover:bg-surface-container-high transition-colors">{"\n              #Masterpiece Bosses\n            "}</span>
-
-<span className="px-2.5 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm uppercase tracking-wider hover:bg-surface-container-high transition-colors">{"\n              #Miquella Lore\n            "}</span>
-
-<span className="px-2.5 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm uppercase tracking-wider hover:bg-surface-container-high transition-colors">{"\n              #Atmospheric Melancholy\n            "}</span>
-
-<span className="px-2.5 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm uppercase tracking-wider hover:bg-surface-container-high transition-colors">{"\n              #Steam Deck Verified\n            "}</span>
-
-</div>
-
-</section>
-
-<section className="flex flex-col gap-4">
-<div className="flex flex-wrap gap-3 items-center justify-between">
-<h2 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight flex items-center gap-2">
-<span>{t("Sample curator concordance")}</span>
-
-<span className="text-primary text-[18px] font-label-md font-normal">{"/ 02"}</span>
-
-</h2>
-
-<span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{t("3 Sample Curators")}</span>
-
-</div>
-
-<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-
-<div className="p-4 rounded-lg bg-surface-container-low flex flex-col justify-between gap-3 shadow-sm hover:bg-surface-container transition-colors">
-<div className="flex flex-wrap gap-3 items-center justify-between">
-<div className="flex items-center gap-2.5">
-<div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center font-label-md text-on-surface font-bold">{"HK"}</div>
-
-<div className="flex flex-col">
-<span className="font-label-md text-label-md font-semibold text-on-surface">{t("Hideo Kojima")}</span>
-
-<span className="font-label-sm text-label-sm text-on-surface-variant">{"@hideo_director"}</span>
-
-</div>
-
-</div>
-
-<div className="bg-primary/10 text-primary px-2 py-0.5 rounded font-label-md text-label-md font-bold">{"\n                  98\n                "}</div>
-
-</div>
-
-<p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 italic">{t("\n                \"A pure manifestation of connection thesis beyond traditional ludology. Miyazaki has mastered silence.\"\n              ")}</p>
-
-</div>
-
-<div className="p-4 rounded-lg bg-surface-container-low flex flex-col justify-between gap-3 shadow-sm hover:bg-surface-container transition-colors">
-<div className="flex flex-wrap gap-3 items-center justify-between">
-<div className="flex items-center gap-2.5">
-<div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center font-label-md text-secondary font-bold">{"ER"}</div>
-
-<div className="flex flex-col">
-<span className="font-label-md text-label-md font-semibold text-on-surface">{t("Elena Rostova")}</span>
-
-<span className="font-label-sm text-label-sm text-on-surface-variant">{"@rostova_critique"}</span>
-
-</div>
-
-</div>
-
-<div className="bg-primary/10 text-primary px-2 py-0.5 rounded font-label-md text-label-md font-bold">{"\n                  99\n                "}</div>
-
-</div>
-
-<p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 italic">{t("\n                \"Unrivaled architectural majesty. The Shadow Keep sets an insurmountable benchmark for vertical level craft.\"\n              ")}</p>
-
-</div>
-
-<div className="p-4 rounded-lg bg-surface-container-low flex flex-col justify-between gap-3 shadow-sm hover:bg-surface-container transition-colors">
-<div className="flex flex-wrap gap-3 items-center justify-between">
-<div className="flex items-center gap-2.5">
-<div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center font-label-md text-on-surface font-bold">{"JS"}</div>
-
-<div className="flex flex-col">
-<span className="font-label-md text-label-md font-semibold text-on-surface">{t("Jason Schreier")}</span>
-
-<span className="font-label-sm text-label-sm text-on-surface-variant">{"@jschreier"}</span>
-
-</div>
-
-</div>
-
-<div className="bg-secondary/10 text-secondary px-2 py-0.5 rounded font-label-md text-label-md font-bold">{"\n                  96\n                "}</div>
-
-</div>
-
-<p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 italic">{t("\n                \"Bigger than most standalone games, tighter than any other sandbox this decade. An unbelievable achievement.\"\n              ")}</p>
-
-</div>
-
-</div>
-
-</section>
-
-<section className="flex flex-col gap-4">
-<div className="flex flex-wrap gap-3 items-center justify-between">
-<h2 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight flex items-center gap-2">
-<span>{t("Sample curator reviews")}</span>
-
-<span className="text-primary text-[18px] font-label-md font-normal">{"/ 03"}</span>
-
-</h2>
-
-<div className="flex min-w-0 flex-wrap items-center gap-3">
-<PreviewAction className="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold" message={"Preview only: this feature is not connected yet."}>{t("Most Helpful")}</PreviewAction>
-
-<span className="text-surface-variant">{"|"}</span>
-
-<PreviewAction className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors" message={"Preview only: this feature is not connected yet."}>{t("Recent")}</PreviewAction>
-
-</div>
-
-</div>
-
-<div className="flex flex-col gap-4">
-
-<article className="p-6 rounded-lg bg-surface-container-low flex flex-col gap-4 shadow-sm">
-<div className="flex min-w-0 flex-col min-[360px]:flex-row items-start justify-between gap-4">
-<div className="flex min-w-0 flex-wrap items-center gap-3">
-<div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary font-label-md font-bold">{"\n                    MK\n                  "}</div>
-
-<div className="flex min-w-0 flex-col">
-<div className="flex flex-wrap gap-y-2 items-center gap-2">
-<span className="font-headline-md text-headline-md text-on-surface font-semibold">{t("Marius Kane")}</span>
-
-<span className="px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm uppercase">{t("Senior Fellow")}</span>
-
-</div>
-
-<span className="font-label-sm text-label-sm text-on-surface-variant">{t("Logged on PC · 94.2 hrs logged · June 28, 2024")}</span>
-
-</div>
-
-</div>
-
-<div className="flex items-center gap-2">
-<div className="bg-primary/10 text-primary px-3 py-1 rounded font-label-lg text-label-lg font-bold">{"\n                    98 / 100\n                  "}</div>
-
-</div>
-
-</div>
-
-<p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">{isReference ? (<>{t("\n                Shadow of the Erdtree is not content to simply provide more Lands Between. It reshapes the grammar of FromSoftware's open space: no longer a planar field dotted with ruins, but an interlocking origami of plateaus, subterranean waterways, and abyssal descent. The final confrontation demands rhythm and discipline that feels almost musical.\n              ")}</>) : t("This is a preview entry. Its editorial details and reviews are sample content.")}</p>
-
-<div className="flex items-center justify-between pt-2">
-<div className="flex flex-wrap items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
-<PreviewAction className="inline-flex items-center gap-1 hover:text-primary transition-colors" message={"Preview only: this feature is not connected yet."}>
-<span aria-hidden="true" className="material-symbols-outlined text-[16px]">{"thumb_up"}</span>
-
-<span>{t("1,429 Curator Agrees")}</span>
-
-</PreviewAction>
-
-<PreviewAction className="inline-flex items-center gap-1 hover:text-primary transition-colors" message={"Preview only: this feature is not connected yet."}>
-<span aria-hidden="true" className="material-symbols-outlined text-[16px]">{"chat_bubble_outline"}</span>
-
-<span>{t("84 Notes")}</span>
-
-</PreviewAction>
-
-</div>
-
-<span className="font-label-sm text-label-sm text-on-surface-variant">{t("Curator Digest Issue #402")}</span>
-
-</div>
-
-</article>
-
-<article className="p-6 rounded-lg bg-surface-container-low flex flex-col gap-4 shadow-sm">
-<div className="flex min-w-0 flex-col min-[360px]:flex-row items-start justify-between gap-4">
-<div className="flex min-w-0 flex-wrap items-center gap-3">
-<div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-secondary font-label-md font-bold">{"\n                    SA\n                  "}</div>
-
-<div className="flex min-w-0 flex-col">
-<div className="flex flex-wrap gap-y-2 items-center gap-2">
-<span className="font-headline-md text-headline-md text-on-surface font-semibold">{t("Sora Takahashi")}</span>
-
-<span className="px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm uppercase">{t("Curator")}</span>
-
-</div>
-
-<span className="font-label-sm text-label-sm text-on-surface-variant">{t("Logged on PS5 · 61.0 hrs logged · July 2, 2024")}</span>
-
-</div>
-
-</div>
-
-<div className="flex items-center gap-2">
-<div className="bg-primary/10 text-primary px-3 py-1 rounded font-label-lg text-label-lg font-bold">{"\n                    97 / 100\n                  "}</div>
-
-</div>
-
-</div>
-
-<p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">{isReference ? (<>{t("\n                The Scadutree fragment progression elegantly circumvents the base game’s endgame over-leveling crisis, creating an unyielding tension reminiscent of our initial hours entering Limgrave. Yuka Kitamura's musical motifs echo through the scorched tombs with tragic grace.\n              ")}</>) : t("This is a preview entry. Its editorial details and reviews are sample content.")}</p>
-
-<div className="flex items-center justify-between pt-2">
-<div className="flex flex-wrap items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
-<PreviewAction className="inline-flex items-center gap-1 hover:text-primary transition-colors" message={"Preview only: this feature is not connected yet."}>
-<span aria-hidden="true" className="material-symbols-outlined text-[16px]">{"thumb_up"}</span>
-
-<span>{t("892 Curator Agrees")}</span>
-
-</PreviewAction>
-
-<PreviewAction className="inline-flex items-center gap-1 hover:text-primary transition-colors" message={"Preview only: this feature is not connected yet."}>
-<span aria-hidden="true" className="material-symbols-outlined text-[16px]">{"chat_bubble_outline"}</span>
-
-<span>{t("32 Notes")}</span>
-
-</PreviewAction>
-
-</div>
-
-<span className="font-label-sm text-label-sm text-on-surface-variant">{t("Curator Digest Issue #408")}</span>
-
-</div>
-
-</article>
-
-<article className="p-6 rounded-lg bg-surface-container-low flex flex-col gap-4 shadow-sm">
-<div className="flex min-w-0 flex-col min-[360px]:flex-row items-start justify-between gap-4">
-<div className="flex min-w-0 flex-wrap items-center gap-3">
-<div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface font-label-md font-bold">{"\n                    DL\n                  "}</div>
-
-<div className="flex min-w-0 flex-col">
-<div className="flex flex-wrap gap-y-2 items-center gap-2">
-<span className="font-headline-md text-headline-md text-on-surface font-semibold">{t("David Lindqvist")}</span>
-
-<span className="px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm uppercase">{t("Archivist")}</span>
-
-</div>
-
-<span className="font-label-sm text-label-sm text-on-surface-variant">{t("Logged on PC · 112.5 hrs logged · July 11, 2024")}</span>
-
-</div>
-
-</div>
-
-<div className="flex items-center gap-2">
-<div className="bg-secondary/10 text-secondary px-3 py-1 rounded font-label-lg text-label-lg font-bold">{"\n                    95 / 100\n                  "}</div>
-
-</div>
-
-</div>
-
-<p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">{isReference ? (<>{t("\n                A relentless, unapologetic expansion that asks players to unlearn complacency. The Scadualtar and Abyssal Woods explore dread with horror-game intimacy. Minor camera frictions during hyper-dense boss animations keep it just shy of absolute formal perfection.\n              ")}</>) : t("This is a preview entry. Its editorial details and reviews are sample content.")}</p>
-
-<div className="flex items-center justify-between pt-2">
-<div className="flex flex-wrap items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
-<PreviewAction className="inline-flex items-center gap-1 hover:text-primary transition-colors" message={"Preview only: this feature is not connected yet."}>
-<span aria-hidden="true" className="material-symbols-outlined text-[16px]">{"thumb_up"}</span>
-
-<span>{t("614 Curator Agrees")}</span>
-
-</PreviewAction>
-
-<PreviewAction className="inline-flex items-center gap-1 hover:text-primary transition-colors" message={"Preview only: this feature is not connected yet."}>
-<span aria-hidden="true" className="material-symbols-outlined text-[16px]">{"chat_bubble_outline"}</span>
-
-<span>{t("19 Notes")}</span>
-
-</PreviewAction>
-
-</div>
-
-<span className="font-label-sm text-label-sm text-on-surface-variant">{t("Curator Digest Issue #412")}</span>
-
-</div>
-
-</article>
-
-</div>
-
-</section>
-
-</div>
-
-<div className="lg:col-span-4 min-w-0 flex flex-col gap-6 sm:gap-8">
-
-<div className="bg-surface-container-low p-6 rounded-xl flex flex-col gap-5 shadow-sm">
-<div className="flex flex-wrap gap-3 items-center justify-between">
-<span className="font-headline-md text-headline-md text-on-surface font-semibold">{t("Curator Rating Curve")}</span>
-
-<span className="font-label-sm text-label-sm text-primary uppercase tracking-widest font-bold">{t("Skew S-Tier")}</span>
-
-</div>
-
-<div className="flex flex-col gap-3 font-label-sm text-label-sm">
-
-<div className="flex min-w-0 flex-wrap items-center gap-3">
-<span className="w-14 text-on-surface font-semibold text-right">{"95–100"}</span>
-
-<div className="flex-1 bg-surface-container-high h-4 rounded overflow-hidden p-0.5">
-<div className="bg-primary h-full rounded-xs transition-all duration-1000" style={{"width": "72%"}}></div>
-
-</div>
-
-<span className="w-10 text-primary font-bold">{"72%"}</span>
-
-</div>
-
-<div className="flex min-w-0 flex-wrap items-center gap-3">
-<span className="w-14 text-on-surface font-semibold text-right">{"90–94"}</span>
-
-<div className="flex-1 bg-surface-container-high h-4 rounded overflow-hidden p-0.5">
-<div className="bg-primary/70 h-full rounded-xs transition-all duration-1000" style={{"width": "18%"}}></div>
-
-</div>
-
-<span className="w-10 text-on-surface-variant">{"18%"}</span>
-
-</div>
-
-<div className="flex min-w-0 flex-wrap items-center gap-3">
-<span className="w-14 text-on-surface-variant text-right">{"80–89"}</span>
-
-<div className="flex-1 bg-surface-container-high h-4 rounded overflow-hidden p-0.5">
-<div className="bg-secondary/60 h-full rounded-xs transition-all duration-1000" style={{"width": "7%"}}></div>
-
-</div>
-
-<span className="w-10 text-on-surface-variant">{"7%"}</span>
-
-</div>
-
-<div className="flex min-w-0 flex-wrap items-center gap-3">
-<span className="w-14 text-on-surface-variant text-right">{"< 80"}</span>
-
-<div className="flex-1 bg-surface-container-high h-4 rounded overflow-hidden p-0.5">
-<div className="bg-on-surface-variant/30 h-full rounded-xs transition-all duration-1000" style={{"width": "3%"}}></div>
-
-</div>
-
-<span className="w-10 text-on-surface-variant">{"3%"}</span>
-
-</div>
-
-</div>
-
-<div className="pt-3 flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant">
-<span>{t("Sample: 12,490 logged users")}</span>
-
-<span className="text-secondary font-semibold">{t("Standard Dev: ±2.1")}</span>
-
-</div>
-
-</div>
-
-<div className="bg-surface-container-low p-6 rounded-xl flex flex-col gap-4 shadow-sm">
-<div className="flex flex-wrap gap-3 items-center justify-between">
-<span className="font-headline-md text-headline-md text-on-surface font-semibold">{t("Sample list placements")}</span>
-
-<Link className="font-label-sm text-label-sm text-primary hover:underline uppercase tracking-wider" data-path="lists" href="/lists">{t("Curated lists")}</Link>
-
-</div>
-
-<div className="flex flex-col gap-3">
-
-<PreviewAction className="p-3 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors flex flex-col gap-1 group" message={"Preview only: this feature is not connected yet."}>
-<div className="flex flex-wrap gap-3 items-center justify-between">
-<span className="font-label-md text-label-md font-semibold text-on-surface group-hover:text-primary transition-colors">{t("\n                  All-Time Masterpieces (95+)\n                ")}</span>
-
-<span className="font-label-sm text-label-sm text-on-surface-variant">{"#3 / 48"}</span>
-
-</div>
-
-<p className="font-body-sm text-body-sm text-on-surface-variant">{t("Curated by The Editorial Guild • 18.2k saves")}</p>
-
-</PreviewAction>
-
-<PreviewAction className="p-3 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors flex flex-col gap-1 group" message={"Preview only: this feature is not connected yet."}>
-<div className="flex flex-wrap gap-3 items-center justify-between">
-<span className="font-label-md text-label-md font-semibold text-on-surface group-hover:text-primary transition-colors">{t("\n                  FromSoftware Architecture & Lore\n                ")}</span>
-
-<span className="font-label-sm text-label-sm text-on-surface-variant">{"#1 / 14"}</span>
-
-</div>
-
-<p className="font-body-sm text-body-sm text-on-surface-variant">{t("Curated by Elena Rostova • 9.4k saves")}</p>
-
-</PreviewAction>
-
-<PreviewAction className="p-3 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors flex flex-col gap-1 group" message={"Preview only: this feature is not connected yet."}>
-<div className="flex flex-wrap gap-3 items-center justify-between">
-<span className="font-label-md text-label-md font-semibold text-on-surface group-hover:text-primary transition-colors">{t("\n                  GOTY 2024 Contenders\n                ")}</span>
-
-<span className="font-label-sm text-label-sm text-on-surface-variant">{"#1 / 25"}</span>
-
-</div>
-
-<p className="font-body-sm text-body-sm text-on-surface-variant">{t("Curated by Global Critic Aggregate • 34.1k saves")}</p>
-
-</PreviewAction>
-
-</div>
-
-</div>
-
-<div className="bg-surface-container-low p-6 rounded-xl flex flex-col gap-4 shadow-sm">
-<span className="font-headline-md text-headline-md text-on-surface font-semibold">{t("Technical Dossier")}</span>
-
-<div className="flex flex-col gap-2.5 font-label-md text-label-md">
-<div className="flex justify-between py-1.5 bg-surface-container/40 px-2 rounded">
-<span className="text-on-surface-variant">{t("Director")}</span>
-
-<span className="text-on-surface font-medium">{t("Hidetaka Miyazaki")}</span>
-
-</div>
-
-<div className="flex justify-between py-1.5 px-2">
-<span className="text-on-surface-variant">{t("Lead Designer")}</span>
-
-<span className="text-on-surface font-medium">{t("Kazuhiro Hamatani")}</span>
-
-</div>
-
-<div className="flex justify-between py-1.5 bg-surface-container/40 px-2 rounded">
-<span className="text-on-surface-variant">{t("Main Composer")}</span>
-
-<span className="text-on-surface font-medium">{t("Yuka Kitamura, Tsukasa Saitoh")}</span>
-
-</div>
-
-<div className="flex justify-between py-1.5 px-2">
-<span className="text-on-surface-variant">{t("Base Engine")}</span>
-
-<span className="text-on-surface font-medium">{t("FromSoftware Proprietary")}</span>
-
-</div>
-
-<div className="flex justify-between py-1.5 bg-surface-container/40 px-2 rounded">
-<span className="text-on-surface-variant">{t("Install Footprint")}</span>
-
-<span className="text-on-surface font-medium">{"16.5 GB (Expansion)"}</span>
-
-</div>
-
-<div className="flex justify-between py-1.5 px-2">
-<span className="text-on-surface-variant">{t("Base Game Req.")}</span>
-
-<span className="text-secondary font-medium">{t("Elden Ring (2022)")}</span>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-</div>
-</>);
+<section className="space-y-4"><h2 className="font-headline-lg text-headline-lg font-bold">{t("About this game")}</h2><p className="whitespace-pre-wrap break-words text-on-surface-variant text-body-lg">{game.summary || t("No overview is available from IGDB yet.")}</p>{game.sourceUrl && <a href={game.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-primary">{t("View source on IGDB ↗")}</a>}</section>
+{Boolean(game.screenshots?.length) && <section className="space-y-4"><h2 className="font-headline-lg text-headline-lg font-bold">{t("Screenshots")}</h2><div className="grid sm:grid-cols-2 gap-4">{game.screenshots!.map((src,index)=><img key={src} src={src} alt={t(`${game.title} screenshot ${index+1}`)} loading="lazy" className="w-full aspect-video rounded object-cover" />)}</div></section>}
+</div><aside className="lg:col-span-4 min-w-0"><Link href="/tiers" className="text-primary">{t("View tier board")}</Link><br /><Link href="/lists" className="inline-flex mt-4 text-primary">{t("Curated lists →")}</Link></aside></div></div>
+</div></div></>);
 }

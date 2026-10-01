@@ -53,7 +53,7 @@ with `pnpm exec playwright install chromium`. Run `pnpm test:e2e`; it starts the
 fixture API on loopback port 3101, builds the real application into `.next-e2e`,
 and starts it on loopback port 3100. Ports must be free; existing servers are never
 reused. The server overrides Supabase, owner and site configuration and clears
-IGDB/admin credentials even when ignored local environment files exist. There
+IGDB credentials and replaces the admin key with a loopback-only fake value even when ignored local environment files exist. There
 is no test sign-in route, production authentication bypass or schema change.
 All fixture controls and writes live in the test-only in-memory server.
 

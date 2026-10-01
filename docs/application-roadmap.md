@@ -21,8 +21,8 @@ controls were also checked in the live browser across navigation and reload.
 | Platform | Next.js 16/React 19/Tailwind 3 on Vercel from GitHub `main`; Supabase Auth, Postgres, RLS, and versioned migrations; server-side IGDB access. | `package.json`, `supabase/migrations`, `AGENTS.md` |
 
 The published Alex Vance profile and 32-game initial seed are identified sample
-content. New Steam profiles start empty. The Discover editorial feature and community
-material on the prototype game-detail screen still contain illustrative copy or metrics. Shelf opens the existing editor (guests sign in first), and Share copies a catalog
+content. New Steam profiles start empty. Discover now uses curated catalog data. Invented community sections and unavailable
+controls on original game pages and the tier board are hidden. Shelf opens the existing editor (guests sign in first), and Share copies a catalog
 URL without publishing a profile. Remaining prototype controls are disabled and
 labeled unavailable; footer API/Terms/Privacy placeholders are hidden.
 Imported games use real catalog metadata and do not inherit the sample editorial
@@ -168,6 +168,12 @@ a five-scored-game minimum for affinity. See [comparison rules and privacy](prof
 
 ### 7. Finish discovery and public launch details
 
+Implemented with curated catalog data, the existing Vercel domain, catalog-only
+indexing and no profile directory. See [launch behavior](public-launch.md) and
+[data operations plan](data-operations.md). Backup scheduling and an isolated
+restore drill remain operational follow-ups; no self-service export/delete UI
+or retention policy is promised.
+
 1. Decide whether Discover remains a deliberately curated editorial page or
    should show personal/catalog-driven sections. If people need to discover other
    profiles, make directory inclusion a separate opt-in choice rather than
@@ -191,9 +197,10 @@ a five-scored-game minimum for affinity. See [comparison rules and privacy](prof
 - **Step 6 (agreed):** Two published handles; affinity is 100 minus mean absolute
   score difference with at least five shared scored games. Include shared unrated
   entries, with tiers compared separately.
-- **Step 7:** Should published profiles also be discoverable in a directory, and
-  should the home page remain editorial or become personalized?
+- **Step 7 (agreed):** Curated catalog-based Discover; no profile directory;
+  existing Vercel domain with indexing only for Discover/catalog/game details.
+  Hide invented community sections and unavailable controls while preserving layouts.
 
 Step 1's available-account flows are verified in the acceptance report; the
 second-Steam scenario remains pending. The next implementable milestone is
-**step 7**, discovery and public launch details, after agreeing on scope.
+the data-operations follow-ups above. The seven application milestones are implemented.
