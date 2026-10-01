@@ -1,7 +1,8 @@
 # Owner sign-in and saved ratings
 
 Update (2026-10-01): owner email-link sign-in has been removed at the user’s
-request. Use Steam or verified email/password; an existing email account can set
+request. Public [email magic links](public-magic-links.md) are now available to
+all valid email users alongside Steam and verified email/password; an existing email account can set
 a password through Forgot password. The original email-link setup below is
 historical. Email verification/recovery and Steam’s internal session bridge remain.
 

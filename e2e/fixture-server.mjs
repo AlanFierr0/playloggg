@@ -47,7 +47,11 @@ export async function startFixtureServer() {
         let body=""; for await (const part of req) body+=part; const input=JSON.parse(body);
         return input.email===user.email && input.password==="fixture-password-123" ? reply(200,session) : reply(400,{error_code:"invalid_credentials",msg:"Invalid login credentials"});
       }
-      if (["/auth/v1/signup","/auth/v1/recover"].includes(url.pathname) && req.method === "POST") return reply(200,{});
+      if (["/auth/v1/signup","/auth/v1/recover","/auth/v1/otp"].includes(url.pathname) && req.method === "POST") return reply(200,{});
+      if (url.pathname === "/auth/v1/verify" && req.method === "POST") {
+        let body=""; for await (const part of req) body+=part; const input=JSON.parse(body);
+        return input.token_hash==="fixture-email-link" && input.type==="email" ? reply(200,session) : reply(400,{error_code:"otp_expired",msg:"Invalid or expired link"});
+      }
       if (url.pathname === "/auth/v1/user" && req.method === "PUT") return authenticated ? reply(200,user) : reply(401,{message:"Unauthorized"});
       if (url.pathname.startsWith("/storage/v1/object/")) {
         const path=url.pathname.replace(/^\/storage\/v1\/object\/(?:authenticated\/)?profile-pictures\/?/, "");

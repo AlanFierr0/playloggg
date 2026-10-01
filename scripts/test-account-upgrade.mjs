@@ -60,8 +60,8 @@ test('private picture URLs return 404 without accessing storage; public reads re
   unpublish=true;assert.equal((await read()).status,404);assert.equal(downloads,2);assert.equal(lookups,5);
 });
 test('password registration, recovery and sign-in use public Auth; ownership comes from the verified session',async()=>{
-  const calls=[];let user={id:'verified-user',email:'player@example.com',email_confirmed_at:'2026-10-01',app_metadata:{}};
-  const supabase={auth:{signUp:async input=>{calls.push(['register',input]);return {data:{session:null},error:null};},resetPasswordForEmail:async(...args)=>{calls.push(['recover',args]);return {error:null};},signInWithPassword:async input=>{calls.push(['signin',input]);return {data:{user},error:null};}},from(table){assert.equal(table,'profiles');return {select(){return this;},eq(key,value){if(key==='owner_user_id')assert.equal(value,'verified-user');return this;},maybeSingle:async()=>({data:null,error:null})};}};
+  const calls=[];let linkError=null;let user={id:'verified-user',email:'player@example.com',email_confirmed_at:'2026-10-01',app_metadata:{}};
+  const supabase={auth:{signInWithOtp:async input=>{calls.push(['link',input]);return {error:linkError};},signUp:async input=>{calls.push(['register',input]);return {data:{session:null},error:null};},resetPasswordForEmail:async(...args)=>{calls.push(['recover',args]);return {error:null};},signInWithPassword:async input=>{calls.push(['signin',input]);return {data:{user},error:null};}},from(table){assert.equal(table,'profiles');return {select(){return this;},eq(key,value){if(key==='owner_user_id')assert.equal(value,'verified-user');return this;},maybeSingle:async()=>({data:null,error:null})};}};
   const {emailPassword}=load('../src/app/actions/password.ts',{
     'next/navigation':{redirect:path=>{throw new Error(`REDIRECT ${path}`);}},'next/cache':{revalidatePath:()=>{}},'@/lib/supabase/server':{createClient:async()=>supabase},'@/lib/account-identity':{eligibleAccount},'@/lib/password-input':{emailAddress,passwordValue},'@/lib/steam-openid':{steamSite:()=> 'https://playloggg.vercel.app'}
   },{process:{env:{}},String});
@@ -72,4 +72,12 @@ test('password registration, recovery and sign-in use public Auth; ownership com
   assert.equal(calls[1][1][1].redirectTo,'https://playloggg.vercel.app/auth/confirm?flow=recovery');
   await assert.rejects(emailPassword({},form('signin')),/REDIRECT \/signup/);
   user={...user,email_confirmed_at:null};assert.match((await emailPassword({},form('signin'))).message,/Sign-in failed/);
+  const link=form('link');link.delete('password');link.set('email','new-player@example.com');link.set('redirectTo','https://attacker.invalid');
+  assert.match((await emailPassword({},link)).message,/Check your inbox for a sign-in link/);
+  const sent=calls.at(-1);assert.equal(sent[0],'link');assert.equal(sent[1].email,'new-player@example.com');
+  assert.equal(sent[1].options.shouldCreateUser,true);assert.equal(sent[1].options.emailRedirectTo,'https://playloggg.vercel.app/auth/confirm');
+  assert.deepEqual(Object.keys(sent[1]).sort(),['email','options']);
+  linkError={message:'sensitive provider error'};assert.match((await emailPassword({},link)).message,/couldn't send an email/);
+  const count=calls.length;link.set('email','bad email');assert.match((await emailPassword({},link)).message,/valid email/);assert.equal(calls.length,count);
+
 });

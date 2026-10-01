@@ -10,6 +10,11 @@ test('email login options, recovery and verified profile routing work without sa
   await page.screenshot({path:`e2e-artifacts/login-${testInfo.project.name}.png`,fullPage:true});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   expect(await page.getByRole('button',{name:'Sign in with Steam'}).evaluate(button=>parseFloat(getComputedStyle(button).borderTopLeftRadius))).toBeGreaterThanOrEqual(12);
+  await page.getByRole('button',{name:'Email link',exact:true}).click();
+  await expect(page.getByLabel('Password',{exact:true})).toHaveCount(0);
+  await page.getByLabel('Email',{exact:true}).fill('new-player@example.com');
+  await page.getByRole('button',{name:'Send sign-in link',exact:true}).click();
+  await expect(page.getByText('Check your inbox for a sign-in link. New accounts start with a private profile.')).toBeVisible();
   await page.getByRole('button',{name:'Create account',exact:true}).first().click();
   await page.getByLabel('Email',{exact:true}).first().fill('new-player@example.com');
   await page.getByLabel('Password',{exact:true}).fill('fixture-password-123');
@@ -59,4 +64,14 @@ test('guest routes contain no demo player and missing-game search asks for sign-
   await expect(page.getByText(/Sample Player|Sample profile/)).toHaveCount(0);
   await page.goto('/u/alexvance');await expect(page.getByRole('heading',{name:'This page isn’t available.'})).toBeVisible();
   await page.goto('/profile');await expect(page).toHaveURL(/\/login$/);
+});
+
+test('magic links verify before sign-in and reject expired links',async({page})=>{
+  // Next's local callback URL uses localhost; cookies must stay on that host.
+  await page.goto('http://localhost:3100/auth/confirm?token_hash=expired-link&type=email');
+  await expect(page).toHaveURL(/\/login\?error=link$/);
+  await expect(page.getByRole('alert').filter({hasText:'That email link is invalid or expired.'})).toContainText('That email link is invalid or expired.');
+  await page.goto('http://localhost:3100/auth/confirm?token_hash=fixture-email-link&type=email');
+  await expect(page).toHaveURL(/\/profile$/);
+  await expect(page.getByRole('heading',{name:'Fixture Owner',exact:true})).toBeVisible();
 });

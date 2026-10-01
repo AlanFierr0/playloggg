@@ -495,7 +495,7 @@
   "Technical Dossier": "Dossier Técnico",
   "Terms": "Términos",
   "That handle is taken. Choose another one.": "Ese mango está tomado. Elige otro.",
-  "That email verification or password reset link is invalid or expired. Request a new one.": "Ese enlace de verificación de correo o recuperación de contraseña no es válido o venció. Pedí uno nuevo.",
+  "That email link is invalid or expired. Request a new one.": "Ese enlace de correo no es válido o venció. Pedí uno nuevo.",
   "The catalog could not be checked. Please retry.": "No se pudo comprobar el catálogo. Vuelva a intentarlo.",
   "The catalog could not be refreshed. Please retry; an existing import will be reused.": "No se pudo actualizar el catálogo. Vuelva a intentarlo; se reutilizará una importación existente.",
   "The Essential Canon": "El canon esencial",
@@ -806,5 +806,9 @@
   "Search the game catalog or return to your profile.": "Buscá en el catálogo de juegos o volvé a tu perfil.",
   "Sign in to search IGDB.": "Iniciá sesión para buscar en IGDB.",
   "Sign in before importing games.": "Iniciá sesión antes de importar juegos.",
-  "Sign in before creating your profile.": "Iniciá sesión antes de crear tu perfil."
+  "Sign in before creating your profile.": "Iniciá sesión antes de crear tu perfil.",
+  "Email link": "Enlace por correo",
+  "Get a one-time sign-in link by email. No password needed.": "Recibí un enlace de un solo uso por correo. No necesitás contraseña.",
+  "Send sign-in link": "Enviar enlace de acceso",
+  "Check your inbox for a sign-in link. New accounts start with a private profile.": "Revisá tu correo para encontrar el enlace de acceso. Las cuentas nuevas empiezan con un perfil privado."
 }

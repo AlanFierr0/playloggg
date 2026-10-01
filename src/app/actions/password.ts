@@ -9,11 +9,17 @@ import { steamSite } from "@/lib/steam-openid";
 export async function emailPassword(_previous: {message: string}, form: FormData) {
   const mode = form.get("mode");
   const email = emailAddress(form.get("email"));
-  if (!email || !["signin", "register", "recover"].includes(String(mode))) return {message: "Enter a valid email address."};
+  if (!email || !["signin", "register", "recover", "link"].includes(String(mode))) return {message: "Enter a valid email address."};
   let destination: string | undefined;
   try {
     const supabase = await createClient();
     const callback = `${steamSite(process.env.PLAYLOGG_SITE_URL)}/auth/confirm`;
+    if (mode === "link") {
+      const {error} = await supabase.auth.signInWithOtp({email, options: {
+        shouldCreateUser: true, emailRedirectTo: callback,
+      }});
+      return {message: error ? "We couldn't send an email. Please try again shortly." : "Check your inbox for a sign-in link. New accounts start with a private profile."};
+    }
     if (mode === "recover") {
       const {error} = await supabase.auth.resetPasswordForEmail(email, {redirectTo: `${callback}?flow=recovery`});
       return {message: error ? "We couldn't send an email. Please try again shortly." : "If this account exists, a password reset link has been sent. Check your inbox."};

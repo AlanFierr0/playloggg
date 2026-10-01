@@ -75,3 +75,7 @@ spotlight actually grow. Desktop/mobile screenshots were visually inspected.
 No browser runtime errors were reported; typecheck, lint and production build
 pass. These checks used the local development server with the live read-only
 catalog; no owner records were changed.
+
+Update (2026-10-01): the user removed Command/Ctrl+K search activation and its
+header hint. Search still opens through the accessible header link, and keyboard
+selection, Tab navigation and Escape inside the search dialog remain available.

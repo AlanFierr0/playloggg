@@ -4,6 +4,8 @@ The user approved 1,000 well-rated released catalog games, IGDB search/import
 for any signed-in profile owner, and separate private profiles for verified
 email/password registrations. Steam and email/password remain. The user subsequently removed the owner
 email-link form and its sending action; verification/recovery emails still work.
+The user then enabled [public magic links](public-magic-links.md), available to
+any valid email through the Email link option.
 Accounts are not automatically linked. These changes are outside the cancelled
 backup/recovery milestone.
 

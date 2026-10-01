@@ -45,7 +45,8 @@ reviewed catalog cover/artwork and initials for people without a real portrait.
 Do not restore generated image overrides. Original exports stay in design-reference.
 The user requested full responsive layouts. Preserve the desktop design while
 using the exported mobile type scale and responsive spacing/grids. Keep all
-navigation and search accessible below desktop widths. The shared header-height
+navigation and search accessible below desktop widths. The user removed the
+Command/Ctrl+K search shortcut and its header hint; search opens through its link. The shared header-height
 CSS variable must also position page content, search and anchor scrolling. See
 docs/responsive-layouts.md for behavior and viewport verification. Use the shared
 `site-container` for full-page layouts so they expand beyond 1440px while keeping
@@ -81,8 +82,11 @@ Supabase sessions and lets users choose names for their own empty, private
 profiles. Use verified server-owned Steam metadata and existing per-profile RLS;
 never derive ownership from user metadata or browser-supplied IDs. `getAccount`
 permits personal edits; `getOwner` remains the original email owner's maintenance
-administration check. Any signed-in profile owner may search/import IGDB metadata. The user removed owner email-link sign-in; keep Steam and verified email/password
-login, do not auto-merge accounts, and do
+administration check. Any signed-in profile owner may search/import IGDB metadata. The user replaced owner-only email-link sign-in with public magic links for any
+valid email. Keep Steam and verified email/password login. New email-link users
+verify their email before choosing names for an empty private profile. Keep the
+callback destination fixed and never grant access from submitted email/IDs.
+Do not auto-merge accounts, and do
 not expose the Auth admin client. Email/password registration is also approved, with confirmed email accounts
 creating separate empty private profiles. No automatic account linking. Production
 rollout is complete. Real Steam sign-in, persistence and repeat sign-in are verified;

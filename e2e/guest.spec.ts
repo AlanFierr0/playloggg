@@ -19,6 +19,12 @@ test("catalog combines filters, paginates, clears and handles empty results", as
 
 test("search supports keyboard selection and returns to its originating route", async ({ page }) => {
   await page.goto("/games");
+  await expect(page.getByText("⌘K", {exact:true})).toHaveCount(0);
+  await page.keyboard.press("Control+k");
+  await expect(page).toHaveURL(/\/games$/);
+  await page.keyboard.press("Meta+k");
+  await expect(page).toHaveURL(/\/games$/);
+  await page.goto("/games");
   await page.getByRole("link", { name: "Open game search" }).filter({ visible: true }).click();
   await expect(page.getByRole("dialog", { name: "Search the game catalog" })).toBeVisible();
   await page.getByRole("textbox", { name: "Search titles, profiles and commands" }).fill("Hades");
