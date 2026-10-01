@@ -96,4 +96,8 @@ Validation: 68 unit tests; typecheck/lint/production build; 44 existing browser
 checks plus six new desktop/mobile account/picture/guest checks; live rollback
 Storage policy checks with zero remaining fixture identities/objects. Publication
 checks include an already-known picture URL after unpublishing. Production
-catalog count, deployment and smoke verification are recorded after rollout.
+catalog expansion and rollout are verified: commit `e40d1ce` reached READY on
+Vercel, exactly 1,000 distinct IGDB IDs are stored, 18 smoke checks passed and
+12 live browser checks across 1440/768/375 px found no overflow, broken images
+or browser exceptions. Real profiles/ratings remained at 2/1. Sample profile
+and 32 sample ratings remain in the database pending the cleanup choice.

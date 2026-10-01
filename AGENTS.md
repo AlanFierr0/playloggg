@@ -20,7 +20,7 @@ featured Top 4, and optional bio/location/platform preference. Favoriting unlogg
 catalog games does not create ratings/status. Profile settings support optional JPEG/PNG/WebP picture uploads; initials remain
 the fallback. Pictures are normalized to WebP with sharp and stored privately.
 Serve pictures through fresh profile visibility checks; never expose Auth IDs
-in public object paths. See docs/accounts-pictures-and-catalog.md. New favorite RLS follows profile visibility and Auth
+in public object paths. Seedocs/accounts-pictures-and-catalog.md. New favorite RLS follows profile visibility and Auth
 ownership; the slot RPC is SECURITY INVOKER. Profiles remain noindex/link-only.
 Recently updated entries use update timestamps, not invented historical activity.
 See docs/profile-v2.md for migrations, routes and verification.
@@ -121,7 +121,7 @@ rating/review exists per profile/game. Rank by score descending, then game slug.
 RLS exposes published profiles and their ratings for public reads. Authenticated
 owners can insert/update their own ratings; other application writes remain denied.
 The application reads published Supabase data on the server using a publishable key.
-Owner-only authentication and rating writes are implemented; the migration is
+Authentication and per-profile rating writes are implemented; the migration is
 applied and production rollout is complete. The confirmed owner account is linked
 to its private profile; the user verified production magic-link sign-in. Use email magic links and
 administratively assigned ownership. Keep the owner's email in ignored/server-only
@@ -150,7 +150,7 @@ skip it. Do not invent user scores or import ratings from the provider. Import
 reuses existing IGDB IDs without overwriting metadata, slugs or personal data.
 Games remain read-only to application database roles; only trusted server-fetched
 metadata goes through the server-only admin client. See
- docs/accounts-pictures-and-catalog.md and docs/igdb-catalog-import.md.
+docs/accounts-pictures-and-catalog.md and docs/igdb-catalog-import.md.
 Guest catalog pages have no selected profile/ratings, and personal pages require
 sign-in/profile setup. Sample public profiles and comparisons are excluded.
 The sample database cleanup scope is pending the user's answer; do not assume
