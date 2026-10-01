@@ -79,3 +79,8 @@ catalog; no owner records were changed.
 Update (2026-10-01): the user removed Command/Ctrl+K search activation and its
 header hint. Search still opens through the accessible header link, and keyboard
 selection, Tab navigation and Escape inside the search dialog remain available.
+
+The shared shell uses a column flex layout with a minimum height of 100dvh.
+Main content fills unused viewport space, keeping the footer at the bottom on
+short pages. Long pages scroll naturally with the footer after their content;
+the footer does not cover controls or remain fixed while scrolling.

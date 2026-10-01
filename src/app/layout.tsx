@@ -32,11 +32,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..700;1,300..700&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
       </head>
-      <body className="bg-surface font-body-md text-on-surface antialiased">
+      <body className="flex min-h-dvh flex-col bg-surface font-body-md text-on-surface antialiased">
         <PortfolioProvider portfolio={portfolio}><SitePreferences initialLocale={locale} initialTheme={theme}><PreviewNoticeProvider>
           <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded focus:bg-surface-container-high focus:px-4 focus:py-3">{t("Skip to content")}</a>
           <SiteHeader />
-          <main id="main-content" tabIndex={-1} className="w-full min-w-0 pt-[var(--site-header-height)] bg-surface">{children}</main>
+          <main id="main-content" tabIndex={-1} className="w-full min-w-0 flex-1 pt-[var(--site-header-height)] bg-surface">{children}</main>
           <SiteFooter />
         </PreviewNoticeProvider></SitePreferences></PortfolioProvider>
       </body>
