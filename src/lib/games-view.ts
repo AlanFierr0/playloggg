@@ -1,4 +1,5 @@
 import type { Game } from "../types/domain.ts";
+import { matchesCatalogPlatform } from "./catalog-platforms.ts";
 import { loggedGames } from "./portfolio-view.ts";
 
 export interface GamesFilters {
@@ -38,7 +39,7 @@ export function filterGames(games: Game[], filters: GamesFilters): Game[] {
     const text = `${game.title} ${game.keywords} ${(game.genres ?? []).join(" ")}`.toLocaleLowerCase();
     return words.every((word) => text.includes(word))
       && (!filters.genre || game.genres?.includes(filters.genre))
-      && (!filters.platform || game.platforms?.includes(filters.platform))
+      && matchesCatalogPlatform(game.platforms, filters.platform)
       && (!filters.year || (filters.year === "unknown" ? game.year === null : game.year === Number(filters.year)))
       && (filters.library === "all" || (filters.library === "logged" ? isLogged : !isLogged))
       && (filters.status === "all" || (filters.status === "unset" ? isLogged && !game.status : isLogged && game.status === filters.status))

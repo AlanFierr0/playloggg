@@ -53,7 +53,8 @@ docs/responsive-layouts.md for behavior and viewport verification. Use the share
 header, content and footer aligned; preserve bounded editor/dialog text widths.
 The user requested a Games navigation tab for the full stored catalog. Keep it
 accessible alongside Discover, Rankings, Lists and Compare. Catalog platform
-filters use available platforms, independently of an entry's played platform.
+filters group metadata into PC, PlayStation, Xbox, Nintendo and Other, with
+console generations grouped, independently of an entry's played platform.
 Profile filters use the selected profile; never infer scores or playback status
 for unlogged games. Games uses Load more with 25/50/100/All amounts (default 25).
 Retain prior cards, reset loaded batches when filters/sort/amount change and keep

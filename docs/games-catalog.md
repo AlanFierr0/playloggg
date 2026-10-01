@@ -9,7 +9,12 @@ from `main` is complete; Vercel deployed commit `36e9226` successfully.
 Catalog filters include word search across titles, keywords and genres; exact
 genre, available platform and release year; and alphabetical, release date or
 profile score sorting. Unknown dates and scores sort last in either direction.
-Platform options come from catalog metadata, not the platform someone played on.
+Platform options group catalog metadata into PC (Windows, Mac, Linux and DOS),
+PlayStation, Xbox, Nintendo and Other, independently of the platform someone
+played on. Console generations and handhelds belong to their respective family.
+Other matches games with at least one platform outside those four families;
+games without platform metadata remain available under All platforms. Existing
+exact-platform URLs still work without adding legacy choices to the menu.
 
 The expandable profile filters include logged/unlogged games, playback status,
 independent tier, rated/unrated entries and inclusive integer score bounds from

@@ -1,3 +1,4 @@
+import { catalogPlatformGroups } from "./catalog-platforms.ts";
 import { filterGames, type GamesFilters } from "./games-view.ts";
 import type { GamesPageSize } from "./games-query.ts";
 import type { Game } from "../types/domain.ts";
@@ -8,9 +9,8 @@ export function gamesPage(games: Game[], filters: GamesFilters, requestedPage: n
   const offset = 0;
   const limit = pageSize === "all" ? filtered.length : page * pageSize;
   const genres = [...new Set(games.flatMap((game) => game.genres ?? []))].sort();
-  const platforms = [...new Set(games.flatMap((game) => game.platforms ?? []))].sort();
+  const platforms = [...catalogPlatformGroups];
   if (filters.genre && !genres.includes(filters.genre)) genres.unshift(filters.genre);
-  if (filters.platform && !platforms.includes(filters.platform)) platforms.unshift(filters.platform);
   const years = [...new Set(games.flatMap((game) => game.year === null ? [] : [game.year]))].sort((a, b) => b - a);
   if (filters.year && filters.year !== "unknown" && !years.includes(Number(filters.year))) years.unshift(Number(filters.year));
   const visible = filtered.slice(0, limit).map(({ slug, title, cover, year, score, tier, status, logged, genres }) => ({ slug, title, cover, year, score, tier, status, logged, genres, keywords: "" }));

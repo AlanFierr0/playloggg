@@ -52,3 +52,15 @@ test("only supported batch sizes are accepted and survive shared URLs",()=>{
   for(const value of ["0","-25","1000","25.5","ALL","garbage"]) assert.equal(parseGamesQuery(new URLSearchParams(`size=${value}`)).pageSize,25);
   assert.equal(gamesQuery(parseGamesQuery(new URLSearchParams()).filters,99,"all"),"size=all");
 });
+
+
+test("catalog platform families include generations, separate other platforms and preserve exact URLs", () => {
+  const platforms = [["PC (Microsoft Windows)", "Android"], ["PlayStation 5", "PlayStation Vita"], ["Xbox Series X|S"], ["Nintendo Switch 2", "Game Boy", "Wii"], ["Dreamcast"], [], ["Mac", "Linux", "DOS"]];
+  const games = platforms.map((platforms, i) => ({slug: String(i), title: String(i), cover: "", year: null, score: null, keywords: "", platforms}));
+  const filters = parseGamesQuery(new URLSearchParams()).filters;
+  for (const [platform, expected] of [["PC", ["0", "6"]], ["PlayStation", ["1"]], ["Xbox", ["2"]], ["Nintendo", ["3"]], ["Other", ["0", "4"]], ["Android", ["0"]]]) {
+    assert.deepEqual(filterGames(games, {...filters, platform}).map(game => game.slug), expected);
+  }
+  assert.deepEqual(gamesPage(games, {...filters, platform: "Android"}, 1).platforms, ["PC", "PlayStation", "Xbox", "Nintendo", "Other"]);
+  assert.equal(filterGames(games, filters).length, 7);
+});

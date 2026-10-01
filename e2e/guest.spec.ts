@@ -143,3 +143,25 @@ test("Games amount selector supports 25, 50, 100 and all while retaining filters
   await expect(page.locator("[data-catalog-game]")).toHaveCount(25);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
+
+
+test("platform filter shows main families and groups the remaining platforms under Other", async ({page}) => {
+  await page.goto("/games");
+  const platform = page.getByRole("combobox", {name: "Platform", exact: true});
+  await expect(platform.locator("option")).toHaveText(["All platforms", "PC", "PlayStation", "Xbox", "Nintendo", "Other"]);
+  for (const family of ["PlayStation", "Xbox", "Nintendo"]) {
+    await platform.selectOption(family);
+    await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
+    await expect(page.getByRole("heading", {name: "Elden Ring: Shadow of the Erdtree", exact: true})).toBeVisible();
+  }
+  await platform.selectOption("Other");
+  await expect(page.locator("[data-catalog-game]")).toHaveCount(2);
+  await expect(page.getByRole("heading", {name: "Hades", exact: true})).toBeVisible();
+  await page.reload(); await expect(platform).toHaveValue("Other");
+  await platform.selectOption("PC");
+  await expect(page.getByRole("heading", {name: "Hades", exact: true})).toBeVisible();
+  await page.goto("/games?platform=Android");
+  await expect(platform).toHaveValue("Android");
+  await expect(platform.locator('option[value="Android"]')).toHaveAttribute("hidden", "");
+  await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
+});
