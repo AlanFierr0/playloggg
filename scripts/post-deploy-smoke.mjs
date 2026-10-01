@@ -1,7 +1,7 @@
 // Read-only production check: no credentials, sign-ins, writes or cleanup.
 const base = "https://playloggg.vercel.app";
 const checks = [
-  ["/", 200, "Curated editorial selection from the catalog."],
+  ["/", 200, "The Essential Canon"],
   ["/robots.txt", 200, "Sitemap: https://playloggg.vercel.app/sitemap.xml"],
   ["/sitemap.xml", 200, "https://playloggg.vercel.app/games"],
   ["/games", 200, "The game archive"],

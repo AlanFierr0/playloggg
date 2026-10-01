@@ -7,7 +7,6 @@ export async function HomeScreen() {
  const colon=hero?.title.indexOf(":") ?? -1;
  return <div className="w-full bg-surface"><div className="flex flex-col w-full">
   <section className="site-container mx-auto px-4 sm:px-6 lg:px-12 pt-6 sm:pt-8 pb-8 sm:pb-20">
-   <p className="mb-4 rounded bg-surface-container-low px-4 py-3 text-body-sm text-on-surface-variant">{t("Curated editorial selection from the catalog. These picks are not community rankings or your personal ratings.")}</p>
    {hero ? <div className="home-spotlight relative flex min-h-[560px] sm:min-h-[600px] flex-col justify-end rounded-xl overflow-hidden bg-surface-container-lowest shadow-2xl group">
     <div aria-hidden="true" className="absolute inset-0 bg-cover bg-center h-full w-full transition-transform duration-700 ease-out group-hover:scale-[1.015]" style={{backgroundImage:`url(${hero.artwork ?? hero.cover})`}} />
     <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/60 to-transparent" /><div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/40 to-transparent" />
