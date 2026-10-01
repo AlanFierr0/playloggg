@@ -9,12 +9,19 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 const require = createRequire(import.meta.url);
 let portfolio;
+let locale = "en";
+const dictionary = JSON.parse(readFileSync(new URL("../src/lib/locale/es-AR.json", import.meta.url), "utf8"));
+const translationModule = { exports: {} };
+vm.runInNewContext(ts.transpileModule(readFileSync(new URL("../src/lib/locale/translate.ts", import.meta.url), "utf8"), {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true },
+}).outputText, { module: translationModule, exports: translationModule.exports, require: () => ({ ...dictionary, default: dictionary }) });
 function loadComponent(path) {
   const compiled = ts.transpileModule(readFileSync(new URL(path, import.meta.url), "utf8"), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true },
   }).outputText;
   const compiledModule = { exports: {} };
   const imports = {
+    "@/components/site-preferences": { useMessages: () => (source) => translationModule.exports.translateText(source, locale) },
     "next/link": { default: ({ children, ...props }) => React.createElement("a", props, children), __esModule: true },
     "@/components/portfolio-provider": { usePortfolio: () => portfolio },
     "@/components/profile-avatar": { ProfileAvatar: ({ name }) => React.createElement("span", null, name) },
@@ -50,4 +57,14 @@ test("Shelf routes guests to sign-in and editors to the selected game's editor",
   assert.ok(renderToStaticMarkup(React.createElement(ShelfLink, { slug: "example-game" }, "Shelf")).includes('href="/login"'));
   portfolio = { access: { canEdit: true } };
   assert.ok(renderToStaticMarkup(React.createElement(ShelfLink, { slug: "example-game" }, "Shelf")).includes('href="/log?game=example-game"'));
+});
+
+test("Spanish UI preserves user content even when it matches an interface message", () => {
+  locale = "es-AR";
+  try {
+    const html = render({ ...game, review: "Games" });
+    assert.ok(html.includes("Pendientes"));
+    assert.ok(html.includes(">Games</p>"));
+    assert.ok(!html.includes(">Juegos</p>"));
+  } finally { locale = "en"; }
 });

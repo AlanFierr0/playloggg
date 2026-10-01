@@ -1,8 +1,9 @@
+import { localizeMetadata } from "@/lib/locale/server";
 import { notFound } from "next/navigation";
 import { CollectionsScreen } from "@/components/screens/collections-screen";
 import { getList } from "@/lib/collections";
 import { getCatalog, getPortfolio } from "@/lib/portfolio";
-export const metadata = { title: "Curated list" };
+export async function generateMetadata() { return localizeMetadata({ title: "Curated list" }); }
 export default async function ListPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!/^[1-9]\d*$/.test(id) || !Number.isSafeInteger(Number(id))) notFound();

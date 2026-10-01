@@ -47,3 +47,12 @@ test("light and dark palettes cover every existing design color role", () => {
     assert.ok(lightPalette.includes(`--color-${name}:`), `light ${name}`);
   }
 });
+
+test("dynamic UI phrases translate without translating embedded names or titles", () => {
+  assert.equal(translateText("Signed in as Games.", "es-AR"), "Iniciaste sesión como Games.");
+  assert.equal(translateText("← Discover's portfolio", "es-AR"), "← Colección de Discover");
+  assert.equal(translateText("Games's log entry", "es-AR"), "Registro de Games");
+  assert.equal(translateText("Games screenshot 2", "es-AR"), "Captura 2 de Games");
+  assert.equal(translateText("Choose tier, currently unassigned", "es-AR"), "Elegí un nivel; actual: sin asignar");
+  assert.equal(translateText("Page 2 of 3", "es-AR"), "Página 2 de 3");
+});

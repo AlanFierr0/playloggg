@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
+import { localizeMetadata } from "@/lib/locale/server";
 import { SearchScreen } from "@/components/screens/search-screen";
 import { getPublicGame } from "@/lib/portfolio";
-export const metadata: Metadata = { title: "Search the archive", description: "Search the saved game catalog, profiles and lists. Owners can find and import games from IGDB." };
+export async function generateMetadata() { return localizeMetadata({ title: "Search the archive", description: "Search the saved game catalog, profiles and lists. Owners can find and import games from IGDB." }); }
 
 async function safeReturnPath(value?: string): Promise<string> {
   if (value && ["/", "/games", "/profile", "/tiers", "/compare", "/log"].includes(value)) return value;

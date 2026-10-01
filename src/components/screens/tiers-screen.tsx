@@ -1,4 +1,6 @@
 "use client";
+import { useMessages } from "@/components/site-preferences";
+
 import Link from "next/link";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { groupTiers, loggedGames } from "@/lib/portfolio-view";
@@ -7,6 +9,7 @@ import type { Game } from "@/types/domain";
 import { PreviewAction } from "@/components/preview-action";
 
 export function TiersScreen() {
+  const t = useMessages();
 const { games, profile, publicBase } = usePortfolio();
 const logged = loggedGames(games);
 const groups = groupTiers(logged);
@@ -22,16 +25,16 @@ return (<>
 <div className="flex flex-wrap items-center gap-3">
 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-surface-container text-primary font-label-sm text-label-sm uppercase tracking-widest font-semibold">
 <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-{"\n            Tier Matrix\n          "}</span>
+{t("\n            Tier Matrix\n          ")}</span>
 
-<span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{"Playlog Curated Registry"}</span>
+<span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{t("Playlog Curated Registry")}</span>
 
 </div>
 
-<h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold">{"\n          Personal Tier Board\n        "}</h1>
+<h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold">{t("\n          Personal Tier Board\n        ")}</h1>
 
-<Link href={publicBase ? `${publicBase}/lists` : "/lists"} className="text-primary font-label-md text-label-md hover:underline">Curated lists</Link>
-<p className="font-body-md text-body-md text-on-surface-variant">{logged.length + " logged titles grouped by independently selected tiers."}</p>
+<Link href={publicBase ? `${publicBase}/lists` : "/lists"} className="text-primary font-label-md text-label-md hover:underline">{t("Curated lists")}</Link>
+<p className="font-body-md text-body-md text-on-surface-variant">{t(logged.length + " logged titles grouped by independently selected tiers.")}</p>
 
 </div>
 
@@ -88,28 +91,28 @@ return (<>
  const theme = tierThemes[key];
  return <section key={key} className="flex flex-col md:flex-row gap-4 p-4 lg:p-6 rounded-xl bg-surface-container-low shadow-sm" id={"tier-" + key.toLowerCase()}>
  <div className="flex flex-wrap gap-2 md:flex-col justify-between items-center md:items-start w-full md:w-44 flex-shrink-0 p-4 rounded-lg bg-surface-container">
- <div className="flex items-center md:flex-col md:items-start gap-2"><span className={"font-display-lg text-display-lg font-bold leading-none " + theme.color}>{group.tier ?? "—"}</span><div className="flex flex-col"><span className="font-label-md text-label-md font-semibold uppercase tracking-wider text-on-surface">{theme.label}</span><span className={"font-label-sm text-label-sm " + theme.color}>{group.tier ? "Independent tier" : "No tier selected"}</span></div></div>
- <div className="flex items-center gap-1.5 pt-0 md:pt-6"><span className="font-label-sm text-label-sm text-on-surface-variant">{group.games.length} {group.games.length === 1 ? "game" : "games"}</span><span className={"w-1.5 h-1.5 rounded-full bg-current " + theme.color}></span></div>
+ <div className="flex items-center md:flex-col md:items-start gap-2"><span className={"font-display-lg text-display-lg font-bold leading-none " + theme.color}>{group.tier ?? "—"}</span><div className="flex flex-col"><span className="font-label-md text-label-md font-semibold uppercase tracking-wider text-on-surface">{t(theme.label)}</span><span className={"font-label-sm text-label-sm " + theme.color}>{group.tier ? t("Independent tier") : t("No tier selected")}</span></div></div>
+ <div className="flex items-center gap-1.5 pt-0 md:pt-6"><span className="font-label-sm text-label-sm text-on-surface-variant">{group.games.length} {group.games.length === 1 ? t("game") : t("games")}</span><span className={"w-1.5 h-1.5 rounded-full bg-current " + theme.color}></span></div>
  </div>
  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 flex-1 min-w-0">
  {group.games.map((game) => <TierCard key={game.slug} game={game} color={theme.color} publicBase={publicBase} />)}
- {group.games.length === 0 && <p className="col-span-full py-8 font-body-sm text-body-sm text-on-surface-variant">No games assigned to this tier.</p>}
+ {group.games.length === 0 && <p className="col-span-full py-8 font-body-sm text-body-sm text-on-surface-variant">{t("No games assigned to this tier.")}</p>}
  </div>
  </section>;
 })}
 </div>
 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-xl bg-surface-container-low text-on-surface-variant mt-4">
 <div className="flex items-center gap-3">
-<span className="material-symbols-outlined text-primary text-xl">{"auto_awesome"}</span>
+<span aria-hidden="true" className="material-symbols-outlined text-primary text-xl">{"auto_awesome"}</span>
 
-<span className="font-body-sm text-body-sm">{publicBase ? "Published ratings and independent tiers from this profile." : profile.isSample ? "Sample ratings. Sign in to save your own scores and independent tiers." : "Your saved ratings. Edit scores and independent tiers in the game log."}</span>
+<span className="font-body-sm text-body-sm">{publicBase ? t("Published ratings and independent tiers from this profile.") : profile.isSample ? t("Sample ratings. Sign in to save your own scores and independent tiers.") : t("Your saved ratings. Edit scores and independent tiers in the game log.")}</span>
 
 </div>
 
 {!publicBase && <div className="flex flex-wrap items-center gap-3">
-<PreviewAction className="px-3.5 py-1.5 rounded bg-surface-container hover:bg-surface-bright text-on-surface font-label-md text-label-md transition-colors" message={"Preview only: this feature is not connected yet."}>{"\n          Share Matrix\n        "}</PreviewAction>
+<PreviewAction className="px-3.5 py-1.5 rounded bg-surface-container hover:bg-surface-bright text-on-surface font-label-md text-label-md transition-colors" message={"Preview only: this feature is not connected yet."}>{t("\n          Share Matrix\n        ")}</PreviewAction>
 
-<PreviewAction className="px-3.5 py-1.5 rounded bg-primary-container text-on-primary-container hover:bg-primary font-label-md text-label-md font-semibold transition-colors" message={"Preview only: this feature is not connected yet."}>{"\n          Organize Tiers\n        "}</PreviewAction>
+<PreviewAction className="px-3.5 py-1.5 rounded bg-primary-container text-on-primary-container hover:bg-primary font-label-md text-label-md font-semibold transition-colors" message={"Preview only: this feature is not connected yet."}>{t("\n          Organize Tiers\n        ")}</PreviewAction>
 
 </div>}
 
@@ -124,10 +127,11 @@ return (<>
 
 const tierThemes: Record<string, { label: string; color: string }> = {"S":{"label":"Pinnacle","color":"text-primary"},"A":{"label":"Essential","color":"text-secondary"},"B":{"label":"Commendable","color":"text-tertiary"},"C":{"label":"Average","color":"text-outline"},"D":{"label":"Subpar","color":"text-on-surface-variant"},"F":{"label":"Unplayable","color":"text-error"},"Unassigned":{"label":"Unassigned","color":"text-on-surface-variant"}};
 function TierCard({ game, color, publicBase }: { game: Game; color: string; publicBase?: string }) {
+  const t = useMessages();
 
  return <div className="group relative rounded-lg overflow-hidden bg-surface-container transition-transform duration-200 hover:-translate-y-1">
  <div className="aspect-[3/4] w-full overflow-hidden bg-surface-container-high"><img className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src={game.cover} alt={game.title} /></div>
  <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-surface/90 backdrop-blur-md shadow"><span className={"font-label-sm text-label-sm font-bold " + color}>{game.score ?? "—"}</span></div>
- <div className="p-2.5 flex flex-col bg-surface-container"><h2 className="font-headline-md text-body-md font-semibold text-on-surface truncate"><Link className="block truncate after:absolute after:inset-0" href={(publicBase ?? "") + "/game/" + game.slug}>{game.title}</Link></h2><span className="font-label-sm text-label-sm text-on-surface-variant truncate">{game.year ?? "Release year unavailable"}</span></div>
+ <div className="p-2.5 flex flex-col bg-surface-container"><h2 className="font-headline-md text-body-md font-semibold text-on-surface truncate"><Link className="block truncate after:absolute after:inset-0" href={(publicBase ?? "") + "/game/" + game.slug}>{game.title}</Link></h2><span className="font-label-sm text-label-sm text-on-surface-variant truncate">{game.year ?? t("Release year unavailable")}</span></div>
  </div>;
 }

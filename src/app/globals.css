@@ -53,7 +53,7 @@
 .material-symbols-outlined.text-\[24px\] { font-size: 24px; }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
 
 /* The original Stitch colors remain the default; light mode reuses their roles. */
@@ -166,6 +166,10 @@ html.light .home-spotlight {
   --color-on-surface-variant: 212 196 176;
   --color-primary: 255 198 101;
   --color-primary-fixed-dim: 250 188 77;
+  --color-on-primary: 67 44 0;
 }
 html.light :focus-visible { outline-color: #795400; }
 html.light .scroll-region { scrollbar-color: #b0a18b #f4f3f7; }
+
+/* Keep keyboard focus visible when form utilities suppress the default outline. */
+:focus-visible { outline: 2px solid rgb(var(--color-primary)); outline-offset: 3px; }

@@ -1,4 +1,6 @@
 "use client";
+import { useMessages } from "@/components/site-preferences";
+
 import Link from "next/link";
 import { useState } from "react";
 import { usePortfolio } from "@/components/portfolio-provider";
@@ -8,6 +10,7 @@ import type { Game } from "@/types/domain";
 import { playbackLabels } from "@/lib/playback-status";
 
 export function RankingsScreen() {
+  const t = useMessages();
 const { games, profile, access, publicBase } = usePortfolio();
 const [filter, setFilter] = useState<RankingFilter>("all");
 const [tag, setTag] = useState("");
@@ -41,77 +44,77 @@ return (<>
 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
 <h1 translate="no" className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-semibold break-words">{profile.displayName}</h1>
 
-<span className="font-label-sm text-label-sm uppercase tracking-wider px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-medium">{profile.isSample ? "Sample profile" : profile.isPublic ? "Public profile" : "Private profile"}</span>
+<span className="font-label-sm text-label-sm uppercase tracking-wider px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-medium">{profile.isSample ? t("Sample profile") : profile.isPublic ? t("Public profile") : t("Private profile")}</span>
 
 </div>
 
 <p className="font-label-md text-label-md text-on-surface-variant tracking-normal">{"@" + profile.handle}</p>
-{!publicBase && access?.canEdit && <div className="flex flex-wrap gap-3 font-label-md text-label-md text-primary"><Link href="/settings">Profile settings</Link>{profile.isPublic && <Link href={`/u/${profile.handle}`}>Public profile ↗</Link>}</div>}
+{!publicBase && access?.canEdit && <div className="flex flex-wrap gap-3 font-label-md text-label-md text-primary"><Link href="/settings">{t("Profile settings")}</Link>{profile.isPublic && <Link href={`/u/${profile.handle}`}>{t("Public profile ↗")}</Link>}</div>}
 
 <div className="flex items-center gap-2 pt-1 font-label-sm text-label-sm text-on-surface-variant">
 <span className="text-on-surface font-semibold">{rated.length}</span>
-{" Games Rated\n            "}<span className="text-outline-variant">{"/"}</span>
+{t(" Games Rated\n            ")}<span className="text-outline-variant">{"/"}</span>
 
 <span className="text-primary font-semibold">{averageScore(rated)}</span>
-{" Avg Score\n          "}</div>
+{t(" Avg Score\n          ")}</div>
 
 </div>
 
 </div>
 
-<nav aria-label="Ranking Categories" className="flex flex-wrap items-center gap-x-4 gap-y-2 md:gap-x-8 pb-1">
-<button data-filter="all" onClick={() => { setPage(1); setFilter("all"); }} aria-pressed={filter === "all"} className={filter === "all" ? "filter-btn active font-body-md text-body-md text-on-surface font-semibold tracking-tight transition-colors relative py-1" : "filter-btn font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors relative py-1"}>{"\n          All\n          "}<span className={"filter-indicator absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" + (filter === "all" ? "" : " hidden")}></span>
+<nav aria-label={t("Ranking Categories")} className="flex flex-wrap items-center gap-x-4 gap-y-2 md:gap-x-8 pb-1">
+<button data-filter="all" onClick={() => { setPage(1); setFilter("all"); }} aria-pressed={filter === "all"} className={filter === "all" ? "filter-btn active font-body-md text-body-md text-on-surface font-semibold tracking-tight transition-colors relative py-1" : "filter-btn font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors relative py-1"}>{t("\n          All\n          ")}<span className={"filter-indicator absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" + (filter === "all" ? "" : " hidden")}></span>
 
 </button>
 
-<button data-filter="masterpieces" onClick={() => { setPage(1); setFilter("masterpieces"); }} aria-pressed={filter === "masterpieces"} className={filter === "masterpieces" ? "filter-btn active font-body-md text-body-md text-on-surface font-semibold tracking-tight transition-colors relative py-1" : "filter-btn font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors relative py-1"}>{"\n          Masterpieces (90+)\n          "}<span className={"filter-indicator absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" + (filter === "masterpieces" ? "" : " hidden")}></span>
+<button data-filter="masterpieces" onClick={() => { setPage(1); setFilter("masterpieces"); }} aria-pressed={filter === "masterpieces"} className={filter === "masterpieces" ? "filter-btn active font-body-md text-body-md text-on-surface font-semibold tracking-tight transition-colors relative py-1" : "filter-btn font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors relative py-1"}>{t("\n          Masterpieces (90+)\n          ")}<span className={"filter-indicator absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" + (filter === "masterpieces" ? "" : " hidden")}></span>
 
 </button>
 
-<button data-filter="recommended" onClick={() => { setPage(1); setFilter("recommended"); }} aria-pressed={filter === "recommended"} className={filter === "recommended" ? "filter-btn active font-body-md text-body-md text-on-surface font-semibold tracking-tight transition-colors relative py-1" : "filter-btn font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors relative py-1"}>{"\n          Recommended (75+)\n          "}<span className={"filter-indicator absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" + (filter === "recommended" ? "" : " hidden")}></span>
+<button data-filter="recommended" onClick={() => { setPage(1); setFilter("recommended"); }} aria-pressed={filter === "recommended"} className={filter === "recommended" ? "filter-btn active font-body-md text-body-md text-on-surface font-semibold tracking-tight transition-colors relative py-1" : "filter-btn font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors relative py-1"}>{t("\n          Recommended (75+)\n          ")}<span className={"filter-indicator absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" + (filter === "recommended" ? "" : " hidden")}></span>
 
 </button>
 
-<button data-filter="backlog" onClick={() => { setPage(1); setFilter("backlog"); }} aria-pressed={filter === "backlog"} className={filter === "backlog" ? "filter-btn active font-body-md text-body-md text-on-surface font-semibold tracking-tight transition-colors relative py-1" : "filter-btn font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors relative py-1"}>{"\n          Backlog\n          "}<span className={"filter-indicator absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" + (filter === "backlog" ? "" : " hidden")}></span>
+<button data-filter="backlog" onClick={() => { setPage(1); setFilter("backlog"); }} aria-pressed={filter === "backlog"} className={filter === "backlog" ? "filter-btn active font-body-md text-body-md text-on-surface font-semibold tracking-tight transition-colors relative py-1" : "filter-btn font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors relative py-1"}>{t("\n          Backlog\n          ")}<span className={"filter-indicator absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" + (filter === "backlog" ? "" : " hidden")}></span>
 
 </button>
 
 </nav>
 
 </header>
-{tags.length > 0 && <label className="flex flex-wrap items-center gap-3 mb-6 font-label-md text-label-md">Filter by tag<select id="tag-filter" className="min-w-0 bg-surface-container rounded p-2 max-w-full" value={tag} onChange={(event) => { setTag(event.target.value); setPage(1); }}><option value="">All tags</option>{tags.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>}
+{tags.length > 0 && <label className="flex flex-wrap items-center gap-3 mb-6 font-label-md text-label-md">{t("Filter by tag")}<select id="tag-filter" className="min-w-0 bg-surface-container rounded p-2 max-w-full" value={tag} onChange={(event) => { setTag(event.target.value); setPage(1); }}><option value="">{t("All tags")}</option>{tags.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>}
 
 <div className="w-full flex flex-wrap gap-3 items-center justify-between mb-8">
 <div className="flex items-center gap-3">
-<span className="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant font-medium">{"Shelf / Personal Canon"}</span>
+<span className="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant font-medium">{t("Shelf / Personal Canon")}</span>
 
 <span className="w-1.5 h-1.5 rounded-full bg-primary/60"></span>
 
-<span className="font-label-sm text-label-sm text-on-surface-variant/80">{"Ordinal Hierarchy"}</span>
+<span className="font-label-sm text-label-sm text-on-surface-variant/80">{t("Ordinal Hierarchy")}</span>
 
 </div>
 
 <div className="flex items-center gap-2">
-<span className="font-label-sm text-label-sm text-on-surface-variant tracking-wider">{"SORT:"}</span>
+<span className="font-label-sm text-label-sm text-on-surface-variant tracking-wider">{t("SORT:")}</span>
 
-<span className="font-label-sm text-label-sm text-on-surface font-medium uppercase tracking-wider">{"Score (Desc)"}</span>
+<span className="font-label-sm text-label-sm text-on-surface font-medium uppercase tracking-wider">{t("Score (Desc)")}</span>
 
 </div>
 
 </div>
 
 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-3 sm:gap-x-6 gap-y-6 sm:gap-y-10" aria-live="polite">
-{filtered.length === 0 && <p className="col-span-full py-10 font-body-md text-body-md text-on-surface-variant">{filter === "backlog" ? publicBase ? "This profile's backlog is empty." : "Your backlog is empty. Choose Backlog in the game log and save; a score is optional." : "No ratings match this filter."}</p>}
+{filtered.length === 0 && <p className="col-span-full py-10 font-body-md text-body-md text-on-surface-variant">{filter === "backlog" ? publicBase ? t("This profile's backlog is empty.") : t("Your backlog is empty. Choose Backlog in the game log and save; a score is optional.") : t("No ratings match this filter.")}</p>}
 {visible.map((game) => <RankingCard key={game.slug} game={game} rank={ranksBySlug.get(game.slug)} publicBase={publicBase} />)}
 </div>
 
 <footer className="pt-16 pb-6 flex items-center justify-between text-on-surface-variant">
 <div className="flex items-center gap-3">
-<button type="button" aria-label="Previous Page" className="p-2 rounded hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-30 disabled:pointer-events-none" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}><span className="material-symbols-outlined text-[20px]" aria-hidden="true">west</span></button>
-<span className="font-label-md text-label-md text-on-surface font-medium tracking-widest">{currentPage} <span className="text-outline-variant font-normal">of</span> {pageCount}</span>
-<button type="button" aria-label="Next Page" className="p-2 rounded hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-30 disabled:pointer-events-none" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}><span className="material-symbols-outlined text-[20px]" aria-hidden="true">east</span></button>
+<button type="button" aria-label={t("Previous Page")} className="p-2 rounded hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-30 disabled:pointer-events-none" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}><span className="material-symbols-outlined text-[20px]" aria-hidden="true">west</span></button>
+<span className="font-label-md text-label-md text-on-surface font-medium tracking-widest">{currentPage} <span className="text-on-surface-variant font-normal">{t("of")}</span> {pageCount}</span>
+<button type="button" aria-label={t("Next Page")} className="p-2 rounded hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-30 disabled:pointer-events-none" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}><span className="material-symbols-outlined text-[20px]" aria-hidden="true">east</span></button>
 </div>
-<div className="hidden sm:flex items-center gap-4 font-label-sm text-label-sm"><span className="text-on-surface-variant/70">Displaying entries {filtered.length ? offset + 1 : 0}–{offset + visible.length} of {filtered.length}</span><span className="w-1 h-1 rounded-full bg-surface-container-highest"></span><span className="text-on-surface-variant/70">{profile.isSample ? "Sample ratings" : "Saved ratings"}</span></div>
+<div className="hidden sm:flex items-center gap-4 font-label-sm text-label-sm"><span className="text-on-surface-variant">{t("Displaying entries ")}{filtered.length ? offset + 1 : 0}–{offset + visible.length} {t("of ")}{filtered.length}</span><span className="w-1 h-1 rounded-full bg-surface-container-highest"></span><span className="text-on-surface-variant">{profile.isSample ? t("Sample ratings") : t("Saved ratings")}</span></div>
 </footer>
 
 </div>
@@ -122,15 +125,16 @@ return (<>
 }
 
 function RankingCard({ game, rank, publicBase }: { game: Game; rank?: number; publicBase?: string }) {
+  const t = useMessages();
 
 return <article className="relative group flex flex-col cursor-pointer transition-transform duration-300" data-rank={rank} data-score={game.score}>
 <div className="relative w-full aspect-[3/4] rounded bg-surface-container-low overflow-hidden shadow-xl">
 <img className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" src={game.cover} alt={game.title} />
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-surface-container-lowest/10 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
-<div className="absolute top-3 left-3 flex items-center"><span className="font-label-md text-label-md font-bold px-2 py-1 rounded bg-surface-container-lowest/80 text-on-surface backdrop-blur-md shadow-md">{rank ? "#" + String(rank).padStart(2, "0") : game.status === "backlog" ? "Backlog" : "Unrated"}</span></div>
+<div className="absolute top-3 left-3 flex items-center"><span className="font-label-md text-label-md font-bold px-2 py-1 rounded bg-surface-container-lowest/80 text-on-surface backdrop-blur-md shadow-md">{rank ? "#" + String(rank).padStart(2, "0") : game.status === "backlog" ? t("Backlog") : t("Unrated")}</span></div>
 <div className="absolute top-3 right-3 flex items-center"><span className="font-label-md text-label-md font-bold px-2.5 py-1 rounded bg-surface-container-lowest/90 text-primary backdrop-blur-md shadow-md">{game.score ?? "—"}</span></div>
-<div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-surface-container-lowest/90 backdrop-blur-md flex items-center justify-between"><span className="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">{game.tier ? "Tier " + game.tier : "Unassigned tier"}</span><div className="flex items-center gap-1 text-primary">{game.score !== null && <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">star</span>}<span className="font-label-sm text-label-sm font-bold">{game.score === null ? "Unrated" : (game.score / 20).toFixed(1)}</span></div></div>
+<div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-surface-container-lowest/90 backdrop-blur-md flex items-center justify-between"><span className="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">{game.tier ? t("Tier") + " " + game.tier : t("Unassigned tier")}</span><div className="flex items-center gap-1 text-primary">{game.score !== null && <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">star</span>}<span className="font-label-sm text-label-sm font-bold">{game.score === null ? t("Unrated") : (game.score / 20).toFixed(1)}</span></div></div>
 </div>
-<div className="mt-3.5 space-y-1"><div className="flex items-baseline justify-between gap-2"><h2 className="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight truncate group-hover:text-primary transition-colors"><Link className="after:absolute after:inset-0" href={(publicBase ?? "") + "/game/" + game.slug}>{game.title}</Link></h2><span className="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">{game.year ?? "—"}</span></div><p className="font-body-sm text-body-sm text-on-surface-variant truncate">{game.status ? playbackLabels[game.status] : game.genres?.join(" · ") || "Profile rating"}</p></div>
+<div className="mt-3.5 space-y-1"><div className="flex items-baseline justify-between gap-2"><h2 className="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight truncate group-hover:text-primary transition-colors"><Link className="after:absolute after:inset-0" href={(publicBase ?? "") + "/game/" + game.slug}>{game.title}</Link></h2><span className="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">{game.year ?? "—"}</span></div><p className="font-body-sm text-body-sm text-on-surface-variant truncate">{game.status ? t(playbackLabels[game.status]) : game.genres?.join(" · ") || t("Profile rating")}</p></div>
 </article>;
 }

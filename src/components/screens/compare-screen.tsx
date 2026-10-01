@@ -1,10 +1,12 @@
+import { getMessages } from "@/lib/locale/server";
 import { gameImages } from "@/lib/game-images";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import { PreviewAction } from "@/components/preview-action";
 
-export function CompareScreen() {
+export async function CompareScreen() {
+  const t = await getMessages();
 return (<>
-<h1 className="sr-only">Compare gaming taste</h1>
+<h1 className="sr-only">{t("Compare gaming taste")}</h1>
 <div className="w-full  bg-surface"><div className="flex flex-col w-full">
 
 <div className="relative overflow-x-clip w-full site-container mx-auto px-4 sm:px-6 lg:px-12 py-10 md:py-16">
@@ -12,11 +14,11 @@ return (<>
 
 <div className="absolute top-3/4 left-1/4 w-72 h-72 bg-tertiary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
-<p className="mb-6 rounded bg-surface-container-low px-4 py-3 text-body-sm text-on-surface-variant">Sample comparison. Profiles, scores and affinity metrics are illustrative. Real profile comparison is not available yet.</p>
+<p className="mb-6 rounded bg-surface-container-low px-4 py-3 text-body-sm text-on-surface-variant">{t("Sample comparison. Profiles, scores and affinity metrics are illustrative. Real profile comparison is not available yet.")}</p>
 <header className="w-full mb-16 md:mb-24">
 <div className="flex flex-col items-center">
 
-<span className="font-label-sm text-label-sm uppercase tracking-widest text-outline mb-4">{"Archival Concordance Analysis"}</span>
+<span className="font-label-sm text-label-sm uppercase tracking-widest text-outline mb-4">{t("Archival Concordance Analysis")}</span>
 
 <div className="w-full flex flex-col xl:flex-row items-center justify-between gap-6 xl:gap-4 bg-surface-container-low/70 backdrop-blur-md rounded-xl p-5 sm:p-8 lg:p-12 shadow-xl">
 
@@ -29,11 +31,11 @@ return (<>
 </div>
 
 <div className="flex min-w-0 flex-col">
-<span className="font-label-md text-label-md uppercase tracking-wider text-outline">{"Senior Critic"}</span>
+<span className="font-label-md text-label-md uppercase tracking-wider text-outline">{t("Senior Critic")}</span>
 
-<h1 className="font-headline-xl text-headline-xl text-on-surface font-semibold tracking-tight">{"Alex Vance"}</h1>
+<h1 className="font-headline-xl text-headline-xl text-on-surface font-semibold tracking-tight">{t("Alex Vance")}</h1>
 
-<span className="font-label-sm text-label-sm text-on-surface-variant font-mono mt-0.5">{"842 logs • Paris, FR"}</span>
+<span className="font-label-sm text-label-sm text-on-surface-variant font-mono mt-0.5">{t("842 logs • Paris, FR")}</span>
 
 </div>
 
@@ -41,9 +43,9 @@ return (<>
 
 <div className="flex flex-col items-center justify-center my-2 xl:my-0 text-center px-6 py-4 rounded-xl bg-surface-container/80 shadow-inner">
 <div className="flex items-center gap-2 mb-1">
-<span className="material-symbols-outlined text-primary text-[20px]" style={{"fontVariationSettings": "'FILL' 1"}}>{"auto_awesome"}</span>
+<span aria-hidden="true" className="material-symbols-outlined text-primary text-[20px]" style={{"fontVariationSettings": "'FILL' 1"}}>{"auto_awesome"}</span>
 
-<span className="font-label-md text-label-md uppercase tracking-widest text-on-surface-variant">{"Taste Affinity"}</span>
+<span className="font-label-md text-label-md uppercase tracking-widest text-on-surface-variant">{t("Taste Affinity")}</span>
 
 </div>
 
@@ -52,17 +54,17 @@ return (<>
 
 </div>
 
-<span className="font-label-sm text-label-sm font-mono text-outline">{"142 Shared Games Logged"}</span>
+<span className="font-label-sm text-label-sm font-mono text-outline">{t("142 Shared Games Logged")}</span>
 
 </div>
 
 <div className="flex items-center gap-4 sm:gap-6 min-w-0 w-full xl:w-auto justify-end flex-row-reverse xl:flex-row">
 <div className="flex min-w-0 flex-col items-end">
-<span className="font-label-md text-label-md uppercase tracking-wider text-outline">{"Director & Auteur"}</span>
+<span className="font-label-md text-label-md uppercase tracking-wider text-outline">{t("Director & Auteur")}</span>
 
-<h2 className="font-headline-xl text-headline-xl text-on-surface font-semibold tracking-tight">{"Hideo Kojima"}</h2>
+<h2 className="font-headline-xl text-headline-xl text-on-surface font-semibold tracking-tight">{t("Hideo Kojima")}</h2>
 
-<span className="font-label-sm text-label-sm text-on-surface-variant font-mono mt-0.5">{"1,219 logs • Tokyo, JP"}</span>
+<span className="font-label-sm text-label-sm text-on-surface-variant font-mono mt-0.5">{t("1,219 logs • Tokyo, JP")}</span>
 
 </div>
 
@@ -78,15 +80,15 @@ return (<>
 </div>
 
 <div className="w-full max-w-xl mt-6 flex flex-wrap gap-3 items-center justify-center sm:justify-between font-label-sm text-label-sm text-outline px-4">
-<span>{"78 Consensus Agreements"}</span>
+<span>{t("78 Consensus Agreements")}</span>
 
 <span className="w-1.5 h-1.5 rounded-full bg-surface-bright"></span>
 
-<span>{"16 Polarization Divides"}</span>
+<span>{t("16 Polarization Divides")}</span>
 
 <span className="w-1.5 h-1.5 rounded-full bg-surface-bright"></span>
 
-<span>{"48 Minor Variances (≤5 pts)"}</span>
+<span>{t("48 Minor Variances (≤5 pts)")}</span>
 
 </div>
 
@@ -97,13 +99,13 @@ return (<>
 <section className="w-full mb-20 md:mb-28">
 <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-2">
 <div>
-<span className="font-label-sm text-label-sm uppercase tracking-widest text-primary font-semibold">{"Major Polarity"}</span>
+<span className="font-label-sm text-label-sm uppercase tracking-widest text-primary font-semibold">{t("Major Polarity")}</span>
 
-<h3 className="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight mt-1">{"Key Divergences"}</h3>
+<h3 className="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight mt-1">{t("Key Divergences")}</h3>
 
 </div>
 
-<p className="font-body-md text-body-md text-on-surface-variant max-w-md">{"Titles where aesthetic worldview and structural critique parted ways most substantially."}</p>
+<p className="font-body-md text-body-md text-on-surface-variant max-w-md">{t("Titles where aesthetic worldview and structural critique parted ways most substantially.")}</p>
 
 </div>
 
@@ -112,7 +114,7 @@ return (<>
 <article className="bg-surface-container-low rounded-xl overflow-hidden p-6 md:p-8 flex flex-col justify-between shadow-lg transition-transform duration-300 hover:scale-[1.01]">
 <div className="flex flex-col sm:flex-row gap-6 items-start">
 <div className="w-28 sm:w-32 aspect-[3/4] flex-shrink-0 rounded-lg overflow-hidden shadow-md relative bg-surface-container">
-<img className="w-full h-full object-cover" src={gameImages("death-stranding").cover} alt="death stranding cover" />
+<img className="w-full h-full object-cover" src={gameImages("death-stranding").cover} alt={"death stranding cover"} />
 
 <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-surface/85 backdrop-blur font-label-sm text-label-sm font-mono text-primary font-bold">{"2019"}</span>
 
@@ -120,15 +122,15 @@ return (<>
 
 <div className="flex-1 flex flex-col">
 <div className="flex items-center justify-between mb-2">
-<span className="font-label-sm text-label-sm uppercase tracking-wider text-outline">{"Action / Strand"}</span>
+<span className="font-label-sm text-label-sm uppercase tracking-wider text-outline">{t("Action / Strand")}</span>
 
-<span className="font-label-sm text-label-sm font-mono text-error font-semibold px-2 py-0.5 rounded bg-surface-container-high">{"Δ -18 pts"}</span>
+<span className="font-label-sm text-label-sm font-mono text-error font-semibold px-2 py-0.5 rounded bg-surface-container-high">{t("Δ -18 pts")}</span>
 
 </div>
 
 <h4 className="font-headline-md text-headline-md text-on-surface font-semibold">{"Death Stranding"}</h4>
 
-<p className="font-body-md text-body-md text-on-surface-variant mt-2 line-clamp-3">{"\n                Kojima regards the isolated logistical odyssey as his singular auteur manifesto, while Vance praised the worldbuilding but critiqued structural pacing hurdles.\n              "}</p>
+<p className="font-body-md text-body-md text-on-surface-variant mt-2 line-clamp-3">{t("\n                Kojima regards the isolated logistical odyssey as his singular auteur manifesto, while Vance praised the worldbuilding but critiqued structural pacing hurdles.\n              ")}</p>
 
 </div>
 
@@ -136,7 +138,7 @@ return (<>
 
 <div className="mt-8 pt-6 bg-surface-container/60 rounded-lg px-6 py-4 flex items-center justify-between">
 <div className="flex flex-col">
-<span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">{"Alex Vance"}</span>
+<span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">{t("Alex Vance")}</span>
 
 <span className="font-display-lg text-[32px] leading-8 font-bold font-headline-md text-on-surface mt-1">{"82"}</span>
 
@@ -148,7 +150,7 @@ return (<>
 </div>
 
 <div className="flex min-w-0 flex-col items-end">
-<span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">{"Hideo Kojima"}</span>
+<span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">{t("Hideo Kojima")}</span>
 
 <span className="font-display-lg text-[32px] leading-8 font-bold font-headline-md text-primary mt-1">{"100"}</span>
 
@@ -161,7 +163,7 @@ return (<>
 <article className="bg-surface-container-low rounded-xl overflow-hidden p-6 md:p-8 flex flex-col justify-between shadow-lg transition-transform duration-300 hover:scale-[1.01]">
 <div className="flex flex-col sm:flex-row gap-6 items-start">
 <div className="w-28 sm:w-32 aspect-[3/4] flex-shrink-0 rounded-lg overflow-hidden shadow-md relative bg-surface-container">
-<img className="w-full h-full object-cover" src={gameImages("starfield").cover} alt="starfield cover" />
+<img className="w-full h-full object-cover" src={gameImages("starfield").cover} alt={"starfield cover"} />
 
 <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-surface/85 backdrop-blur font-label-sm text-label-sm font-mono text-primary font-bold">{"2023"}</span>
 
@@ -169,15 +171,15 @@ return (<>
 
 <div className="flex-1 flex flex-col">
 <div className="flex items-center justify-between mb-2">
-<span className="font-label-sm text-label-sm uppercase tracking-wider text-outline">{"Sci-Fi RPG"}</span>
+<span className="font-label-sm text-label-sm uppercase tracking-wider text-outline">{t("Sci-Fi RPG")}</span>
 
-<span className="font-label-sm text-label-sm font-mono text-error font-semibold px-2 py-0.5 rounded bg-surface-container-high">{"Δ -24 pts"}</span>
+<span className="font-label-sm text-label-sm font-mono text-error font-semibold px-2 py-0.5 rounded bg-surface-container-high">{t("Δ -24 pts")}</span>
 
 </div>
 
 <h4 className="font-headline-md text-headline-md text-on-surface font-semibold">{"Starfield"}</h4>
 
-<p className="font-body-md text-body-md text-on-surface-variant mt-2 line-clamp-3">{"\n                Kojima championed the romantic NASA-punk analog aesthetics and ambient celestial contemplation; Vance lamented disjointed loading boundaries and dated quest loops.\n              "}</p>
+<p className="font-body-md text-body-md text-on-surface-variant mt-2 line-clamp-3">{t("\n                Kojima championed the romantic NASA-punk analog aesthetics and ambient celestial contemplation; Vance lamented disjointed loading boundaries and dated quest loops.\n              ")}</p>
 
 </div>
 
@@ -185,7 +187,7 @@ return (<>
 
 <div className="mt-8 pt-6 bg-surface-container/60 rounded-lg px-6 py-4 flex items-center justify-between">
 <div className="flex flex-col">
-<span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">{"Alex Vance"}</span>
+<span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">{t("Alex Vance")}</span>
 
 <span className="font-display-lg text-[32px] leading-8 font-bold font-headline-md text-on-surface-variant mt-1">{"62"}</span>
 
@@ -197,7 +199,7 @@ return (<>
 </div>
 
 <div className="flex min-w-0 flex-col items-end">
-<span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">{"Hideo Kojima"}</span>
+<span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">{t("Hideo Kojima")}</span>
 
 <span className="font-display-lg text-[32px] leading-8 font-bold font-headline-md text-primary mt-1">{"86"}</span>
 
@@ -214,13 +216,13 @@ return (<>
 <section className="w-full mb-20 md:mb-28">
 <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-2">
 <div>
-<span className="font-label-sm text-label-sm uppercase tracking-widest text-secondary font-semibold">{"Consensus Apex"}</span>
+<span className="font-label-sm text-label-sm uppercase tracking-widest text-secondary font-semibold">{t("Consensus Apex")}</span>
 
-<h3 className="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight mt-1">{"Unanimous Masterpieces"}</h3>
+<h3 className="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight mt-1">{t("Unanimous Masterpieces")}</h3>
 
 </div>
 
-<p className="font-body-md text-body-md text-on-surface-variant">{"Near-perfect alignment on seminal triumphs across design generations."}</p>
+<p className="font-body-md text-body-md text-on-surface-variant">{t("Near-perfect alignment on seminal triumphs across design generations.")}</p>
 
 </div>
 
@@ -228,7 +230,7 @@ return (<>
 
 <div className="bg-surface-container-low rounded-xl p-5 flex flex-col justify-between shadow-md hover:bg-surface-container transition-colors group">
 <div className="w-full aspect-[16/10] rounded-lg overflow-hidden mb-4 relative bg-surface-container">
-<img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={gameImages("elden-ring").cover} alt="elden ring cover" />
+<img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={gameImages("elden-ring").cover} alt={"elden ring cover"} />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-low via-transparent to-transparent opacity-80"></div>
 
@@ -238,7 +240,7 @@ return (<>
 
 <div className="flex items-center justify-between pt-2">
 <div className="flex items-center gap-2">
-<span className="font-label-sm text-label-sm text-outline">{"VANCE"}</span>
+<span className="font-label-sm text-label-sm text-outline">{t("VANCE")}</span>
 
 <span className="font-label-lg text-label-lg font-mono font-bold text-primary">{"98"}</span>
 
@@ -249,7 +251,7 @@ return (<>
 <div className="flex items-center gap-2">
 <span className="font-label-lg text-label-lg font-mono font-bold text-primary">{"98"}</span>
 
-<span className="font-label-sm text-label-sm text-outline">{"KOJIMA"}</span>
+<span className="font-label-sm text-label-sm text-outline">{t("KOJIMA")}</span>
 
 </div>
 
@@ -259,17 +261,17 @@ return (<>
 
 <div className="bg-surface-container-low rounded-xl p-5 flex flex-col justify-between shadow-md hover:bg-surface-container transition-colors group">
 <div className="w-full aspect-[16/10] rounded-lg overflow-hidden mb-4 relative bg-surface-container">
-<img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={gameImages("metal-gear-solid-3-snake-eater").cover} alt="metal gear solid 3 snake eater cover" />
+<img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={gameImages("metal-gear-solid-3-snake-eater").cover} alt={"metal gear solid 3 snake eater cover"} />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-low via-transparent to-transparent opacity-80"></div>
 
-<span className="absolute bottom-3 left-3 font-headline-md text-headline-md text-on-surface font-bold drop-shadow">{"Metal Gear Solid 3"}</span>
+<span className="absolute bottom-3 left-3 font-headline-md text-headline-md text-on-surface font-bold drop-shadow">{t("Metal Gear Solid 3")}</span>
 
 </div>
 
 <div className="flex items-center justify-between pt-2">
 <div className="flex items-center gap-2">
-<span className="font-label-sm text-label-sm text-outline">{"VANCE"}</span>
+<span className="font-label-sm text-label-sm text-outline">{t("VANCE")}</span>
 
 <span className="font-label-lg text-label-lg font-mono font-bold text-primary">{"96"}</span>
 
@@ -280,7 +282,7 @@ return (<>
 <div className="flex items-center gap-2">
 <span className="font-label-lg text-label-lg font-mono font-bold text-primary">{"98"}</span>
 
-<span className="font-label-sm text-label-sm text-outline">{"KOJIMA"}</span>
+<span className="font-label-sm text-label-sm text-outline">{t("KOJIMA")}</span>
 
 </div>
 
@@ -290,17 +292,17 @@ return (<>
 
 <div className="bg-surface-container-low rounded-xl p-5 flex flex-col justify-between shadow-md hover:bg-surface-container transition-colors group">
 <div className="w-full aspect-[16/10] rounded-lg overflow-hidden mb-4 relative bg-surface-container">
-<img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={gameImages("super-mario-bros-3").cover} alt="super mario bros 3 cover" />
+<img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={gameImages("super-mario-bros-3").cover} alt={"super mario bros 3 cover"} />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-low via-transparent to-transparent opacity-80"></div>
 
-<span className="absolute bottom-3 left-3 font-headline-md text-headline-md text-on-surface font-bold drop-shadow">{"Super Mario Bros. 3"}</span>
+<span className="absolute bottom-3 left-3 font-headline-md text-headline-md text-on-surface font-bold drop-shadow">{t("Super Mario Bros. 3")}</span>
 
 </div>
 
 <div className="flex items-center justify-between pt-2">
 <div className="flex items-center gap-2">
-<span className="font-label-sm text-label-sm text-outline">{"VANCE"}</span>
+<span className="font-label-sm text-label-sm text-outline">{t("VANCE")}</span>
 
 <span className="font-label-lg text-label-lg font-mono font-bold text-primary">{"94"}</span>
 
@@ -311,7 +313,7 @@ return (<>
 <div className="flex items-center gap-2">
 <span className="font-label-lg text-label-lg font-mono font-bold text-primary">{"94"}</span>
 
-<span className="font-label-sm text-label-sm text-outline">{"KOJIMA"}</span>
+<span className="font-label-sm text-label-sm text-outline">{t("KOJIMA")}</span>
 
 </div>
 
@@ -326,38 +328,38 @@ return (<>
 <section className="w-full">
 <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
 <div>
-<span className="font-label-sm text-label-sm uppercase tracking-widest text-outline">{"Curated Ledger"}</span>
+<span className="font-label-sm text-label-sm uppercase tracking-widest text-outline">{t("Curated Ledger")}</span>
 
-<h3 className="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight mt-1">{"Shared Catalog Matrix"}</h3>
+<h3 className="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight mt-1">{t("Shared Catalog Matrix")}</h3>
 
 </div>
 
 <div className="flex flex-wrap items-center gap-2">
-<PreviewAction className="px-3 py-1.5 rounded bg-surface-container text-primary font-label-md text-label-md transition-colors" message={"Preview only: this feature is not connected yet."}>{"All Shared (142)"}</PreviewAction>
+<PreviewAction className="px-3 py-1.5 rounded bg-surface-container text-primary font-label-md text-label-md transition-colors" message={"Preview only: this feature is not connected yet."}>{t("All Shared (142)")}</PreviewAction>
 
-<PreviewAction className="px-3 py-1.5 rounded bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md transition-colors" message={"Preview only: this feature is not connected yet."}>{"Ties (18)"}</PreviewAction>
+<PreviewAction className="px-3 py-1.5 rounded bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md transition-colors" message={"Preview only: this feature is not connected yet."}>{t("Ties (18)")}</PreviewAction>
 
-<PreviewAction className="px-3 py-1.5 rounded bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md transition-colors" message={"Preview only: this feature is not connected yet."}>{"Disagreements >10"}</PreviewAction>
+<PreviewAction className="px-3 py-1.5 rounded bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md transition-colors" message={"Preview only: this feature is not connected yet."}>{t("Disagreements >10")}</PreviewAction>
 
 </div>
 
 </div>
 
 <div className="w-full bg-surface-container-low rounded-xl overflow-hidden shadow-xl">
-<p className="sm:hidden px-4 pt-4 font-body-sm text-body-sm text-on-surface-variant">Scroll sideways to compare all columns.</p>
-<div className="scroll-region overflow-x-auto" role="region" aria-label="Shared catalog comparison table" tabIndex={0}>
+<p className="sm:hidden px-4 pt-4 font-body-sm text-body-sm text-on-surface-variant">{t("Scroll sideways to compare all columns.")}</p>
+<div className="scroll-region overflow-x-auto" role="region" aria-label={t("Shared catalog comparison table")} tabIndex={0}>
 <table className="min-w-[640px] w-full text-left border-collapse">
 <thead>
 <tr className="bg-surface-container-high/40 text-outline font-label-sm text-label-sm uppercase tracking-wider">
-<th className="py-4 px-6 font-semibold">{"Title"}</th>
+<th className="py-4 px-6 font-semibold">{t("Title")}</th>
 
-<th className="py-4 px-6 font-semibold">{"Release"}</th>
+<th className="py-4 px-6 font-semibold">{t("Release")}</th>
 
-<th className="py-4 px-6 font-semibold text-right">{"Alex Vance"}</th>
+<th className="py-4 px-6 font-semibold text-right">{t("Alex Vance")}</th>
 
-<th className="py-4 px-6 font-semibold text-right">{"Hideo Kojima"}</th>
+<th className="py-4 px-6 font-semibold text-right">{t("Hideo Kojima")}</th>
 
-<th className="py-4 px-6 font-semibold text-right">{"Difference"}</th>
+<th className="py-4 px-6 font-semibold text-right">{t("Difference")}</th>
 
 </tr>
 
@@ -412,7 +414,7 @@ return (<>
 <div className="flex items-center gap-3">
 <span className="w-2 h-2 rounded-full bg-secondary"></span>
 
-<span>{"The Legend of Zelda: Tears of the Kingdom"}</span>
+<span>{t("The Legend of Zelda: Tears of the Kingdom")}</span>
 
 </div>
 
@@ -454,7 +456,7 @@ return (<>
 <div className="flex items-center gap-3">
 <span className="w-2 h-2 rounded-full bg-secondary"></span>
 
-<span>{"Shadow of the Colossus"}</span>
+<span>{t("Shadow of the Colossus")}</span>
 
 </div>
 
@@ -496,7 +498,7 @@ return (<>
 <div className="flex items-center gap-3">
 <span className="w-2 h-2 rounded-full bg-surface-variant"></span>
 
-<span>{"Silent Hill 2"}</span>
+<span>{t("Silent Hill 2")}</span>
 
 </div>
 
@@ -519,14 +521,14 @@ return (<>
 </div>
 
 <div className="px-6 py-4 bg-surface-container-high/20 flex flex-col sm:flex-row items-center justify-between gap-4 font-label-sm text-label-sm text-outline">
-<span>{"Showing 7 of 142 shared catalog entries"}</span>
+<span>{t("Showing 7 of 142 shared catalog entries")}</span>
 
 <div className="flex items-center gap-2">
-<PreviewAction className="px-2.5 py-1 rounded bg-surface-container hover:bg-surface-bright text-on-surface transition-colors" message={"Preview only: this feature is not connected yet."}>{"Previous"}</PreviewAction>
+<PreviewAction className="px-2.5 py-1 rounded bg-surface-container hover:bg-surface-bright text-on-surface transition-colors" message={"Preview only: this feature is not connected yet."}>{t("Previous")}</PreviewAction>
 
 <span className="font-mono text-on-surface px-1">{"1 / 21"}</span>
 
-<PreviewAction className="px-2.5 py-1 rounded bg-surface-container hover:bg-surface-bright text-on-surface transition-colors" message={"Preview only: this feature is not connected yet."}>{"Next"}</PreviewAction>
+<PreviewAction className="px-2.5 py-1 rounded bg-surface-container hover:bg-surface-bright text-on-surface transition-colors" message={"Preview only: this feature is not connected yet."}>{t("Next")}</PreviewAction>
 
 </div>
 

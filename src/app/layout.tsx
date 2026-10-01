@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { getMessages, localizeMetadata } from "@/lib/locale/server";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PreviewNoticeProvider } from "@/components/preview-action";
@@ -9,14 +9,15 @@ import { localeCookie, siteLocale, siteTheme, themeCookie } from "@/lib/locale/p
 import { SitePreferences } from "@/components/site-preferences";
 import "./globals.css";
 
-export const metadata: Metadata = {
+export async function generateMetadata() { return localizeMetadata({
   title: { default: "Playlogg | Your gaming portfolio", template: "%s | Playlogg" },
   description: "A personal gaming portfolio of ratings, rankings, tiers and shared gaming taste. Visual prototype with sample content.",
   openGraph: { title: "Playlogg | Your gaming portfolio", description: "Ratings, rankings and personal gaming taste.", type: "website", siteName: "Playlogg" },
   twitter: { card: "summary_large_image" },
-};
+}); }
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const t = await getMessages();
   const [portfolio, cookieStore] = await Promise.all([getPortfolio(), cookies()]);
   const locale = siteLocale(cookieStore.get(localeCookie)?.value);
   const theme = siteTheme(cookieStore.get(themeCookie)?.value);
@@ -30,8 +31,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       </head>
       <body className="bg-surface font-body-md text-on-surface antialiased">
         <PortfolioProvider portfolio={portfolio}><SitePreferences initialLocale={locale} initialTheme={theme}><PreviewNoticeProvider>
+          <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded focus:bg-surface-container-high focus:px-4 focus:py-3">{t("Skip to content")}</a>
           <SiteHeader />
-          <main id="main-content" className="w-full min-w-0 pt-[var(--site-header-height)] bg-surface">{children}</main>
+          <main id="main-content" tabIndex={-1} className="w-full min-w-0 pt-[var(--site-header-height)] bg-surface">{children}</main>
           <SiteFooter />
         </PreviewNoticeProvider></SitePreferences></PortfolioProvider>
       </body>

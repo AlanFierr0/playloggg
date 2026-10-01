@@ -40,10 +40,10 @@ claims. [README.md](../README.md) lists the routes and existing rollout notes.
    scores, and affinity numbers. Discover and prototype detail pages also retain
    editorial/sample content. Step 2 now labels these sections prominently and renders the selected
    profile's real saved entry separately; replacing sample content remains future work.
-3. **Spanish arrives after hydration.** The current translator scans and changes
-   rendered DOM text in the browser. A cold Spanish page can flash English; page
-   metadata begins in English, and newly added UI strings depend on dictionary
-   coverage. The theme itself is selected on the server.
+3. **The fatal root-layout fallback uses default preferences initially.** Ordinary
+   pages now render Spanish UI and metadata on the server. If the root layout
+   itself fails, Next’s client global-error screen reads cookie preferences after
+   hydration. See [display preferences](display-preferences.md).
 4. **Catalog growth will stress the current page model.** The root portfolio loads
    the full shared catalog into its client provider on every route. Selected-profile
    rating reads are capped at 1,000 entries in `getPortfolio`, while the public portfolio
@@ -106,7 +106,8 @@ remains pending.
 
 Implemented with local fixtures approved by the user. See
 [journey suite, isolation and post-deploy checklist](journey-tests.md).
-The next implementation milestone is step 4, localization and accessibility.
+Step 4 implements explicit localization and accessibility. The next implementation
+milestone is step 5, catalog and profile growth.
 
 1. Keep existing unit/data/RLS tests, then add a small deterministic browser suite
    for guest catalog/search, theme/language persistence, mobile navigation, and
@@ -120,6 +121,9 @@ The next implementation milestone is step 4, localization and accessibility.
    protected journey can be reproduced without altering another user's data.
 
 ### 4. Make localization and accessibility first-class
+
+Implemented using the existing dictionary, unchanged URLs and cookie preferences.
+See [translation approach, accessibility checks and fallback limitation](display-preferences.md).
 
 1. Replace broad DOM text mutation with explicit UI messages rendered by React
    and the server. Include titles/descriptions, form errors, live status messages,
@@ -175,10 +179,10 @@ The next implementation milestone is step 4, localization and accessibility.
 
 ## Decisions to ask before implementing the affected step
 
-- **Step 2:** Which prototype actions should become real first, and what approved
-  Terms/Privacy text or destination should the footer use?
-- **Step 4:** Keep language preference on the same URLs, or use distinct locale
-  URLs for link-sharing and search indexing?
+- **Step 2 (agreed):** Shelf uses the editor, Share copies a catalog URL, and
+  API/Terms/Privacy placeholders stay hidden.
+- **Step 4 (agreed):** Keep the existing dictionary, cookie preferences and URLs,
+  with explicit React/server translations and no runtime i18n dependency.
 - **Step 6:** Compare any two published profiles, or only a signed-in user's
   profile against a published profile? What should “affinity” measure?
 - **Step 7:** Should published profiles also be discoverable in a directory, and
@@ -186,4 +190,4 @@ The next implementation milestone is step 4, localization and accessibility.
 
 Step 1's available-account flows are verified in the acceptance report; the
 second-Steam scenario remains pending. The next implementable milestone is
-**step 2**, with its action/content decisions agreed before visible changes.
+**step 5**, catalog and profile growth.
