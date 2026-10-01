@@ -44,13 +44,13 @@ begin
   if exists (select 1 from public.games where igdb_id=source_id or slug=saved_slug) then
     raise exception 'Test ID already exists; retry with a fresh fixture';
   end if;
-  insert into public.games (slug,title,cover_url,igdb_id,is_sample)
-    values (saved_slug,'Original import','/images/missing-cover.svg',source_id,false);
-  insert into public.games (slug,title,cover_url,igdb_id,is_sample)
-    values (saved_slug || '-changed','Overwrite attempt','/changed',source_id,true)
+  insert into public.games (slug,title,cover_url,igdb_id)
+    values (saved_slug,'Original import','/images/missing-cover.svg',source_id);
+  insert into public.games (slug,title,cover_url,igdb_id)
+    values (saved_slug || '-changed','Overwrite attempt','/changed',source_id)
     on conflict (igdb_id) do nothing;
   if (select count(*) from public.games where igdb_id=source_id) <> 1
-    or not exists (select 1 from public.games where igdb_id=source_id and slug=saved_slug and title='Original import' and not is_sample) then
+    or not exists (select 1 from public.games where igdb_id=source_id and slug=saved_slug and title='Original import') then
     raise exception 'Duplicate imports must reuse the original row without overwriting';
   end if;
   if before_ratings <> (select count(*) from public.ratings)

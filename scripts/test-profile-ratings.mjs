@@ -34,7 +34,7 @@ test("a failed later rating page fails the read rather than returning a partial 
 });
 test("guest catalog above 1000 never reads sample profiles or ratings", async () => {
   const calls = [];
-  const rows = Array.from({ length: 1001 }, (_, i) => ({ id: i + 1, slug: `game-${i}`, title: `Game ${i}`, cover_url: "/icon.svg", release_year: 2020, released_on: null, genres: [], artwork_image_ids: [], screenshot_image_ids: [], search_keywords: "", is_sample: true, igdb_metadata: {}, igdb_url: null }));
+  const rows = Array.from({ length: 1001 }, (_, i) => ({ id: i + 1, slug: `game-${i}`, title: `Game ${i}`, cover_url: "/icon.svg", release_year: 2020, released_on: null, genres: [], artwork_image_ids: [], screenshot_image_ids: [], search_keywords: "", igdb_metadata: {}, igdb_url: null }));
   const ratings = rows.map((row) => ({ game_id: row.id, score: row.id === 1001 ? 0 : null, tier: null, review: null, status: "backlog", platform: null, hours_played: 0, completed_on: null, tags: [] }));
   const { getPortfolio } = load("../src/lib/portfolio.ts", { react: { cache: (fn) => fn }, "@/lib/owner": { getAccount: async () => null }, "@/lib/collections": { getLists: async () => [] }, "@/lib/favorites": { readFavorites: async () => [] }, "@/lib/supabase/server": { createClient: async () => ({}) } }, {
     process: { env: { NEXT_PUBLIC_SUPABASE_URL: "https://fixture.invalid", NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "local-test" } }, AbortSignal,
@@ -43,7 +43,10 @@ test("guest catalog above 1000 never reads sample profiles or ratings", async ()
       let data;
       if (url.pathname.endsWith("/profiles")) data = [{ id: 7, handle: "alexvance", display_name: "Sample", is_sample: true, is_public: true }];
       else if (url.pathname.endsWith("/ratings")) { assert.equal(url.searchParams.get("profiles.handle"), "eq.alexvance"); assert.equal(url.searchParams.get("order"), "game_id.asc"); calls.push(offset); data = ratings.slice(offset, offset + limit); }
-      else data = rows.slice(offset, offset + limit);
+      else {
+        for (const column of ["is_sample", "created_at", "updated_at"]) assert.ok(!url.searchParams.get("select").split(",").includes(column));
+        data = rows.slice(offset, offset + limit);
+      }
       return { ok: true, json: async () => data };
     },
   });

@@ -20,8 +20,8 @@ create temporary table cleanup_before as select
 delete from public.ratings where profile_id in
   (select id from public.profiles where is_sample and owner_user_id is null);
 delete from public.profiles where is_sample and owner_user_id is null;
--- These are reviewed real IGDB titles, not invented player data.
-update public.games set is_sample=false where is_sample;
+-- Catalog titles are retained. Their sample flag was removed by migration
+-- 20261001184236_remove_game_sample_and_timestamps; no game update is needed.
 do $$ declare before record; begin
   select * into before from cleanup_before;
   if (select count(*) from public.profiles where not is_sample) <> before.real_profiles

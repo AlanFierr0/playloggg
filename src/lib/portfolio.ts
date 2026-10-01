@@ -26,8 +26,8 @@ async function readPublic<T>(resource: string, tags: string[] = []): Promise<T[]
 
 const image = (id: string, size: "screenshot_huge" | "screenshot_big") => `https://images.igdb.com/igdb/image/upload/t_${size}/${id}.jpg`;
 
-const catalogFields = "slug,title,cover_url,release_year,released_on,genres,search_keywords,id,is_sample,igdb_metadata->platforms";
-const detailFields = "slug,title,cover_url,release_year,released_on,genres,artwork_image_ids,screenshot_image_ids,search_keywords,id,is_sample,igdb_metadata,igdb_url";
+const catalogFields = "slug,title,cover_url,release_year,released_on,genres,search_keywords,id,igdb_metadata->platforms";
+const detailFields = "slug,title,cover_url,release_year,released_on,genres,artwork_image_ids,screenshot_image_ids,search_keywords,id,igdb_metadata,igdb_url";
 
 // Cache shared card metadata only. Reviews and account data remain request-local.
 export const getCatalog = cache(async () => {

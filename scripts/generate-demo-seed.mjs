@@ -8,6 +8,7 @@ const literal = (value) => `'${value.replaceAll("'", "''")}'`;
 const json = (value) => `${literal(JSON.stringify(value))}::jsonb`;
 const profile = demo.profile;
 const sql = `-- Generated from demo-data.json. Rebuild with node scripts/generate-demo-seed.mjs.
+-- Isolated test databases only; automatic seeding is disabled. Never apply to production.
 -- Sample data only. Existing records are never overwritten.
 begin;
 
@@ -19,9 +20,8 @@ begin
   if exists (
     select 1 from public.games g
     join jsonb_to_recordset(${json(demo.games)}) as d(slug text) on d.slug = g.slug
-    where not g.is_sample
   ) then
-    raise exception 'Demo catalog overlaps non-sample games; seed refused';
+    raise exception 'Demo catalog overlaps existing games; seed refused';
   end if;
 end
 $seed_guard$;
@@ -30,8 +30,8 @@ insert into public.profiles (handle, display_name, avatar_url, is_public, is_sam
 values (${literal(profile.handle)}, ${literal(profile.display_name)}, ${profile.avatar_url === null ? "null" : literal(profile.avatar_url)}, true, true)
 on conflict (handle) do nothing;
 
-insert into public.games (slug, title, cover_url, release_year, search_keywords, is_sample)
-select slug, title, cover_url, release_year, search_keywords, true
+insert into public.games (slug, title, cover_url, release_year, search_keywords)
+select slug, title, cover_url, release_year, search_keywords
 from jsonb_to_recordset(${json(demo.games)})
   as d(slug text, title text, cover_url text, release_year smallint, search_keywords text)
 on conflict (slug) do nothing;

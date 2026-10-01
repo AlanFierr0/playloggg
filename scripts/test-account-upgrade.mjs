@@ -42,7 +42,7 @@ test('catalog bootstrap reuses IDs without replacing reviewed metadata and resum
   };}};
   const query=async body=>{assert.match(body,/total_rating >= 75/);return [1,2,3].map(id=>({id,name:`Game ${id}`,slug:`game-${id}`,cover:{image_id:'cover'},first_release_date:1500000000}));};
   assert.equal(await bootstrapCatalog({admin,query,target:3,progress:()=>{}}),3);
-  assert.equal(rows[0].title,'Reviewed name');assert.equal(mutations,1);assert.equal(rows[1].is_sample,false);
+  assert.equal(rows[0].title,'Reviewed name');assert.equal(mutations,1);for (const column of ["is_sample", "created_at", "updated_at"]) assert.ok(!(column in rows[1]));
   assert.equal(await bootstrapCatalog({admin,query:()=>assert.fail('Unnecessary provider call'),target:3,progress:()=>{}}),3);
   assert.equal(mutations,1);assert.throws(()=>bootstrapQuery(-1),/Invalid/);
 });

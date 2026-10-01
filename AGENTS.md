@@ -155,7 +155,10 @@ Guest catalog pages have no selected profile/ratings, and personal pages require
 sign-in/profile setup. Sample public profiles and comparisons are excluded.
 The user approved deleting all demo information. The unowned sample profile and
 32 invented ratings are deleted; the 32 real reviewed catalog titles were kept
-and their sample flags cleared. The catalog retains 1,000 games and real personal
+and their sample flags cleared. The user subsequently requested removing only
+`games.is_sample`, `games.created_at`, and `games.updated_at`; catalog reads/imports
+must not reference them. Keep profile/entry timestamps and profile sample guards.
+The catalog retains 1,000 games and real personal
 records are unchanged. Automatic local demo seeding is disabled; never restore
 sample players/ratings into production. See supabase/cleanup-demo.sql.
 Do not enable public database writes without an

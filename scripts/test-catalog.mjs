@@ -24,7 +24,7 @@ test("imports whitelist public metadata, use trusted image URLs and preserve no-
   assert.deepEqual(row.artwork_image_ids, ["valid_1"]);
   assert.deepEqual(row.igdb_metadata.developers, ["Studio"]);
   assert.ok(!JSON.stringify(row).includes("never-store"));
-  assert.equal(row.is_sample, false);
+  for (const column of ["is_sample", "created_at", "updated_at"]) assert.ok(!(column in row));
   assert.ok(!("score" in row));
 });
 

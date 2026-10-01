@@ -25,7 +25,7 @@ current draft while preserving the name and order. Save the list separately.
 Catalog import itself creates no rating, playback status or list membership.
 
 Existing IGDB IDs reuse the same catalog row. Concurrent imports use the unique
-index with ON CONFLICT DO NOTHING, preserving metadata, slugs, sample flags,
+index with ON CONFLICT DO NOTHING, preserving metadata, slugs,
 ratings and list references. New slugs include the source ID, avoiding collisions
 between editions. Cached catalog pages expire immediately after import. Catalog
 reads page through the API instead of silently stopping at 1,000 games.

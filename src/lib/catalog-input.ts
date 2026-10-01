@@ -65,6 +65,6 @@ export function normalizeImport(value: unknown): Database["public"]["Tables"]["g
     artwork_image_ids: imageIds(record.artworks), screenshot_image_ids: imageIds(record.screenshots),
     igdb_url: typeof record.url === "string" && /^https:\/\/www\.igdb\.com\/games\/[a-z0-9-]+$/.test(record.url) ? record.url : null, igdb_metadata: metadata,
     search_keywords: [match.title, slug.replaceAll("-", " "), ...genres].join(" "),
-    is_sample: false, igdb_synced_at: new Date().toISOString(),
+    igdb_synced_at: new Date().toISOString(),
   };
 }
