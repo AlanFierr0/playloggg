@@ -84,3 +84,7 @@ The shared shell uses a column flex layout with a minimum height of 100dvh.
 Main content fills unused viewport space, keeping the footer at the bottom on
 short pages. Long pages scroll naturally with the footer after their content;
 the footer does not cover controls or remain fixed while scrolling.
+
+The user removed the homepage Editor’s Spotlight section. Discover now opens
+with its page heading followed by the existing Essential Canon game cards;
+the spotlight artwork, copy, actions and reserved hero height are removed.

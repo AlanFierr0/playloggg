@@ -63,10 +63,12 @@ test("navigation stays usable and layouts avoid horizontal page overflow", async
   }
 });
 
-test("homepage actions work and guest Shelf requires sign-in", async ({ page }) => {
+test("homepage omits the spotlight and links to the game catalog", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("link", { name: /Shelf/i }).click();
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByText("Editor's Spotlight", {exact:true})).toHaveCount(0);
+  await expect(page.getByRole("heading", {name:"Discover", exact:true})).toBeVisible();
+  await page.getByRole("link", {name:"Explore All Games", exact:true}).click();
+  await expect(page).toHaveURL(/\/games$/);
   await page.goto("/compare");
   await expect(page.getByText("Choose two published profiles to see their shared games and scores.")).toBeVisible();
   await expect(page.locator("footer").getByText("Privacy", { exact: true })).toHaveCount(0);
@@ -74,7 +76,7 @@ test("homepage actions work and guest Shelf requires sign-in", async ({ page }) 
 
 
 test("Share copies only the catalog URL and offers a fallback when clipboard is denied", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/game/elden-ring-shadow-of-the-erdtree");
   await page.evaluate(() => {
     Object.defineProperty(navigator.clipboard, "writeText", { configurable: true, value: async (url: string) => { document.documentElement.dataset.copied = url; } });
   });
