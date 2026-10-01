@@ -1,8 +1,8 @@
 # Catalog column cleanup
 
 The user requested removal of `public.games.is_sample`, `created_at`, and
-`updated_at`. Only those three game columns are removed. Profile/entry timestamps
-and profile sample guards remain; `games.igdb_synced_at` still records provider sync.
+`updated_at`. Only those three game columns are removed. Profile/entry timestamps remain; the profile sample marker was subsequently
+removed in [a separate migration](profile-sample-column.md); `games.igdb_synced_at` still records provider sync.
 
 ## Rollout
 
