@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import type { Database } from "@/types/database";
 import type { Game, Portfolio } from "@/types/domain";
+import { readProfileRatings } from "@/lib/profile-ratings";
 import { getLists } from "@/lib/collections";
 import { getAccount, isOwnerEmail } from "@/lib/owner";
 
@@ -22,43 +23,59 @@ async function readPublic<T>(resource: string, tags: string[] = []): Promise<T[]
 
 const image = (id: string, size: "screenshot_huge" | "screenshot_big") => `https://images.igdb.com/igdb/image/upload/t_${size}/${id}.jpg`;
 
-// Shared catalog can be cached; authenticated profile data is always request-local.
+const catalogFields = "slug,title,cover_url,release_year,released_on,genres,search_keywords,id,is_sample,igdb_metadata->platforms";
+const detailFields = "slug,title,cover_url,release_year,released_on,genres,artwork_image_ids,screenshot_image_ids,search_keywords,id,is_sample,igdb_metadata,igdb_url";
+
+// Cache shared card metadata only. Reviews and account data remain request-local.
 export const getCatalog = cache(async () => {
   const rows: GameRow[] = [];
-  let offset = 0;
-  while (true) {
-    const page = await readPublic<GameRow>(`games?select=slug,title,cover_url,release_year,released_on,genres,artwork_image_ids,screenshot_image_ids,search_keywords,id,is_sample,igdb_metadata,igdb_url&order=id.asc&limit=500&offset=${offset}`, ["game-catalog"]);
-    rows.push(...page);
+  for (let offset = 0; ; offset += 500) {
+    const page = await readPublic<GameRow & { platforms?: GameRow["igdb_metadata"] }>(`games?select=${catalogFields}&order=id.asc&limit=500&offset=${offset}`, ["game-catalog"]);
+    rows.push(...page.map((row) => ({ ...row, artwork_image_ids: [], screenshot_image_ids: [], igdb_url: null,
+      igdb_metadata: { platforms: row.platforms ?? (row.igdb_metadata && typeof row.igdb_metadata === "object" && !Array.isArray(row.igdb_metadata) ? row.igdb_metadata.platforms : []) ?? [] } })));
     if (page.length < 500) return rows;
-    offset += page.length;
   }
 });
-
-export const getPortfolio = cache(async (): Promise<Portfolio> => {
-  const [owner, rows] = await Promise.all([getAccount(), getCatalog()]);
-  let profile: Pick<ProfileRow, "id" | "handle" | "display_name" | "is_sample" | "is_public"> | undefined;
-  let ratings: Pick<RatingRow, "game_id" | "score" | "tier" | "review" | "status" | "platform" | "hours_played" | "completed_on" | "tags">[];
-  if (owner?.profile) {
-    profile = owner.profile;
-    const { data, error } = await owner.supabase.from("ratings").select("game_id,score,tier,review,status,platform,hours_played,completed_on,tags").eq("profile_id", profile.id).limit(1000);
-    if (error) throw new Error("Your ratings could not be loaded.");
-    ratings = data;
-  } else {
-    const [profiles, sampleRatings] = await Promise.all([
-      readPublic<ProfileRow>("profiles?handle=eq.alexvance&select=id,handle,display_name,is_sample,is_public&limit=1"),
-      readPublic<RatingRow>("ratings?select=game_id,score,tier,review,status,platform,hours_played,completed_on,tags,profiles!inner(handle)&profiles.handle=eq.alexvance&limit=1000"),
-    ]);
-    profile = profiles[0];
-    ratings = sampleRatings;
-  }
+export const getCatalogGame = cache(async (slug: string): Promise<GameRow | undefined> => {
+  if (!/^[a-z0-9][a-z0-9-]{0,199}$/.test(slug)) return undefined;
+  return (await readPublic<GameRow>(`games?slug=eq.${encodeURIComponent(slug)}&select=${detailFields}&limit=1`, ["game-catalog"]))[0];
+});
+const selectedAccount = cache(async () => {
+  const owner = await getAccount();
+  const profile = owner?.profile ?? (await readPublic<ProfileRow>("profiles?handle=eq.alexvance&select=id,handle,display_name,is_sample,is_public&limit=1"))[0];
   if (!profile) throw new Error("The published sample profile could not be loaded.");
-  const games = portfolioGames(rows, ratings);
-  return { games, lists: await getLists(profile.id), profile: { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: profile.is_sample, isPublic: profile.is_public }, access: { signedIn: Boolean(owner), canEdit: Boolean(owner?.profile), canImportCatalog: Boolean(owner?.profile && isOwnerEmail(owner.user.email)) } };
+  return { owner, profile };
 });
-
-export async function getPublicGame(slug: string) {
-  return (await getPortfolio()).games.find((game) => game.slug === slug);
-}
+export const getPortfolioShell = cache(async (): Promise<Portfolio> => {
+  const { owner, profile } = await selectedAccount();
+  return { games: [], lists: [], profile: { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: profile.is_sample, isPublic: profile.is_public }, access: { signedIn: Boolean(owner), canEdit: Boolean(owner?.profile), canImportCatalog: Boolean(owner?.profile && isOwnerEmail(owner.user.email)) } };
+});
+const selectedRatings = cache(async () => {
+  const { owner, profile } = await selectedAccount();
+  if (owner?.profile) return readProfileRatings(owner.supabase, profile.id);
+  const all: RatingRow[] = [];
+  for (let offset = 0; ; offset += 500) {
+    const page = await readPublic<RatingRow>(`ratings?select=game_id,score,tier,review,status,platform,hours_played,completed_on,tags,profiles!inner(handle)&profiles.handle=eq.alexvance&order=game_id.asc&limit=500&offset=${offset}`);
+    all.push(...page);
+    if (page.length < 500) return all;
+  }
+});
+export const getPortfolio = cache(async (): Promise<Portfolio> => {
+  const [shell, rows, ratings] = await Promise.all([getPortfolioShell(), getCatalog(), selectedRatings()]);
+  return { ...shell, games: portfolioGames(rows, ratings), lists: await getLists(Number(shell.profile.id)) };
+});
+export const getPublicGame = cache(async (slug: string) => {
+  const row = await getCatalogGame(slug);
+  if (!row) return undefined;
+  const { owner, profile } = await selectedAccount();
+  let ratings: RatingRow[];
+  if (owner?.profile) {
+    const { data, error } = await owner.supabase.from("ratings").select("game_id,score,tier,review,status,platform,hours_played,completed_on,tags").eq("profile_id", profile.id).eq("game_id", row.id).limit(1);
+    if (error) throw new Error("Your ratings could not be loaded.");
+    ratings = data as RatingRow[];
+  } else ratings = await readPublic<RatingRow>(`ratings?select=game_id,score,tier,review,status,platform,hours_played,completed_on,tags,profiles!inner(handle)&profiles.handle=eq.alexvance&game_id=eq.${row.id}&limit=1`);
+  return portfolioGames([row], ratings)[0];
+});
 
 export function portfolioGames(rows: GameRow[], ratings: Pick<RatingRow, "game_id" | "score" | "tier" | "review" | "status" | "platform" | "hours_played" | "completed_on" | "tags">[]): Game[] {
   const byGame = new Map(ratings.map((rating) => [rating.game_id, rating]));

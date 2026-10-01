@@ -2,34 +2,30 @@
 import { useMessages } from "@/components/site-preferences";
 
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
-import { usePortfolio } from "@/components/portfolio-provider";
-import { defaultGamesFilters, filterGames, validScoreRange, type GamesFilters } from "@/lib/games-view";
-import { loggedGames } from "@/lib/portfolio-view";
+import { useOptimistic, useTransition, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { gamesQuery } from "@/lib/games-query";
+import type { GamesPageData } from "@/lib/games-page";
+import { defaultGamesFilters, validScoreRange, type GamesFilters } from "@/lib/games-view";
 import { playbackLabels } from "@/lib/playback-status";
-import type { Game } from "@/types/domain";
+import type { Game, Portfolio } from "@/types/domain";
 
 const control = "w-full min-w-0 rounded bg-surface-container px-3 py-2.5 font-body-md text-body-md text-on-surface";
 const button = "inline-flex items-center justify-center rounded px-4 py-2.5 font-label-md text-label-md bg-surface-container-high text-on-surface disabled:opacity-40";
 
-export function GamesScreen() {
+export function GamesScreen({ data, profile, access }: { data: GamesPageData; profile: Portfolio["profile"]; access: Portfolio["access"] }) {
   const t = useMessages();
-  const { games, profile, access } = usePortfolio();
-  const [filters, setFilters] = useState<GamesFilters>(defaultGamesFilters);
-  const [page, setPage] = useState(1);
-  const filtered = filterGames(games, filters);
-  const logged = new Set(loggedGames(games).map((game) => game.slug));
-  const genres = [...new Set(games.flatMap((game) => game.genres ?? []))].sort();
-  const platforms = [...new Set(games.flatMap((game) => game.platforms ?? []))].sort();
-  const years = [...new Set(games.flatMap((game) => game.year === null ? [] : [game.year]))].sort((a, b) => b - a);
-  const pageCount = Math.max(1, Math.ceil(filtered.length / 24));
-  const currentPage = Math.min(page, pageCount);
-  const offset = (currentPage - 1) * 24;
-  const visible = filtered.slice(offset, offset + 24);
-  function change<K extends keyof GamesFilters>(key: K, value: GamesFilters[K]) { setFilters((current) => ({ ...current, [key]: value })); setPage(1); }
-  function clear() { setFilters(defaultGamesFilters); setPage(1); }
-  return <div className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-10 space-y-6">
-    <header className="flex flex-wrap items-end justify-between gap-4"><div className="min-w-0 space-y-2"><p className="font-label-sm text-label-sm text-primary uppercase tracking-widest">{t("The game archive")}</p><h1 className="font-headline-xl text-headline-xl font-semibold tracking-tight">{t("Games")}</h1><p className="text-on-surface-variant font-body-md text-body-md">{t("Browse all ")}{games.length} {t("saved catalog games, including titles you haven’t logged.")}</p></div>{access?.canImportCatalog && <Link href="/search?q=&from=/games" className="inline-flex items-center rounded px-4 py-2.5 bg-primary-container text-on-primary-container font-label-md text-label-md">{t("Find games on IGDB →")}</Link>}</header>
+  const router = useRouter();
+  const [filters, updateFilters] = useOptimistic(data.filters);
+  const [pending, startTransition] = useTransition();
+  const { games: visible, total, matched, genres, platforms, years, page: currentPage, pageCount, offset } = data;
+  function navigate(next: GamesFilters, page = 1) {
+    startTransition(() => { updateFilters(next); const query = gamesQuery(next, page); router.push(`/games${query ? `?${query}` : ""}`, { scroll: false }); });
+  }
+  function change<K extends keyof GamesFilters>(key: K, value: GamesFilters[K]) { navigate({ ...filters, [key]: value }); }
+  function clear() { navigate(defaultGamesFilters); }
+  return <div aria-busy={pending} className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-10 space-y-6">
+    <header className="flex flex-wrap items-end justify-between gap-4"><div className="min-w-0 space-y-2"><p className="font-label-sm text-label-sm text-primary uppercase tracking-widest">{t("The game archive")}</p><h1 className="font-headline-xl text-headline-xl font-semibold tracking-tight">{t("Games")}</h1><p className="text-on-surface-variant font-body-md text-body-md">{t("Browse all ")}{total} {t("saved catalog games, including titles you haven’t logged.")}</p></div>{access?.canImportCatalog && <Link href="/search?q=&from=/games" className="inline-flex items-center rounded px-4 py-2.5 bg-primary-container text-on-primary-container font-label-md text-label-md">{t("Find games on IGDB →")}</Link>}</header>
     <section aria-label={t("Catalog filters")} className="rounded-lg bg-surface-container-low p-4 sm:p-5 space-y-4">
       <Field label={t("Search titles")}><input id="games-query" type="search" className={control} value={filters.query} placeholder={t("Search the catalog…")} onChange={(event) => change("query", event.target.value)} /></Field>
       <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -46,10 +42,10 @@ export function GamesScreen() {
         <Field label={t("Minimum score")}><input id="games-min-score" className={control} type="number" min={0} max={100} step={1} placeholder={"0"} value={filters.minScore} onChange={(event) => change("minScore", event.target.value)} /></Field>
         <Field label={t("Maximum score")}><input id="games-max-score" className={control} type="number" min={0} max={100} step={1} placeholder={"100"} value={filters.maxScore} onChange={(event) => change("maxScore", event.target.value)} /></Field>
       </div></details>
-      <div className="flex flex-wrap items-center justify-between gap-3"><p role="status" aria-live="polite" className="text-on-surface-variant font-body-sm text-body-sm">{validScoreRange(filters) ? t(`${filtered.length} of ${games.length} games${filtered.length ? ` · Showing ${offset + 1}–${offset + visible.length}` : ""}`) : t("Use whole-number scores from 0 to 100, with minimum no greater than maximum.")}</p><button type="button" className={button} onClick={clear}>{t("Clear filters")}</button></div>
+      <div className="flex flex-wrap items-center justify-between gap-3"><p role="status" aria-live="polite" className="text-on-surface-variant font-body-sm text-body-sm">{validScoreRange(filters) ? t(`${matched} of ${total} games${matched ? ` · Showing ${offset + 1}–${offset + visible.length}` : ""}`) : t("Use whole-number scores from 0 to 100, with minimum no greater than maximum.")}</p><button type="button" className={button} onClick={clear}>{t("Clear filters")}</button></div>
     </section>
-    <section aria-label={t("Game catalog results")}><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-3 gap-y-6 sm:gap-x-5">{visible.map((game) => <CatalogCard key={game.slug} game={game} logged={logged.has(game.slug)} canEdit={Boolean(access?.canEdit)} />)}</div>{!visible.length && <div className="py-12 text-center space-y-4"><h2 className="font-headline-lg text-headline-lg">{t("No games match these filters")}</h2><p className="text-on-surface-variant">{t("Try a broader search or clear the filters.")}</p><button className={button} onClick={clear}>{t("Show all games")}</button></div>}</section>
-    {filtered.length > 24 && <nav aria-label={t("Catalog pages")} className="flex flex-wrap justify-center items-center gap-3"><button className={button} disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>{t("← Previous")}</button><span className="font-label-md text-label-md">{t("Page ")}{currentPage} {t("of ")}{pageCount}</span><button className={button} disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>{t("Next →")}</button></nav>}
+    <section aria-label={t("Game catalog results")}><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-3 gap-y-6 sm:gap-x-5">{visible.map((game) => <CatalogCard key={game.slug} game={game} logged={Boolean(game.logged)} canEdit={Boolean(access?.canEdit)} />)}</div>{!visible.length && <div className="py-12 text-center space-y-4"><h2 className="font-headline-lg text-headline-lg">{t("No games match these filters")}</h2><p className="text-on-surface-variant">{t("Try a broader search or clear the filters.")}</p><button className={button} onClick={clear}>{t("Show all games")}</button></div>}</section>
+    {matched > 24 && <nav aria-label={t("Catalog pages")} className="flex flex-wrap justify-center items-center gap-3"><button className={button} disabled={currentPage === 1} onClick={() => navigate(filters, currentPage - 1)}>{t("← Previous")}</button><span className="font-label-md text-label-md">{t("Page ")}{currentPage} {t("of ")}{pageCount}</span><button className={button} disabled={currentPage === pageCount} onClick={() => navigate(filters, currentPage + 1)}>{t("Next →")}</button></nav>}
   </div>;
 }
 

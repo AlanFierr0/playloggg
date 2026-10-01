@@ -81,3 +81,32 @@ test("Share copies only the catalog URL and offers a fallback when clipboard is 
   await page.getByRole("button", { name: "Copy game link" }).click();
   await expect(page.getByRole("textbox", { name: "Game link", exact: true })).toHaveValue("http://127.0.0.1:3100/game/elden-ring-shadow-of-the-erdtree");
 });
+
+
+test("Games URLs retain filters and pages through reload, sharing and history", async ({page}) => {
+  await page.goto("/games?page=2");
+  await expect(page.getByText("Page 2 of 2", {exact:true})).toBeVisible();
+  await page.reload();
+  await expect(page.locator("[data-catalog-game]")).toHaveCount(2);
+  await page.getByLabel("Search titles").fill("Hades");
+  await expect(page).toHaveURL(/q=Hades$/);
+  await expect(page.getByRole("heading",{name:"Hades",exact:true})).toBeVisible();
+  await page.getByRole("combobox",{name:"Genre",exact:true}).selectOption("Roguelike");
+  await expect(page).toHaveURL(/q=Hades&genre=Roguelike$/);
+  await page.reload();
+  await expect(page.getByLabel("Search titles")).toHaveValue("Hades");
+  await expect(page.getByRole("combobox",{name:"Genre",exact:true})).toHaveValue("Roguelike");
+  await page.getByRole("link",{name:"Open game search"}).filter({visible:true}).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.getByRole("dialog").press("Escape");
+  await expect(page).toHaveURL(/q=Hades&genre=Roguelike$/);
+  await page.getByRole("button",{name:"Clear filters"}).click();
+  await expect(page).toHaveURL(/\/games$/);
+  await page.goBack();
+  await expect(page.getByLabel("Search titles")).toHaveValue("Hades");
+  await page.goForward();
+  await expect(page.getByLabel("Search titles")).toHaveValue("");
+  await page.goto("/games?genre=Unknown&sort=invalid&page=-1");
+  await expect(page.getByRole("heading",{name:"No games match these filters"})).toBeVisible();
+  await expect(page.getByRole("combobox",{name:"Genre",exact:true})).toHaveValue("Unknown");
+});

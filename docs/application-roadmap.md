@@ -106,8 +106,7 @@ remains pending.
 
 Implemented with local fixtures approved by the user. See
 [journey suite, isolation and post-deploy checklist](journey-tests.md).
-Step 4 implements explicit localization and accessibility. The next implementation
-milestone is step 5, catalog and profile growth.
+Step 4 implements explicit localization and accessibility. Step 5 implements catalog and profile growth; the next milestone is step 6.
 
 1. Keep existing unit/data/RLS tests, then add a small deterministic browser suite
    for guest catalog/search, theme/language persistence, mobile navigation, and
@@ -136,6 +135,9 @@ See [translation approach, accessibility checks and fallback limitation](display
    user-authored content.
 
 ### 5. Prepare the catalog and profiles for growth
+
+Implemented with the approved server-filtered 24-card pages. See
+[catalog growth, payload estimates and remaining limits](catalog-growth.md).
 
 1. Remove the 1,000-rating truncation for selected profiles, using paginated
    reads and tests above that boundary. Keep public/private access checks intact.
@@ -183,6 +185,7 @@ See [translation approach, accessibility checks and fallback limitation](display
   API/Terms/Privacy placeholders stay hidden.
 - **Step 4 (agreed):** Keep the existing dictionary, cookie preferences and URLs,
   with explicit React/server translations and no runtime i18n dependency.
+- **Step 5 (agreed):** Server-filtered Games pages with 24 cards and URL filters.
 - **Step 6:** Compare any two published profiles, or only a signed-in user's
   profile against a published profile? What should “affinity” measure?
 - **Step 7:** Should published profiles also be discoverable in a directory, and
@@ -190,4 +193,4 @@ See [translation approach, accessibility checks and fallback limitation](display
 
 Step 1's available-account flows are verified in the acceptance report; the
 second-Steam scenario remains pending. The next implementable milestone is
-**step 5**, catalog and profile growth.
+**step 6**, real profile comparison, after agreeing on selection and affinity.

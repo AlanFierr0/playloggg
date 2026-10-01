@@ -3,7 +3,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PreviewNoticeProvider } from "@/components/preview-action";
 import { PortfolioProvider } from "@/components/portfolio-provider";
-import { getPortfolio } from "@/lib/portfolio";
+import { getPortfolioShell } from "@/lib/portfolio";
 import { cookies } from "next/headers";
 import { localeCookie, siteLocale, siteTheme, themeCookie } from "@/lib/locale/preferences";
 import { SitePreferences } from "@/components/site-preferences";
@@ -18,7 +18,7 @@ export async function generateMetadata() { return localizeMetadata({
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const t = await getMessages();
-  const [portfolio, cookieStore] = await Promise.all([getPortfolio(), cookies()]);
+  const [portfolio, cookieStore] = await Promise.all([getPortfolioShell(), cookies()]);
   const locale = siteLocale(cookieStore.get(localeCookie)?.value);
   const theme = siteTheme(cookieStore.get(themeCookie)?.value);
   return (

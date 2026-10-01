@@ -3,7 +3,7 @@ import { useMessages } from "@/components/site-preferences";
 
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import { usePortfolio } from "@/components/portfolio-provider";
@@ -17,7 +17,9 @@ export function SiteHeader() {
   const { locale, theme, setLocale, setTheme } = useSitePreferences();
   const pathname = usePathname();
   const router = useRouter();
-  const searchHref = `/search?q=&from=${encodeURIComponent(pathname === "/search" ? "/" : pathname)}`;
+  const searchParams = useSearchParams();
+  const returnPath = pathname === "/games" && searchParams.size ? `${pathname}?${searchParams}` : pathname;
+  const searchHref = `/search?q=&from=${encodeURIComponent(pathname === "/search" ? "/" : returnPath)}`;
   const isActive = (href: string) => pathname === href || (href === "/tiers" && pathname.startsWith("/lists"));
   useEffect(() => {
     function shortcut(event: KeyboardEvent) {

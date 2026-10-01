@@ -1,7 +1,7 @@
 # Games catalog
 
 The Games tab at `/games` browses all stored Supabase catalog games, including
-titles the selected profile has not logged. It reuses the portfolio provider,
+titles the selected profile has not logged. It reuses the selected profile,
 existing permissions, reviewed covers and responsive site container. No schema,
 credentials or new dependencies are required for browsing. Production rollout
 from `main` is complete; Vercel deployed commit `36e9226` successfully.
@@ -20,8 +20,9 @@ game. Sample profile data is labeled in the profile filter summary.
 
 All filters combine. Changing a filter resets pagination to the first page;
 clearing restores the complete alphabetically sorted catalog. Each page displays
-up to 24 cards. Filters and pagination live in component state and reset when
-the page remounts. They do not write to the database.
+up to 24 cards. Filters and pagination live in the URL and survive reload and Back/Forward.
+Filtering runs on the server, shipping only the current 24 cards and facets.
+They do not write to the database. See [growth and limits](catalog-growth.md).
 
 Cards open game details. Authenticated owners additionally get log/edit links
 and a link to search IGDB for new games. IGDB search/import remains a separate
