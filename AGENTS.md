@@ -161,8 +161,12 @@ must not reference them. Keep profile/entry timestamps. The user also approved r
 all ownership checks use verified Auth IDs and publication checks use `is_public`.
 The corresponding migration preserves owner isolation for ratings, lists,
 favorites and private picture storage; never replace owner predicates with role-only access.
-The catalog retains 1,000 games and real personal
-records are unchanged. Demo seeding and the completed cleanup script are retired; never restore
+The catalog retains 1,000 games. After these migrations, the user explicitly
+requested deletion of all profiles: both profiles and their one saved rating were
+deleted on 2026-10-01. Profile, rating, favorite and curated-list tables are empty;
+both Auth sign-in accounts remain. Existing users must set up new private profiles
+on their next sign-in. Do not restore the removed personal entries. See
+supabase/delete-all-profiles.sql and docs/profile-data-reset.md. Demo seeding and the completed cleanup script are retired; never restore
 sample players/ratings into production. See supabase/cleanup-demo.sql.
 Do not enable public database writes without an
 agreed ownership/access design. Inspect Supabase before finalizing a schema;
