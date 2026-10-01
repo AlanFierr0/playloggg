@@ -13,8 +13,12 @@ export function ProfileSettingsForm({ profile }: { profile: Profile }) {
   const [visibilityState, visibilityAction, visibilityPending] = useActionState(updateProfile, { message: "" });
   const [handle, setHandle] = useState(profile.handle);
   const [displayName, setDisplayName] = useState(profile.displayName);
+  const [identityState, identityAction, identityPending] = useActionState(updateProfile, { message: "" });
+  const [bio, setBio] = useState(profile.bio ?? "");
+  const [location, setLocation] = useState(profile.location ?? "");
+  const [platformPreference, setPlatformPreference] = useState(profile.platformPreference ?? "");
   const [copyMessage, setCopyMessage] = useState("");
-  const pending = namesPending || visibilityPending;
+  const pending = namesPending || visibilityPending || identityPending;
   return <div className="space-y-8">
     <form action={namesAction} className="rounded-xl bg-surface-container-low p-5 sm:p-8 space-y-5">
       <input type="hidden" name="setting" value="names" />
@@ -25,12 +29,22 @@ export function ProfileSettingsForm({ profile }: { profile: Profile }) {
       <p role="status" className="text-primary break-words">{t(namesState.message)}</p>
       <button disabled={pending} className={button}>{namesPending ? t("Saving…") : t("Save names")}</button>
     </form>
+    <form action={identityAction} className="rounded-xl bg-surface-container-low p-5 sm:p-8 space-y-5">
+      <input type="hidden" name="setting" value="identity" />
+      <h2 className="font-headline-lg text-headline-lg">{t("About you")}</h2>
+      <p className="text-on-surface-variant">{t("These fields are optional and become visible when you publish your profile.")}</p>
+      <label className="block space-y-2"><span>{t("Bio")}</span><textarea name="bio" value={bio} onChange={event => setBio(event.target.value)} maxLength={500} rows={4} disabled={pending} className="w-full min-w-0 rounded bg-surface-container p-3" /></label>
+      <label className="block space-y-2"><span>{t("Location")}</span><input name="location" value={location} onChange={event => setLocation(event.target.value)} maxLength={80} disabled={pending} className="w-full min-w-0 rounded bg-surface-container p-3" /></label>
+      <label className="block space-y-2"><span>{t("Platform preference")}</span><input name="platformPreference" value={platformPreference} onChange={event => setPlatformPreference(event.target.value)} maxLength={80} disabled={pending} className="w-full min-w-0 rounded bg-surface-container p-3" /></label>
+      <p role="status" className="text-primary break-words">{t(identityState.message)}</p>
+      <button disabled={pending} className={button}>{identityPending ? t("Saving…") : t("Save profile details")}</button>
+    </form>
     <form action={visibilityAction} className="rounded-xl bg-surface-container-low p-5 sm:p-8 space-y-5">
       <input type="hidden" name="setting" value="visibility" />
       <input type="hidden" name="visibility" value={profile.isPublic ? "private" : "public"} />
       <h2 className="font-headline-lg text-headline-lg">{t("Profile visibility")}</h2>
       <p className="text-primary">{profile.isPublic ? t("Public") : t("Private")}</p>
-      <p className="text-on-surface-variant">{t("Publishing makes your profile names, ratings, tiers, playback details, reviews, tags and curated lists visible to anyone with the link. Your account email and Steam ID stay private.")}</p>
+      <p className="text-on-surface-variant">{t("Publishing makes your profile details, favorites, ratings, tiers, playback details, reviews, tags and curated lists visible to anyone with the link. Your account email and Steam ID stay private.")}</p>
       <p className="text-on-surface-variant">{t("Profiles start private. You can make yours private again at any time; future public visits will no longer show it.")}</p>
       {profile.isPublic && <Link className="block break-all text-primary underline" href={`/u/${profile.handle}`}>{t("Open public profile: /u/")}{profile.handle}</Link>}
       {profile.isPublic && <button type="button" className="text-primary underline" onClick={async () => {

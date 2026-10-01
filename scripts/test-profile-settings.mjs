@@ -71,6 +71,7 @@ test("public portfolios use anonymous fresh reads, paginate entries and hide unp
     "@/lib/supabase/public": { createPublicClient: () => client },
     "@/lib/portfolio": { getCatalog: async () => [], portfolioGames: (_rows, entries) => entries },
     "@/lib/profile-settings": { publicProfilePath },
+    "@/lib/favorites": {readFavorites: async () => []},
   });
   const portfolio = await getPublicPortfolio("player");
   assert.equal(portfolio.games.length, 501);

@@ -17,7 +17,14 @@ The five highest-priority improvements are Public Profile v2, Compare v2, Taste
 Fingerprint and personal stats, quick rating, and a Discover redesign. The phased
 order below establishes the data needed to make those features truthful.
 
-## Current foundation
+## Current status
+
+Profile v2 and the navigation foundation are implemented with the approved
+unlimited favorites and ordered featured Top 4. Optional bio/location/platform
+preference, current reviews, entry updates and basic stats are included. See
+[Profile v2](profile-v2.md). Quick rating and the deeper taste engine remain next.
+
+## Foundation at the start of this roadmap
 
 - Steam accounts have separately owned profiles, private by default. Publishing
   exposes their entries and lists through anonymous reads with publication checks.
@@ -40,6 +47,8 @@ order below establishes the data needed to make those features truthful.
 ## Phase 1: make profiles worth sharing
 
 ### 1A. Public Profile v2 and favorites
+
+Implemented with the approved scope; image uploads remain deferred.
 
 1. Agree on the favorite model and initial customization scope. Recommended:
    unlimited independent favorites with an ordered featured Top 4; bio and

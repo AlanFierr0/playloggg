@@ -8,7 +8,7 @@ import { profileSettings } from "@/lib/profile-settings";
 
 export async function updateProfile(_previous: { message: string }, form: FormData) {
   const input = profileSettings(form);
-  if (!input) return { message: "Check your profile settings. Handles need 3–30 lowercase letters, numbers or underscores; display names need 1–80 characters." };
+  if (!input) return { message: "Check your profile settings. Bio allows 500 characters; location and platform preference allow 80. Handles need 3–30 lowercase letters, numbers or underscores; display names need 1–80 characters." };
   try {
     const account = await getAccount();
     if (!account?.profile) return { message: "Sign in to edit your own profile." };
@@ -19,7 +19,7 @@ export async function updateProfile(_previous: { message: string }, form: FormDa
       .select("handle,is_public").maybeSingle();
     if (error || !data) return { message: error?.code === "23505" ? "That handle is taken. Choose another one." : "Your profile could not be updated. Please retry." };
     revalidatePath("/", "layout");
-    return { message: input.setting === "names" ? "Profile names saved." : data.is_public ? "Your profile and curated lists are now public." : "Your profile and curated lists are now private." };
+    return { message: input.setting === "names" ? "Profile names saved." : input.setting === "identity" ? "Profile details saved." : data.is_public ? "Your profile and curated lists are now public." : "Your profile and curated lists are now private." };
   } catch { return { message: "Saving is unavailable. Your draft has been kept; please retry." }; }
 }
 

@@ -15,6 +15,14 @@ Do not infer favorites from scores/tiers or independent preference rankings from
 score sorting. Keep private defaults and the existing no-directory policy until
 explicitly changed. Backup/recovery implementation is deferred.
 
+Profile v2 decisions are agreed: unlimited independent favorites, optional ordered
+featured Top 4, and optional bio/location/platform preference. Favoriting unlogged
+catalog games does not create ratings/status. Profile settings keep initials;
+image uploads are deferred. New favorite RLS follows profile visibility and Auth
+ownership; the slot RPC is SECURITY INVOKER. Profiles remain noindex/link-only.
+Recently updated entries use update timestamps, not invented historical activity.
+See docs/profile-v2.md for migrations, routes and verification.
+
 ## Stack and structure
 - Next.js App Router, React, strict TypeScript, compiled Tailwind CSS 3.
 - `src/app`: routes, shared layout and metadata.

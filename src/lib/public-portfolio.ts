@@ -2,28 +2,29 @@ import "server-only";
 import { cache } from "react";
 import { createPublicClient } from "@/lib/supabase/public";
 import { getCatalog, portfolioGames } from "@/lib/portfolio";
+import { readFavorites } from "@/lib/favorites";
 import { publicProfilePath } from "@/lib/profile-settings";
 import type { Database } from "@/types/database";
 import type { CuratedList, CuratedListSummary, Portfolio } from "@/types/domain";
 
 type RatingRow = Database["public"]["Tables"]["ratings"]["Row"];
-type PublicRating = Pick<RatingRow, "game_id" | "score" | "tier" | "review" | "status" | "platform" | "hours_played" | "completed_on" | "tags">;
+type PublicRating = Pick<RatingRow, "game_id" | "score" | "tier" | "review" | "status" | "platform" | "hours_played" | "completed_on" | "tags" | "updated_at">;
 
 export const getPublicPortfolio = cache(async (handle: string): Promise<Portfolio | null> => {
   const publicBase = publicProfilePath(handle);
   if (!publicBase) return null;
   const supabase = createPublicClient();
   const { data: profile, error } = await supabase.from("profiles")
-    .select("id,handle,display_name,is_sample,is_public").eq("handle", handle).eq("is_public", true).maybeSingle();
+    .select("id,handle,display_name,is_sample,is_public,bio,location,platform_preference").eq("handle", handle).eq("is_public", true).maybeSingle();
   if (error) throw new Error("This portfolio could not be loaded.");
   if (!profile) return null;
-  const [rows, ratings, lists] = await Promise.all([
+  const [rows, ratings, lists, favorites] = await Promise.all([
     getCatalog(),
     (async () => {
       const all: PublicRating[] = [];
       for (let offset = 0; ; offset += 500) {
         const { data, error } = await supabase.from("ratings")
-          .select("game_id,score,tier,review,status,platform,hours_played,completed_on,tags")
+          .select("game_id,score,tier,review,status,platform,hours_played,completed_on,tags,updated_at")
           .eq("profile_id", profile.id).order("game_id").range(offset, offset + 499);
         if (error) throw new Error("This portfolio's entries could not be loaded.");
         all.push(...data);
@@ -40,6 +41,7 @@ export const getPublicPortfolio = cache(async (handle: string): Promise<Portfoli
         if (data.length < 100) return all;
       }
     })(),
+    readFavorites(supabase, profile.id),
   ]);
   // Recheck after the paginated reads in case publishing changed during the request.
   const { data: current, error: currentError } = await supabase.from("profiles").select("id")
@@ -47,8 +49,8 @@ export const getPublicPortfolio = cache(async (handle: string): Promise<Portfoli
   if (currentError) throw new Error("This portfolio could not be loaded.");
   if (!current) return null;
   return {
-    games: portfolioGames(rows, ratings), lists, publicBase,
-    profile: { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: profile.is_sample, isPublic: true },
+    games: portfolioGames(rows, ratings), lists, favorites, publicBase,
+    profile: { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: profile.is_sample, bio: profile.bio, location: profile.location, platformPreference: profile.platform_preference, isPublic: true },
     access: { signedIn: false, canEdit: false, canImportCatalog: false },
   };
 });

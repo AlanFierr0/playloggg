@@ -14,7 +14,7 @@ export const getAccount = cache(async () => {
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user || (!isOwnerEmail(user.email) && !validSteamId(user.app_metadata.playlogg_steam_id))) return null;
   const { data: profile, error: profileError } = await supabase.from("profiles")
-    .select("id,handle,display_name,is_sample,is_public")
+    .select("id,handle,display_name,is_sample,is_public,bio,location,platform_preference")
     .eq("owner_user_id", user.id).eq("is_sample", false).maybeSingle();
   if (profileError) throw new Error("Your profile could not be loaded.");
   return { supabase, user, profile };

@@ -182,3 +182,10 @@ Repeatable browser checks use a local fixture API and fake sessions, never
 production writes. Run `pnpm test` for domain tests, `pnpm test:e2e` for desktop
 and mobile journeys, and `pnpm test:smoke` for read-only production checks. See
 [journey tests and failure reports](docs/journey-tests.md).
+
+Profile v2 makes `/profile` and published `/u/[handle]` pages gaming identity
+overviews, with independent favorites and an optional featured Top 4. Bio,
+location and platform preference follow profile visibility. Ranking, tiers, lists,
+reviews and basic stats are profile sections; main navigation is Discover, Games,
+Profile and Compare. See [Profile v2](docs/profile-v2.md) and the
+[product identity roadmap](docs/product-identity-roadmap.md).

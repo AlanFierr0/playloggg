@@ -1,2 +1,2 @@
-import { RankingsScreen } from "@/components/screens/rankings-screen";
-export default function PublicProfilePage() { return <RankingsScreen />; }
+import { ProfileOverviewScreen } from "@/components/screens/profile-overview-screen";
+export default function PublicProfilePage() { return <ProfileOverviewScreen />; }

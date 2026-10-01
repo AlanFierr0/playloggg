@@ -15,6 +15,6 @@ export default async function SettingsPage() {
   return <section className="mx-auto max-w-2xl px-4 sm:px-6 py-8 sm:py-12 space-y-6">
     <Link className="text-primary font-label-md text-label-md" href="/profile">{t("← My portfolio")}</Link>
     <h1 className="font-headline-xl text-headline-xl break-words">{t("Profile settings")}</h1>
-    <ProfileSettingsForm profile={{ id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isPublic: profile.is_public, isSample: false }} />
+    <ProfileSettingsForm profile={{ id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isPublic: profile.is_public, isSample: false, bio: profile.bio, location: profile.location, platformPreference: profile.platform_preference }} />
   </section>;
 }

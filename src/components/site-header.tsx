@@ -9,7 +9,7 @@ import { ProfileAvatar } from "@/components/profile-avatar";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { useSitePreferences } from "@/components/site-preferences";
 
-const navigation = [{ href: "/", label: "Discover" }, { href: "/games", label: "Games" }, { href: "/profile", label: "Rankings" }, { href: "/tiers", label: "Lists" }, { href: "/compare", label: "Compare" }];
+const navigation = [{ href: "/", label: "Discover" }, { href: "/games", label: "Games" }, { href: "/profile", label: "Profile" }, { href: "/compare", label: "Compare" }];
 
 export function SiteHeader() {
   const t = useMessages();
@@ -20,7 +20,7 @@ export function SiteHeader() {
   const searchParams = useSearchParams();
   const returnPath = pathname === "/games" && searchParams.size ? `${pathname}?${searchParams}` : pathname;
   const searchHref = `/search?q=&from=${encodeURIComponent(pathname === "/search" ? "/" : returnPath)}`;
-  const isActive = (href: string) => pathname === href || (href === "/tiers" && pathname.startsWith("/lists"));
+  const isActive = (href: string) => pathname === href || (href === "/profile" && (pathname.startsWith("/profile/") || pathname === "/tiers" || pathname.startsWith("/lists") || pathname.startsWith("/u/")));
   useEffect(() => {
     function shortcut(event: KeyboardEvent) {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") { event.preventDefault(); if (pathname !== "/search") router.push(searchHref); }

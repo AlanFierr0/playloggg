@@ -16,6 +16,7 @@ export interface Game {
   hoursPlayed?: number | null;
   completedOn?: string | null;
   tags?: string[];
+  updatedAt?: string;
   keywords: string;
   releasedOn?: string | null;
   genres?: string[];
@@ -35,6 +36,9 @@ export interface Profile {
   id: string;
   displayName: string;
   handle: string;
+  bio?: string | null;
+  location?: string | null;
+  platformPreference?: string | null;
   isSample?: boolean;
   isPublic?: boolean;
 }
@@ -44,6 +48,7 @@ export interface Portfolio {
   profile: Profile;
   publicBase?: string;
   lists?: CuratedListSummary[];
+  favorites?: Favorite[];
   access?: { signedIn: boolean; canEdit: boolean; canImportCatalog?: boolean };
 }
 
@@ -62,3 +67,5 @@ export interface Rating {
 
 export interface CuratedListSummary { id: number; name: string; revision: number }
 export interface CuratedList extends CuratedListSummary { slugs: string[] }
+
+export interface Favorite { slug: string; featuredSlot: number | null; createdAt: string }

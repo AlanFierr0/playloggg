@@ -48,7 +48,7 @@ test("theme and Argentine Spanish persist across navigation and reload", async (
 test("navigation stays usable and layouts avoid horizontal page overflow", async ({ page }) => {
   await page.goto("/");
   const navigation = page.getByRole("navigation", { name: "Main navigation" }).filter({ visible: true });
-  for (const [name, path] of [["Games", "/games"], ["Rankings", "/profile"], ["Lists", "/tiers"], ["Compare", "/compare"], ["Discover", "/"]]) {
+  for (const [name, path] of [["Games", "/games"], ["Profile", "/profile"], ["Compare", "/compare"], ["Discover", "/"]]) {
     await navigation.getByRole("link", { name, exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`${path === "/" ? "/" : path}$`));
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);

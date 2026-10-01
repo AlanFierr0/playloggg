@@ -145,38 +145,83 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_favorites: {
+        Row: {
+          created_at: string
+          featured_slot: number | null
+          game_id: number
+          profile_id: number
+        }
+        Insert: {
+          created_at?: string
+          featured_slot?: number | null
+          game_id: number
+          profile_id: number
+        }
+        Update: {
+          created_at?: string
+          featured_slot?: number | null
+          game_id?: number
+          profile_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_favorites_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_favorites_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           created_at: string
           display_name: string
           handle: string
           id: number
           is_public: boolean
           is_sample: boolean
+          location: string | null
           owner_user_id: string | null
+          platform_preference: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           display_name: string
           handle: string
           id?: never
           is_public?: boolean
           is_sample?: boolean
+          location?: string | null
           owner_user_id?: string | null
+          platform_preference?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           display_name?: string
           handle?: string
           id?: never
           is_public?: boolean
           is_sample?: boolean
+          location?: string | null
           owner_user_id?: string | null
+          platform_preference?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -255,6 +300,14 @@ export type Database = {
           p_profile_id: number
         }
         Returns: Json
+      }
+      set_profile_favorite: {
+        Args: {
+          p_favorite: boolean
+          p_featured_slot?: number
+          p_game_id: number
+        }
+        Returns: undefined
       }
       valid_rating_tags: { Args: { value: string[] }; Returns: boolean }
     }

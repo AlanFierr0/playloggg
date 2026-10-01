@@ -36,7 +36,7 @@ test("published sample ratings above 1000 retain the sample filter on every page
   const calls = [];
   const rows = Array.from({ length: 1001 }, (_, i) => ({ id: i + 1, slug: `game-${i}`, title: `Game ${i}`, cover_url: "/icon.svg", release_year: 2020, released_on: null, genres: [], artwork_image_ids: [], screenshot_image_ids: [], search_keywords: "", is_sample: true, igdb_metadata: {}, igdb_url: null }));
   const ratings = rows.map((row) => ({ game_id: row.id, score: row.id === 1001 ? 0 : null, tier: null, review: null, status: "backlog", platform: null, hours_played: 0, completed_on: null, tags: [] }));
-  const { getPortfolio } = load("../src/lib/portfolio.ts", { react: { cache: (fn) => fn }, "@/lib/owner": { getAccount: async () => null }, "@/lib/collections": { getLists: async () => [] } }, {
+  const { getPortfolio } = load("../src/lib/portfolio.ts", { react: { cache: (fn) => fn }, "@/lib/owner": { getAccount: async () => null }, "@/lib/collections": { getLists: async () => [] }, "@/lib/favorites": { readFavorites: async () => [] }, "@/lib/supabase/server": { createClient: async () => ({}) } }, {
     process: { env: { NEXT_PUBLIC_SUPABASE_URL: "https://fixture.invalid", NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "local-test" } }, AbortSignal,
     fetch: async (input) => {
       const url = new URL(input); const offset = Number(url.searchParams.get("offset") ?? 0); const limit = Number(url.searchParams.get("limit") ?? 500);

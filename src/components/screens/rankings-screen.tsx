@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { averageScore, filterRankings, loggedGames, ratedGames, type RankingFilter } from "@/lib/portfolio-view";
+import { ProfileNavigation } from "@/components/profile-navigation";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import type { Game } from "@/types/domain";
 import { playbackLabels } from "@/lib/playback-status";
@@ -31,6 +32,8 @@ return (<>
 
 <div className="absolute top-48 right-10 w-80 h-80 bg-secondary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
+{!publicBase && <div className="mb-8"><ProfileNavigation /></div>}
+<p className="mb-6 text-on-surface-variant text-body-sm">{t("Score ranking orders scored games from highest to lowest. Your tier and favorites are independent.")}</p>
 <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-12">
 <div className="flex min-w-0 items-center gap-4 sm:gap-6">
 <div className="relative shrink-0 group">

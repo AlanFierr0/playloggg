@@ -11,7 +11,7 @@ for (const locale of ["en", "es-AR"]) for (const theme of ["dark", "light"]) {
       { name: "playlogg_theme", value: theme, url: "http://127.0.0.1:3100" },
     ]);
     const failures: { path: string; rule: string; targets: string[][]; summary: string[] }[] = [];
-    for (const path of ["/", "/games", "/profile", "/tiers", "/lists", "/compare", "/compare?left=fixture_public&right=fixture_peer", "/game/hades", "/game/elden-ring-shadow-of-the-erdtree", "/search?q=Hades&from=/games", "/login", "/u/fixture_public", "/u/fixture_public/tiers", "/u/fixture_public/game/hades", "/u/fixture_public/lists/10", "/u/missing_fixture"]) {
+    for (const path of ["/", "/games", "/profile", "/profile/ranking", "/profile/favorites", "/profile/reviews", "/profile/stats", "/tiers", "/lists", "/compare", "/compare?left=fixture_public&right=fixture_peer", "/game/hades", "/game/elden-ring-shadow-of-the-erdtree", "/search?q=Hades&from=/games", "/login", "/u/fixture_public", "/u/fixture_public/tiers", "/u/fixture_public/game/hades", "/u/fixture_public/lists/10", "/u/missing_fixture"]) {
       await page.goto(path);
       await expect(page.locator("html")).toHaveAttribute("lang", locale);
       const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
