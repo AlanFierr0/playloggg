@@ -2,8 +2,8 @@
 
 A gaming portfolio based on the original Google Stitch exports. People can keep
 private entries and curated lists, browse a shared game catalog, and optionally
-publish a profile. All people use the same profile concepts; some editorial and
-comparison screens still contain illustrative content.
+publish a profile. All people use the same profile concepts. Catalog browsing does not invent
+ratings or select a demo player. See [accounts, pictures and catalog expansion](docs/accounts-pictures-and-catalog.md).
 
 For the current application inventory and prioritized next milestones, see the
 [application review and roadmap](docs/application-roadmap.md).
@@ -44,12 +44,13 @@ Next.js ESLint configuration fail on ESLint 10's rule API.
 | `/games` | Full saved game catalog with search, filters and pagination |
 | `/profile` | Personal profile and rankings |
 | `/tiers` | S–F tier board |
-| `/compare` | Sample profile comparison |
+| `/compare` | Comparison of two published profiles |
 | `/search` | Search overlay; Ctrl/Cmd+K also opens it |
-| `/log` | Owner rating/review and playback-status editor |
-| `/login` | Steam sign-in and existing owner email sign-in |
-| `/signup` | Private profile name setup after first Steam sign-in |
-| `/settings` | Owner profile names and optional publishing |
+| `/log` | Personal rating/review and playback-status editor |
+| `/login` | Steam, verified email/password registration and sign-in, password recovery, owner email link |
+| `/signup` | Private profile name setup after first sign-in |
+| `/settings` | Personal names, bio, picture and optional publishing |
+| `/reset-password` | Set a password after email recovery |
 | `/u/[handle]`, `/u/[handle]/tiers`, `/u/[handle]/lists` | Shareable rankings, tiers and curated lists for published profiles |
 | `/u/[handle]/lists/[id]`, `/u/[handle]/game/[slug]` | Public list and saved-entry details |
 | `/lists`, `/lists/[id]` | Curated lists and custom game order |

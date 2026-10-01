@@ -20,8 +20,7 @@ test("published comparisons show real affinity, independent tiers and reloadable
  await expect(page.getByRole("table").locator("tbody tr")).toHaveCount(20);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
  await page.goto("/compare?left=alexvance&right=fixture_public");
- await expect(page.locator("[data-affinity]")).toHaveText("—");
- await expect(page.getByText("At least 5 shared scored games are needed to show affinity.")).toBeVisible();
+ await expect(page.getByText("Comparison unavailable. Check both handles and make sure both profiles are published.")).toBeVisible();
  await page.goto("/compare?left=fixture_public&right=fixture_empty");
  await expect(page.getByText("These profiles have no shared logged games yet.")).toBeVisible();
 });

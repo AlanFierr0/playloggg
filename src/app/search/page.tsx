@@ -3,7 +3,7 @@ import { PortfolioProvider } from "@/components/portfolio-provider";
 import { localizeMetadata } from "@/lib/locale/server";
 import { SearchScreen } from "@/components/screens/search-screen";
 import { getPortfolio, getPublicGame } from "@/lib/portfolio";
-export async function generateMetadata() { return localizeMetadata({ title: "Search the archive", description: "Search the saved game catalog, profiles and lists. Owners can find and import games from IGDB." }); }
+export async function generateMetadata() { return localizeMetadata({ title: "Search the archive", description: "Search the saved game catalog, profiles and lists. Signed-in users can find and import games from IGDB." }); }
 
 async function safeReturnPath(value?: string): Promise<string> {
   if (value && ["/", "/games", "/profile", "/tiers", "/compare", "/log"].includes(value)) return value;

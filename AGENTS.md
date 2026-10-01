@@ -17,8 +17,10 @@ explicitly changed. Backup/recovery implementation is deferred.
 
 Profile v2 decisions are agreed: unlimited independent favorites, optional ordered
 featured Top 4, and optional bio/location/platform preference. Favoriting unlogged
-catalog games does not create ratings/status. Profile settings keep initials;
-image uploads are deferred. New favorite RLS follows profile visibility and Auth
+catalog games does not create ratings/status. Profile settings support optional JPEG/PNG/WebP picture uploads; initials remain
+the fallback. Pictures are normalized to WebP with sharp and stored privately.
+Serve pictures through fresh profile visibility checks; never expose Auth IDs
+in public object paths. See docs/accounts-pictures-and-catalog.md. New favorite RLS follows profile visibility and Auth
 ownership; the slot RPC is SECURITY INVOKER. Profiles remain noindex/link-only.
 Recently updated entries use update timestamps, not invented historical activity.
 See docs/profile-v2.md for migrations, routes and verification.
@@ -78,9 +80,10 @@ Public Steam registration is approved. The deployed Steam OpenID bridge creates
 Supabase sessions and lets users choose names for their own empty, private
 profiles. Use verified server-owned Steam metadata and existing per-profile RLS;
 never derive ownership from user metadata or browser-supplied IDs. `getAccount`
-permits personal edits; `getOwner` remains the original email owner's catalog
-administration check. Keep email owner login, do not auto-merge accounts, and do
-not expose the Auth admin client. No schema/grant changes are needed. Production
+permits personal edits; `getOwner` remains the original email owner's maintenance
+administration check. Any signed-in profile owner may search/import IGDB metadata. Keep email owner login, do not auto-merge accounts, and do
+not expose the Auth admin client. Email/password registration is also approved, with confirmed email accounts
+creating separate empty private profiles. No automatic account linking. Production
 rollout is complete. Real Steam sign-in, persistence and repeat sign-in are verified;
 a second Steam account was unavailable. See docs/steam-sign-in.md.
 
@@ -139,16 +142,19 @@ the user authorized production rollout from `main`. Lists follow profile visibil
 custom game order independently of ratings. Keep existing navigation, link to
 curated lists from the tier board, and use the editor's functional tag controls.
 See docs/tags-and-curated-lists.md for the applied schema and verification.
-Owner-only IGDB catalog search/import is deployed. The owner confirmed credentials
-are configured in Vercel Production; real owner search/import, duplicate reuse
-and Steam action denial are verified. See docs/production-acceptance.md.
-Local provider/admin credentials remain absent. Search/import must reverify the allowlisted
-Auth user and its non-sample owned profile. Only server-fetched metadata may be
-inserted through the server-only catalog client; anonymous/authenticated games
-permissions remain read-only. Reuse existing IGDB IDs without overwriting games,
-sample flags, ratings or lists. New imports do not create personal entries. See
-docs/igdb-catalog-import.md. Never expose the Supabase secret key or provider
-credentials to Client Components.
+IGDB catalog search/import is available to any Auth-verified user with their own
+non-sample profile. The user approved an initial catalog of 1,000 well-rated
+released games. An idempotent bootstrap runs only in Vercel Production builds
+until that target is met, using existing server credentials; preview/local builds
+skip it. Do not invent user scores or import ratings from the provider. Import
+reuses existing IGDB IDs without overwriting metadata, slugs or personal data.
+Games remain read-only to application database roles; only trusted server-fetched
+metadata goes through the server-only admin client. See
+ docs/accounts-pictures-and-catalog.md and docs/igdb-catalog-import.md.
+Guest catalog pages have no selected profile/ratings, and personal pages require
+sign-in/profile setup. Sample public profiles and comparisons are excluded.
+The sample database cleanup scope is pending the user's answer; do not assume
+that keeping or deleting the original real game metadata was approved.
 Do not enable public database writes without an
 agreed ownership/access design. Inspect Supabase before finalizing a schema;
 track approved changes in versioned migrations. Keep credentials in ignored

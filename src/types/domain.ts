@@ -36,6 +36,7 @@ export interface Profile {
   id: string;
   displayName: string;
   handle: string;
+  avatarUrl?: string | null;
   bio?: string | null;
   location?: string | null;
   platformPreference?: string | null;

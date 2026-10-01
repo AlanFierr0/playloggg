@@ -37,7 +37,7 @@ function loader({hidden=false,unpublish=false,fail=false}={}){
  async range(start,end){assert.equal(fields,"game_id,score,tier,status");assert.ok(filters.some(([key])=>key==="profile_id"));ratingReads++;return{data:fail&&start===500 ? null : entries.slice(start,end+1),error:fail&&start===500 ? {} : null}}
  }}};
  const source=readFileSync(new URL("../src/lib/public-comparison.ts",import.meta.url),"utf8");
- const dependencies={"server-only":{},"@/lib/supabase/public":{createPublicClient:()=>{created++;return db}},"@/lib/profile-settings":{publicProfilePath:handle=>/^[a-z0-9_]{3,30}$/.test(handle)?`/u/${handle}`:null},"@/lib/portfolio":{getCatalog:async()=>rows}};
+ const dependencies={"@/lib/avatar-input":{avatarSource:()=>null},"server-only":{},"@/lib/supabase/public":{createPublicClient:()=>{created++;return db}},"@/lib/profile-settings":{publicProfilePath:handle=>/^[a-z0-9_]{3,30}$/.test(handle)?`/u/${handle}`:null},"@/lib/portfolio":{getCatalog:async()=>rows}};
  const compiledModule={exports:{}};vm.runInNewContext(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:compiledModule,exports:compiledModule.exports,require:name=>{assert.ok(name in dependencies);return dependencies[name]}});
  return {read:compiledModule.exports.getPublicComparison,state:()=>({ratingReads,checks,created})};
 }

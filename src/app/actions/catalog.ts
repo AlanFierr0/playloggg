@@ -1,6 +1,6 @@
 "use server";
 import { revalidatePath, updateTag } from "next/cache";
-import { getOwner } from "@/lib/owner";
+import { getAccount } from "@/lib/owner";
 import { catalogQuery, igdbId, normalizeImport, normalizeMatch, searchBody, type IgdbMatch } from "@/lib/catalog-input";
 import { queryIgdb } from "@/lib/igdb";
 import { createCatalogAdmin } from "@/lib/supabase/catalog-admin";
@@ -14,8 +14,8 @@ export async function searchIgdb(input: unknown): Promise<SearchResult> {
   const query = catalogQuery(input);
   if (!query) return { ok: false, message: "Enter a title of 2–100 characters.", games: [] };
   try {
-    const owner = await getOwner();
-    if (!owner?.profile) return { ok: false, message: "Sign in to your owner account to search IGDB.", games: [] };
+    const owner = await getAccount();
+    if (!owner?.profile) return { ok: false, message: "Sign in to search IGDB.", games: [] };
     const records = await queryIgdb(searchBody(query));
     const seen = new Set<number>();
     const games = records.slice(0, 20).map(normalizeMatch).filter((game): game is IgdbMatch => Boolean(game && !seen.has(game.id) && seen.add(game.id)));
@@ -28,8 +28,8 @@ export async function searchIgdb(input: unknown): Promise<SearchResult> {
 export async function importIgdb(input: unknown): Promise<ImportResult> {
   if (!igdbId(input)) return { ok: false, message: "Choose a valid IGDB game." };
   try {
-    const owner = await getOwner();
-    if (!owner?.profile) return { ok: false, message: "Sign in to your owner account before importing games." };
+    const owner = await getAccount();
+    if (!owner?.profile) return { ok: false, message: "Sign in before importing games." };
     // Reuse the reviewed shared catalog even when provider import is unconfigured.
     const { data: existing, error: readError } = await owner.supabase.from("games").select(fields).eq("igdb_id", input).maybeSingle();
     if (readError) return { ok: false, message: "The catalog could not be checked. Please retry." };

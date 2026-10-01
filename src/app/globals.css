@@ -173,3 +173,7 @@ html.light .scroll-region { scrollbar-color: #b0a18b #f4f3f7; }
 
 /* Keep keyboard focus visible when form utilities suppress the default outline. */
 :focus-visible { outline: 2px solid rgb(var(--color-primary)); outline-offset: 3px; }
+
+/* A shared radius for actions; circular account controls keep their shape. */
+button:not(.rounded-full), input[type="submit"], [role="button"]:not(.rounded-full),
+a.inline-flex:not(.rounded-full), a[class*="bg-primary"]:not(.rounded-full) { border-radius: .75rem; }

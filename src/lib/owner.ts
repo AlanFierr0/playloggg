@@ -1,7 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { validSteamId } from "@/lib/steam-openid";
+import { eligibleAccount } from "@/lib/account-identity";
 
 export function isOwnerEmail(email: string | undefined) {
   const allowed = process.env.PLAYLOGG_OWNER_EMAIL?.trim().toLowerCase();
@@ -12,9 +12,9 @@ export function isOwnerEmail(email: string | undefined) {
 export const getAccount = cache(async () => {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user || (!isOwnerEmail(user.email) && !validSteamId(user.app_metadata.playlogg_steam_id))) return null;
+  if (error || !user || !eligibleAccount(user)) return null;
   const { data: profile, error: profileError } = await supabase.from("profiles")
-    .select("id,handle,display_name,is_sample,is_public,bio,location,platform_preference")
+    .select("id,handle,display_name,is_sample,is_public,avatar_url,bio,location,platform_preference")
     .eq("owner_user_id", user.id).eq("is_sample", false).maybeSingle();
   if (profileError) throw new Error("Your profile could not be loaded.");
   return { supabase, user, profile };

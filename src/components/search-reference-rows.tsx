@@ -170,7 +170,7 @@ export function ReferenceGame2({ game, query, mode }: { game: Game; query: strin
 export function ReferenceProfile0({ profile, count, average }: { profile: Profile; count: number; average: string }) {
   const t = useMessages(); return (<Link data-search-result className="group flex items-center gap-3 p-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors" href="/profile">
 <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-surface-container-highest shadow">
-<ProfileAvatar className="w-full h-full object-cover" name={profile.displayName} />
+<ProfileAvatar className="w-full h-full object-cover" src={profile.avatarUrl} name={profile.displayName} />
 
 </div>
 

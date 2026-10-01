@@ -37,7 +37,7 @@ return (<>
 <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-12">
 <div className="flex min-w-0 items-center gap-4 sm:gap-6">
 <div className="relative shrink-0 group">
-<ProfileAvatar className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded object-cover shadow-2xl transition-transform duration-500 group-hover:scale-105" name={profile.displayName} />
+<ProfileAvatar className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded object-cover shadow-2xl transition-transform duration-500 group-hover:scale-105" src={profile.avatarUrl} name={profile.displayName} />
 
 <span className="absolute bottom-1 right-1 w-3 h-3 bg-secondary rounded-full ring-2 ring-surface shadow-sm"></span>
 

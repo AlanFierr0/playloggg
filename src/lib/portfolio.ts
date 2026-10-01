@@ -1,3 +1,4 @@
+import { avatarSource } from "@/lib/avatar-input";
 import "server-only";
 import { cache } from "react";
 import type { Database } from "@/types/database";
@@ -6,11 +7,11 @@ import { readProfileRatings } from "@/lib/profile-ratings";
 import { getLists } from "@/lib/collections";
 import { readFavorites } from "@/lib/favorites";
 import { createClient } from "@/lib/supabase/server";
-import { getAccount, isOwnerEmail } from "@/lib/owner";
+import { getAccount } from "@/lib/owner";
 
 type GameRow = Database["public"]["Tables"]["games"]["Row"];
 type RatingRow = Database["public"]["Tables"]["ratings"]["Row"];
-type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+
 
 async function readPublic<T>(resource: string, tags: string[] = []): Promise<T[]> {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -44,27 +45,20 @@ export const getCatalogGame = cache(async (slug: string): Promise<GameRow | unde
 });
 const selectedAccount = cache(async () => {
   const owner = await getAccount();
-  const profile = owner?.profile ?? (await readPublic<ProfileRow>("profiles?handle=eq.alexvance&select=id,handle,display_name,is_sample,is_public,bio,location,platform_preference&limit=1"))[0];
-  if (!profile) throw new Error("The published sample profile could not be loaded.");
+  const profile = owner?.profile ?? null;
   return { owner, profile };
 });
 export const getPortfolioShell = cache(async (): Promise<Portfolio> => {
   const { owner, profile } = await selectedAccount();
-  return { games: [], lists: [], profile: { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: profile.is_sample, bio: profile.bio, location: profile.location, platformPreference: profile.platform_preference, isPublic: profile.is_public }, access: { signedIn: Boolean(owner), canEdit: Boolean(owner?.profile), canImportCatalog: Boolean(owner?.profile && isOwnerEmail(owner.user.email)) } };
+  return { games: [], lists: [], profile: profile ? { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: false, avatarUrl: avatarSource(profile.id, profile.avatar_url), bio: profile.bio, location: profile.location, platformPreference: profile.platform_preference, isPublic: profile.is_public } : {id: "", handle: "", displayName: "", isSample: false, isPublic: false}, access: { signedIn: Boolean(owner), canEdit: Boolean(profile), canImportCatalog: Boolean(profile) } };
 });
 const selectedRatings = cache(async () => {
   const { owner, profile } = await selectedAccount();
-  if (owner?.profile) return readProfileRatings(owner.supabase, profile.id);
-  const all: RatingRow[] = [];
-  for (let offset = 0; ; offset += 500) {
-    const page = await readPublic<RatingRow>(`ratings?select=game_id,score,tier,review,status,platform,hours_played,completed_on,tags,updated_at,profiles!inner(handle)&profiles.handle=eq.alexvance&order=game_id.asc&limit=500&offset=${offset}`);
-    all.push(...page);
-    if (page.length < 500) return all;
-  }
+  return owner?.profile && profile ? readProfileRatings(owner.supabase, profile.id) : [];
 });
 export const getPortfolio = cache(async (): Promise<Portfolio> => {
   const [shell, rows, ratings] = await Promise.all([getPortfolioShell(), getCatalog(), selectedRatings()]);
-  const [lists, favorites] = await Promise.all([getLists(Number(shell.profile.id)), (async () => readFavorites(await createClient(), Number(shell.profile.id)))()]);
+  const [lists, favorites] = !shell.profile.id ? [[], []] : await Promise.all([getLists(Number(shell.profile.id)), (async () => readFavorites(await createClient(), Number(shell.profile.id)))()]);
   return { ...shell, games: portfolioGames(rows, ratings), lists, favorites };
 });
 export const getPublicGame = cache(async (slug: string) => {
@@ -72,11 +66,11 @@ export const getPublicGame = cache(async (slug: string) => {
   if (!row) return undefined;
   const { owner, profile } = await selectedAccount();
   let ratings: RatingRow[];
-  if (owner?.profile) {
+  if (owner?.profile && profile) {
     const { data, error } = await owner.supabase.from("ratings").select("game_id,score,tier,review,status,platform,hours_played,completed_on,tags,updated_at").eq("profile_id", profile.id).eq("game_id", row.id).limit(1);
     if (error) throw new Error("Your ratings could not be loaded.");
     ratings = data as RatingRow[];
-  } else ratings = await readPublic<RatingRow>(`ratings?select=game_id,score,tier,review,status,platform,hours_played,completed_on,tags,updated_at,profiles!inner(handle)&profiles.handle=eq.alexvance&game_id=eq.${row.id}&limit=1`);
+  } else ratings = [];
   return portfolioGames([row], ratings)[0];
 });
 
@@ -97,11 +91,19 @@ export function portfolioGames(rows: GameRow[], ratings: (Pick<RatingRow, "game_
       hoursPlayed: rating?.hours_played ?? null, completedOn: rating?.completed_on ?? null, tags: rating?.tags ?? [],
       artwork: row.artwork_image_ids[0] ? image(row.artwork_image_ids[0], "screenshot_huge") : row.screenshot_image_ids[0] ? image(row.screenshot_image_ids[0], "screenshot_huge") : null,
       screenshots: row.screenshot_image_ids.map((id) => image(id, "screenshot_big")),
-      isSampleCatalog: row.is_sample, summary: typeof metadata.summary === "string" ? metadata.summary.slice(0, 10000) : null,
+      isSampleCatalog: false, summary: typeof metadata.summary === "string" ? metadata.summary.slice(0, 10000) : null,
       developers: names(metadata.developers), publishers: names(metadata.publishers), platforms: names(metadata.platforms),
       kind: typeof metadata.game_type === "string" ? metadata.game_type.slice(0, 80) : null, sourceUrl: row.igdb_url,
     };
   });
   games.sort((a, b) => (b.score ?? -1) - (a.score ?? -1) || a.slug.localeCompare(b.slug));
   return games;
+}
+
+export async function getPersonalPortfolio() {
+  const {redirect} = await import("next/navigation");
+  const account = await getAccount();
+  if (!account) return redirect("/login");
+  if (!account.profile) redirect("/signup");
+  return getPortfolio();
 }

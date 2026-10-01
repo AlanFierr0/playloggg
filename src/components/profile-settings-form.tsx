@@ -1,6 +1,7 @@
 "use client";
 import { useMessages } from "@/components/site-preferences";
 
+import { ProfilePictureForm } from "@/components/profile-picture-form";
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { updateProfile } from "@/app/actions/profile";
@@ -20,6 +21,7 @@ export function ProfileSettingsForm({ profile }: { profile: Profile }) {
   const [copyMessage, setCopyMessage] = useState("");
   const pending = namesPending || visibilityPending || identityPending;
   return <div className="space-y-8">
+    <ProfilePictureForm profile={profile} />
     <form action={namesAction} className="rounded-xl bg-surface-container-low p-5 sm:p-8 space-y-5">
       <input type="hidden" name="setting" value="names" />
       <h2 className="font-headline-lg text-headline-lg">{t("Profile names")}</h2>

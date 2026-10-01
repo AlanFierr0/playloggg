@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { isOwnerEmail } from "@/lib/owner";
+import { eligibleAccount } from "@/lib/account-identity";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
@@ -8,8 +8,9 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code");
   const supabase = await createClient();
   let verified = false;
-  if (token_hash && searchParams.get("type") === "email") {
-    const { error } = await supabase.auth.verifyOtp({ token_hash, type: "email" });
+  const type = searchParams.get("type");
+  if (token_hash && (type === "email" || type === "signup" || type === "recovery")) {
+    const { error } = await supabase.auth.verifyOtp({ token_hash, type });
     verified = !error;
   } else if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
@@ -17,8 +18,8 @@ export async function GET(request: NextRequest) {
   }
   if (verified) {
     const { data: { user } } = await supabase.auth.getUser();
-    if (user && isOwnerEmail(user.email)) {
-      const response = NextResponse.redirect(new URL("/profile", request.url));
+    if (user && eligibleAccount(user)) {
+      const response = NextResponse.redirect(new URL(type === "recovery" || (code && searchParams.get("flow") === "recovery") ? "/reset-password" : "/profile", request.url));
       response.headers.set("Cache-Control", "private, no-store");
       response.headers.set("Referrer-Policy", "no-referrer");
       return response;

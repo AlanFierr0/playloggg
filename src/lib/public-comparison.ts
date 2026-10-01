@@ -1,4 +1,5 @@
 import "server-only";
+import { avatarSource } from "@/lib/avatar-input";
 import { createPublicClient } from "@/lib/supabase/public";
 import { publicProfilePath } from "@/lib/profile-settings";
 import { getCatalog } from "@/lib/portfolio";
@@ -10,8 +11,8 @@ export async function getPublicComparison(left: string, right: string) {
   if (!publicProfilePath(left) || !publicProfilePath(right) || left === right) return null;
   const supabase = createPublicClient();
   async function read(handle: string) {
-    const { data: profile, error } = await supabase.from("profiles").select("id,handle,display_name,is_sample,is_public")
-      .eq("handle",handle).eq("is_public",true).maybeSingle();
+    const { data: profile, error } = await supabase.from("profiles").select("id,handle,display_name,is_sample,is_public,avatar_url")
+      .eq("handle",handle).eq("is_public",true).eq("is_sample",false).maybeSingle();
     if (error) throw new Error("Comparison could not be loaded.");
     if (!profile) return null;
     const entries: Entry[] = [];
@@ -29,7 +30,7 @@ export async function getPublicComparison(left: string, right: string) {
   const rows = await getCatalog();
   // Recheck both profiles after all paginated reads, even for signed-in visitors.
   const current = await Promise.all([a,b].map(async side => {
-    const { data,error } = await supabase.from("profiles").select("id").eq("id",side.profile.id).eq("handle",side.profile.handle).eq("is_public",true).maybeSingle();
+    const { data,error } = await supabase.from("profiles").select("id").eq("id",side.profile.id).eq("handle",side.profile.handle).eq("is_public",true).eq("is_sample",false).maybeSingle();
     if (error) throw new Error("Comparison could not be loaded.");
     return data;
   }));
@@ -40,7 +41,7 @@ export async function getPublicComparison(left: string, right: string) {
       const entry = entries.get(row.id)!;
       return { slug:row.slug,title:row.title,cover:row.cover_url,year:row.release_year,keywords:"",score:entry.score,tier:entry.tier as Game["tier"],status:entry.status as Game["status"],logged:true };
     });
-    const profile: Profile = {id:String(side.profile.id),handle:side.profile.handle,displayName:side.profile.display_name,isSample:side.profile.is_sample,isPublic:true};
+    const profile: Profile = {id:String(side.profile.id),handle:side.profile.handle,displayName:side.profile.display_name,avatarUrl:avatarSource(side.profile.id,side.profile.avatar_url),isSample:false,isPublic:true};
     return {profile,games};
   }
   return {left:portfolio(a),right:portfolio(b)};

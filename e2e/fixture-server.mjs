@@ -3,7 +3,7 @@ import { createServer } from "node:http";
 export const fixtureAdminKey = "loopback-only-fixture-admin";
 export const fixtureOrigin = "http://127.0.0.1:3101";
 const ownerId = "11111111-1111-4111-8111-111111111111";
-const user = { id: ownerId, aud: "authenticated", role: "authenticated", email: "owner@fixture.invalid", app_metadata: {}, user_metadata: {}, created_at: "2026-01-01T00:00:00Z" };
+const user = { id: ownerId, aud: "authenticated", role: "authenticated", email: "owner@fixture.test", email_confirmed_at: "2026-01-01T00:00:00Z", app_metadata: {}, user_metadata: {}, created_at: "2026-01-01T00:00:00Z" };
 const token = [Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url"), Buffer.from(JSON.stringify({ sub: ownerId, aud: "authenticated", role: "authenticated", exp: 4102444800, iat: 1767225600 })).toString("base64url"), Buffer.from("only-valid-in-local-fixture").toString("base64url")].join(".");
 const session = { access_token: token, refresh_token: "local-fixture-refresh", token_type: "bearer", expires_in: 3600, expires_at: 4102444800, user };
 export const authCookie = { name: "sb-127-auth-token", value: `base64-${Buffer.from(JSON.stringify(session)).toString("base64url")}`, url: "http://127.0.0.1:3100" };
@@ -19,7 +19,8 @@ const games = titles.map(([slug, title, genre], index) => ({ id: index + 1, slug
 let ratings;
 let failSave;
 let favorites;
-function reset() { Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false,bio:null,location:null,platform_preference:null}); favorites=[{profile_id:3,game_id:1,featured_slot:1,created_at:"2026-09-29T12:00:00Z"}]; ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
+let pictures = new Map();
+function reset() { pictures.clear(); Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false,bio:null,location:null,platform_preference:null,avatar_url:null}); favorites=[{profile_id:3,game_id:1,featured_slot:1,created_at:"2026-09-29T12:00:00Z"}]; ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
  for (const game_id of [3,4,5,6]) ratings.push({profile_id:3,game_id,score:50,tier:null,status:"playing",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  for (const game_id of [1,3,4,5,6]) ratings.push({profile_id:4,game_id,score:game_id===1 ? 10 : 40,tier:"A",status:"completed",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  ratings.push({profile_id:3,game_id:7,score:null,tier:"S",status:"backlog",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
@@ -41,9 +42,33 @@ export async function startFixtureServer() {
       if (url.pathname === "/__state") return reply(200, { ratings, favorites });
       const admin = req.headers.authorization === `Bearer ${fixtureAdminKey}`;
       const authenticated = req.headers.authorization === `Bearer ${token}`;
-      if (url.pathname === "/auth/v1/user") return authenticated ? reply(200, user) : reply(401, { message: "Fixture session required" });
+      if (url.pathname === "/auth/v1/user" && req.method === "GET") return authenticated ? reply(200, user) : reply(401, { message: "Fixture session required" });
+      if (url.pathname === "/auth/v1/token" && req.method === "POST") {
+        let body=""; for await (const part of req) body+=part; const input=JSON.parse(body);
+        return input.email===user.email && input.password==="fixture-password-123" ? reply(200,session) : reply(400,{error_code:"invalid_credentials",msg:"Invalid login credentials"});
+      }
+      if (["/auth/v1/signup","/auth/v1/recover"].includes(url.pathname) && req.method === "POST") return reply(200,{});
+      if (url.pathname === "/auth/v1/user" && req.method === "PUT") return authenticated ? reply(200,user) : reply(401,{message:"Unauthorized"});
+      if (url.pathname.startsWith("/storage/v1/object/")) {
+        const path=url.pathname.replace(/^\/storage\/v1\/object\/(?:authenticated\/)?profile-pictures\/?/, "");
+        if(req.method==="POST") {
+          if(!authenticated || !path.startsWith("2/"))return reply(403,{message:"Fixture ownership denied"});
+          const parts=[];for await(const part of req)parts.push(part); pictures.set(path,Buffer.concat(parts));return reply(200,{Key:path});
+        }
+        if(req.method==="DELETE") {
+          if(!authenticated)return reply(403,{message:"Fixture ownership denied"});
+          let body="";for await(const part of req)body+=part;const input=JSON.parse(body);
+          for(const key of input.prefixes??[])if(key.startsWith("2/"))pictures.delete(key);
+          return reply(200,[]);
+        }
+        if(req.method==="GET") {
+          if(!admin && !authenticated)return reply(403,{message:"Private bucket"});
+          const bytes=pictures.get(path);if(!bytes)return reply(404,{message:"Missing picture"});
+          res.writeHead(200,{"Content-Type":"image/webp"});return res.end(bytes);
+        }
+      }
       const resource = url.pathname.replace("/rest/v1/", "");
-      const visibleProfiles = profiles.filter((profile) => profile.is_public || (authenticated && profile.owner_user_id === ownerId));
+      const visibleProfiles = profiles.filter((profile) => admin || profile.is_public || (authenticated && profile.owner_user_id === ownerId));
       if (resource === "ratings" && req.method === "POST") {
         let body = ""; for await (const part of req) body += part;
         const rating = JSON.parse(body);
@@ -56,9 +81,9 @@ export async function startFixtureServer() {
         if (!admin || url.searchParams.get("id") !== "eq.2" || url.searchParams.get("owner_user_id") !== `eq.${ownerId}` || url.searchParams.get("is_sample") !== "eq.false") return reply(403, {message:"Fixture ownership denied"});
         let body=""; for await (const part of req) body+=part;
         const patch=JSON.parse(body);
-        if(Object.keys(patch).some(key=>!["handle","display_name","is_public","updated_at","bio","location","platform_preference"].includes(key))) return reply(400,{message:"Unsupported fixture field"});
+        if(Object.keys(patch).some(key=>!["handle","display_name","is_public","updated_at","bio","location","platform_preference","avatar_url"].includes(key))) return reply(400,{message:"Unsupported fixture field"});
         Object.assign(profiles[1],patch);
-        const result={handle:profiles[1].handle,is_public:profiles[1].is_public};
+        const result={id:2,handle:profiles[1].handle,is_public:profiles[1].is_public};
         return reply(200,req.headers.accept?.includes("application/vnd.pgrst.object+json") ? result : [result]);
       }
       if (resource === "rpc/set_profile_favorite" && req.method === "POST") {

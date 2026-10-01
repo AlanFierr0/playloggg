@@ -14,7 +14,7 @@ export function GameStandpoint({ game }: { game: Game }) {
   return <section className="bg-surface-container-low rounded-xl p-5 shadow-sm relative overflow-hidden space-y-4">
     <div className="flex flex-wrap items-center justify-between gap-4">
       <div className="flex min-w-0 items-center gap-3">
-        <ProfileAvatar name={profile.displayName} className="w-12 h-12 shrink-0 rounded-full object-cover" />
+        <ProfileAvatar src={profile.avatarUrl} name={profile.displayName} className="w-12 h-12 shrink-0 rounded-full object-cover" />
         <div className="min-w-0 space-y-2">
           <h2 className="font-headline-md text-headline-md font-semibold">{profile.isSample ? t("Sample profile entry") : t("Your log entry")}</h2>
           {game.logged ? <div className="flex flex-wrap gap-x-3 gap-y-1 text-body-sm text-on-surface-variant">

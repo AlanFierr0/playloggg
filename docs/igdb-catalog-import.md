@@ -1,4 +1,4 @@
-# Owner IGDB search and catalog import
+# IGDB search and catalog import
 
 Status: deployed from `main` in commit `36e9226`. The owner confirmed the three
 provider/server variables are configured in Vercel Production. Real authenticated
@@ -7,9 +7,13 @@ search/import and duplicate reuse passed on 2026-09-30; see
 these three variables. No schema migration or public catalog-write grant is
 needed; the inspected live schema already has a unique `games.igdb_id`.
 
+Current access (2026-10-01): all Auth-verified users with their own private or
+public profile can search and import missing games. Original owner-only acceptance
+below is historical. See [accounts, pictures and catalog](accounts-pictures-and-catalog.md).
+
 ## Behavior
 
-The signed-in owner can choose **Find on IGDB** in the existing search dialog.
+A signed-in user with a profile can choose **Find on IGDB** in the existing search dialog.
 Enter 2–100 characters, then press Search IGDB or Enter. Searches return at most
 20 matches with title, earliest release year, game type, platforms and cover.
 Check these fields before choosing an edition. Query edits hide old matches.
@@ -33,8 +37,8 @@ Unavailable cover art uses a labeled text placeholder; no art is generated.
 ## Access and secrets
 
 Every search/import Server Action validates input, verifies the current Auth user,
-checks the server owner-email allowlist, and resolves its administratively owned
-non-sample profile. Browser requests contain only the query or numeric IGDB ID.
+resolves its non-sample owned profile, and derives ownership from the verified
+Auth user. Browser requests contain only the query or numeric IGDB ID.
 Import fetches metadata again from IGDB and stores whitelisted public fields.
 The browser cannot supply a slug, source URL, cover URL, profile or rating.
 

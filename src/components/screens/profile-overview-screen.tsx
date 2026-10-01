@@ -21,7 +21,7 @@ export function ProfileOverviewScreen() {
   return <section className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-12 space-y-10">
     <header className="space-y-6">
       <div className="flex items-start gap-4 sm:gap-6">
-        <ProfileAvatar name={profile.displayName} className="w-16 h-16 sm:w-24 sm:h-24 rounded-xl text-headline-xl" />
+        <ProfileAvatar src={profile.avatarUrl} name={profile.displayName} className="w-16 h-16 sm:w-24 sm:h-24 rounded-xl text-headline-xl" />
         <div className="min-w-0 space-y-2">
           <p className="text-label-sm font-label-sm uppercase tracking-widest text-primary">{profile.isSample ? t("Sample profile") : profile.isPublic ? t("Public profile") : t("Private profile")}</p>
           <h1 translate="no" className="font-display-lg text-display-lg sm:text-[56px] leading-tight break-words">{profile.displayName}</h1>

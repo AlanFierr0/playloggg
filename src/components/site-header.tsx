@@ -49,7 +49,7 @@ export function SiteHeader() {
           </Link>
           <Link aria-label={t("Log a game")} className="inline-flex shrink-0 min-h-11 min-w-11 justify-center items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded bg-primary-container text-on-primary-container hover:bg-primary transition-colors font-label-md text-label-md tracking-wider uppercase font-semibold" href="/log"><span className="material-symbols-outlined text-[16px]" aria-hidden="true">add</span><span className="hidden sm:inline">{t("Log")}</span></Link>
           <div className="hidden sm:flex items-center gap-1"><PreferenceControls locale={locale} theme={theme} setLocale={setLocale} setTheme={setTheme} /></div>
-          <Link className="flex h-11 w-11 shrink-0 items-center justify-center" href="/login" aria-label={access?.signedIn ? t("Account and sign out") : t("Sign in")}><ProfileAvatar name={access?.canEdit ? profile.displayName : "Account"} className="w-8 h-8 rounded-full ring-1 ring-surface-variant hover:ring-primary transition-all" /></Link>
+          <Link className="flex h-11 w-11 shrink-0 items-center justify-center" href="/login" aria-label={access?.signedIn ? t("Account and sign out") : t("Sign in")}><ProfileAvatar src={access?.canEdit ? profile.avatarUrl : null} name={access?.canEdit ? profile.displayName : "Account"} className="w-8 h-8 rounded-full ring-1 ring-surface-variant hover:ring-primary transition-all" /></Link>
         </div>
       </div>
       <nav aria-label={t("Main navigation")} className="scroll-region xl:hidden flex h-12 items-center justify-start gap-1 overflow-x-auto px-4 sm:px-6 bg-surface-container-low/80">
