@@ -1,6 +1,8 @@
 # Profile account controls
 
-The owner overview offers Sign out and Delete profile. Public profile pages never
+The owner overview offers Sign out and Delete profile in a Danger zone at the
+bottom, after all portfolio content. Header tools contain only portfolio actions.
+Public profile pages never
 show these controls. Sign out uses the existing Supabase action, clears the browser
 session and returns to login without deleting saved data.
 
