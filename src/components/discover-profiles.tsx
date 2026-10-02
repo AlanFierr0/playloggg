@@ -46,7 +46,7 @@ export async function DiscoverProfiles({
       {full && <div className="space-y-5">
         <p className="text-on-surface-variant">{t("Find a friend, follow their updates and compare your games.")}</p>
         <nav aria-label={t("Friends navigation")} className="flex flex-wrap gap-3">
-          {account?.profile ? <><Link href="/profile/social" className="rounded bg-primary/10 text-primary px-4 py-3">{t("Following")}</Link><Link href="/profile/activity" className="rounded bg-surface-container text-primary px-4 py-3">{t("Activity feed")}</Link><Link href="/settings" className="rounded bg-surface-container text-primary px-4 py-3">{t("Profile settings")}</Link></> : <Link href="/login" className="rounded bg-primary-container text-on-primary-container px-4 py-3">{t("Sign in to follow friends")}</Link>}
+          {account?.profile ? <><Link href="/profile/social" className="rounded bg-primary/10 text-primary px-4 py-3">{t("Following")}</Link><Link href="/profile/activity" className="rounded bg-surface-container text-primary px-4 py-3">{t("Activity feed")}</Link></> : <Link href="/login" className="rounded bg-primary-container text-on-primary-container px-4 py-3">{t("Sign in to follow friends")}</Link>}
         </nav>
         <form action="/people" method="get" className="flex flex-col sm:flex-row gap-3 items-end">
           <label className="w-full min-w-0 space-y-2"><span className="block">{t("Find friends")}</span><input name="q" defaultValue={search} maxLength={80} placeholder={t("Search by name or handle")} className="w-full rounded bg-surface-container p-3" /></label>
