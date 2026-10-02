@@ -23,6 +23,7 @@ export function ProfileOverviewScreen() {
   const panel = "min-w-0 rounded-2xl bg-surface-container-low p-5 sm:p-7 space-y-5";
   const tools = [["Quick rating", "/quick-rate"], ["Import from Steam", "/profile/import/steam"], ["Edit profile", "/settings"], ["Manage favorites", "/profile/favorites"], ["Year in Gaming", "/profile/wrapped"], ["Activity feed", "/profile/activity"], ["Following and blocks", "/profile/social"]];
   return <section className="site-container w-full mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-12 space-y-6 sm:space-y-8">
+    {!publicBase && <ProfileNavigation />}
     <header className="rounded-2xl bg-surface-container-low p-5 sm:p-8 space-y-8">
       <div className="grid xl:grid-cols-[minmax(0,1fr)_24rem] gap-8">
       <div className="min-w-0 space-y-5">
@@ -41,7 +42,6 @@ export function ProfileOverviewScreen() {
       </div>
       <dl className="grid grid-cols-2 sm:grid-cols-4 gap-5 border-t border-outline-variant/20 pt-6">{[[t("Games rated"), rated.length], [t("Completed games"), entries.filter(g => g.status === "completed").length], [t("Average score"), averageScore(rated)], [t("Favorites"), favorites.length]].map(([label, value]) => <div key={label} className="min-w-0 space-y-2"><dt className="text-body-sm text-on-surface-variant">{label}</dt><dd className="font-headline-xl text-headline-xl text-primary">{value}</dd></div>)}</dl>
     </header>
-    {!publicBase && <ProfileNavigation />}
     <section className={panel}><div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-headline-xl text-headline-xl">{t("Featured favorites")}</h2><Link className="inline-flex min-h-11 items-center text-primary" href={`${base}/favorites`}>{t("All favorites")}</Link></div>
       <p className="text-on-surface-variant text-body-sm">{t("Your favorites express what matters to you, independently of scores and tiers.")}</p>
       {featured.length ? <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">{featured.map(f => { const game = bySlug.get(f.slug); return game ? <Link key={f.slug} href={gameHref(game)} className="group min-w-0"><img src={game.cover} alt="" className="w-full aspect-[2/3] object-cover rounded-lg shadow-lg" /><p translate="no" className="mt-3 font-headline-md text-headline-md break-words group-hover:text-primary">{game.title}</p><p className="text-primary font-label-md">#{f.featuredSlot}</p></Link> : null; })}</div> : <p className="text-on-surface-variant">{t("No featured favorites yet.")}</p>}

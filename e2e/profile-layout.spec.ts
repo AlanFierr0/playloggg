@@ -16,9 +16,9 @@ test("profile tools, section tabs and content stay separate and usable", async (
   await expect(tools.getByRole("link", { name: "Import from Steam", exact: true })).toHaveAttribute("href", "/profile/import/steam");
   await expect(tabs.getByRole("link")).toHaveCount(6);
   await expect(tabs.getByRole("link", { name: "Overview", exact: true })).toHaveAttribute("aria-current", "page");
-  const toolsBox = (await tools.boundingBox())!;
+  const profileBox = (await tools.locator("xpath=ancestor::header").boundingBox())!;
   const tabsBox = (await tabs.boundingBox())!;
-  expect(tabsBox.y).toBeGreaterThan(toolsBox.y + toolsBox.height);
+  expect(profileBox.y).toBeGreaterThan(tabsBox.y + tabsBox.height);
   for (const nav of [tools, tabs]) {
     const boxes = await nav.getByRole("link").evaluateAll(links => links.map(link => {
       const { x, y, width, height } = link.getBoundingClientRect();
