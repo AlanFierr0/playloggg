@@ -51,3 +51,9 @@ intersection, independent/missing tiers, deterministic ties, input immutability,
 Local fixture journeys cover real form submission, reload, small/empty overlap,
 private/unknown handles even while signed in, and mobile overflow. Accessibility
 checks include the populated comparison in both languages and themes.
+
+For signed-in users with an owned profile, the first handle is always their
+verified profile handle and is read-only. Submitted URL parameters cannot
+replace it. Links with the user's handle on the right swap the two handles so
+the other profile remains selected. Guests can still enter both handles.
+Comparison data continues to use fresh anonymous reads of published profiles.

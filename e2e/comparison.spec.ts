@@ -26,12 +26,32 @@ test("published comparisons show real affinity, independent tiers and reloadable
 });
 test("private and missing profiles stay unavailable even to a signed-in owner",async ({page,context})=>{
  await context.addCookies([authCookie]);
- for(const right of ["fixture_owner","missing_fixture","../../login"]){
+ for(const right of ["fixture_peer","missing_fixture","../../login"]){
   await page.goto(`/compare?left=fixture_public&right=${encodeURIComponent(right)}`);
   await expect(page.getByText("Comparison unavailable. Check both handles and make sure both profiles are published.")).toBeVisible();
   await expect(page.getByText("Private fixture review")).toHaveCount(0);
   await expect(page.locator("[data-affinity]")).toHaveCount(0);
  }
- await page.goto("/compare?left=fixture_public&right=fixture_public");
+ await page.goto("/compare?left=fixture_owner&right=fixture_owner");
  await expect(page.getByText("Choose two different published profiles.")).toBeVisible();
+});
+test("signed-in comparisons always put the owned profile first",async ({page,context})=>{
+ await context.addCookies([authCookie]);
+ await page.goto("/compare");
+ const first=page.getByLabel("First profile handle");
+ const second=page.getByLabel("Second profile handle");
+ await expect(first).toHaveValue("fixture_owner");
+ await expect(first).toHaveAttribute("readonly", "");
+ await second.fill("fixture_peer");
+ await page.getByRole("button",{name:"Compare profiles"}).click();
+ await expect(page).toHaveURL(/left=fixture_owner&right=fixture_peer/);
+ await page.reload();
+ await expect(first).toHaveValue("fixture_owner");
+ await expect(second).toHaveValue("fixture_peer");
+ await page.goto("/compare?left=fixture_public&right=fixture_peer");
+ await expect(first).toHaveValue("fixture_owner");
+ await expect(second).toHaveValue("fixture_peer");
+ await page.goto("/compare?left=fixture_public&right=fixture_owner");
+ await expect(first).toHaveValue("fixture_owner");
+ await expect(second).toHaveValue("fixture_public");
 });

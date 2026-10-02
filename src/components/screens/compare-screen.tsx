@@ -10,7 +10,7 @@ import type { Profile } from "@/types/domain";
 type Comparison = NonNullable<Awaited<ReturnType<typeof getPublicComparison>>>;
 const panel="rounded-xl bg-surface-container-low p-5 sm:p-8 shadow-lg";
 const control="w-full min-w-0 rounded bg-surface-container px-3 py-2.5 text-on-surface";
-export async function CompareScreen({left,right,comparison,requestedPage}:{left:string;right:string;comparison:Comparison|null;requestedPage:number}) {
+export async function CompareScreen({left,right,comparison,requestedPage,ownProfile=false}:{left:string;right:string;comparison:Comparison|null;requestedPage:number;ownProfile?:boolean}) {
   const t=await getMessages();
   const result=comparison ? compareGames(comparison.left.games,comparison.right.games) : null;
   const leftGenres=comparison?tasteStats(comparison.left.games).genres:[],rightGenres=comparison?tasteStats(comparison.right.games).genres:[];
@@ -27,7 +27,7 @@ export async function CompareScreen({left,right,comparison,requestedPage}:{left:
   return <div className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-10 md:py-16 space-y-10">
     <header className="space-y-4"><p className="font-label-sm text-label-sm uppercase tracking-widest text-outline">{t("Shared Taste")}</p><h1 className="font-headline-xl text-headline-xl font-semibold">{t("Compare gaming taste")}</h1><p className="text-on-surface-variant">{t("Enter two published profile handles. Private and unknown profiles are unavailable.")}</p></header>
     <form action="/compare" method="get" className={`${panel} grid sm:grid-cols-2 lg:grid-cols-[1fr_1fr_auto] gap-4 items-end`}>
-      <label className="space-y-2 min-w-0"><span className="block">{t("First profile handle")}</span><input className={control} name="left" defaultValue={left} required maxLength={30} autoCapitalize="none" autoCorrect="off" spellCheck={false} /></label>
+      <label className="space-y-2 min-w-0"><span className="block">{t("First profile handle")}</span><input className={control} name="left" defaultValue={left} readOnly={ownProfile} required maxLength={30} autoCapitalize="none" autoCorrect="off" spellCheck={false} /></label>
       <label className="space-y-2 min-w-0"><span className="block">{t("Second profile handle")}</span><input className={control} name="right" defaultValue={right} required maxLength={30} autoCapitalize="none" autoCorrect="off" spellCheck={false} /></label>
       <button className="rounded bg-primary-container text-on-primary-container px-6 py-3 font-label-md text-label-md">{t("Compare profiles")}</button>
     </form>
