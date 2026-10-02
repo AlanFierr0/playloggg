@@ -18,9 +18,9 @@ export async function saveList(input: unknown): Promise<Result> {
       const bySlug = new Map(data.map((game) => [game.slug, game.id]));
       ids = draft.slugs.map((slug) => bySlug.get(slug)!);
     }
-    const { data, error } = await owner.supabase.rpc("save_curated_list", {
-      p_profile_id: owner.profile.id, p_list_id: draft.id, p_name: draft.name,
-      p_game_ids: ids, p_expected_revision: draft.revision,
+    const { data, error } = await owner.supabase.rpc("save_curated_list_v2", {
+      p_profile_id: owner.profile.id, p_list_id: draft.id as number, p_name: draft.name,
+      p_game_ids: ids, p_expected_revision: draft.revision as number, p_description:draft.description,p_public:draft.isPublic,p_ranked:draft.isRanked,
     });
     if (error) return { ok: false, message: error.code === "40001"
       ? "This list changed in another tab. Your draft has been kept; reload to get its latest version."

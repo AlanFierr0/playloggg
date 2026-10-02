@@ -18,7 +18,7 @@ for (const locale of ["en", "es-AR"]) for (const theme of ["dark", "light"]) {
       for (const violation of results.violations) failures.push({ path, rule: violation.id, targets: violation.nodes.map((node) => node.target as string[]), summary: violation.nodes.map((node) => node.failureSummary ?? "") });
     }
     await context.addCookies([authCookie]);
-    for (const path of ["/settings", "/log?game=hades", "/lists"]) {
+    for (const path of ["/settings", "/log?game=hades", "/lists", "/quick-rate", "/profile/ranking", "/profile/stats", "/profile/wrapped", "/profile/social", "/profile/activity"]) {
       await page.goto(path);
       const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
       for (const violation of results.violations) failures.push({ path, rule: violation.id, targets: violation.nodes.map((node) => node.target as string[]), summary: violation.nodes.map((node) => node.failureSummary ?? "") });

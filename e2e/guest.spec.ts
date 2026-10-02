@@ -66,7 +66,7 @@ test("navigation stays usable and layouts avoid horizontal page overflow", async
 test("homepage omits the spotlight and links to the game catalog", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByText("Editor's Spotlight", {exact:true})).toHaveCount(0);
-  await expect(page.getByRole("heading", {name:"Discover", exact:true})).toBeVisible();
+  await expect(page.getByRole("heading", {name:"Build your gaming identity.", exact:true})).toBeVisible();
   await page.getByRole("link", {name:"Explore All Games", exact:true}).click();
   await expect(page).toHaveURL(/\/games$/);
   await page.goto("/compare");

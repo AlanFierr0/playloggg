@@ -1,10 +1,18 @@
 // Read-only production check: no credentials, sign-ins, writes or cleanup.
 const base = "https://playloggg.vercel.app";
 const checks = [
-  ["/", 200, "The Essential Canon"],
+  ["/", 200, "Build your gaming identity."],
   ["/robots.txt", 200, "Sitemap: https://playloggg.vercel.app/sitemap.xml"],
   ["/sitemap.xml", 200, "https://playloggg.vercel.app/games"],
   ["/games", 200, "The game archive"],
+  ["/people",200,"Explore profiles"],
+  ["/quick-rate",307,null],
+  ["/profile/wrapped",307,null],
+  ["/profile/activity",307,null],
+  ["/profile/social",307,null],
+  ["/api/share/profile",404,null],
+  ["/api/share/list?id=999999",404,null],
+  ["/api/share/compare?left=unknown_smoke_profile&right=missing_smoke_profile",404,null],
   ["/profile", 307, null],
   ["/profile/favorites", 307, null],
   ["/profile/ranking", 307, null],

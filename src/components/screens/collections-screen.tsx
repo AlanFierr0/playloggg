@@ -1,4 +1,5 @@
 "use client";
+import {ShareCardControls} from "@/components/share-card-controls";
 import { useMessages } from "@/components/site-preferences";
 
 import { ProfileNavigation } from "@/components/profile-navigation";
@@ -18,6 +19,9 @@ export function CollectionsScreen({ initial }: { initial?: CuratedList }) {
   const router = useRouter();
   const [saved, setSaved] = useState(initial);
   const [name, setName] = useState(initial?.name ?? "");
+  const [description,setDescription]=useState(initial?.description ?? "");
+  const [isPublic,setIsPublic]=useState(initial?.is_public ?? false);
+  const [isRanked,setIsRanked]=useState(initial?.is_ranked ?? true);
   const [slugs, setSlugs] = useState(initial?.slugs ?? []);
   const [query, setQuery] = useState("");
   const [findIgdb, setFindIgdb] = useState(false);
@@ -29,14 +33,14 @@ export function CollectionsScreen({ initial }: { initial?: CuratedList }) {
   const canEdit = Boolean(access?.canEdit);
   const bySlug = new Map([...importedGames, ...games].map((game) => [game.slug, game]));
   const available = [...bySlug.values()].filter((game) => !slugs.includes(game.slug) && game.title.toLowerCase().includes(query.trim().toLowerCase()));
-  function discard() { setName(saved?.name ?? ""); setSlugs(saved?.slugs ?? []); setQuery(""); setMessage(""); setConfirmDelete(false); }
+  function discard() { setDescription(saved?.description ?? "");setIsPublic(saved?.is_public ?? false);setIsRanked(saved?.is_ranked ?? true);setName(saved?.name ?? ""); setSlugs(saved?.slugs ?? []); setQuery(""); setMessage(""); setConfirmDelete(false); }
   function move(index: number, direction: number) {
     setSlugs((current) => { const next = [...current]; [next[index], next[index + direction]] = [next[index + direction], next[index]]; return next; });
   }
   function commit() {
     startTransition(async () => {
       try {
-        const result = await saveList({ id: saved?.id ?? null, revision: saved?.revision ?? null, name, slugs });
+        const result = await saveList({ id: saved?.id ?? null, revision: saved?.revision ?? null, name, slugs, description, isPublic,isRanked });
         setMessage(result.message);
         if (result.ok && result.list) {
           const updated = { ...result.list, slugs: [...slugs] };
@@ -53,13 +57,16 @@ export function CollectionsScreen({ initial }: { initial?: CuratedList }) {
   }
   return <div className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-10 space-y-8">
     {!publicBase && <ProfileNavigation />}
-    <header className="break-words space-y-3"><Link href={publicBase ? `${publicBase}/tiers` : "/tiers"} className="text-primary font-label-md text-label-md">{t("← Tier board")}</Link><h1 className="font-headline-xl text-headline-xl font-bold">{t("Curated lists")}</h1><p className="text-on-surface-variant">{profile.displayName} · {profile.isPublic ? t("Visible with this public profile") : t("Private with this profile")}{t(". Games follow this profile’s custom order.")}</p></header>
+    {saved&&<ShareCardControls endpoint={`/api/share/list?id=${saved.id}${publicBase?`&handle=${encodeURIComponent(profile.handle)}`:""}`}/> }
+    <header className="break-words space-y-3"><Link href={publicBase ? `${publicBase}/tiers` : "/tiers"} className="text-primary font-label-md text-label-md">{t("← Tier board")}</Link><h1 className="font-headline-xl text-headline-xl font-bold">{t("Curated lists")}</h1><p className="text-on-surface-variant">{profile.displayName} · {t("Lists keep their own order and visibility. Scores and tiers stay independent.")}</p></header>
     <nav aria-label={t("Curated lists")} className="flex flex-wrap gap-3">{canEdit && <Link href="/lists" className={`inline-flex min-w-0 items-center ${button}`}>{t("New list")}</Link>}{lists.map((list) => <Link key={list.id} href={`${publicBase ?? ""}/lists/${list.id}`} className={`inline-flex min-w-0 items-center ${button}`}><span className="min-w-0 break-words">{list.name}</span></Link>)}</nav>
     {!initial && !canEdit ? <p className="text-on-surface-variant">{lists.length ? t("Choose a list to view its games.") : t("This profile has no curated lists.")}</p> : <section className="bg-surface-container-low rounded-lg p-4 sm:p-6 space-y-6">
       <h2 className="font-headline-lg text-headline-lg">{initial ? publicBase ? t("Selected games") : t("Your selection") : t("Create a list")}</h2>
       {canEdit ? <label className="block space-y-2"><span className="font-label-sm text-label-sm uppercase tracking-wider">{t("List name")}</span><input id="list-name" className="block min-w-0 w-full rounded bg-surface-container p-3" value={name} maxLength={80} onChange={(event) => setName(event.target.value)} disabled={pending || importBusy} /></label> : <h3 className="font-headline-md text-headline-md break-words">{name}</h3>}
+      {slugs.length>0&&<div className="flex max-w-md overflow-hidden rounded-xl">{slugs.slice(0,4).map(slug=>{const game=bySlug.get(slug);return game?<img key={slug} src={game.cover} alt="" loading="lazy" className="w-1/4 aspect-[2/3] object-cover flex-1 min-w-0"/>:null;})}</div>}
+      {canEdit?<fieldset disabled={pending||importBusy} className="space-y-4"><label className="block space-y-2"><span>{t("Description")}</span><textarea aria-label={t("Description")} className="w-full rounded bg-surface-container p-3" rows={3} maxLength={2000} value={description} onChange={event=>setDescription(event.target.value)}/></label><label className="flex items-center gap-3"><input type="checkbox" checked={isRanked} onChange={event=>setIsRanked(event.target.checked)}/>{t("Ranked list")}</label><label className="flex items-center gap-3"><input type="checkbox" checked={isPublic} onChange={event=>setIsPublic(event.target.checked)}/>{t("Public list")}</label><p className="text-body-sm text-on-surface-variant">{t("A public list is visible only while your profile is public. Private lists stay visible only to you.")}</p></fieldset>:<p translate="no" className="text-on-surface-variant whitespace-pre-wrap break-words">{description}</p>}
       <ol id="list-games" className="space-y-3">{slugs.map((slug, index) => { const game = bySlug.get(slug); if (!game) return null; return <li key={slug} data-game={slug} className="flex flex-wrap items-center gap-3 bg-surface-container rounded p-3">
-        <span className="text-primary font-label-md text-label-md">{index + 1}</span><img src={game.cover} alt={""} className="w-10 h-14 object-cover rounded" /><Link href={`${publicBase ?? ""}/game/${slug}`} className="flex-1 min-w-0 break-words">{game.title}</Link>
+        {isRanked&&<span className="text-primary font-label-md text-label-md">{index + 1}</span>}<img src={game.cover} alt={""} className="w-10 h-14 object-cover rounded" /><Link href={`${publicBase ?? ""}/game/${slug}`} className="flex-1 min-w-0 break-words">{game.title}</Link>
         {canEdit && <div className="flex gap-2 justify-end w-full sm:w-auto"><button className={button} aria-label={t(`Move ${game.title} up`)} disabled={pending || importBusy || index === 0} onClick={() => move(index, -1)}>↑</button><button className={button} aria-label={t(`Move ${game.title} down`)} disabled={pending || importBusy || index === slugs.length - 1} onClick={() => move(index, 1)}>↓</button><button className={button} aria-label={t(`Remove ${game.title}`)} disabled={pending || importBusy} onClick={() => setSlugs(slugs.filter((item) => item !== slug))}>{t("Remove")}</button></div>}
       </li>; })}</ol>
       {slugs.length === 0 && <p className="text-on-surface-variant">{t("No games in this list yet.")}</p>}

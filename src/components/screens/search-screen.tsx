@@ -50,7 +50,7 @@ return (<div onKeyDown={onKeyDown}>
 <div inert aria-hidden="true" className="w-full site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 opacity-25 filter blur-[3px] pointer-events-none select-none">
 <div className="flex items-center justify-between pb-6">
 <div className="space-y-1">
-<span className="font-label-sm text-label-sm uppercase tracking-widest text-primary">{t("Archival Index")}</span>
+<span className="font-label-sm text-label-sm uppercase tracking-widest text-primary">{t("Search")}</span>
 
 <h2 className="font-headline-xl text-headline-xl text-on-surface">{t("Curated Database")}</h2>
 
@@ -142,7 +142,7 @@ return (<div onKeyDown={onKeyDown}>
 
 <button onClick={() => setScope("games")} aria-pressed={scope === "games"} className={"px-2.5 py-1 rounded font-label-sm text-label-sm tracking-wide transition-colors whitespace-nowrap " + (scope === "games" ? "bg-surface-container-high text-primary font-semibold shadow-sm" : "hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface")}>{t("Games (")}{matchCounts.titles.length})</button>
 
-<button onClick={() => setScope("curators")} aria-pressed={scope === "curators"} className={"px-2.5 py-1 rounded font-label-sm text-label-sm tracking-wide transition-colors whitespace-nowrap " + (scope === "curators" ? "bg-surface-container-high text-primary font-semibold shadow-sm" : "hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface")}>{t("Curators (")}{matchCounts.profiles.length})</button>
+<button onClick={() => setScope("curators")} aria-pressed={scope === "curators"} className={"px-2.5 py-1 rounded font-label-sm text-label-sm tracking-wide transition-colors whitespace-nowrap " + (scope === "curators" ? "bg-surface-container-high text-primary font-semibold shadow-sm" : "hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface")}>{t("Profiles (")}{matchCounts.profiles.length})</button>
 
 <button onClick={() => setScope("lists")} aria-pressed={scope === "lists"} className={"px-2.5 py-1 rounded font-label-sm text-label-sm tracking-wide transition-colors whitespace-nowrap " + (scope === "lists" ? "bg-surface-container-high text-primary font-semibold shadow-sm" : "hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface")}>{t("Curated Lists (")}{matchCounts.lists.length})</button>
 

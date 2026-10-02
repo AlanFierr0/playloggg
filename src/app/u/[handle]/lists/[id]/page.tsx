@@ -3,6 +3,7 @@ import { getMessages } from "@/lib/locale/server";
 import { siteUrl, noIndex } from "@/lib/site-url";
 import { notFound } from "next/navigation";
 import { getPublicList } from "@/lib/public-portfolio";
+import {ListLike} from "@/components/list-like";
 import { CollectionsScreen } from "@/components/screens/collections-screen";
 const readList=cache(getPublicList);
 export async function generateMetadata({params}:{params:Promise<{handle:string;id:string}>}) {
@@ -15,5 +16,5 @@ export default async function PublicListPage({ params }: { params: Promise<{ han
   const { handle, id } = await params;
   const list = await readList(handle, id);
   if (!list) notFound();
-  return <CollectionsScreen key={list.id} initial={list} />;
+  return <><CollectionsScreen key={list.id} initial={list} /><ListLike id={list.id}/></>;
 }

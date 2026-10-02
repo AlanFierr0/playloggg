@@ -47,10 +47,10 @@ test('pictures persist, stay private, follow publication and revert to initials 
   const guest=await browser.newContext();
   try {
     expect((await guest.request.get(`http://127.0.0.1:3100${src}`)).status()).toBe(404);
-    await page.getByRole('button',{name:'Publish profile and lists',exact:true}).click();
+    await page.getByRole('button',{name:'Publish profile',exact:true}).click();
     await expect(page.getByRole('button',{name:'Make profile private',exact:true})).toBeVisible();
     const response=await guest.request.get(`http://127.0.0.1:3100${src}`);expect(response.status()).toBe(200);expect(response.headers()['cache-control']).toBe('private, no-store');
-    await page.getByRole('button',{name:'Make profile private',exact:true}).click();await expect(page.getByRole('button',{name:'Publish profile and lists',exact:true})).toBeVisible();
+    await page.getByRole('button',{name:'Make profile private',exact:true}).click();await expect(page.getByRole('button',{name:'Publish profile',exact:true})).toBeVisible();
     expect((await guest.request.get(`http://127.0.0.1:3100${src}`)).status()).toBe(404);
   } finally {await guest.close();}
   await page.getByRole('button',{name:'Remove picture',exact:true}).click();

@@ -12,8 +12,8 @@ favorites, then the taste engine, Compare v2, discovery and sharing/social growt
 The roadmap authorizes this direction and visible redesign scope, but alternative
 favorite formats, customization, formulas and access changes still need agreement.
 Do not infer favorites from scores/tiers or independent preference rankings from
-score sorting. Keep private defaults and the existing no-directory policy until
-explicitly changed. Backup/recovery implementation is deferred.
+score sorting. Keep private defaults. Discovery is an explicitly approved separate opt-in after
+publishing; link-only public profiles must not appear in discovery. Backup/recovery implementation is deferred.
 
 Profile v2 decisions are agreed: unlimited independent favorites, optional ordered
 featured Top 4, and optional bio/location/platform preference. Favoriting unlogged
@@ -24,6 +24,22 @@ in public object paths. Seedocs/accounts-pictures-and-catalog.md. New favorite R
 ownership; the slot RPC is SECURITY INVOKER. Profiles remain noindex/link-only.
 Recently updated entries use update timestamps, not invented historical activity.
 See docs/profile-v2.md for migrations, routes and verification.
+
+The document implementation decisions are recorded in docs/product-ui-review.md.
+Taste preferences require three scored games per genre/studio; Taste Match remains
+100 minus mean absolute score difference with five shared scored games. Community
+scores/spread require five distinct scored profiles, trends use score changes over
+30 days, and recommendations use 85%+ matches across five shared scored games and
+source scores of 90+. Scores, tiers, favorites and saved logged-game preference
+order are independent. Pairwise choices move the winner immediately above the
+other game; Skip has no effect and changes need an explicit save.
+
+Lists have descriptions, automatic cover collages, ranked/unranked mode, explicit
+private/public visibility, and signed-in likes; a private profile never exposes a
+public list. Follow only discoverable public profiles. Include unfollow and blocking;
+blocked profiles are excluded from the personal activity feed/recommendations.
+Record trusted activity only from launch onward. Never backfill invented history,
+classification labels or social content. Share exports must recheck visibility.
 
 ## Stack and structure
 - Next.js App Router, React, strict TypeScript, compiled Tailwind CSS 3.

@@ -17,7 +17,11 @@ export function profileSettings(form: FormData) {
   }
   if (form.get("setting") === "visibility") {
     const value = form.get("visibility");
-    return value === "public" || value === "private" ? { setting: "visibility" as const, values: { is_public: value === "public" } } : null;
+    return value === "public" || value === "private" ? { setting: "visibility" as const, values: value === "public" ? {is_public:true} : {is_public:false,is_discoverable:false} } : null;
+  }
+  if (form.get("setting") === "discovery") {
+    const value=form.get("discovery");
+    return value==="on" || value==="off" ? {setting:"discovery" as const,values:{is_discoverable:value==="on"}} : null;
   }
   return null;
 }

@@ -42,6 +42,7 @@ export interface Profile {
   platformPreference?: string | null;
   isSample?: boolean;
   isPublic?: boolean;
+  isDiscoverable?: boolean;
 }
 
 export interface Portfolio {
@@ -50,6 +51,7 @@ export interface Portfolio {
   publicBase?: string;
   lists?: CuratedListSummary[];
   favorites?: Favorite[];
+  ranking?: {slugs:string[];revision:number};
   access?: { signedIn: boolean; canEdit: boolean; canImportCatalog?: boolean };
 }
 
@@ -66,7 +68,7 @@ export interface Rating {
   tags: string[];
 }
 
-export interface CuratedListSummary { id: number; name: string; revision: number }
+export interface CuratedListSummary { id: number; name: string; revision: number; description?: string; is_public?: boolean; is_ranked?: boolean }
 export interface CuratedList extends CuratedListSummary { slugs: string[] }
 
 export interface Favorite { slug: string; featuredSlot: number | null; createdAt: string }

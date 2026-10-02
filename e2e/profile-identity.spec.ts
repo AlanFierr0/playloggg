@@ -40,8 +40,8 @@ test("owner favorites stay independent, feature atomically, persist and follow p
   try {
     const visitor = await guest.newPage();
     expect((await visitor.goto("http://127.0.0.1:3100/u/fixture_owner/favorites"))?.status()).toBe(404);
-    await page.getByRole("button", { name: "Publish profile and lists" }).click();
-    await expect(page.getByText("Your profile and curated lists are now public.")).toBeVisible();
+    await page.getByRole("button", { name: "Publish profile" }).click();
+    await expect(page.getByText("Your profile is now public. Private lists remain private.")).toBeVisible();
     expect((await visitor.goto("http://127.0.0.1:3100/u/fixture_owner"))?.status()).toBe(200);
     await expect(visitor.getByText("I love RPGs. Mi nombre no se traduce.", { exact: true })).toBeVisible();
     await expect(visitor.getByRole("heading", { name: "Featured favorites" })).toBeVisible();

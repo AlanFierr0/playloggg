@@ -1,4 +1,6 @@
 "use client";
+import {ShareCardControls} from "@/components/share-card-controls";
+import {TasteDetails} from "@/components/taste-details";
 import Link from "next/link";
 import { useMessages } from "@/components/site-preferences";
 import { usePortfolio } from "@/components/portfolio-provider";
@@ -17,6 +19,9 @@ export function ProfileDetailsScreen({ section }: { section: "reviews" | "stats"
     {section === "reviews" ? <div className="max-w-4xl space-y-8">{reviews.map(game => <article key={game.slug} className="flex items-start gap-4 sm:gap-6"><Link href={publicBase ? `${publicBase}/game/${game.slug}` : `/game/${game.slug}`} className="shrink-0 w-16 sm:w-24"><img src={game.cover} alt={game.title} loading="lazy" className="w-full aspect-[2/3] rounded object-cover" /></Link><div className="min-w-0 space-y-3"><h2 translate="no" className="font-headline-lg text-headline-lg">{game.title}</h2><p className="text-primary">{t("Score")}: {game.score ?? t("Unrated")}</p><p translate="no" className="whitespace-pre-wrap break-words text-on-surface-variant">{game.review}</p></div></article>)}{!reviews.length && <p className="text-on-surface-variant">{t("No reviews yet.")}</p>}</div> : <div className="max-w-3xl space-y-8">
       <dl className="grid grid-cols-2 sm:grid-cols-3 gap-5">{[[t("Games rated"), rated.length], [t("Average score"), averageScore(rated)], [t("Completed games"), entries.filter(game => game.status === "completed").length]].map(([label, value]) => <div key={label}><dt className="text-on-surface-variant">{label}</dt><dd className="text-primary font-headline-xl text-headline-xl">{value}</dd></div>)}</dl>
       <section className="space-y-4"><h2 className="font-headline-lg text-headline-lg">{t("Rating distribution")}</h2><p className="text-on-surface-variant">{t("Only scored games are included. Zero is a real score.")}</p><ul className="space-y-4">{bands.map(([low, high]) => { const count = rated.filter(game => game.score! >= low && game.score! <= high).length; const percent = rated.length ? count / rated.length * 100 : 0; return <li key={low} className="space-y-2"><div className="flex justify-between gap-4"><span>{low}–{high}</span><span>{count} ({percent.toFixed(1)}%)</span></div><div aria-hidden="true" className="h-2 rounded bg-surface-container"><div className="h-full rounded bg-primary" style={{ width: `${percent}%` }} /></div></li>; })}</ul></section>
+      <TasteDetails games={games} />
+      <section className="space-y-4"><h2 className="font-headline-lg text-headline-lg">{t("Your score differences")}</h2><p className="text-body-sm text-on-surface-variant">{t("Compare your scores with community averages from at least 5 eligible ratings. Export shows your score, community average, difference and sample count.")}</p><ShareCardControls endpoint={`/api/share/profile?kind=takes${publicBase?`&handle=${publicBase.split("/").pop()}`:""}`}/></section>
+      <ShareCardControls endpoint={`/api/share/profile?kind=taste${publicBase?`&handle=${publicBase.split("/")[2]}`:""}`} />
     </div>}
   </section>;
 }

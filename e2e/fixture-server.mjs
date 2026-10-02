@@ -8,9 +8,9 @@ const token = [Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toStrin
 const session = { access_token: token, refresh_token: "local-fixture-refresh", token_type: "bearer", expires_in: 3600, expires_at: 4102444800, user };
 export const authCookie = { name: "sb-127-auth-token", value: `base64-${Buffer.from(JSON.stringify(session)).toString("base64url")}`, url: "http://127.0.0.1:3100" };
 const profiles = [
-  { id: 1, handle: "alexvance", display_name: "Unavailable Fixture", is_public: false, owner_user_id: null },
-  { id: 2, handle: "fixture_owner", display_name: "Fixture Owner", is_public: false, owner_user_id: ownerId },
-  { id: 3, handle: "fixture_public", display_name: "Published Fixture", is_public: true, owner_user_id: null },
+  { id: 1, handle: "alexvance", display_name: "Unavailable Fixture", is_public: false, is_discoverable:false, owner_user_id: null },
+  { id: 2, handle: "fixture_owner", display_name: "Fixture Owner", is_public: false, is_discoverable:false, owner_user_id: ownerId },
+  { id: 3, handle: "fixture_public", display_name: "Published Fixture", is_public: true, is_discoverable:true, owner_user_id: null },
 ];
 profiles.push({id:4,handle:"fixture_peer",display_name:"Published Peer",is_public:true,owner_user_id:null});
 profiles.push({id:5,handle:"fixture_empty",display_name:"Empty Profile",is_public:true,owner_user_id:null});
@@ -19,8 +19,9 @@ const games = titles.map(([slug, title, genre], index) => ({ id: index + 1, slug
 let ratings;
 let failSave;
 let favorites;
+let rankings=[];let curated=[];let listItems=[];let follows=[];let blocks=[];let likes=[];
 let pictures = new Map();
-function reset() { pictures.clear(); Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false,bio:null,location:null,platform_preference:null,avatar_url:null}); favorites=[{profile_id:3,game_id:1,featured_slot:1,created_at:"2026-09-29T12:00:00Z"}]; ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
+function reset() { rankings=[];follows=[];blocks=[];likes=[];curated=[{id:10,profile_id:3,name:"Public fixture list",revision:1,description:"Fixture description",is_public:true,is_ranked:true}];listItems=[{list_id:10,game_id:1,position:0}];pictures.clear(); Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false,is_discoverable:false,bio:null,location:null,platform_preference:null,avatar_url:null}); favorites=[{profile_id:3,game_id:1,featured_slot:1,created_at:"2026-09-29T12:00:00Z"}]; ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
  for (const game_id of [3,4,5,6]) ratings.push({profile_id:3,game_id,score:50,tier:null,status:"playing",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  for (const game_id of [1,3,4,5,6]) ratings.push({profile_id:4,game_id,score:game_id===1 ? 10 : 40,tier:"A",status:"completed",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  ratings.push({profile_id:3,game_id:7,score:null,tier:"S",status:"backlog",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
@@ -79,13 +80,13 @@ export async function startFixtureServer() {
         if (!authenticated || rating.profile_id !== 2 || !games.some((game) => game.id === rating.game_id)) return reply(403, { message: "Fixture ownership denied" });
         if (failSave) { failSave = false; return reply(503, { message: "Controlled save failure" }); }
         ratings = ratings.filter((row) => row.profile_id !== rating.profile_id || row.game_id !== rating.game_id);
-        ratings.push(rating); return reply(201);
+        ratings.push({...rating,updated_at:new Date().toISOString()}); return reply(201);
       }
       if (resource === "profiles" && req.method === "PATCH") {
         if (!admin || url.searchParams.get("id") !== "eq.2" || url.searchParams.get("owner_user_id") !== `eq.${ownerId}`) return reply(403, {message:"Fixture ownership denied"});
         let body=""; for await (const part of req) body+=part;
         const patch=JSON.parse(body);
-        if(Object.keys(patch).some(key=>!["handle","display_name","is_public","updated_at","bio","location","platform_preference","avatar_url"].includes(key))) return reply(400,{message:"Unsupported fixture field"});
+        if(Object.keys(patch).some(key=>!["handle","display_name","is_public","updated_at","bio","location","platform_preference","avatar_url","is_discoverable"].includes(key))) return reply(400,{message:"Unsupported fixture field"});
         Object.assign(profiles[1],patch);
         const result={id:2,handle:profiles[1].handle,is_public:profiles[1].is_public};
         return reply(200,req.headers.accept?.includes("application/vnd.pgrst.object+json") ? result : [result]);
@@ -102,21 +103,32 @@ export async function startFixtureServer() {
         if(existing)existing.featured_slot=slot;else favorites.push({profile_id:2,game_id:input.p_game_id,featured_slot:slot,created_at:new Date().toISOString()});
         return reply(200,null);
       }
+      if(resource==="rpc/save_preference_ranking"&&req.method==="POST"){let body="";for await(const part of req)body+=part;const input=JSON.parse(body);if(!authenticated||input.p_ids.some(id=>!ratings.some(row=>row.profile_id===2&&row.game_id===id)))return reply(403,{message:"Not owned"});const existing=rankings.find(row=>row.profile_id===2);if((existing?.revision??null)!==input.p_revision)return reply(409,{code:"40001",message:"Stale ranking"});const row={profile_id:2,game_ids:input.p_ids,revision:(existing?.revision??0)+1};rankings=[row];return reply(200,row.revision);}
+      if(resource==="rpc/save_curated_list_v2"&&req.method==="POST"){let body="";for await(const part of req)body+=part;const input=JSON.parse(body);if(!authenticated||input.p_profile_id!==2)return reply(403,{message:"Not owned"});const existing=curated.find(row=>row.id===input.p_list_id);if(existing&&existing.revision!==input.p_expected_revision)return reply(409,{code:"40001",message:"Stale list"});const row={id:existing?.id??11,profile_id:2,name:input.p_name,description:input.p_description,is_public:input.p_public,is_ranked:input.p_ranked,revision:(existing?.revision??0)+1};curated=curated.filter(item=>item.id!==row.id);curated.push(row);listItems=listItems.filter(item=>item.list_id!==row.id);input.p_game_ids.forEach((game_id,position)=>listItems.push({list_id:row.id,game_id,position}));return reply(200,row);}
+      if(["profile_follows","profile_blocks","list_likes"].includes(resource)&&["POST","DELETE"].includes(req.method)){if(!authenticated)return reply(403,{message:"Not owned"});let rows=resource==="profile_follows"?follows:resource==="profile_blocks"?blocks:likes;if(req.method==="POST"){let body="";for await(const part of req)body+=part;rows.push(JSON.parse(body));}else rows=rows.filter(row=>![...url.searchParams].every(([key,value])=>String(row[key])===value.slice(3)));if(resource==="profile_follows")follows=rows;else if(resource==="profile_blocks")blocks=rows;else likes=rows;return reply(200,null);}
+      if(resource==="rpc/public_list_like_counts")return reply(200,[]);
       if (req.method !== "GET") return reply(405, { message: "Unsupported fixture mutation" });
       let rows;
       if (resource === "games") rows = games;
       else if (resource === "profiles") rows = visibleProfiles;
       else if (resource === "ratings") rows = ratings.filter((rating) => visibleProfiles.some((profile) => profile.id === rating.profile_id));
       else if (resource === "profile_favorites") rows = favorites.filter(f=>visibleProfiles.some(p=>p.id===f.profile_id)).map(f=>({...f,games:{slug:games.find(g=>g.id===f.game_id).slug}}));
-      else if (resource === "curated_lists") rows = [{ id: 10, profile_id: 3, name: "Public fixture list", revision: 1 }];
-      else if (resource === "curated_list_items") rows = [{ list_id: 10, game_id: 1, position: 0 }];
+      else if (resource === "curated_lists") rows = curated.filter(row=>row.profile_id===2?authenticated:(row.is_public&&visibleProfiles.some(profile=>profile.id===row.profile_id)));
+      else if (resource === "curated_list_items") rows = listItems;
+      else if(resource==="profile_rankings")rows=rankings.filter(row=>visibleProfiles.some(profile=>profile.id===row.profile_id));
+      else if(resource==="profile_follows")rows=authenticated?follows:[];
+      else if(resource==="profile_blocks")rows=authenticated?blocks:[];
+      else if(resource==="list_likes")rows=authenticated?likes:[];
+      else if(resource==="profile_activity")rows=[];
       else return reply(404, { message: `Unsupported fixture endpoint ${url.pathname}` });
+      if(url.searchParams.get("select")?.includes("profiles!inner"))rows=rows.map(row=>({...row,profiles:profiles.find(profile=>profile.id===row.profile_id),curated_list_items:listItems.filter(item=>item.list_id===row.id)}));
       for (const [key, value] of url.searchParams) {
         if (value.startsWith("eq.")) {
           const expected = value.slice(3);
-          if (key === "profiles.handle") rows = rows.filter((row) => visibleProfiles.some((profile) => profile.id === row.profile_id && profile.handle === expected));
+          if (key.startsWith("profiles.")) rows = rows.filter((row) => visibleProfiles.some((profile) => profile.id === row.profile_id && String(profile[key.slice(9)]) === expected));
           else rows = rows.filter((row) => String(row[key]) === expected);
-        }
+        } else if(value.startsWith("in.(")){const expected=value.slice(4,-1).split(",");rows=rows.filter(row=>expected.includes(String(row[key])));}
+
       }
       rows = rows.slice(Number(url.searchParams.get("offset") || 0), Number(url.searchParams.get("offset") || 0) + Number(url.searchParams.get("limit") || 500));
       if (req.headers.accept?.includes("application/vnd.pgrst.object+json")) return rows.length === 1 ? reply(200, rows[0]) : reply(406, { code: "PGRST116", details: `The result contains ${rows.length} rows`, message: "JSON object requested, multiple (or no) rows returned" });

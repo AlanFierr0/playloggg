@@ -7,7 +7,7 @@ export async function getLists(profileId: number): Promise<CuratedListSummary[]>
   const lists: CuratedListSummary[] = [];
   // Read every page instead of silently dropping lists at the Data API row limit.
   for (let offset = 0; ; offset += 100) {
-    const { data, error } = await supabase.from("curated_lists").select("id,name,revision")
+    const { data, error } = await supabase.from("curated_lists").select("id,name,revision,description,is_public,is_ranked")
       .eq("profile_id", profileId).order("id").range(offset, offset + 99);
     if (error) throw new Error("Your curated lists could not be loaded.");
     lists.push(...data);
@@ -16,7 +16,7 @@ export async function getLists(profileId: number): Promise<CuratedListSummary[]>
 }
 export async function getList(profileId: number, id: number) {
   const supabase = await createClient();
-  const { data: list, error } = await supabase.from("curated_lists").select("id,name,revision")
+  const { data: list, error } = await supabase.from("curated_lists").select("id,name,revision,description,is_public,is_ranked")
     .eq("profile_id", profileId).eq("id", id).maybeSingle();
   if (error) throw new Error("This list could not be loaded.");
   if (!list) return null;

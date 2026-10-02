@@ -16,7 +16,7 @@ function load(relative, dependencies) {
 
 test("settings require explicit operations and whitelist names or visibility independently", () => {
   assert.deepEqual(profileSettings(form({ setting: "names", handle: "valid_user", displayName: "  Player  ", is_public: "true", owner_user_id: "other" })), { setting: "names", values: { handle: "valid_user", display_name: "Player" } });
-  assert.deepEqual(profileSettings(form({ setting: "visibility", visibility: "private", handle: "overwrite" })), { setting: "visibility", values: { is_public: false } });
+  assert.deepEqual(profileSettings(form({ setting: "visibility", visibility: "private", handle: "overwrite" })), { setting: "visibility", values: { is_public: false, is_discoverable:false } });
   assert.deepEqual(profileSettings(form({ setting: "visibility", visibility: "public" })), { setting: "visibility", values: { is_public: true } });
   for (const value of [{}, { setting: "visibility" }, { setting: "visibility", visibility: "true" }, { setting: "names", handle: "bad/path", displayName: "Player" }, { setting: "names", handle: "player", displayName: "\u0000" }]) assert.equal(profileSettings(form(value)), null);
   assert.equal(publicProfilePath("valid_user"), "/u/valid_user");
@@ -71,6 +71,7 @@ test("public portfolios use anonymous fresh reads, paginate entries and hide unp
     "@/lib/supabase/public": { createPublicClient: () => client },
     "@/lib/portfolio": { getCatalog: async () => [], portfolioGames: (_rows, entries) => entries },
     "@/lib/profile-settings": { publicProfilePath },
+    "@/lib/preference-ranking":{readPreferenceRanking:async()=>undefined},
     "@/lib/favorites": {readFavorites: async () => []},
   });
   const portfolio = await getPublicPortfolio("player");

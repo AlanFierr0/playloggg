@@ -1,0 +1,64 @@
+"use server";
+import { getAccount } from "@/lib/owner";
+import { revalidatePath } from "next/cache";
+export async function saveRanking(slugs: unknown, revision: unknown) {
+  if (
+    !Array.isArray(slugs) ||
+    slugs.length > 10000 ||
+    slugs.some(
+      (slug) =>
+        typeof slug !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug),
+    ) ||
+    new Set(slugs).size !== slugs.length ||
+    (revision !== null &&
+      (!Number.isSafeInteger(revision) || Number(revision) < 1))
+  )
+    return { ok: false, message: "Invalid ranking." };
+  try {
+    const account = await getAccount();
+    if (!account?.profile)
+      return { ok: false, message: "Sign in to edit your ranking." };
+    const rows = [];
+    for (let offset = 0; offset < slugs.length; offset += 100) {
+      const { data, error } = await account.supabase
+        .from("games")
+        .select("id,slug")
+        .in("slug", slugs.slice(offset, offset + 100));
+      if (error)
+        return {
+          ok: false,
+          message: "Ranking could not be saved. Your draft has been kept.",
+        };
+      rows.push(...data);
+    }
+    const bySlug = new Map(rows.map((row) => [row.slug, row.id]));
+    if (rows.length !== slugs.length)
+      return { ok: false, message: "A game is unavailable." };
+    const { data, error } = await account.supabase.rpc(
+      "save_preference_ranking",
+      {
+        p_ids: slugs.map((slug) => bySlug.get(slug)!),
+        p_revision: revision as number,
+      },
+    );
+    if (error)
+      return {
+        ok: false,
+        message:
+          error.code === "40001"
+            ? "Ranking changed in another tab. Reload before saving."
+            : "Ranking could not be saved. Your draft has been kept.",
+      };
+    revalidatePath("/", "layout");
+    return {
+      ok: true,
+      revision: data,
+      message: "Personal ranking saved. Scores and tiers are unchanged.",
+    };
+  } catch {
+    return {
+      ok: false,
+      message: "Ranking could not be saved. Your draft has been kept.",
+    };
+  }
+}

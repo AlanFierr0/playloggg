@@ -23,8 +23,8 @@ test("owner can save privately, publish, copy a truthful link and unpublish",asy
  const guest=await browser.newContext();const visitor=await guest.newPage();
  try{
   expect((await visitor.goto("http://127.0.0.1:3100/u/fixture_owner"))?.status()).toBe(404);
-  await page.goto("/settings");await page.getByRole("button",{name:"Publish profile and lists"}).click();
-  await expect(page.getByText("Your profile and curated lists are now public.")).toBeVisible();
+  await page.goto("/settings");await page.getByRole("button",{name:"Publish profile"}).click();
+  await expect(page.getByText("Your profile is now public. Private lists remain private.")).toBeVisible();
   await page.evaluate(()=>{Object.defineProperty(navigator.clipboard,"writeText",{configurable:true,value:async(value:string)=>{document.documentElement.dataset.copied=value}})});
   await page.getByRole("button",{name:"Copy public link"}).click();await expect(page.locator("html")).toHaveAttribute("data-copied","http://127.0.0.1:3100/u/fixture_owner");
   expect((await visitor.goto("http://127.0.0.1:3100/u/fixture_owner/game/hades"))?.status()).toBe(200);

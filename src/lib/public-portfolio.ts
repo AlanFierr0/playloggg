@@ -3,6 +3,7 @@ import "server-only";
 import { cache } from "react";
 import { createPublicClient } from "@/lib/supabase/public";
 import { getCatalog, portfolioGames } from "@/lib/portfolio";
+import {readPreferenceRanking} from "@/lib/preference-ranking";
 import { readFavorites } from "@/lib/favorites";
 import { publicProfilePath } from "@/lib/profile-settings";
 import type { Database } from "@/types/database";
@@ -16,7 +17,7 @@ export const getPublicPortfolio = cache(async (handle: string): Promise<Portfoli
   if (!publicBase) return null;
   const supabase = createPublicClient();
   const { data: profile, error } = await supabase.from("profiles")
-    .select("id,handle,display_name,is_public,avatar_url,bio,location,platform_preference").eq("handle", handle).eq("is_public", true).maybeSingle();
+    .select("id,handle,display_name,is_public,avatar_url,bio,location,platform_preference,is_discoverable").eq("handle", handle).eq("is_public", true).maybeSingle();
   if (error) throw new Error("This portfolio could not be loaded.");
   if (!profile) return null;
   const [rows, ratings, lists, favorites] = await Promise.all([
@@ -35,7 +36,7 @@ export const getPublicPortfolio = cache(async (handle: string): Promise<Portfoli
     (async () => {
       const all: CuratedListSummary[] = [];
       for (let offset = 0; ; offset += 100) {
-        const { data, error } = await supabase.from("curated_lists").select("id,name,revision")
+        const { data, error } = await supabase.from("curated_lists").select("id,name,revision,description,is_public,is_ranked")
           .eq("profile_id", profile.id).order("id").range(offset, offset + 99);
         if (error) throw new Error("This portfolio's lists could not be loaded.");
         all.push(...data);
@@ -44,14 +45,15 @@ export const getPublicPortfolio = cache(async (handle: string): Promise<Portfoli
     })(),
     readFavorites(supabase, profile.id),
   ]);
+  const ranking=await readPreferenceRanking(supabase,profile.id,rows);
   // Recheck after the paginated reads in case publishing changed during the request.
   const { data: current, error: currentError } = await supabase.from("profiles").select("id")
     .eq("id", profile.id).eq("handle", handle).eq("is_public", true).maybeSingle();
   if (currentError) throw new Error("This portfolio could not be loaded.");
   if (!current) return null;
   return {
-    games: portfolioGames(rows, ratings), lists, favorites, publicBase,
-    profile: { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: false, avatarUrl: avatarSource(profile.id, profile.avatar_url), bio: profile.bio, location: profile.location, platformPreference: profile.platform_preference, isPublic: true },
+    games: portfolioGames(rows, ratings), lists, favorites, publicBase, ranking,
+    profile: { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: false, avatarUrl: avatarSource(profile.id, profile.avatar_url), bio: profile.bio, location: profile.location, platformPreference: profile.platform_preference, isPublic: true, isDiscoverable:profile.is_discoverable },
     access: { signedIn: false, canEdit: false, canImportCatalog: false },
   };
 });
@@ -61,7 +63,7 @@ export async function getPublicList(handle: string, id: string): Promise<Curated
   const portfolio = await getPublicPortfolio(handle);
   if (!portfolio) return null;
   const supabase = createPublicClient();
-  const { data: list, error } = await supabase.from("curated_lists").select("id,name,revision")
+  const { data: list, error } = await supabase.from("curated_lists").select("id,name,revision,description,is_public,is_ranked")
     .eq("profile_id", Number(portfolio.profile.id)).eq("id", Number(id)).maybeSingle();
   if (error) throw new Error("This list could not be loaded.");
   if (!list) return null;
@@ -72,6 +74,8 @@ export async function getPublicList(handle: string, id: string): Promise<Curated
     .eq("id", Number(portfolio.profile.id)).eq("handle", handle).eq("is_public", true).maybeSingle();
   if (currentError) throw new Error("This portfolio could not be loaded.");
   if (!current) return null;
+  const {data:currentList,error:listVisibilityError}=await supabase.from("curated_lists").select("id").eq("id",list.id).eq("profile_id",Number(portfolio.profile.id)).eq("is_public",true).maybeSingle();
+  if(listVisibilityError)throw new Error("List visibility could not be checked.");if(!currentList)return null;
   const rows = await getCatalog();
   const byId = new Map(rows.map((row) => [row.id, row.slug]));
   const slugs = items.map((item) => byId.get(item.game_id));

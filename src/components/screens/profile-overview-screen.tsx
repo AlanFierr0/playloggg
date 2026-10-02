@@ -2,6 +2,8 @@
 import Link from "next/link";
 import { useMessages } from "@/components/site-preferences";
 import { usePortfolio } from "@/components/portfolio-provider";
+import {ShareCardControls} from "@/components/share-card-controls";
+import { TasteSummary } from "@/components/taste-summary";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import { ProfileNavigation } from "@/components/profile-navigation";
 import { averageScore, ratedGames, loggedGames } from "@/lib/portfolio-view";
@@ -31,13 +33,15 @@ export function ProfileOverviewScreen() {
       {profile.bio && <p translate="no" className="max-w-3xl text-body-lg text-on-surface-variant whitespace-pre-wrap break-words">{profile.bio}</p>}
       {(profile.location || profile.platformPreference) && <div className="flex flex-wrap gap-4 text-body-sm text-on-surface-variant">{profile.location && <p>{t("Location")}: <span translate="no">{profile.location}</span></p>}{profile.platformPreference && <p>{t("Platform preference")}: <span translate="no">{profile.platformPreference}</span></p>}</div>}
       <dl className="grid grid-cols-2 sm:grid-cols-4 gap-5 max-w-3xl">{[[t("Games rated"), rated.length], [t("Completed games"), entries.filter(g => g.status === "completed").length], [t("Average score"), averageScore(rated)], [t("Favorites"), favorites.length]].map(([label, value]) => <div key={label}><dt className="text-body-sm text-on-surface-variant">{label}</dt><dd className="font-headline-xl text-headline-xl text-primary">{value}</dd></div>)}</dl>
-      {!publicBase && access?.canEdit && <div className="flex flex-wrap gap-5 text-primary font-label-md"><Link className="inline-flex min-h-11 items-center" href="/settings">{t("Edit profile")}</Link><Link className="inline-flex min-h-11 items-center" href="/profile/favorites">{t("Manage favorites")}</Link>{profile.isPublic && <Link className="inline-flex min-h-11 items-center" href={`/u/${profile.handle}`}>{t("Open public profile")}</Link>}</div>}
+      {!publicBase && access?.canEdit && <div className="flex flex-wrap gap-5 text-primary font-label-md"><Link className="inline-flex min-h-11 items-center" href="/profile/wrapped">{t("Year in Gaming")}</Link><Link className="inline-flex min-h-11 items-center" href="/profile/activity">{t("Activity feed")}</Link><Link className="inline-flex min-h-11 items-center" href="/profile/social">{t("Following and blocks")}</Link><Link className="inline-flex min-h-11 items-center" href="/quick-rate">{t("Quick rating")}</Link><Link className="inline-flex min-h-11 items-center" href="/settings">{t("Edit profile")}</Link><Link className="inline-flex min-h-11 items-center" href="/profile/favorites">{t("Manage favorites")}</Link>{profile.isPublic && <Link className="inline-flex min-h-11 items-center" href={`/u/${profile.handle}`}>{t("Open public profile")}</Link>}</div>}
       {!publicBase && <ProfileNavigation />}
     </header>
     <section className="space-y-5"><div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-headline-xl text-headline-xl">{t("Featured favorites")}</h2><Link className="inline-flex min-h-11 items-center text-primary" href={`${base}/favorites`}>{t("All favorites")}</Link></div>
       <p className="text-on-surface-variant text-body-sm">{t("Your favorites express what matters to you, independently of scores and tiers.")}</p>
       {featured.length ? <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">{featured.map(f => { const game = bySlug.get(f.slug); return game ? <Link key={f.slug} href={gameHref(game)} className="group min-w-0"><img src={game.cover} alt="" className="w-full aspect-[2/3] object-cover rounded-lg shadow-lg" /><p translate="no" className="mt-3 font-headline-md text-headline-md break-words group-hover:text-primary">{game.title}</p><p className="text-primary font-label-md">#{f.featuredSlot}</p></Link> : null; })}</div> : <p className="text-on-surface-variant">{t("No featured favorites yet.")}</p>}
     </section>
+    <ShareCardControls endpoint={`/api/share/profile?kind=favorites${publicBase?`&handle=${profile.handle}`:""}`} />
+    <TasteSummary games={games} href={`${base}/stats`} />
     <section className="space-y-5"><h2 className="font-headline-lg text-headline-lg">{t("Recently updated entries")}</h2><p className="text-body-sm text-on-surface-variant">{t("Latest saved entry updates, including rating, review or playback edits.")}</p>
       {recent.length ? <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">{recent.map(game => <Link href={gameHref(game)} key={game.slug} className="min-w-0"><img loading="lazy" src={game.cover} alt="" className="w-full aspect-[2/3] object-cover rounded" /><h3 translate="no" className="mt-2 font-headline-md text-headline-md break-words">{game.title}</h3><p className="text-primary text-body-sm">{t("Score")}: {game.score ?? t("Unrated")}</p><time className="text-body-sm text-on-surface-variant" dateTime={game.updatedAt}>{game.updatedAt!.slice(0, 10)}</time></Link>)}</div> : <p className="text-on-surface-variant">{t("No dated entry updates yet.")}</p>}
     </section>

@@ -22,7 +22,10 @@ order below establishes the data needed to make those features truthful.
 Profile v2 and the navigation foundation are implemented with the approved
 unlimited favorites and ordered featured Top 4. Optional bio/location/platform
 preference, current reviews, entry updates and basic stats are included. See
-[Profile v2](profile-v2.md). Quick rating and the deeper taste engine remain next.
+[Profile v2](profile-v2.md). Quick rating, the taste engine, independent preference rankings, Compare v2,
+separate discovery consent, list settings/likes, social controls, recorded activity
+and PNG sharing are now implemented. See [document review](product-ui-review.md)
+for exact coverage, formulas and remaining proposals.
 
 ## Foundation at the start of this roadmap
 
@@ -48,7 +51,8 @@ preference, current reviews, entry updates and basic stats are included. See
 
 ### 1A. Public Profile v2 and favorites
 
-Implemented with the approved scope; image uploads remain deferred.
+Implemented with the approved scope, including the subsequently approved private
+profile picture uploads.
 
 1. Agree on the favorite model and initial customization scope. Recommended:
    unlimited independent favorites with an ordered featured Top 4; bio and
@@ -141,10 +145,10 @@ Redesign the homepage around "Build your gaming identity": rate games, rank
 favorites and compare taste. Use a create-profile CTA with a useful signed-in
 destination. Retain editorial content as a secondary section.
 
-Featured profiles, taste neighbors, public-figure profiles and profile exploration
-require a separate opt-in directory/discoverability design: existing publication
-does not imply directory consent. The previously approved no-directory/noindex
-policy stays in place until changed explicitly.
+Profile exploration now uses the approved separate discovery opt-in after
+publishing. Existing public profiles remain link-only unless they opt in; all
+profiles stay noindex. Public-figure verification and dedicated taste-neighbor
+browsing remain separate proposals.
 
 Define population, time window, minimum samples and privacy rules for trending
 games, popular lists, recent reviews, high-variance controversial games, consensus
@@ -196,9 +200,11 @@ data and functional destinations before appearing.
 ## Pending decisions and deferred work
 
 The product direction and phased priorities come from the user's supplied plan.
-Alternative favorite formats, customization, formulas, new statuses, independent
-ordering, discoverability and social access are proposals until agreed at their
-milestone. Ask before consequential choices, then proceed with routine
+Favorite formats, formulas, existing statuses, independent ordering, separate
+discovery consent and social access have now been agreed and implemented as
+recorded in product-ui-review.md. Unsupported classifications, custom banners,
+public-figure verification, comments and additional discovery categories remain
+proposals. Ask before consequential new choices; proceed with routine
 implementation, verification, push and automatic deployment.
 
 Backup scheduling, restore exercises, personal export/deletion UI and the second

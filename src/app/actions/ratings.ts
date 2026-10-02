@@ -19,7 +19,7 @@ export async function saveRating(input: unknown): Promise<{ ok: boolean; message
     }, { onConflict: "profile_id,game_id" });
     if (error) return { ok: false, message: "Your rating could not be saved. Your draft has been kept; please try again." };
     revalidatePath("/", "layout");
-    return { ok: true, message: "Entry saved: score, tier, playback status, platform, playtime, completion date, and review. Tags are saved; nothing was broadcast." };
+    return { ok: true, message: "Entry saved: score, tier, playback status, platform, playtime, completion date, review and tags." };
   } catch {
     return { ok: false, message: "Saving is unavailable right now. Your draft has been kept; please try again." };
   }

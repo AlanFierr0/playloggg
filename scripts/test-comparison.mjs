@@ -37,7 +37,7 @@ function loader({hidden=false,unpublish=false,fail=false}={}){
  async range(start,end){assert.equal(fields,"game_id,score,tier,status");assert.ok(filters.some(([key])=>key==="profile_id"));ratingReads++;return{data:fail&&start===500 ? null : entries.slice(start,end+1),error:fail&&start===500 ? {} : null}}
  }}};
  const source=readFileSync(new URL("../src/lib/public-comparison.ts",import.meta.url),"utf8");
- const dependencies={"@/lib/avatar-input":{avatarSource:()=>null},"server-only":{},"@/lib/supabase/public":{createPublicClient:()=>{created++;return db}},"@/lib/profile-settings":{publicProfilePath:handle=>/^[a-z0-9_]{3,30}$/.test(handle)?`/u/${handle}`:null},"@/lib/portfolio":{getCatalog:async()=>rows}};
+ const dependencies={"@/lib/favorites":{readFavorites:async()=>[]},"@/lib/avatar-input":{avatarSource:()=>null},"server-only":{},"@/lib/supabase/public":{createPublicClient:()=>{created++;return db}},"@/lib/profile-settings":{publicProfilePath:handle=>/^[a-z0-9_]{3,30}$/.test(handle)?`/u/${handle}`:null},"@/lib/portfolio":{getCatalog:async()=>rows}};
  const compiledModule={exports:{}};vm.runInNewContext(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:compiledModule,exports:compiledModule.exports,require:name=>{assert.ok(name in dependencies);return dependencies[name]}});
  return {read:compiledModule.exports.getPublicComparison,state:()=>({ratingReads,checks,created})};
 }
@@ -51,3 +51,5 @@ test("invalid, private, unpublished and same-profile pairs never produce compari
  assert.equal(await loader({unpublish:true}).read("left_user","right_user"),null);
  await assert.rejects(loader({fail:true}).read("left_user","right_user"),/entries could not be loaded/);
 });
+
+test("comparison correlation handles constants and recommendations never infer unplayed from unrated",()=>{const a=[game("a",0),game("b",50),game("c",100),game("unrated",null),game("logged",null)];const b=[game("a",10),game("b",60),game("c",100),game("unrated",95),game("new",95)];const result=compareGames(a,b);assert.ok(result.correlation>0.99);assert.equal(result.averageDifference,6.7);assert.deepEqual(result.forLeft.map(g=>g.slug),["new"]);assert.equal(compareGames(a,a.map(g=>({...g,score:50}))).correlation,null);assert.deepEqual(result.agreements.map(e=>e.game.slug),["c","a","b"]);});

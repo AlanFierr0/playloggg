@@ -5,6 +5,7 @@ import type { Database } from "@/types/database";
 import type { Game, Portfolio } from "@/types/domain";
 import { readProfileRatings } from "@/lib/profile-ratings";
 import { getLists } from "@/lib/collections";
+import {readPreferenceRanking} from "@/lib/preference-ranking";
 import { readFavorites } from "@/lib/favorites";
 import { createClient } from "@/lib/supabase/server";
 import { getAccount } from "@/lib/owner";
@@ -26,16 +27,16 @@ async function readPublic<T>(resource: string, tags: string[] = []): Promise<T[]
 
 const image = (id: string, size: "screenshot_huge" | "screenshot_big") => `https://images.igdb.com/igdb/image/upload/t_${size}/${id}.jpg`;
 
-const catalogFields = "slug,title,cover_url,release_year,released_on,genres,search_keywords,id,igdb_metadata->platforms";
+const catalogFields = "slug,title,cover_url,release_year,released_on,genres,search_keywords,id,igdb_metadata->platforms,igdb_metadata->developers,igdb_metadata->publishers";
 const detailFields = "slug,title,cover_url,release_year,released_on,genres,artwork_image_ids,screenshot_image_ids,search_keywords,id,igdb_metadata,igdb_url";
 
 // Cache shared card metadata only. Reviews and account data remain request-local.
 export const getCatalog = cache(async () => {
   const rows: GameRow[] = [];
   for (let offset = 0; ; offset += 500) {
-    const page = await readPublic<GameRow & { platforms?: GameRow["igdb_metadata"] }>(`games?select=${catalogFields}&order=id.asc&limit=500&offset=${offset}`, ["game-catalog"]);
+    const page = await readPublic<GameRow & { platforms?: GameRow["igdb_metadata"]; developers?: GameRow["igdb_metadata"]; publishers?: GameRow["igdb_metadata"] }>(`games?select=${catalogFields}&order=id.asc&limit=500&offset=${offset}`, ["game-catalog"]);
     rows.push(...page.map((row) => ({ ...row, artwork_image_ids: [], screenshot_image_ids: [], igdb_url: null,
-      igdb_metadata: { platforms: row.platforms ?? (row.igdb_metadata && typeof row.igdb_metadata === "object" && !Array.isArray(row.igdb_metadata) ? row.igdb_metadata.platforms : []) ?? [] } })));
+      igdb_metadata: { developers: row.developers ?? (row.igdb_metadata as {developers?: string[]})?.developers ?? [], publishers: row.publishers ?? (row.igdb_metadata as {publishers?:string[]})?.publishers ?? [], platforms: row.platforms ?? (row.igdb_metadata && typeof row.igdb_metadata === "object" && !Array.isArray(row.igdb_metadata) ? row.igdb_metadata.platforms : []) ?? [] } })));
     if (page.length < 500) return rows;
   }
 });
@@ -50,7 +51,7 @@ const selectedAccount = cache(async () => {
 });
 export const getPortfolioShell = cache(async (): Promise<Portfolio> => {
   const { owner, profile } = await selectedAccount();
-  return { games: [], lists: [], profile: profile ? { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: false, avatarUrl: avatarSource(profile.id, profile.avatar_url), bio: profile.bio, location: profile.location, platformPreference: profile.platform_preference, isPublic: profile.is_public } : {id: "", handle: "", displayName: "", isSample: false, isPublic: false}, access: { signedIn: Boolean(owner), canEdit: Boolean(profile), canImportCatalog: Boolean(profile) } };
+  return { games: [], lists: [], profile: profile ? { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: false, avatarUrl: avatarSource(profile.id, profile.avatar_url), bio: profile.bio, location: profile.location, platformPreference: profile.platform_preference, isPublic: profile.is_public, isDiscoverable:profile.is_discoverable } : {id: "", handle: "", displayName: "", isSample: false, isPublic: false}, access: { signedIn: Boolean(owner), canEdit: Boolean(profile), canImportCatalog: Boolean(profile) } };
 });
 const selectedRatings = cache(async () => {
   const { owner, profile } = await selectedAccount();
@@ -59,7 +60,8 @@ const selectedRatings = cache(async () => {
 export const getPortfolio = cache(async (): Promise<Portfolio> => {
   const [shell, rows, ratings] = await Promise.all([getPortfolioShell(), getCatalog(), selectedRatings()]);
   const [lists, favorites] = !shell.profile.id ? [[], []] : await Promise.all([getLists(Number(shell.profile.id)), (async () => readFavorites(await createClient(), Number(shell.profile.id)))()]);
-  return { ...shell, games: portfolioGames(rows, ratings), lists, favorites };
+  const ranking=shell.profile.id ? await readPreferenceRanking(await createClient(),Number(shell.profile.id),rows) : undefined;
+  return { ...shell, games: portfolioGames(rows, ratings), lists, favorites, ranking };
 });
 export const getPublicGame = cache(async (slug: string) => {
   const row = await getCatalogGame(slug);

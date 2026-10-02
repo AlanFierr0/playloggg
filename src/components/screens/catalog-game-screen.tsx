@@ -1,3 +1,6 @@
+import {GameFavorite} from "@/components/game-favorite";
+import {getCommunity} from "@/lib/community";
+import {getCatalogGame} from "@/lib/portfolio";
 import { getMessages } from "@/lib/locale/server";
 import Link from "next/link";
 import { ShareGameButton } from "@/components/game-actions";
@@ -7,7 +10,8 @@ import { playbackLabels } from "@/lib/playback-status";
 // Imported games use real catalog details and the selected profile's saved entry.
 // The Stitch sample reviews/community statistics belong to the original samples.
 export async function CatalogGameScreen({ game, isSample, publicProfile }: { game: Game; isSample: boolean; publicProfile?: Profile }) {
-  const t = await getMessages();
+  const [t,community,row] = await Promise.all([getMessages(),getCommunity(),getCatalogGame(game.slug)]);
+  const communityScore=community.scores.find(score=>score.gameId===row?.id);
   return <div className="relative overflow-hidden bg-surface-container-lowest">
     {game.artwork && <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[620px] bg-cover bg-top opacity-25" style={{ backgroundImage: `url(${game.artwork})` }} />}
     <div className="absolute inset-0 bg-gradient-to-b from-surface/70 via-surface/90 to-surface pointer-events-none" />
@@ -20,6 +24,9 @@ export async function CatalogGameScreen({ game, isSample, publicProfile }: { gam
           <h1 className="font-headline-xl text-headline-xl lg:text-[44px] lg:leading-[48px] tracking-tight font-bold break-words">{game.title}</h1>
           <div className="flex flex-wrap gap-x-4 gap-y-2 font-label-md text-label-md text-on-surface-variant"><span>{game.releasedOn ? t(`Released ${game.releasedOn}`) : t("Release date unknown")}</span><span>{game.genres?.join(" / ") || t("Genres unknown")}</span></div>
           {Boolean(game.developers?.length) && <p className="break-words text-on-surface-variant font-body-md text-body-md">{t("Developer · ")}{game.developers!.join(", ")}</p>}
+          <div className="flex flex-wrap gap-6 py-3"><div><p className="text-body-sm text-on-surface-variant">{t(publicProfile?"Profile score":"Your score")}</p><p className="font-headline-xl text-headline-xl text-primary">{game.score ?? t("Unrated")}</p></div><div><p className="text-body-sm text-on-surface-variant">{t("Community score")}</p><p className="font-headline-xl text-headline-xl">{communityScore?.average ?? t("Not enough ratings")}</p>{communityScore&&<p className="text-body-sm">{communityScore.count} {t("ratings")}</p>}</div><div><p className="text-body-sm text-on-surface-variant">{t("Tier")}</p><p className="font-headline-xl text-headline-xl">{game.tier ?? t("Unassigned")}</p></div></div>
+          <p className="text-body-sm text-on-surface-variant">{t("Community scores use discoverable public profiles and require at least 5 ratings.")}</p>
+          {!publicProfile&&<GameFavorite slug={game.slug}/>}
           {Boolean(game.publishers?.length) && <p className="break-words text-on-surface-variant font-body-md text-body-md">{t("Publisher · ")}{game.publishers!.join(", ")}</p>}
           <div className="flex flex-wrap gap-2">{game.platforms?.map((platform) => <span key={platform} className="break-words max-w-full px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">{platform}</span>)}</div>
           <ShareGameButton slug={game.slug} className="inline-flex items-center gap-2 rounded bg-surface-container px-4 py-2 text-on-surface"><span className="material-symbols-outlined" aria-hidden="true">share</span><span>{t("Copy game link")}</span></ShareGameButton>

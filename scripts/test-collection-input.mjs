@@ -9,7 +9,7 @@ test("tags normalize spacing and casing duplicates, preserve labels and clear", 
 });
 test("list drafts preserve custom order, trim names and discard forged identity", () => {
   const draft = { id: null, revision: null, name: "  Favorites ", slugs: ["b", "a"], profile_id: 123 };
-  assert.deepEqual(validateList(draft), { id: null, revision: null, name: "Favorites", slugs: ["b", "a"] });
+  assert.deepEqual(validateList(draft), { description:"",isPublic:false,isRanked:true,id: null, revision: null, name: "Favorites", slugs: ["b", "a"] });
   assert.ok(validateList({ ...draft, id: 1, revision: 2, slugs: [] }));
   for (const change of [{ name: "" }, { name: "x".repeat(81) }, { name: "a\nb" }, { id: 1 }, { revision: 1 }, { id: -1 }, { slugs: ["a", "a"] }, { slugs: ["../game"] }, { slugs: Array.from({ length: 501 }, (_, i) => `game-${i}`) }]) assert.equal(validateList({ ...draft, ...change }), null);
 });

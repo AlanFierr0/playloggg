@@ -2,6 +2,7 @@ import "server-only";
 import { avatarSource } from "@/lib/avatar-input";
 import { createPublicClient } from "@/lib/supabase/public";
 import { publicProfilePath } from "@/lib/profile-settings";
+import { readFavorites } from "@/lib/favorites";
 import { getCatalog } from "@/lib/portfolio";
 import type { Database } from "@/types/database";
 import type { Game, Profile } from "@/types/domain";
@@ -23,7 +24,8 @@ export async function getPublicComparison(left: string, right: string) {
       entries.push(...data);
       if (data.length < 500) break;
     }
-    return { profile, entries };
+    const favorites=await readFavorites(supabase,profile.id);
+    return { profile, entries, favorites };
   }
   const [a,b] = await Promise.all([read(left),read(right)]);
   if (!a || !b) return null;
@@ -37,12 +39,12 @@ export async function getPublicComparison(left: string, right: string) {
   if (current.some(profile => !profile)) return null;
   function portfolio(side: NonNullable<typeof a>) {
     const entries = new Map(side.entries.map(entry => [entry.game_id,entry]));
-    const games: Game[] = rows.filter(row => entries.has(row.id)).map(row => {
+    const games: Game[] = rows.filter(row => entries.has(row.id) || side.favorites.some(favorite=>favorite.slug===row.slug)).map(row => {
       const entry = entries.get(row.id)!;
-      return { slug:row.slug,title:row.title,cover:row.cover_url,year:row.release_year,keywords:"",score:entry.score,tier:entry.tier as Game["tier"],status:entry.status as Game["status"],logged:true };
+      return { slug:row.slug,title:row.title,cover:row.cover_url,year:row.release_year,keywords:"",score:entry?.score ?? null,tier:entry?.tier as Game["tier"],status:entry?.status as Game["status"],genres:row.genres,developers:Array.isArray((row.igdb_metadata as {developers?:unknown})?.developers) ? (row.igdb_metadata as {developers:string[]}).developers : [],logged:Boolean(entry) };
     });
     const profile: Profile = {id:String(side.profile.id),handle:side.profile.handle,displayName:side.profile.display_name,avatarUrl:avatarSource(side.profile.id,side.profile.avatar_url),isSample:false,isPublic:true};
-    return {profile,games};
+    return {profile,games,favorites:side.favorites};
   }
   return {left:portfolio(a),right:portfolio(b)};
 }

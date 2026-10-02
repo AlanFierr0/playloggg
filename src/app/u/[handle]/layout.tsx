@@ -1,6 +1,7 @@
 import { siteUrl, noIndex } from "@/lib/site-url";
 import { getMessages } from "@/lib/locale/server";
 import type { Metadata } from "next";
+import {ProfileSocial} from "@/components/profile-social";
 import { ProfileNavigation } from "@/components/profile-navigation";
 import { notFound } from "next/navigation";
 import { getPublicPortfolio } from "@/lib/public-portfolio";
@@ -18,7 +19,7 @@ export default async function PublicProfileLayout({ params, children }: { params
   const portfolio = await getPublicPortfolio((await params).handle);
   if (!portfolio) notFound();
   return <PortfolioProvider portfolio={portfolio}>
-    <div className="site-container mx-auto px-4 sm:px-6 lg:px-12 pt-6"><ProfileNavigation /></div>
+    <div className="site-container mx-auto px-4 sm:px-6 lg:px-12 pt-6"><ProfileNavigation />{portfolio.profile.isDiscoverable&&<div className="pt-4"><ProfileSocial target={Number(portfolio.profile.id)}/></div>}</div>
     {children}
   </PortfolioProvider>;
 }

@@ -15,5 +15,5 @@ export default async function ListPage({ params }: { params: Promise<{ id: strin
   const byId = new Map(catalog.map((game) => [game.id, game.slug]));
   const slugs = list.gameIds.map((gameId) => byId.get(gameId));
   if (slugs.some((slug) => slug === undefined)) throw new Error("Some list games could not be loaded.");
-  return <PortfolioProvider portfolio={portfolio}><CollectionsScreen key={list.id} initial={{ id: list.id, name: list.name, revision: list.revision, slugs: slugs as string[] }} /></PortfolioProvider>;
+  return <PortfolioProvider portfolio={portfolio}><CollectionsScreen key={list.id} initial={{ ...list, slugs: slugs as string[] }} /></PortfolioProvider>;
 }
