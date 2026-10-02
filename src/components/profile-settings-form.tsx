@@ -21,7 +21,7 @@ export function ProfileSettingsForm({ profile }: { profile: Profile }) {
   const [platformPreference, setPlatformPreference] = useState(profile.platformPreference ?? "");
   const [copyMessage, setCopyMessage] = useState("");
   const pending = namesPending || visibilityPending || identityPending || discoveryPending;
-  return <div className="space-y-8">
+  return <div className="grid grid-cols-1 xl:grid-cols-2 items-start gap-6 sm:gap-8 [&>*]:min-w-0">
     <form action={discoveryAction} className="rounded-xl bg-surface-container-low p-5 sm:p-8 space-y-5"><input type="hidden" name="setting" value="discovery"/><input type="hidden" name="discovery" value={profile.isDiscoverable?"off":"on"}/><h2 className="font-headline-lg text-headline-lg">{t("Profile discovery")}</h2><p className="text-on-surface-variant">{t("Publishing shares your link. Discovery is a separate opt-in that shows your public profile in Explore profiles and lets others follow your activity.")}</p><p className="text-primary">{t(profile.isDiscoverable?"Discoverable":"Link-only")}</p><button disabled={pending || (!profile.isPublic&&!profile.isDiscoverable)} className={button}>{t(discoveryPending?"Saving…":profile.isDiscoverable?"Leave discovery":"Join discovery")}</button>{!profile.isPublic&&<p className="text-body-sm text-on-surface-variant">{t("Publish your profile before opting into discovery.")}</p>}<p role="status">{t(discoveryState.message)}</p></form>
     <ProfilePictureForm profile={profile} />
     <form action={namesAction} className="rounded-xl bg-surface-container-low p-5 sm:p-8 space-y-5">
@@ -43,7 +43,7 @@ export function ProfileSettingsForm({ profile }: { profile: Profile }) {
       <p role="status" className="text-primary break-words">{t(identityState.message)}</p>
       <button disabled={pending} className={button}>{identityPending ? t("Saving…") : t("Save profile details")}</button>
     </form>
-    <form action={visibilityAction} className="rounded-xl bg-surface-container-low p-5 sm:p-8 space-y-5">
+    <form action={visibilityAction} className="xl:col-span-2 rounded-xl bg-surface-container-low p-5 sm:p-8 space-y-5">
       <input type="hidden" name="setting" value="visibility" />
       <input type="hidden" name="visibility" value={profile.isPublic ? "private" : "public"} />
       <h2 className="font-headline-lg text-headline-lg">{t("Profile visibility")}</h2>

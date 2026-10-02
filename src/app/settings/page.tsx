@@ -13,7 +13,7 @@ export default async function SettingsPage() {
   if (!account) redirect("/login");
   if (!account.profile) redirect("/signup");
   const profile = account.profile;
-  return <section className="mx-auto max-w-2xl px-4 sm:px-6 py-8 sm:py-12 space-y-6">
+  return <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-6">
     <Link className="text-primary font-label-md text-label-md" href="/profile">{t("← My portfolio")}</Link>
     <h1 className="font-headline-xl text-headline-xl break-words">{t("Profile settings")}</h1>
     <ProfileSettingsForm profile={{ id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isPublic: profile.is_public, isDiscoverable:profile.is_discoverable, isSample: false, avatarUrl: avatarSource(profile.id, profile.avatar_url), bio: profile.bio, location: profile.location, platformPreference: profile.platform_preference }} />
