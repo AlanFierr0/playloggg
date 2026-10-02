@@ -13,7 +13,7 @@ test("score slider works on an unrated game and discard returns to profile witho
   const selected = Number(await slider.inputValue());
   expect(selected).toBeGreaterThan(70);
   expect(selected).toBeLessThan(90);
-  await expect(page.locator("#score-display")).toHaveText(String(selected));
+  await expect(page.locator("#score-display")).toHaveValue(String(selected));
   const dragBox = (await slider.boundingBox())!;
   const thumbX = dragBox.x + 11 + (dragBox.width - 22) * selected / 100;
   await page.mouse.move(thumbX, dragBox.y + dragBox.height / 2);
@@ -30,7 +30,7 @@ test("score slider works on an unrated game and discard returns to profile witho
   await expect(page).toHaveURL(/\/profile$/);
   await expect(page.locator("#score-slider")).toHaveCount(0);
   await page.goto("/log?game=hades");
-  await expect(page.locator("#score-display")).toHaveText("—");
+  await expect(page.locator("#score-display")).toHaveValue("");
   await expect(page.locator("#dispatch-textarea")).toHaveValue("");
   await expect(page.locator("#hours-input")).toHaveValue("");
   await expect(page.locator("#date-input")).toHaveValue("");
@@ -45,24 +45,24 @@ test("score keyboard controls and discard retain the last committed score", asyn
   const slider = page.getByRole("slider", { name: "Numerical score from 0 to 100" });
   await slider.focus();
   await slider.press("Home");
-  await expect(page.locator("#score-display")).toHaveText("0");
+  await expect(page.locator("#score-display")).toHaveValue("0");
   await slider.press("End");
-  await expect(page.locator("#score-display")).toHaveText("100");
+  await expect(page.locator("#score-display")).toHaveValue("100");
   await page.locator("#dispatch-textarea").fill("Keep this saved review");
   await page.locator("#commit-rating").click();
   await expect(page).toHaveURL(/\/profile$/);
   await page.goto("/log?game=hades");
   await slider.press("ArrowLeft");
-  await expect(page.locator("#score-display")).toHaveText("99");
+  await expect(page.locator("#score-display")).toHaveValue("99");
   await page.locator("#dispatch-textarea").fill("Discard this draft");
   await page.locator("#discard-rating").click();
   await expect(page).toHaveURL(/\/profile$/);
   await expect(page.locator("#score-slider")).toHaveCount(0);
   await page.goto("/log?game=hades");
-  await expect(page.locator("#score-display")).toHaveText("100");
+  await expect(page.locator("#score-display")).toHaveValue("100");
   await expect(page.locator("#dispatch-textarea")).toHaveValue("Keep this saved review");
   await page.reload();
-  await expect(page.locator("#score-display")).toHaveText("100");
+  await expect(page.locator("#score-display")).toHaveValue("100");
 });
 
 test("editor score and discard controls are accessible in both themes and languages", async ({ page, context }, testInfo) => {
@@ -87,11 +87,11 @@ test("typed scores sync with the slider, reject invalid values and persist zero"
   const slider=page.getByRole("slider", {name:"Numerical score from 0 to 100"});
   await input.fill("87");
   await expect(slider).toHaveValue("87");
-  await expect(page.locator("#score-display")).toHaveText("87");
+  await expect(page.locator("#score-display")).toHaveValue("87");
   await slider.fill("100");
   await expect(input).toHaveValue("100");
   await input.fill("");
-  await expect(page.locator("#score-display")).toHaveText("—");
+  await expect(page.locator("#score-display")).toHaveValue("");
   await expect(input).toHaveAttribute("maxlength","3");
   await expect(page.getByRole("spinbutton", {name:"Numerical score from 0 to 100"})).toHaveCount(0);
   await input.fill("87");

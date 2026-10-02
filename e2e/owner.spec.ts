@@ -14,7 +14,7 @@ test("authenticated unscored Backlog persists, failed saves retain the draft, an
   await expect(page.locator("#commit-rating")).toHaveCount(0);
   await page.goto("/log?game=hades");
   await expect(page.getByRole("button", { name: /Backlog$/ })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.locator("#score-display")).toHaveText("—");
+  await expect(page.locator("#score-display")).toHaveValue("");
   await expect(page.locator("#hours-input")).toHaveValue("0");
   await expect(page.locator("#dispatch-textarea")).toHaveValue("Fixture-only saved review");
   await page.getByRole("button", { name: "Add score", exact: true }).click();
@@ -32,7 +32,7 @@ test("authenticated unscored Backlog persists, failed saves retain the draft, an
   await expect(page).toHaveURL(/\/profile$/);
   await expect(page.locator("#commit-rating")).toHaveCount(0);
   await page.goto("/log?game=hades");
-  await expect(page.locator("#score-display")).toHaveText("0");
+  await expect(page.locator("#score-display")).toHaveValue("0");
   await expect(page.getByRole("button", { name: "Choose tier, currently S" })).toBeVisible();
   const state = await (await fetch("http://127.0.0.1:3101/__state")).json();
   expect(state.ratings.filter((row: { profile_id: number }) => row.profile_id === 2 && "game_id" in row && row.game_id === 1)).toMatchObject([{ score: 0, tier: "S", status: "backlog", hours_played: 0 }]);
