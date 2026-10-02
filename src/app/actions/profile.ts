@@ -20,7 +20,7 @@ export async function updateProfile(_previous: { message: string }, form: FormDa
       .select("handle,is_public").maybeSingle();
     if (error || !data) return { message: error?.code === "23505" ? "That handle is taken. Choose another one." : "Your profile could not be updated. Please retry." };
     revalidatePath("/", "layout");
-    return { message: input.setting === "discovery" ? "Discovery preference saved." : input.setting === "names" ? "Profile names saved." : input.setting === "identity" ? "Profile details saved." : data.is_public ? "Your profile is now public. Private lists remain private." : "Your profile and curated lists are now private." };
+    return { message: input.setting === "discovery" ? "Discovery preference saved." : input.setting === "names" ? "Profile names saved." : input.setting === "identity" ? "Profile details saved." : data.is_public ? "Your profile is now public." : "Your profile is now private." };
   } catch { return { message: "Saving is unavailable. Your draft has been kept; please retry." }; }
 }
 

@@ -7,6 +7,6 @@ export async function publicPageMetadata(handle:string,suffix:string,label:strin
  if(!portfolio) return {title:t("Profile unavailable"),robots:noIndex,openGraph:{title:t("Profile unavailable")}};
  const title=`${t(label)} · ${portfolio.profile.displayName}`;
  const url=siteUrl(`${portfolio.publicBase}${suffix}`);
- const description=t("Public game ratings, tiers, reviews and curated lists.");
+ const description=t("Public game ratings, tiers and reviews.");
  return {title,description,robots:noIndex,alternates:{canonical:url},openGraph:{title,description,url},twitter:{card:"summary" as const,title,description}};
 }

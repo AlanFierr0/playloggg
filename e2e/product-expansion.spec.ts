@@ -128,37 +128,6 @@ test("discovery is separate from publishing and unpublishing clears consent", as
     0,
   );
 });
-test("lists save description and unranked mode while private exports stay owned", async ({
-  page,
-  context,
-  browser,
-}) => {
-  await context.addCookies([authCookie]);
-  await page.goto("/lists");
-  await page.getByLabel("List name", { exact: true }).fill("My actual list");
-  await page
-    .getByLabel("Description", { exact: true })
-    .fill("Independent favorites");
-  await page.getByLabel("Ranked list", { exact: true }).uncheck();
-  await page.locator('[data-add-game="hades"]').click();
-  await page.getByRole("button", { name: "Save list", exact: true }).click();
-  await expect(page).toHaveURL(/\/lists\/11$/);
-  await page.reload();
-  await expect(page.getByLabel("Description", { exact: true })).toHaveValue(
-    "Independent favorites",
-  );
-  await expect(
-    page.getByLabel("Ranked list", { exact: true }),
-  ).not.toBeChecked();
-  expect((await page.request.get("/api/share/list?id=11")).status()).toBe(200);
-  const guest = await browser.newContext();
-  expect(
-    (
-      await guest.request.get("http://127.0.0.1:3100/api/share/list?id=11")
-    ).status(),
-  ).toBe(404);
-  await guest.close();
-});
 test("social controls support follow and unfollow without block controls", async ({
   page,
   context,
@@ -207,5 +176,4 @@ test("share cards export correct PNG sizes and reject private public handles", a
   ).toBe(404);
 });
 
-test("signed-in users can like and unlike a public list",async({page,context})=>{await context.addCookies([authCookie]);await page.goto("/u/fixture_public/lists/10");await page.getByRole("button",{name:"Like",exact:true}).click();await expect(page.getByRole("button",{name:"Unlike",exact:true})).toBeVisible();await page.reload();await expect(page.getByRole("button",{name:"Unlike",exact:true})).toBeVisible();await page.getByRole("button",{name:"Unlike",exact:true}).click();await expect(page.getByRole("button",{name:"Like",exact:true})).toBeVisible();});
 test("taste neighbors show real match and overlap after five shared scored games",async({page,context})=>{await context.addCookies([authCookie]);await page.goto("/quick-rate");for(const [name,score] of [["Hades","0"],["Fixture Game 00","50"],["Fixture Game 01","50"],["Fixture Game 02","50"],["Fixture Game 03","50"]]){await page.getByLabel("Search titles",{exact:true}).fill(name);await page.getByRole("button",{name,exact:true}).click();await page.getByLabel("Score",{exact:true}).fill(score);await page.getByRole("button",{name:"Save entry",exact:true}).click();await expect(page.getByRole("status").filter({hasText:"saved"})).toBeVisible();}await page.goto("/");const section=page.locator("section").filter({has:page.getByRole("heading",{name:"Taste neighbors",exact:true})});await expect(section).toContainText("100% Taste Match");await expect(section).toContainText("5 Shared scored games");expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);});

@@ -39,7 +39,6 @@ export async function CatalogGameScreen({ game, isSample, publicProfile }: { gam
             </> : <p className="text-on-surface-variant">{publicProfile || isSample ? t("This profile has not logged this game.") : t("This game is in the catalog. Add a log entry to save your status, rating or review.")}</p>}
             {!publicProfile && <>
             <Link href={isSample ? "/login" : `/log?game=${encodeURIComponent(game.slug)}`} className="inline-flex rounded px-5 py-2.5 bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider">{isSample ? t("Sign in") : game.logged ? t("Edit log entry") : t("Log this game")}</Link>
-            {!isSample && <Link href="/lists" className="inline-flex ml-3 py-2.5 text-primary font-label-md text-label-md">{t("Curated lists →")}</Link>}
             </>}
           </section>
         </div>

@@ -41,7 +41,7 @@ test("authenticated unscored Backlog persists, failed saves retain the draft, an
   await expect(page.locator("#commit-rating")).toBeDisabled();
 });
 
-test("private and unknown nested profiles return 404; published entries and lists are readable", async ({ page }) => {
+test("private and unknown nested profiles return 404; published entries are readable and list pages are retired", async ({ page }) => {
   for (const handle of ["fixture_owner", "missing_fixture"]) {
     for (const suffix of ["", "/game/hades", "/lists", "/lists/10", "/tiers"]) {
       const response = await page.goto(`/u/${handle}${suffix}`);
@@ -53,6 +53,6 @@ test("private and unknown nested profiles return 404; published entries and list
   await page.goto("/u/fixture_public/game/hades");
   await expect(page.getByText("Public fixture review", { exact: true })).toBeVisible();
   await page.goto("/u/fixture_public/lists/10");
-  await expect(page.getByRole("heading", { name: "Public fixture list", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Public fixture list", exact: true })).toHaveCount(0);
   await expect(page.getByText("Fixture-only saved review", { exact: true })).toHaveCount(0);
 });

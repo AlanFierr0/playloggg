@@ -12,10 +12,9 @@ export function ProfileNavigation() {
   const items = [
     ["Overview", base], ["Ranking", `${base}/ranking`],
     ...(publicBase ? [["Tier List", `${base}/tiers`]] : []),
-    ["Lists", publicBase ? `${base}/lists` : "/lists"],
     ["Reviews", `${base}/reviews`], ["Stats", `${base}/stats`],
   ];
-  return <nav aria-label={t("Profile sections")} className={`grid grid-cols-2 sm:grid-cols-3 ${publicBase ? "lg:grid-cols-6" : "lg:grid-cols-5"} gap-2 rounded-xl bg-surface-container-low p-2`}>
+  return <nav aria-label={t("Profile sections")} className={`grid grid-cols-2 sm:grid-cols-3 ${publicBase ? "lg:grid-cols-5" : "lg:grid-cols-4"} gap-2 rounded-xl bg-surface-container-low p-2`}>
     {items.map(([label, href]) => <Link key={href} href={href} aria-current={path === href ? "page" : undefined} className={`min-h-12 inline-flex justify-center items-center rounded-lg px-3 py-3 text-center font-label-md ${path === href ? "bg-primary-container text-on-primary-container font-semibold" : "text-on-surface-variant hover:bg-surface-container-high hover:text-primary"}`}>{t(label)}</Link>)}
   </nav>;
 }

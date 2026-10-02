@@ -1069,5 +1069,12 @@
   "Your profile could not be deleted. Please retry.": "No se pudo eliminar tu perfil. Volvé a intentar.",
   "This permanently deletes your profile, entries, lists, favorites and connections. Your sign-in account stays active so you can create a new profile.": "Esto elimina definitivamente tu perfil, entradas, listas, favoritos y conexiones. Tu cuenta de acceso sigue activa para que puedas crear otro perfil.",
   "Playtime synced. Other entry details were kept unchanged.": "Horas sincronizadas. Los demás datos de tus entradas se conservaron.",
-  "Some playtimes could not be synced. Retry to update the remaining games.": "No se pudieron sincronizar algunas horas. Volvé a intentar para actualizar los juegos restantes."
+  "Some playtimes could not be synced. Retry to update the remaining games.": "No se pudieron sincronizar algunas horas. Volvé a intentar para actualizar los juegos restantes.",
+  "This permanently deletes your profile and all its saved data. Your sign-in account stays active so you can create a new profile.": "Esto elimina permanentemente tu perfil y todos sus datos guardados. Tu cuenta de acceso sigue activa para que puedas crear un perfil nuevo.",
+  "Publishing makes your profile and its public data visible to anyone with the link. Your account email and Steam ID stay private.": "Publicar hace que tu perfil y sus datos públicos sean visibles para cualquiera que tenga el enlace. Tu correo y Steam ID siguen privados.",
+  "Your profile is now public.": "Tu perfil ahora es público.",
+  "Your profile is now private.": "Tu perfil ahora es privado.",
+  "Choose a name for your gaming portfolio.": "Elegí un nombre para tu portfolio de videojuegos.",
+  "Public game ratings, tiers and reviews.": "Puntajes, tiers y reseñas públicas de juegos.",
+  "Search games and profiles. Sign in to find and import missing games.": "Buscá juegos y perfiles. Iniciá sesión para encontrar e importar juegos que faltan."
 }

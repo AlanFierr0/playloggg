@@ -262,7 +262,7 @@ return (<><fieldset disabled={pending} className="contents">
 
 </div>
 
-<div className="md:col-span-12 flex flex-col gap-2.5"><TagEditor key={tagVersion} tags={tags} onChange={setTags} /><Link href="/lists" className="inline-flex items-center font-label-sm text-label-sm text-primary hover:underline">{t("Manage curated lists")}</Link>
+<div className="md:col-span-12 flex flex-col gap-2.5"><TagEditor key={tagVersion} tags={tags} onChange={setTags} />
 </div>
 
 </div>

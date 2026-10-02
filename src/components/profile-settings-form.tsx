@@ -48,7 +48,7 @@ export function ProfileSettingsForm({ profile }: { profile: Profile }) {
       <input type="hidden" name="visibility" value={profile.isPublic ? "private" : "public"} />
       <h2 className="font-headline-lg text-headline-lg">{t("Profile visibility")}</h2>
       <p className="text-primary">{profile.isPublic ? t("Public") : t("Private")}</p>
-      <p className="text-on-surface-variant">{t("Publishing makes your profile details, favorites, ratings, tiers, playback details, reviews, tags and public lists visible to anyone with the link. Private lists stay private. Your account email and Steam ID stay private.")}</p>
+      <p className="text-on-surface-variant">{t("Publishing makes your profile and its public data visible to anyone with the link. Your account email and Steam ID stay private.")}</p>
       <p className="text-on-surface-variant">{t("Profiles start private. You can make yours private again at any time; future public visits will no longer show it.")}</p>
       {profile.isPublic && <Link className="block break-all text-primary underline" href={`/u/${profile.handle}`}>{t("Open public profile: /u/")}{profile.handle}</Link>}
       {profile.isPublic && <button type="button" className="text-primary underline" onClick={async () => {

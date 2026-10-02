@@ -41,7 +41,7 @@ test("owner favorites stay independent, feature atomically, persist and follow p
     const visitor = await guest.newPage();
     expect((await visitor.goto("http://127.0.0.1:3100/u/fixture_owner/favorites"))?.status()).toBe(404);
     await page.getByRole("button", { name: "Publish profile" }).click();
-    await expect(page.getByText("Your profile is now public. Private lists remain private.")).toBeVisible();
+    await expect(page.getByText("Your profile is now public.")).toBeVisible();
     expect((await visitor.goto("http://127.0.0.1:3100/u/fixture_owner"))?.status()).toBe(200);
     await expect(visitor.getByText("I love RPGs. Mi nombre no se traduce.", { exact: true })).toBeVisible();
     await expect(visitor.getByRole("heading", { name: "Featured favorites" })).toBeVisible();
@@ -50,7 +50,7 @@ test("owner favorites stay independent, feature atomically, persist and follow p
     await expect(visitor.getByRole("button", { name: "Remove favorite" })).toHaveCount(0);
     await expect(visitor.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
     await page.getByRole("button", { name: "Make profile private" }).click();
-    await expect(page.getByText("Your profile and curated lists are now private.")).toBeVisible();
+    await expect(page.getByText("Your profile is now private.")).toBeVisible();
     expect((await visitor.reload())?.status()).toBe(404);
   } finally { await guest.close(); }
   state = await (await request.get("http://127.0.0.1:3101/__state")).json();
@@ -62,7 +62,7 @@ test("public profile sections use real zero scores, review text and independent 
   await expect(page.getByRole("heading", { name: "Published Fixture", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Featured favorites" })).toBeVisible();
   const navigation = page.getByRole("navigation", { name: "Profile sections" });
-  for (const [name, suffix] of [["Ranking", "ranking"], ["Reviews", "reviews"], ["Stats", "stats"], ["Tier List", "tiers"], ["Lists", "lists"]]) {
+  for (const [name, suffix] of [["Ranking", "ranking"], ["Reviews", "reviews"], ["Stats", "stats"], ["Tier List", "tiers"]]) {
     await navigation.getByRole("link", { name, exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`/u/fixture_public/${suffix}$`));
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);

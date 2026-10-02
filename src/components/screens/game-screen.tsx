@@ -182,6 +182,6 @@ return (<>
 <GameStandpoint game={game} />
 <section className="space-y-4"><h2 className="font-headline-lg text-headline-lg font-bold">{t("About this game")}</h2><p className="whitespace-pre-wrap break-words text-on-surface-variant text-body-lg">{game.summary || t("No overview is available from IGDB yet.")}</p>{game.sourceUrl && <a href={game.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-primary">{t("View source on IGDB ↗")}</a>}</section>
 {Boolean(game.screenshots?.length) && <section className="space-y-4"><h2 className="font-headline-lg text-headline-lg font-bold">{t("Screenshots")}</h2><div className="grid sm:grid-cols-2 gap-4">{game.screenshots!.map((src,index)=><img key={src} src={src} alt={t(`${game.title} screenshot ${index+1}`)} loading="lazy" className="w-full aspect-video rounded object-cover" />)}</div></section>}
-</div><aside className="lg:col-span-4 min-w-0"><Link href="/tiers" className="text-primary">{t("View tier board")}</Link><br /><Link href="/lists" className="inline-flex mt-4 text-primary">{t("Curated lists →")}</Link></aside></div></div>
+</div><aside className="lg:col-span-4 min-w-0"><Link href="/tiers" className="text-primary">{t("View tier board")}</Link></aside></div></div>
 </div></div></>);
 }

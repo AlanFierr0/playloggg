@@ -16,7 +16,6 @@ export async function CommunityDiscovery() {
     !community.controversial.length &&
     !recommendations.length &&
     !neighbors.length &&
-    !community.lists.length &&
     !community.reviews.length
   )
     return (
@@ -153,54 +152,6 @@ export async function CommunityDiscovery() {
           )}
         </section>
       ))}
-      <section className="space-y-4">
-        <h2 className="font-headline-lg text-headline-lg">
-          {t("Popular lists")}
-        </h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {community.lists.slice(0, 6).map((list) => (
-            <Link
-              key={list.id}
-              href={`/u/${list.profiles.handle}/lists/${list.id}`}
-              className="rounded-lg bg-surface-container-low p-4 space-y-3"
-            >
-              <div className="grid grid-cols-4 gap-1">
-                {list.curated_list_items
-                  .sort((a, b) => a.position - b.position)
-                  .slice(0, 4)
-                  .map((item) => {
-                    const game = games.get(item.game_id);
-                    return (
-                      game && (
-                        <img
-                          key={game.id}
-                          alt=""
-                          src={game.cover_url}
-                          className="w-full aspect-[3/4] object-cover rounded"
-                          loading="lazy"
-                        />
-                      )
-                    );
-                  })}
-              </div>
-              <h3 translate="no" className="font-headline-md text-headline-md">
-                {list.name}
-              </h3>
-              <p translate="no" className="text-on-surface-variant break-words">
-                {list.profiles.display_name}
-              </p>
-              <p className="text-body-sm text-primary">
-                {list.likes} {t("Likes")}
-              </p>
-            </Link>
-          ))}
-        </div>
-        {!community.lists.length && (
-          <p className="text-on-surface-variant">
-            {t("No discoverable public lists yet.")}
-          </p>
-        )}
-      </section>
       <section className="space-y-4">
         <h2 className="font-headline-lg text-headline-lg">
           {t("Recent reviews")}

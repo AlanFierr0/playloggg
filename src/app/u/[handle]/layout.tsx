@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ handle: s
   const portfolio = await getPublicPortfolio((await params).handle);
   if (!portfolio) return { title: t("Profile unavailable"), robots: { index: false, follow: false } };
   const title = `${t("Portfolio")} · ${portfolio.profile.displayName}`;
-  return { robots:noIndex, alternates:{canonical:siteUrl(portfolio.publicBase!)}, title, description: t("Public game ratings, tiers, reviews and curated lists."), openGraph: { url:siteUrl(portfolio.publicBase!), title, description: t("Public gaming portfolio on Playlogg.") } };
+  return { robots:noIndex, alternates:{canonical:siteUrl(portfolio.publicBase!)}, title, description: t("Public game ratings, tiers and reviews."), openGraph: { url:siteUrl(portfolio.publicBase!), title, description: t("Public gaming portfolio on Playlogg.") } };
 }
 export default async function PublicProfileLayout({ params, children }: { params: Promise<{ handle: string }>; children: React.ReactNode }) {
   const portfolio = await getPublicPortfolio((await params).handle);

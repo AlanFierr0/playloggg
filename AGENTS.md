@@ -38,6 +38,9 @@ Lists have descriptions, automatic cover collages, ranked/unranked mode, explici
 private/public visibility, and signed-in likes; a private profile never exposes a
 public list. Follow only discoverable public profiles. Include unfollow and blocking;
 blocked profiles are excluded from the personal activity feed/recommendations.
+The user subsequently retired Lists throughout the interface: remove list tabs,
+links, search results and discovery sections, and make legacy list pages unavailable.
+Preserve stored list data and database access constraints; do not restore list UI.
 The user subsequently removed blocking controls and the blocked-profiles section
 from the interface. Profile tools and activity links use "Following". Keep
 follow/unfollow; do not restore Block/Unblock controls. Existing database records

@@ -33,7 +33,6 @@ return (<>
 
 <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold">{t("\n          Personal Tier Board\n        ")}</h1>
 
-<Link href={publicBase ? `${publicBase}/lists` : "/lists"} className="text-primary font-label-md text-label-md hover:underline">{t("Curated lists")}</Link>
 <p className="font-body-md text-body-md text-on-surface-variant">{t(logged.length + " logged titles grouped by independently selected tiers.")}</p>
 
 </div>

@@ -117,7 +117,7 @@ return (<div onKeyDown={onKeyDown}>
 <span aria-hidden="true" className="material-symbols-outlined text-primary text-[22px] mr-3.5 flex-shrink-0 animate-pulse">{"search"}</span>
 
 <div className="min-w-0 flex-1 relative flex items-center">
-<input className="w-full bg-transparent text-on-surface font-headline-md text-headline-md tracking-tight focus:outline-none placeholder:text-on-surface-variant/40 caret-primary" id="command-input" placeholder={t(mode === "log" ? "Search games…" : "Search titles, directors, lists, or commands...")} type="text" ref={input} value={query} onChange={(event) => setQuery(event.target.value)} aria-label={t("Search titles, profiles and commands")} />
+<input className="w-full bg-transparent text-on-surface font-headline-md text-headline-md tracking-tight focus:outline-none placeholder:text-on-surface-variant/40 caret-primary" id="command-input" placeholder={t("Search games…")} type="text" ref={input} value={query} onChange={(event) => setQuery(event.target.value)} aria-label={t("Search titles, profiles and commands")} />
 
 <span className="hidden sm:inline-block w-2 h-5 bg-primary/80 ml-0.5 animate-pulse"></span>
 
@@ -141,7 +141,6 @@ return (<div onKeyDown={onKeyDown}>
 
 <button onClick={() => setScope("curators")} aria-pressed={scope === "curators"} className={"px-2.5 py-1 rounded font-label-sm text-label-sm tracking-wide transition-colors whitespace-nowrap " + (scope === "curators" ? "bg-surface-container-high text-primary font-semibold shadow-sm" : "hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface")}>{t("Profiles (")}{matchCounts.profiles.length})</button>
 
-<button onClick={() => setScope("lists")} aria-pressed={scope === "lists"} className={"px-2.5 py-1 rounded font-label-sm text-label-sm tracking-wide transition-colors whitespace-nowrap " + (scope === "lists" ? "bg-surface-container-high text-primary font-semibold shadow-sm" : "hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface")}>{t("Curated Lists (")}{matchCounts.lists.length})</button>
 
 <button onClick={() => setScope("actions")} aria-pressed={scope === "actions"} className={"px-2.5 py-1 rounded font-label-sm text-label-sm tracking-wide transition-colors whitespace-nowrap " + (scope === "actions" ? "bg-surface-container-high text-primary font-semibold shadow-sm" : "hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface")}>{t("Actions (2)")}</button>
 
