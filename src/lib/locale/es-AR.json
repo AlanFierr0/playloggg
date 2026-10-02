@@ -1,4 +1,16 @@
 {
+  "Friends": "Amigos",
+  "Find friends": "Buscar amigos",
+  "Friends navigation": "Navegación de amigos",
+  "Search by name or handle": "Buscá por nombre o usuario",
+  "Clear search": "Limpiar búsqueda",
+  "Compare games": "Comparar juegos",
+  "Find friends to compare": "Buscar amigos para comparar",
+  "Sign in to follow friends": "Iniciá sesión para seguir amigos",
+  "Find a friend, follow their updates and compare your games.": "Buscá a un amigo, seguí sus novedades y compará sus juegos con los tuyos.",
+  "Friends need a public profile with discovery enabled to appear here.": "Para aparecer acá, tus amigos necesitan un perfil público con la opción de descubrimiento activada.",
+  "No friends match this search.": "No se encontraron amigos con esa búsqueda.",
+  "You are not following anyone yet. Find a friend to get started.": "Todavía no seguís a nadie. Buscá a un amigo para empezar.",
   "Your profile": "Tu perfil",
   "Search results": "Resultados de búsqueda",
   "Search for a game, then select it to open its log options.": "Buscá un juego y elegilo para abrir las opciones del registro.",
@@ -995,5 +1007,6 @@
   "Entry saved: score, tier, playback status, platform, playtime, completion date, review and tags.": "Registro guardado: puntuación, tier, estado, plataforma, horas jugadas, fecha de finalización, reseña y etiquetas.",
   "Commit saves your optional score, independent tier, playback status, platform, playtime, completion date, review and tags.": "Confirmar guarda tu puntuación opcional, tier independiente, estado, plataforma, horas jugadas, fecha de finalización, reseña y etiquetas.",
   "Updates appear in feeds only while your profile is public and discoverable.": "Las actualizaciones aparecen en la actividad solo mientras tu perfil sea público y participe en descubrimiento.",
-  "Not enough data yet.": "Todavía no hay suficientes datos."
+  "Not enough data yet.": "Todavía no hay suficientes datos.",
+  "Your profile is selected. Choose a friend’s public handle to compare games.": "Tu perfil ya está seleccionado. Elegí el usuario público de un amigo para comparar juegos."
 }

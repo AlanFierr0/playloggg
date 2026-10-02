@@ -24,9 +24,9 @@ test("published comparisons show real affinity, independent tiers and reloadable
  await page.goto("/compare?left=fixture_public&right=fixture_empty");
  await expect(page.getByText("These profiles have no shared logged games yet.")).toBeVisible();
 });
-test("private and missing profiles stay unavailable even to a signed-in owner",async ({page,context})=>{
+test("other users private and missing profiles stay unavailable even to a signed-in owner",async ({page,context})=>{
  await context.addCookies([authCookie]);
- for(const right of ["fixture_peer","missing_fixture","../../login"]){
+ for(const right of ["alexvance","missing_fixture","../../login"]){
   await page.goto(`/compare?left=fixture_public&right=${encodeURIComponent(right)}`);
   await expect(page.getByText("Comparison unavailable. Check both handles and make sure both profiles are published.")).toBeVisible();
   await expect(page.getByText("Private fixture review")).toHaveCount(0);

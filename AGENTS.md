@@ -199,6 +199,11 @@ track approved changes in versioned migrations. Keep credentials in ignored
 environment files. Never commit secrets or place them in documentation.
 Push completed, verified milestones to `main` and let Vercel deploy them without
 asking again. Ask before infrastructure resets/deletion or destructive Git actions.
+The user approved owner-only comparisons of their private profile against a
+public friend. Resolve ownership through verified Auth and `owner_user_id`;
+anonymous comparisons and share-card exports still require public profiles.
+Friends search reuses opt-in public discovery and excludes blocked connections.
+See docs/friends-and-comparison.md.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

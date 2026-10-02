@@ -1,18 +1,33 @@
 import Link from "next/link";
-import { discoverProfiles } from "@/lib/profile-directory";
+import { discoverProfiles, profileSearch } from "@/lib/profile-directory";
 import { getMessages } from "@/lib/locale/server";
 import { ProfileAvatar } from "@/components/profile-avatar";
+import { getAccount } from "@/lib/owner";
+import { SocialControls } from "@/components/social-controls";
 export async function DiscoverProfiles({
   full = false,
   page = 1,
+  query = "",
 }: {
   full?: boolean;
   page?: number;
+  query?: string;
 }) {
-  const [profiles, t] = await Promise.all([
-    discoverProfiles(full ? 25 : 6, full ? (page - 1) * 24 : 0),
-    getMessages(),
-  ]);
+  const [account, t] = await Promise.all([full ? getAccount() : Promise.resolve(null), getMessages()]);
+  const followed = new Set<number>();
+  const excluded = new Set<number>();
+  if (account?.profile) {
+    const [follows, blocks] = await Promise.all([
+      account.supabase.from("profile_follows").select("followed_id").eq("follower_id", account.profile.id),
+      account.supabase.from("profile_blocks").select("blocker_id,blocked_id"),
+    ]);
+    if (follows.error || blocks.error) throw new Error("Connections could not be loaded.");
+    follows.data.forEach(row => followed.add(row.followed_id));
+    blocks.data.forEach(row => excluded.add(row.blocker_id === account.profile!.id ? row.blocked_id : row.blocker_id));
+  }
+  const search = profileSearch(query);
+  const profiles = await discoverProfiles(full ? 25 : 6, full ? (page - 1) * 24 : 0, search, [...excluded]);
+  const pageHref = (next: number) => `/people?${new URLSearchParams({ ...(search ? { q: search } : {}), page: String(next) })}`;
   return (
     <section className="w-full site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 space-y-6">
       <div className="flex flex-wrap gap-4 justify-between items-center">
@@ -28,14 +43,23 @@ export async function DiscoverProfiles({
           </Link>
         )}
       </div>
+      {full && <div className="space-y-5">
+        <p className="text-on-surface-variant">{t("Find a friend, follow their updates and compare your games.")}</p>
+        <nav aria-label={t("Friends navigation")} className="flex flex-wrap gap-3">
+          {account?.profile ? <><Link href="/profile/social" className="rounded bg-primary/10 text-primary px-4 py-3">{t("Following")}</Link><Link href="/profile/activity" className="rounded bg-surface-container text-primary px-4 py-3">{t("Activity feed")}</Link><Link href="/settings" className="rounded bg-surface-container text-primary px-4 py-3">{t("Profile settings")}</Link></> : <Link href="/login" className="rounded bg-primary-container text-on-primary-container px-4 py-3">{t("Sign in to follow friends")}</Link>}
+        </nav>
+        <form action="/people" method="get" className="flex flex-col sm:flex-row gap-3 items-end">
+          <label className="w-full min-w-0 space-y-2"><span className="block">{t("Find friends")}</span><input name="q" defaultValue={search} maxLength={80} placeholder={t("Search by name or handle")} className="w-full rounded bg-surface-container p-3" /></label>
+          <button className="shrink-0 rounded bg-primary-container text-on-primary-container px-5 py-3">{t("Search")}</button>
+          {search && <Link href="/people" className="shrink-0 text-primary px-4 py-3">{t("Clear search")}</Link>}
+        </form>
+        <p className="text-body-sm text-on-surface-variant">{t("Friends need a public profile with discovery enabled to appear here.")}</p>
+      </div>}
       {profiles.length ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {profiles.slice(0, full ? 24 : 6).map((profile) => (
-            <Link
-              href={`/u/${profile.handle}`}
-              key={profile.id}
-              className="flex items-start gap-4 rounded-xl bg-surface-container-low p-5"
-            >
+            <article key={profile.id} className="min-w-0 rounded-xl bg-surface-container-low p-5 space-y-4">
+            <Link href={`/u/${profile.handle}`} className="flex items-start gap-4">
               <ProfileAvatar
                 src={profile.avatar_url}
                 name={profile.display_name}
@@ -61,22 +85,24 @@ export async function DiscoverProfiles({
                 )}
               </div>
             </Link>
+            {full && account?.profile && account.profile.id !== profile.id && <div className="space-y-3"><SocialControls target={profile.id} followed={followed.has(profile.id)} /><Link href={`/compare?right=${encodeURIComponent(profile.handle)}`} aria-label={`${t("Compare games")} ${profile.display_name}`} className="inline-flex min-h-11 items-center rounded bg-primary/10 text-primary px-4 py-2">{t("Compare games")}</Link></div>}
+            </article>
           ))}
         </div>
       ) : (
         <p className="text-on-surface-variant">
-          {t("No profiles have opted into discovery yet.")}
+          {t(search ? "No friends match this search." : "No profiles have opted into discovery yet.")}
         </p>
       )}
       {full && (
         <nav aria-label={t("Profile directory pages")} className="flex gap-6">
           {page > 1 && (
-            <Link href={`/people?page=${page - 1}`} className="text-primary">
+            <Link href={pageHref(page - 1)} className="text-primary">
               {t("Previous")}
             </Link>
           )}
           {profiles.length > 24 && (
-            <Link href={`/people?page=${page + 1}`} className="text-primary">
+            <Link href={pageHref(page + 1)} className="text-primary">
               {t("Next")}
             </Link>
           )}

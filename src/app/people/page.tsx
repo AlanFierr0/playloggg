@@ -9,9 +9,9 @@ export async function generateMetadata() {
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; q?: string }>;
 }) {
   const query = await searchParams;
   const page = /^[1-9]\d{0,5}$/.test(query.page ?? "") ? Number(query.page) : 1;
-  return <DiscoverProfiles full page={page} />;
+  return <DiscoverProfiles full page={page} query={typeof query.q === "string" ? query.q : ""} />;
 }

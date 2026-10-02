@@ -144,7 +144,11 @@ export async function startFixtureServer() {
       else return reply(404, { message: `Unsupported fixture endpoint ${url.pathname}` });
       if(url.searchParams.get("select")?.includes("profiles!inner"))rows=rows.map(row=>({...row,profiles:profiles.find(profile=>profile.id===row.profile_id),curated_list_items:listItems.filter(item=>item.list_id===row.id)}));
       for (const [key, value] of url.searchParams) {
-        if (value.startsWith("eq.")) {
+        if (key === "or") {
+          const alternatives = value.slice(1,-1).split(",");
+          rows = rows.filter(row => alternatives.some(term => { const [field,operator,...parts] = term.split("."); const needle = parts.join(".").replace(/^%|%$/g, "").replace(/\\_/g, "_").toLowerCase(); return operator === "ilike" && String(row[field] ?? "").toLowerCase().includes(needle); }));
+        } else if(value.startsWith("not.in.(")){const excluded=value.slice(8,-1).split(",");rows=rows.filter(row=>!excluded.includes(String(row[key])));
+        } else if (value.startsWith("eq.")) {
           const expected = value.slice(3);
           if (key.startsWith("profiles.")) rows = rows.filter((row) => visibleProfiles.some((profile) => profile.id === row.profile_id && String(profile[key.slice(9)]) === expected));
           else rows = rows.filter((row) => String(row[key]) === expected);
