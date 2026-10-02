@@ -14,7 +14,7 @@ export async function CatalogGameScreen({ game, isSample, publicProfile }: { gam
   const [t,row] = await Promise.all([getMessages(),getCatalogGame(game.slug)]);
   const communityScore=row ? await getCommunityGameScore(row.id) : undefined;
   return <div className="relative overflow-hidden bg-surface-container-lowest">
-    {game.artwork && <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[620px] bg-cover bg-top opacity-25" style={{ backgroundImage: `url(${game.artwork})` }} />}
+    {game.artwork && <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[620px] bg-cover bg-top opacity-25" style={{ backgroundImage: `url(${game.artwork})`, maskImage: "linear-gradient(to bottom, black 0%, black 45%, transparent 100%)" }} />}
     <div className="absolute inset-0 bg-gradient-to-b from-surface/70 via-surface/90 to-surface pointer-events-none" />
     <div className="relative site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-12 space-y-8">
       <nav aria-label={t("Game navigation")}><Link href={publicProfile ? `/u/${publicProfile.handle}` : "/games"} className="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary font-label-md text-label-md uppercase tracking-wider">{publicProfile ? t(`← ${publicProfile.displayName}'s portfolio`) : t("← Game catalog")}</Link></nav>
@@ -35,11 +35,10 @@ export async function CatalogGameScreen({ game, isSample, publicProfile }: { gam
           {Boolean(game.developers?.length) && <p className="break-words text-on-surface-variant font-body-md text-body-md">{t("Developer · ")}{game.developers!.join(", ")}</p>}
           <div className="space-y-2">
             <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-body-sm text-on-surface-variant"><span>{t("Community score")}</span><span className="font-headline-md text-headline-md text-on-surface">{communityScore?.average ?? t("Not enough ratings")}</span>{communityScore && <span>{communityScore.count} {t("ratings")}</span>}</p>
-            <p className="text-body-sm text-on-surface-variant">{t("Community scores use discoverable public profiles and require at least 5 ratings.")}</p>
           </div>
           {!publicProfile&&<GameFavorite slug={game.slug}/>}
-          {Boolean(game.publishers?.length) && <p className="break-words text-on-surface-variant font-body-md text-body-md">{t("Publisher · ")}{game.publishers!.join(", ")}</p>}
-          <div className="flex flex-wrap gap-2">{game.platforms?.map((platform) => <span key={platform} className="break-words max-w-full px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">{platform}</span>)}</div>
+          {Boolean(game.publishers?.length) && <p className="break-words text-on-surface-variant font-body-md text-body-md">{game.publishers!.join(", ")}</p>}
+          <div className="flex flex-wrap gap-2">{game.platforms?.map((platform) => <span key={platform} className="break-words max-w-full px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">{platform === "PC (Microsoft Windows)" ? "PC" : platform}</span>)}</div>
           <section className="rounded-lg bg-surface-container-low p-4 sm:p-5 space-y-4">
             <h2 className="font-headline-md text-headline-md font-bold">{publicProfile ? t(`${publicProfile.displayName}'s log entry`) : isSample ? t("Sample profile entry") : t("Your log entry")}</h2>
             {game.logged ? <>

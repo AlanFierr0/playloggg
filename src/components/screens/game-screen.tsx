@@ -90,7 +90,7 @@ return (<>
 
 <span className="text-surface-variant">{"•"}</span>
 
-<div className="flex flex-wrap items-center gap-1.5 text-on-surface">{game.platforms?.map(platform=><span key={platform} className="px-1.5 py-0.5 rounded bg-surface-container-high text-label-sm">{platform}</span>)}</div>
+<div className="flex flex-wrap items-center gap-1.5 text-on-surface">{game.platforms?.map(platform=><span key={platform} className="px-1.5 py-0.5 rounded bg-surface-container-high text-label-sm">{platform === "PC (Microsoft Windows)" ? "PC" : platform}</span>)}</div>
 
 </div>
 
