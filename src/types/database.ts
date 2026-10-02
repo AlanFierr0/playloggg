@@ -50,7 +50,10 @@ export type Database = {
       curated_lists: {
         Row: {
           created_at: string
+          description: string
           id: number
+          is_public: boolean
+          is_ranked: boolean
           name: string
           profile_id: number
           revision: number
@@ -58,7 +61,10 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          description?: string
           id?: never
+          is_public?: boolean
+          is_ranked?: boolean
           name: string
           profile_id: number
           revision?: number
@@ -66,7 +72,10 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          description?: string
           id?: never
+          is_public?: boolean
+          is_ranked?: boolean
           name?: string
           profile_id?: number
           revision?: number
@@ -136,6 +145,120 @@ export type Database = {
         }
         Relationships: []
       }
+      list_likes: {
+        Row: {
+          list_id: number
+          profile_id: number
+        }
+        Insert: {
+          list_id: number
+          profile_id: number
+        }
+        Update: {
+          list_id?: number
+          profile_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "list_likes_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "curated_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "list_likes_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_activity: {
+        Row: {
+          completion_changed: boolean
+          game_id: number | null
+          id: number
+          kind: string
+          occurred_at: string
+          profile_id: number
+          score: number | null
+          score_changed: boolean
+          status: string | null
+          tier: string | null
+        }
+        Insert: {
+          completion_changed?: boolean
+          game_id?: number | null
+          id?: never
+          kind: string
+          occurred_at?: string
+          profile_id: number
+          score?: number | null
+          score_changed?: boolean
+          status?: string | null
+          tier?: string | null
+        }
+        Update: {
+          completion_changed?: boolean
+          game_id?: number | null
+          id?: never
+          kind?: string
+          occurred_at?: string
+          profile_id?: number
+          score?: number | null
+          score_changed?: boolean
+          status?: string | null
+          tier?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_activity_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_activity_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_blocks: {
+        Row: {
+          blocked_id: number
+          blocker_id: number
+        }
+        Insert: {
+          blocked_id: number
+          blocker_id: number
+        }
+        Update: {
+          blocked_id?: number
+          blocker_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_favorites: {
         Row: {
           created_at: string
@@ -172,6 +295,62 @@ export type Database = {
           },
         ]
       }
+      profile_follows: {
+        Row: {
+          followed_id: number
+          follower_id: number
+        }
+        Insert: {
+          followed_id: number
+          follower_id: number
+        }
+        Update: {
+          followed_id?: number
+          follower_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_follows_followed_id_fkey"
+            columns: ["followed_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_rankings: {
+        Row: {
+          game_ids: number[]
+          profile_id: number
+          revision: number
+        }
+        Insert: {
+          game_ids?: number[]
+          profile_id: number
+          revision?: number
+        }
+        Update: {
+          game_ids?: number[]
+          profile_id?: number
+          revision?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_rankings_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -180,6 +359,7 @@ export type Database = {
           display_name: string
           handle: string
           id: number
+          is_discoverable: boolean
           is_public: boolean
           location: string | null
           owner_user_id: string | null
@@ -193,6 +373,7 @@ export type Database = {
           display_name: string
           handle: string
           id?: never
+          is_discoverable?: boolean
           is_public?: boolean
           location?: string | null
           owner_user_id?: string | null
@@ -206,6 +387,7 @@ export type Database = {
           display_name?: string
           handle?: string
           id?: never
+          is_discoverable?: boolean
           is_public?: boolean
           location?: string | null
           owner_user_id?: string | null
@@ -279,6 +461,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      public_list_like_counts: {
+        Args: never
+        Returns: {
+          likes: number
+          list_id: number
+        }[]
+      }
       save_curated_list: {
         Args: {
           p_expected_revision: number
@@ -288,6 +477,23 @@ export type Database = {
           p_profile_id: number
         }
         Returns: Json
+      }
+      save_curated_list_v2: {
+        Args: {
+          p_description: string
+          p_expected_revision: number
+          p_game_ids: number[]
+          p_list_id: number
+          p_name: string
+          p_profile_id: number
+          p_public: boolean
+          p_ranked: boolean
+        }
+        Returns: Json
+      }
+      save_preference_ranking: {
+        Args: { p_ids: number[]; p_revision: number }
+        Returns: number
       }
       set_profile_favorite: {
         Args: {
