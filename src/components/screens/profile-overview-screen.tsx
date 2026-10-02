@@ -11,14 +11,13 @@ import type { Game } from "@/types/domain";
 
 export function ProfileOverviewScreen() {
   const t = useMessages();
-  const { profile, games, favorites = [], lists = [], access, publicBase } = usePortfolio();
+  const { profile, games, favorites = [], access, publicBase } = usePortfolio();
   const base = publicBase ?? "/profile";
   const rated = ratedGames(games);
   const entries = loggedGames(games);
   const bySlug = new Map(games.map(game => [game.slug, game]));
   const featured = favorites.filter(f => f.featuredSlot !== null).sort((a, b) => a.featuredSlot! - b.featuredSlot!);
   const recent = entries.filter(g => g.updatedAt && Number.isFinite(Date.parse(g.updatedAt))).sort((a, b) => b.updatedAt!.localeCompare(a.updatedAt!) || a.slug.localeCompare(b.slug)).slice(0, 6);
-  const reviews = entries.filter(g => g.review?.trim()).sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "") || a.slug.localeCompare(b.slug)).slice(0, 3);
   const gameHref = (game: Game) => publicBase && game.logged ? `${base}/game/${game.slug}` : `/game/${game.slug}`;
   const panel = "min-w-0 rounded-2xl bg-surface-container-low p-5 sm:p-7 space-y-5";
   const tools = [["Quick rating", "/quick-rate"], ["Import from Steam", "/profile/import/steam"], ["Edit profile", "/settings"], ["Manage favorites", "/profile/favorites"], ["Year in Gaming", "/profile/wrapped"], ["Activity feed", "/profile/activity"], ["Following and blocks", "/profile/social"]];
@@ -56,8 +55,6 @@ export function ProfileOverviewScreen() {
     <section className={panel}><div className="flex min-h-11 items-center"><h2 className="font-headline-lg text-headline-lg">{t("Recently updated entries")}</h2></div><p className="text-body-sm text-on-surface-variant">{t("Latest saved entry updates, including rating, review or playback edits.")}</p>
       {recent.length ? <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">{recent.map(game => <Link href={gameHref(game)} key={game.slug} className="min-w-0"><img loading="lazy" src={game.cover} alt="" className="w-full aspect-[2/3] object-cover rounded" /><h3 translate="no" className="mt-2 font-headline-md text-headline-md break-words">{game.title}</h3><p className="text-primary text-body-sm">{t("Score")}: {game.score ?? t("Unrated")}</p><time className="text-body-sm text-on-surface-variant" dateTime={game.updatedAt}>{game.updatedAt!.slice(0, 10)}</time></Link>)}</div> : <p className="text-on-surface-variant">{t("No dated entry updates yet.")}</p>}
     </section>
-      <section className={panel}><h2 className="font-headline-lg text-headline-lg">{t("Reviews")}</h2>{reviews.length ? reviews.map(game => <article key={game.slug} className="space-y-2"><Link href={gameHref(game)} translate="no" className="text-primary font-headline-md text-headline-md">{game.title}</Link><p translate="no" className="text-on-surface-variant break-words whitespace-pre-wrap line-clamp-3">{game.review}</p></article>) : <p className="text-on-surface-variant">{t("No reviews yet.")}</p>}<Link className="inline-flex min-h-11 items-center text-primary" href={`${base}/reviews`}>{t("All reviews")}</Link></section>
-      <section className={panel}><h2 className="font-headline-lg text-headline-lg">{t("Lists")}</h2>{lists.length ? lists.slice(0, 3).map(list => <Link key={list.id} href={`${publicBase ?? ""}/lists/${list.id}`} translate="no" className="block font-headline-md text-headline-md text-primary break-words">{list.name}</Link>) : <p className="text-on-surface-variant">{t("No curated lists yet.")}</p>}<Link href={`${publicBase ?? ""}/lists`} className="inline-flex min-h-11 items-center text-primary">{t("View lists")}</Link></section>
     </div>
   </section>;
 }
