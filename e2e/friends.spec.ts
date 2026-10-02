@@ -9,7 +9,7 @@ test("find a friend, follow persistently and compare saved games with your own p
   await page.getByRole("slider", { name: "Numerical score from 0 to 100" }).focus();
   await page.getByRole("slider").press("End");
   await page.locator("#commit-rating").click();
-  await expect(page.getByText(/^Entry saved:/)).toBeVisible();
+  await expect(page).toHaveURL(/\/profile$/);
   await page.getByRole("navigation", { name: "Main navigation" }).filter({ visible: true }).getByRole("link", { name: "Friends", exact: true }).click();
   await page.getByLabel("Find friends", { exact: true }).fill("@FIXTURE_PUBLIC");
   await page.getByRole("button", { name: "Search", exact: true }).click();

@@ -10,8 +10,9 @@ test("authenticated unscored Backlog persists, failed saves retain the draft, an
   await page.locator("#hours-input").fill("0");
   await page.locator("#dispatch-textarea").fill("Fixture-only saved review");
   await page.locator("#commit-rating").click();
-  await expect(page.getByText(/^Entry saved:/)).toBeVisible();
-  await page.reload();
+  await expect(page).toHaveURL(/\/profile$/);
+  await expect(page.locator("#commit-rating")).toHaveCount(0);
+  await page.goto("/log?game=hades");
   await expect(page.getByRole("button", { name: /Backlog$/ })).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator("#score-display")).toHaveText("—");
   await expect(page.locator("#hours-input")).toHaveValue("0");
@@ -28,8 +29,9 @@ test("authenticated unscored Backlog persists, failed saves retain the draft, an
   await page.getByRole("button", { name: "Choose tier, currently unassigned" }).click();
   await page.getByRole("menuitemradio", { name: "S Apex Masterpiece", exact: true }).click();
   await page.locator("#commit-rating").click();
-  await expect(page.getByText(/^Entry saved:/)).toBeVisible();
-  await page.reload();
+  await expect(page).toHaveURL(/\/profile$/);
+  await expect(page.locator("#commit-rating")).toHaveCount(0);
+  await page.goto("/log?game=hades");
   await expect(page.locator("#score-display")).toHaveText("0");
   await expect(page.getByRole("button", { name: "Choose tier, currently S" })).toBeVisible();
   const state = await (await fetch("http://127.0.0.1:3101/__state")).json();

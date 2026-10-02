@@ -19,7 +19,7 @@ test("launch metadata indexes only public catalog pages and excludes profiles fr
 test("owner can save privately, publish, copy a truthful link and unpublish",async ({page,context,browser})=>{
  await context.addCookies([authCookie]);await page.goto("/log?game=hades");
  await page.getByRole("button",{name:/Backlog$/}).click();
- await page.locator("#dispatch-textarea").fill("Launch fixture review");await page.locator("#commit-rating").click();await expect(page.getByText(/^Entry saved:/)).toBeVisible();
+ await page.locator("#dispatch-textarea").fill("Launch fixture review");await page.locator("#commit-rating").click();await expect(page).toHaveURL(/\/profile$/);
  const guest=await browser.newContext();const visitor=await guest.newPage();
  try{
   expect((await visitor.goto("http://127.0.0.1:3100/u/fixture_owner"))?.status()).toBe(404);

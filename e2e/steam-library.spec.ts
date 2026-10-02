@@ -137,7 +137,7 @@ test("Steam import does not overwrite an entry logged after preview",async({page
   await editor.getByRole("slider").focus();
   await editor.getByRole("slider").press("End");
   await editor.locator("#commit-rating").click();
-  await expect(editor.getByText(/^Entry saved:/)).toBeVisible();
+  await expect(editor).toHaveURL(/\/profile$/);
   await editor.close();
   await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
   await expect(page.getByText("Import complete. Your games are saved in your profile.")).toBeVisible();

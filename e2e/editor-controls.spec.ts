@@ -50,7 +50,8 @@ test("score keyboard controls and discard retain the last committed score", asyn
   await expect(page.locator("#score-display")).toHaveText("100");
   await page.locator("#dispatch-textarea").fill("Keep this saved review");
   await page.locator("#commit-rating").click();
-  await expect(page.getByText(/^Entry saved:/)).toBeVisible();
+  await expect(page).toHaveURL(/\/profile$/);
+  await page.goto("/log?game=hades");
   await slider.press("ArrowLeft");
   await expect(page.locator("#score-display")).toHaveText("99");
   await page.locator("#dispatch-textarea").fill("Discard this draft");
