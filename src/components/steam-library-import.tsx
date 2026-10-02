@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useMessages } from "@/components/site-preferences";
 import { importSteamGame, previewSteamLibrary, type LibraryPreview } from "@/app/actions/steam-library";
@@ -23,8 +23,15 @@ export function SteamLibraryImport({configured}:{configured:boolean}) {
   const [failures,setFailures] = useState<{title:string;message:string}[]>([]);
   const active = useRef(false);
   const stopLoading = useRef(false);
+  const hasPreview = useRef(false);
+  const revision = useRef(0);
+  const filterTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingLoad = useRef<{query:Omit<SteamBrowse,"offset">;size:string}|null>(null);
+  useEffect(()=>()=>{if(filterTimer.current)clearTimeout(filterTimer.current);revision.current++;pendingLoad.current=null;},[]);
   async function load(query=filters,size=amount,append=false) {
-    if (active.current) return;
+    if (active.current) {if(!append)pendingLoad.current={query,size};return;}
+    hasPreview.current=true;
+    const requestRevision=revision.current;
     active.current=true;stopLoading.current=false;setBusy(true);setLoading(true);setMessage("");setFailures([]);
     let current=append ? preview : null;
     const target=size==="all" ? Infinity : (current?.games.length ?? 0)+Number(size);
@@ -33,21 +40,30 @@ export function SteamLibraryImport({configured}:{configured:boolean}) {
       do {
         const offset=current?.nextOffset ?? 0;
         const result=await previewSteamLibrary({...query,offset});
+        if(requestRevision!==revision.current)break;
         if (!result.ok) {setMessage(result.message);break;}
+        hasPreview.current=true;
         const games=new Map([...(current?.games ?? []),...result.games].map(game=>[game.appId,game]));
         current={...result,games:[...games.values()]};
         setPreview(current);setMessage(result.message);
         if (!result.games.length || current.nextOffset>=current.total) break;
       } while(current.games.length<target&&!stopLoading.current);
-    } catch {setMessage("Library import is unavailable right now. Please retry.");}
-    finally {active.current=false;setBusy(false);setLoading(false);}
+    } catch {if(requestRevision===revision.current)setMessage("Library import is unavailable right now. Please retry.");}
+    finally {
+      active.current=false;setBusy(false);setLoading(false);
+      const next=pendingLoad.current;pendingLoad.current=null;
+      if(next)void load(next.query,next.size);
+    }
   }
-  function applyFilters() {
-    const query=parseSteamBrowse({offset:0,sort:filters.sort,minHours:parseHours(minHours),maxHours:parseHours(maxHours)});
+  function updateFilters(min=minHours,max=maxHours,sort=filters.sort,size=amount,delay=350) {
+    revision.current++;stopLoading.current=true;pendingLoad.current=null;
+    setSelected([]);
+    if(filterTimer.current)clearTimeout(filterTimer.current);
+    const query=parseSteamBrowse({offset:0,sort,minHours:parseHours(min),maxHours:parseHours(max)});
     if (!query) {setMessage("Use nonnegative hours and a minimum no greater than the maximum.");return;}
     const next={sort:query.sort,minHours:query.minHours,maxHours:query.maxHours};
-    setFilters(next);
-    if (preview) void load(next);
+    setFilters(next);setMessage("");
+    if(hasPreview.current)filterTimer.current=setTimeout(()=>{filterTimer.current=null;void load(next,size);},delay);
   }
   async function importSelected() {
     if (active.current || !selected.length) return;
@@ -73,14 +89,13 @@ export function SteamLibraryImport({configured}:{configured:boolean}) {
   return <div className="space-y-6">
     <p className="text-body-sm text-on-surface-variant">{t("Steam Game details must be Public, including playtime. Your Playlogg profile visibility does not change.")}</p>
     <div className="flex flex-wrap gap-3"><button className={button} disabled={busy} onClick={()=>load()}>{t(loading ? "Loading…" : preview ? "Refresh library" : "Preview Steam library")}</button><Link href="/profile" className="inline-flex min-h-11 items-center rounded-xl bg-surface-container text-primary px-5 py-3">{t("View profile")}</Link></div>
-    <form onSubmit={event=>{event.preventDefault();applyFilters();}} className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end rounded-xl bg-surface-container-low p-5">
-      <label className="min-w-0 space-y-2"><span className="block">{t("Sort by")}</span><select aria-label={t("Sort by")} disabled={busy} value={filters.sort} onChange={event=>{const next={...filters,sort:event.target.value as SteamBrowse["sort"]};setFilters(next);if(preview)void load(next);}} className="w-full rounded-xl bg-surface-container p-3"><option value="title">{t("Title A–Z")}</option><option value="hours_desc">{t("Most played")}</option><option value="hours_asc">{t("Least played")}</option></select></label>
-      <label className="min-w-0 space-y-2"><span className="block">{t("Minimum hours")}</span><input disabled={busy} type="number" min="0" step="any" value={minHours} onChange={event=>setMinHours(event.target.value)} className="w-full rounded-xl bg-surface-container p-3" /></label>
-      <label className="min-w-0 space-y-2"><span className="block">{t("Maximum hours")}</span><input disabled={busy} type="number" min="0" step="any" value={maxHours} onChange={event=>setMaxHours(event.target.value)} className="w-full rounded-xl bg-surface-container p-3" /></label>
-      <label className="min-w-0 space-y-2"><span className="block">{t("Games to show")}</span><select aria-label={t("Games to show")} disabled={busy} value={amount} onChange={event=>{const size=event.target.value;setAmount(size);if(preview)void load(filters,size);}} className="w-full rounded-xl bg-surface-container p-3">{["25","50","100","all"].map(size=><option key={size} value={size}>{size==="all" ? t("All") : size}</option>)}</select></label>
-      <button disabled={busy} className={button}>{t("Apply filters")}</button>
-      <button type="button" disabled={busy} onClick={()=>{const next={...filters,minHours:null,maxHours:null};setMinHours("");setMaxHours("");setFilters(next);if(preview)void load(next);}} className="min-h-11 rounded-xl bg-surface-container text-primary px-4">{t("Clear filters")}</button>
-    </form>
+    <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end rounded-xl bg-surface-container-low p-5">
+      <label className="min-w-0 space-y-2"><span className="block">{t("Sort by")}</span><select aria-label={t("Sort by")} disabled={busy&&!loading} value={filters.sort} onChange={event=>updateFilters(minHours,maxHours,event.target.value as SteamBrowse["sort"],amount,0)} className="w-full rounded-xl bg-surface-container p-3"><option value="title">{t("Title A–Z")}</option><option value="hours_desc">{t("Most played")}</option><option value="hours_asc">{t("Least played")}</option></select></label>
+      <label className="min-w-0 space-y-2"><span className="block">{t("Minimum hours")}</span><input disabled={busy&&!loading} type="number" min="0" step="any" value={minHours} onChange={event=>{setMinHours(event.target.value);updateFilters(event.target.value,maxHours);}} className="w-full rounded-xl bg-surface-container p-3" /></label>
+      <label className="min-w-0 space-y-2"><span className="block">{t("Maximum hours")}</span><input disabled={busy&&!loading} type="number" min="0" step="any" value={maxHours} onChange={event=>{setMaxHours(event.target.value);updateFilters(minHours,event.target.value);}} className="w-full rounded-xl bg-surface-container p-3" /></label>
+      <label className="min-w-0 space-y-2"><span className="block">{t("Games to show")}</span><select aria-label={t("Games to show")} disabled={busy&&!loading} value={amount} onChange={event=>{const size=event.target.value;setAmount(size);updateFilters(minHours,maxHours,filters.sort,size,0);}} className="w-full rounded-xl bg-surface-container p-3">{["25","50","100","all"].map(size=><option key={size} value={size}>{size==="all" ? t("All") : size}</option>)}</select></label>
+      <button type="button" disabled={busy&&!loading} onClick={()=>{setMinHours("");setMaxHours("");updateFilters("","",filters.sort,amount,0);}} className="min-h-11 rounded-xl bg-surface-container text-primary px-4">{t("Clear filters")}</button>
+    </div>
     <p role="status" aria-live="polite">{t(message)}{loading&&<span className="block">{t("Loading library")}: {preview?.games.length ?? 0} / {preview?.total ?? "—"}</span>}{busy&&!loading&&selected.length>0&&<span className="block">{t("Importing games")}: {progress} / {selected.length}</span>}</p>
     {loading&&<button type="button" onClick={()=>{stopLoading.current=true;}} className="min-h-11 rounded-xl bg-surface-container text-primary px-4">{t("Stop loading")}</button>}
     {!!failures.length&&<ul className="space-y-2 text-on-surface-variant">{failures.map(failure=><li key={failure.title}><span translate="no">{failure.title}</span>: {t(failure.message)}</li>)}</ul>}

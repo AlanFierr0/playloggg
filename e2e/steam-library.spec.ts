@@ -106,21 +106,45 @@ test("Steam browsing loads more without losing selection, changes amounts and fi
   await expect(page.getByRole("checkbox").first()).toHaveAttribute("aria-label","Select game ZZZ Fixture 123");
   await page.getByLabel("Minimum hours",{exact:true}).fill("1");
   await page.getByLabel("Maximum hours",{exact:true}).fill("2");
-  await page.getByRole("button",{name:"Apply filters",exact:true}).click();
+  await expect(page.getByRole("button",{name:"Apply filters",exact:true})).toHaveCount(0);
   await expect(page.getByRole("checkbox")).toHaveCount(1);
   await expect(hades).toBeVisible();
   await page.getByLabel("Minimum hours",{exact:true}).fill("0");
   await page.getByLabel("Maximum hours",{exact:true}).fill("0");
-  await page.getByRole("button",{name:"Apply filters",exact:true}).click();
   await expect(page.getByRole("checkbox",{name:"Select game Steam Fixture Adventure",exact:true})).toBeVisible();
   await expect(hades).toHaveCount(0);
   await page.getByLabel("Minimum hours",{exact:true}).fill("101");
   await page.getByLabel("Maximum hours",{exact:true}).fill("102");
-  await page.getByRole("button",{name:"Apply filters",exact:true}).click();
   await expect(page.getByText("No Steam games match these filters.")).toBeVisible();
   await page.getByRole("button",{name:"Clear filters",exact:true}).click();
   await expect(page.getByRole("checkbox")).toHaveCount(25);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+
+test("Steam playtime filters keep typing responsive and discard outdated results",async({page,context})=>{
+  await context.addCookies([authCookie]);
+  await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
+  await page.goto("/profile/import/steam");
+  await page.getByRole("button",{name:"Preview Steam library"}).click();
+  await expect(page.getByRole("checkbox")).toHaveCount(25);
+  let delayed=false;
+  await page.route("**/profile/import/steam",async route=>{
+    if(route.request().method()==="POST"&&!delayed){delayed=true;await new Promise(resolve=>setTimeout(resolve,700));}
+    await route.continue();
+  });
+  const request=page.waitForRequest(req=>req.method()==="POST"&&Boolean(req.headers()["next-action"]));
+  await page.getByLabel("Minimum hours",{exact:true}).fill("5");
+  await request;
+  await expect(page.getByLabel("Minimum hours",{exact:true})).toBeEnabled();
+  await page.getByLabel("Minimum hours",{exact:true}).fill("101");
+  await page.getByLabel("Maximum hours",{exact:true}).fill("102");
+  await expect(page.getByText("No Steam games match these filters.")).toBeVisible();
+  await expect(page.getByRole("checkbox")).toHaveCount(0);
+  await expect(page.getByLabel("Minimum hours",{exact:true})).toHaveValue("101");
+  await page.getByLabel("Maximum hours",{exact:true}).fill("100");
+  await expect(page.getByText("Use nonnegative hours and a minimum no greater than the maximum.")).toBeVisible();
+  await page.getByRole("button",{name:"Clear filters",exact:true}).click();
+  await expect(page.getByRole("checkbox")).toHaveCount(25);
 });
 
 test("Steam artwork falls back to its header and then a placeholder if images fail",async({page,context})=>{

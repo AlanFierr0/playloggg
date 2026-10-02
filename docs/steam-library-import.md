@@ -10,8 +10,11 @@
    appends the next chosen amount and keeps existing cards and selections.
    All loads every match progressively; **Stop loading** stops after the current
    request and keeps games already loaded. Load more can resume a stopped load.
-5. Sort by title, most played or least played, and optionally apply minimum and
-   maximum hours. Blank limits are unrestricted; zero includes unplayed games.
+5. Sort by title, most played or least played, and optionally type minimum and
+   maximum hours. Results update automatically after a 350 ms typing pause;
+   no Apply button is needed. Inputs remain editable while previews load, and
+   outdated requests cannot replace results for the latest filters.
+   Blank limits are unrestricted; zero includes unplayed games.
    Filters and sorting apply to the whole library before batches are chosen.
    Select individual matched games, or **Select available games** among loaded cards.
 6. Select **Import selected games**. Games are imported sequentially, with
