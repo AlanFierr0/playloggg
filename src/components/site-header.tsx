@@ -28,7 +28,7 @@ export function SiteHeader() {
             <span translate="no" className="font-headline-md text-headline-md tracking-tight uppercase text-on-surface font-bold">Playlog<span className="text-primary">.gg</span></span>
           </Link>
           <nav aria-label={t("Main navigation")} className="hidden xl:flex items-center gap-6">
-            {navigation.map((item) => <Link key={item.href} href={item.href} aria-current={isActive(item.href) ? "page" : undefined} className={`inline-flex min-h-11 items-center font-body-md text-body-md transition-colors ${isActive(item.href) ? "text-on-surface font-semibold" : "text-on-surface-variant hover:text-on-surface"}`}>{t(item.label)}</Link>)}
+            {navigation.map((item) => <Link key={item.href} href={item.href} aria-current={isActive(item.href) ? "page" : undefined} className={`inline-flex min-h-11 items-center rounded px-2 font-body-md text-body-md transition-colors ${isActive(item.href) ? "text-primary bg-primary/10 font-semibold" : "text-on-surface-variant hover:text-on-surface"}`}>{t(item.label)}</Link>)}
           </nav>
         </div>
         <div className="flex min-w-0 items-center gap-1 sm:gap-3 lg:gap-4 sm:flex-1 sm:max-w-[440px] xl:max-w-[480px] justify-end">
