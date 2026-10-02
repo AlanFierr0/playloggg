@@ -88,9 +88,8 @@ return (<><fieldset disabled={pending} className="contents">
 </div>
 
 <div className="p-4 sm:p-6 lg:p-8 grid grid-cols-1 xl:grid-cols-2 items-start gap-8">
-<p className="xl:col-span-2 text-body-sm text-on-surface-variant">{t("Score: how good is this game? Tier: how much does it mean to you? Favorites and ranking are separate.")}</p>
-<p className="xl:col-span-2 font-body-sm text-body-sm text-on-surface-variant">{canEdit ? t("Commit saves your optional score, independent tier, playback status, platform, playtime, completion date, review and tags.") : <>{t("Sign in to save your entry. ")}<Link href="/login" className="text-primary underline">{t("Sign in")}</Link> {t("to save entries to your own profile.")}</>}</p>
-<p role="status" className="xl:col-span-2 font-body-sm text-body-sm text-primary">{pending ? t("Saving…") : t(saveMessage)}</p>
+{!canEdit && <p className="xl:col-span-2 font-body-sm text-body-sm text-on-surface-variant">{t("Sign in to save your entry. ")}<Link href="/login" className="text-primary underline">{t("Sign in")}</Link> {t("to save entries to your own profile.")}</p>}
+<p role="status" hidden={!pending && !saveMessage} className="xl:col-span-2 font-body-sm text-body-sm text-primary">{pending ? t("Saving…") : t(saveMessage)}</p>
 <div className="xl:col-span-2 flex flex-col sm:flex-row gap-6 sm:gap-8 items-start">
 <div className="relative group flex-shrink-0 w-32 sm:w-40 aspect-[3/4] rounded-lg overflow-hidden bg-surface-container shadow-xl">
 <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt={game.title} src={game.cover} />
