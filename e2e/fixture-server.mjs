@@ -20,6 +20,7 @@ let games = structuredClone(initialGames);
 let ratings;
 let failSave;
 let steamMode="public";
+let profileDeleted=false;
 let steamMinutes=90;
 let favorites;
 let rankings=[];let curated=[];let listItems=[];let follows=[];let blocks=[];let likes=[];
@@ -32,7 +33,7 @@ function reset() { user.app_metadata={};steamMode="public";rankings=[];follows=[
  ratings.push({profile_id:4,game_id:7,score:0,tier:null,status:"playing",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  for (const game_id of Array.from({length:19},(_,i)=>i+8)) for (const profile_id of [3,4]) ratings.push({profile_id,game_id,score:profile_id===3 ? 50 : 40,tier:null,status:"playing",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  ratings.forEach(row=>row.updated_at="2026-09-29T12:00:00Z");
- failSave = false;steamMinutes=90; }
+ failSave = false;steamMinutes=90;profileDeleted=false; }
 reset();
 
 // Deliberately limited contract double, not an implementation/proof of Supabase RLS.
@@ -67,10 +68,11 @@ export async function startFixtureServer() {
       }
       if (url.pathname === "/__reset" && req.method === "POST") { reset(); return reply(200, { ok: true }); }
       if (url.pathname === "/__fail-save" && req.method === "POST") { failSave = true; return reply(200, { ok: true }); }
-      if (url.pathname === "/__state") return reply(200, { ratings, favorites, games });
+      if (url.pathname === "/__state") return reply(200, { ratings, favorites, games, profiles:profiles.filter(row=>!profileDeleted||row.id!==2) });
       const admin = req.headers.authorization === `Bearer ${fixtureAdminKey}`;
       const authenticated = req.headers.authorization === `Bearer ${token}`;
       if (url.pathname === "/auth/v1/user" && req.method === "GET") return authenticated ? reply(200, user) : reply(401, { message: "Fixture session required" });
+      if (url.pathname === "/auth/v1/logout" && req.method === "POST") return authenticated ? reply(200,{}) : reply(401,{message:"Unauthorized"});
       if (url.pathname === "/auth/v1/token" && req.method === "POST") {
         let body=""; for await (const part of req) body+=part; const input=JSON.parse(body);
         return input.email===user.email && input.password==="fixture-password-123" ? reply(200,session) : reply(400,{error_code:"invalid_credentials",msg:"Invalid login credentials"});
@@ -88,7 +90,7 @@ export async function startFixtureServer() {
           const parts=[];for await(const part of req)parts.push(part); pictures.set(path,Buffer.concat(parts));return reply(200,{Key:path});
         }
         if(req.method==="DELETE") {
-          if(!authenticated)return reply(403,{message:"Fixture ownership denied"});
+          if(!authenticated&&!admin)return reply(403,{message:"Fixture ownership denied"});
           let body="";for await(const part of req)body+=part;const input=JSON.parse(body);
           for(const key of input.prefixes??[])if(key.startsWith("2/"))pictures.delete(key);
           return reply(200,[]);
@@ -106,7 +108,17 @@ export async function startFixtureServer() {
         if(!games.some(game=>game.igdb_id===input.igdb_id))games.push({...input,id:Math.max(...games.map(game=>game.id))+1});
         return reply(201,null);
       }
-      const visibleProfiles = profiles.filter((profile) => admin || profile.is_public || (authenticated && profile.owner_user_id === ownerId));
+      const visibleProfiles = profiles.filter(profile=>(!profileDeleted||profile.id!==2)&&(admin || profile.is_public || (authenticated && profile.owner_user_id === ownerId)));
+      if(resource==="rpc/delete_owned_profile"&&req.method==="POST") {
+        let body="";for await(const part of req)body+=part;const input=JSON.parse(body);
+        if(!admin||input.p_owner!==ownerId||input.p_handle!==profiles[1].handle||profileDeleted)return reply(403,{message:"Not owned"});
+        if(failSave){failSave=false;return reply(503,{message:"Controlled delete failure"});}
+        const ids=curated.filter(row=>row.profile_id===2).map(row=>row.id);
+        ratings=ratings.filter(row=>row.profile_id!==2);favorites=favorites.filter(row=>row.profile_id!==2);rankings=rankings.filter(row=>row.profile_id!==2);
+        curated=curated.filter(row=>row.profile_id!==2);listItems=listItems.filter(row=>!ids.includes(row.list_id));
+        follows=follows.filter(row=>row.follower_id!==2&&row.followed_id!==2);blocks=blocks.filter(row=>row.blocker_id!==2&&row.blocked_id!==2);likes=likes.filter(row=>row.profile_id!==2&&!ids.includes(row.list_id));
+        profileDeleted=true;return reply(200,{id:2,avatar:profiles[1].avatar_url});
+      }
       if (resource === "ratings" && req.method === "PATCH") {
         if(!authenticated || url.searchParams.get("profile_id")!=="eq.2")return reply(403,{message:"Fixture ownership denied"});
         let body="";for await(const part of req)body+=part;const patch=JSON.parse(body);

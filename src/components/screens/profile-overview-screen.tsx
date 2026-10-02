@@ -5,6 +5,7 @@ import { usePortfolio } from "@/components/portfolio-provider";
 import {ShareCardControls} from "@/components/share-card-controls";
 import { TasteSummary } from "@/components/taste-summary";
 import { ProfileAvatar } from "@/components/profile-avatar";
+import { ProfileAccountControls } from "@/components/profile-account-controls";
 import { ProfileNavigation } from "@/components/profile-navigation";
 import { averageScore, ratedGames, loggedGames } from "@/lib/portfolio-view";
 import type { Game } from "@/types/domain";
@@ -37,7 +38,7 @@ export function ProfileOverviewScreen() {
       {profile.bio && <p translate="no" className="max-w-3xl text-body-lg text-on-surface-variant whitespace-pre-wrap break-words">{profile.bio}</p>}
       {(profile.location || profile.platformPreference) && <div className="flex flex-wrap gap-4 text-body-sm text-on-surface-variant">{profile.location && <p>{t("Location")}: <span translate="no">{profile.location}</span></p>}{profile.platformPreference && <p>{t("Platform preference")}: <span translate="no">{profile.platformPreference}</span></p>}</div>}
       </div>
-      {!publicBase && access?.canEdit && <nav aria-label={t("Profile tools")} className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-3 xl:grid-cols-2 gap-3 self-start">{tools.map(([label, href]) => <Link key={href} className="flex min-h-12 items-center justify-center rounded-lg px-4 py-3 text-center text-body-sm font-medium bg-surface-container-high text-on-surface hover:bg-surface-container-highest" href={href}>{t(label)}</Link>)}{profile.isPublic && <Link className="flex min-h-12 items-center justify-center rounded-lg px-4 py-3 text-center text-primary bg-surface-container-high min-[400px]:col-span-2 sm:col-span-3 xl:col-span-2" href={`/u/${profile.handle}`}>{t("Open public profile")}</Link>}</nav>}
+      {!publicBase && access?.canEdit && <nav aria-label={t("Profile tools")} className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-3 xl:grid-cols-2 gap-3 self-start">{tools.map(([label, href]) => <Link key={href} className="flex min-h-12 items-center justify-center rounded-lg px-4 py-3 text-center text-body-sm font-medium bg-surface-container-high text-on-surface hover:bg-surface-container-highest" href={href}>{t(label)}</Link>)}<ProfileAccountControls handle={profile.handle}/>{profile.isPublic && <Link className="flex min-h-12 items-center justify-center rounded-lg px-4 py-3 text-center text-primary bg-surface-container-high min-[400px]:col-span-2 sm:col-span-3 xl:col-span-2" href={`/u/${profile.handle}`}>{t("Open public profile")}</Link>}</nav>}
       </div>
       <dl className="grid grid-cols-2 sm:grid-cols-4 gap-5 border-t border-outline-variant/20 pt-6">{[[t("Games rated"), rated.length], [t("Completed games"), entries.filter(g => g.status === "completed").length], [t("Average score"), averageScore(rated)], [t("Favorites"), favorites.length]].map(([label, value]) => <div key={label} className="min-w-0 space-y-2"><dt className="text-body-sm text-on-surface-variant">{label}</dt><dd className="font-headline-xl text-headline-xl text-primary">{value}</dd></div>)}</dl>
     </header>

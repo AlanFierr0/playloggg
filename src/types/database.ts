@@ -461,6 +461,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_owned_profile: {
+        Args: { p_handle: string; p_owner: string }
+        Returns: Json
+      }
       public_list_like_counts: {
         Args: never
         Returns: {

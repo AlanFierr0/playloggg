@@ -213,6 +213,12 @@ explicit game selection, PC / Steam and playtime, unset score/tier/status, and
 no replacement of existing entries. Re-fetch verified account ownership and
 Steam playtime on the server; match exact external app IDs, not game titles.
 Keep STEAM_WEB_API_KEY server-only. See docs/steam-library-import.md.
+The user approved owner overview Sign out and Delete profile controls. Profile
+deletion requires exact-handle confirmation and verified Auth ownership, deletes
+personal child data atomically and preserves the Auth account and shared games.
+Use the service-role-only SECURITY INVOKER RPC; never accept a submitted owner ID.
+See docs/profile-account-controls.md. Do not treat deleting a profile as permission
+to delete an Auth account or another user's data.
 The user approved hiding all already logged exact Steam matches from the importer,
 including manually logged games. The separate sync button may update only hours
 for existing PC / Steam entries, including manual ones. Never overwrite scores,
