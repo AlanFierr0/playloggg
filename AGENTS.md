@@ -79,10 +79,9 @@ accessible alongside Discover, Rankings, Lists and Compare. Catalog platform
 filters group metadata into PC, PlayStation, Xbox, Nintendo and Other, with
 console generations grouped, independently of an entry's played platform.
 Profile filters use the selected profile; never infer scores or playback status
-for unlogged games. Games uses Load more with 25/50/100/All amounts (default 25).
-Retain prior cards, reset loaded batches when filters/sort/amount change and keep
-filters, amount and loaded batches shareable/reloadable in the URL. Clear filters
-preserves the selected amount; All means all matches. See docs/games-catalog.md.
+for unlogged games. Games uses infinite scroll in batches of 25, with an accessible Load more fallback.
+Retain prior cards, reset loaded batches when filters/sort change and keep filters
+and loaded batches shareable/reloadable in the URL. The amount selector is retired. See docs/games-catalog.md.
 The user moved the personal Tier List to the shared top navigation at /tiers.
 Do not include it in personal profile tabs or show profile tabs on /tiers.
 Published profiles retain their own tier link for viewing someone else's board.

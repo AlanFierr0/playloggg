@@ -23,17 +23,18 @@ or invalid range shows an explanation. Unlogged games never acquire fabricated
 status or scores. A logged entry with no status remains distinct from an unlogged
 game. Guest catalog browsing does not invent personal entries.
 
-All filters combine. The Games to show selector offers 25 (default), 50, 100 and
-All. Load more adds another selected-size batch while retaining every previously
-shown card. The button disappears once all matching games are shown; All displays
-the complete filtered result immediately. Covers stay lazy-loaded.
+All filters combine. Infinite scroll loads 25 games at a time when the end of the
+visible grid approaches the viewport. Previously loaded cards remain visible;
+the loader disappears when all matching games are shown. An accessible Load more
+button remains as a keyboard and unsupported-browser fallback. Covers stay lazy-loaded.
 
-Changing filters, sort or amount resets the loaded batches to one. Clearing
-filters preserves the selected amount. Filters, amount (`size`) and loaded batches
-(`page`, retained for existing shared links) live in the URL and survive reload
-and Back/Forward. Loading more preserves the scroll position. Filtering runs on
-the server and only compact visible-card data and facets reach the screen. No
-browse operation writes to the database. See [growth and limits](catalog-growth.md).
+Changing filters or sort resets to the first batch and scrolls to the filters.
+Filters and loaded batches (`page`) live in the URL and survive reload and
+Back/Forward. Automatic loading replaces the current history entry and preserves
+scroll position. The Games to show selector is removed, and legacy `size` values
+no longer change the batch size on this route. Filtering runs on the server and
+only compact visible-card data and facets reach the screen. No browse operation
+writes to the database. See [growth and limits](catalog-growth.md).
 
 Cards open game details. Authenticated owners additionally get log/edit links
 and a link to search IGDB for new games. IGDB search/import remains a separate

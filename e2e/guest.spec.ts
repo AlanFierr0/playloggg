@@ -5,7 +5,7 @@ test("catalog combines filters, loads more, clears and handles empty results", a
   await page.goto("/games");
   await expect(page.locator("[data-catalog-game]")).toHaveCount(25);
   const initial = await page.locator("[data-catalog-game]").first().getAttribute("data-catalog-game");
-  await page.getByRole("button", { name: "Load more", exact: true }).click();
+  await page.locator("[data-infinite-scroll]").scrollIntoViewIfNeeded();
   await expect(page.locator("[data-catalog-game]")).toHaveCount(50);
   await expect(page.locator(`[data-catalog-game="${initial}"]`)).toBeVisible();
   await page.getByLabel("Search titles").fill("Hades");
@@ -16,7 +16,7 @@ test("catalog combines filters, loads more, clears and handles empty results", a
   await expect(page.getByRole("heading", { name: "No games match these filters" })).toBeVisible();
   await page.getByRole("button", { name: "Show all games" }).click();
   await expect(page.locator("[data-catalog-game]")).toHaveCount(25);
-  await expect(page.getByRole("button", { name: "Load more", exact: true })).toBeVisible();
+  await expect(page.locator("[data-infinite-scroll]")).toHaveCount(1);
 });
 
 test("search supports keyboard selection and returns to its originating route", async ({ page }) => {
@@ -108,30 +108,29 @@ test("Games URLs retain filters and loaded results through reload, sharing and h
   await expect(page.getByRole("combobox",{name:"Genre",exact:true})).toHaveValue("Unknown");
 });
 
-test("Games amount selector supports 25, 50, 100 and all while retaining filters",async({page,request})=>{
+test("Games automatically append batches on scroll and reset with filters",async({page,request})=>{
   const catalogSize=(await (await request.get("http://127.0.0.1:3101/__state")).json()).games.length;
   await page.goto("/games");
-  const amount=page.getByRole("combobox",{name:"Games to show",exact:true});
-  await expect(amount).toHaveValue("25");
-  for(const size of [50,100]) {
-    await amount.selectOption(String(size));
-    await expect(page.locator("[data-catalog-game]")).toHaveCount(size);
-    await expect(page.getByRole("button",{name:"Load more",exact:true})).toBeVisible();
-    await page.getByRole("button",{name:"Load more",exact:true}).click();
-    await expect(page.locator("[data-catalog-game]")).toHaveCount(Math.min(size*2,catalogSize));
+  await expect(page.getByRole("combobox",{name:"Games to show",exact:true})).toHaveCount(0);
+  await expect(page.locator("[data-catalog-game]")).toHaveCount(25);
+  await page.locator("[data-infinite-scroll]").scrollIntoViewIfNeeded();
+  await expect(page.locator("[data-catalog-game]")).toHaveCount(50);
+  await expect(page).toHaveURL(/page=2$/);
+  const slugs=await page.locator("[data-catalog-game]").evaluateAll(nodes=>nodes.map(node=>node.getAttribute("data-catalog-game")));
+  expect(new Set(slugs).size).toBe(slugs.length);
+  await page.reload();
+  await expect(page.locator("[data-catalog-game]")).toHaveCount(50);
+  while(await page.locator("[data-catalog-game]").count()<catalogSize){
+    const before=await page.locator("[data-catalog-game]").count();
+    await page.locator("[data-infinite-scroll]").scrollIntoViewIfNeeded();
+    await expect(page.locator("[data-catalog-game]")).toHaveCount(Math.min(before+25,catalogSize));
   }
-  await expect(page.getByRole("button",{name:"Load more",exact:true})).toHaveCount(0);
-  await amount.selectOption("all");
-  await expect(page).toHaveURL(/size=all$/);
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(catalogSize);
-  await expect(page.getByRole("button",{name:"Load more",exact:true})).toHaveCount(0);
-  await page.reload();await expect(amount).toHaveValue("all");
+  await expect(page.locator("[data-infinite-scroll]")).toHaveCount(0);
   await page.getByLabel("Search titles").fill("Hades");
   await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
-  await expect(amount).toHaveValue("all");
+  await expect(page).toHaveURL(/q=Hades$/);
   await page.getByRole("button",{name:"Clear filters",exact:true}).click();
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(catalogSize);
-  await amount.selectOption("25");
+  await page.evaluate(()=>window.scrollTo(0,0));
   await expect(page.locator("[data-catalog-game]")).toHaveCount(25);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
@@ -155,8 +154,11 @@ test("platform filter shows main families and groups the remaining platforms und
   await expect(page.locator("[data-catalog-game]")).toHaveCount(25);
   await expect(page.getByRole("heading", {name: "Fixture Game 01", exact: true})).toBeVisible();
   await expect(page.getByRole("heading", {name: "Hades", exact: true})).toHaveCount(0);
-  await page.getByRole("combobox", {name: "Games to show", exact: true}).selectOption("all");
-  await expect(page).toHaveURL(/size=all/);
+  while(await page.getByRole("heading", {name: "Hades", exact: true}).count()===0){
+    const before=await page.locator("[data-catalog-game]").count();
+    await page.locator("[data-infinite-scroll]").scrollIntoViewIfNeeded();
+    await expect.poll(()=>page.locator("[data-catalog-game]").count()).toBeGreaterThan(before);
+  }
   await expect(page.getByRole("heading", {name: "Hades", exact: true})).toBeVisible();
   await page.goto("/games?platform=Android");
   await expect(platform).toHaveValue("Android");
