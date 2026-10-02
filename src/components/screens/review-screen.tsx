@@ -235,7 +235,7 @@ return (<><fieldset disabled={pending} className="contents">
 </div>
 
 <div className="md:col-span-6 flex flex-col gap-2">
-<label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" htmlFor="hours-input">{t("Runtime Inscribed")}</label>
+<label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" htmlFor="hours-input">{t("Hours played")}</label>
 
 <div className="relative flex items-center">
 <span aria-hidden="true" className="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">{"schedule"}</span>
@@ -247,7 +247,7 @@ return (<><fieldset disabled={pending} className="contents">
 </div>
 
 <div className="md:col-span-6 flex flex-col gap-2">
-<label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" htmlFor="date-input">{t("Date Concluded")}</label>
+<label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" htmlFor="date-input">{t("Completion date")}</label>
 
 <div className="relative flex items-center">
 <span aria-hidden="true" className="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">{"calendar_today"}</span>
