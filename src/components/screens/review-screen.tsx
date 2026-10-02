@@ -182,13 +182,13 @@ return (<><fieldset disabled={pending} className="contents">
 </div>
 
 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-on-surface-variant font-label-sm text-label-sm px-1">
-<span>{t("0 (Deficient)")}</span>
+<span>{t("0 (Terrible)")}</span>
 
-<span>{t("50 (Median)")}</span>
+<span>{t("50 (Average)")}</span>
 
-<span>{t("75 (Essential)")}</span>
+<span>{t("75 (Great)")}</span>
 
-<span className="text-primary font-bold">{t("100 (Flawless)")}</span>
+<span className="text-primary font-bold">{t("100 (Masterpiece)")}</span>
 
 </div>
 
