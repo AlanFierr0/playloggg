@@ -15,6 +15,8 @@ export function SteamLibraryImport({configured}:{configured:boolean}) {
   const [busy,setBusy] = useState(configured);
   const [loading,setLoading] = useState(configured);
   const [syncing,setSyncing] = useState(false);
+  const [importing,setImporting] = useState(false);
+  const [importTitle,setImportTitle] = useState("");
   const [amount,setAmount] = useState("25");
   const [filters,setFilters] = useState<Omit<SteamBrowse,"offset">>({sort:"title",minHours:null,maxHours:null});
   const [minHours,setMinHours] = useState("");
@@ -70,12 +72,13 @@ export function SteamLibraryImport({configured}:{configured:boolean}) {
   }
   async function importSelected() {
     if (active.current || !selected.length) return;
-    active.current=true;setBusy(true);setMessage("");setFailures([]);setProgress(0);
+    active.current=true;setBusy(true);setImporting(true);setMessage("");setFailures([]);setProgress(0);
     const remaining:number[]=[];
     const failed:{title:string;message:string}[]=[];
     try {
       for (let index=0;index<selected.length;index++) {
         const appId=selected[index];
+        setImportTitle(preview?.games.find(game=>game.appId===appId)?.title ?? "");
         let result;
         try {result=await importSteamGame(appId);}
         catch {result={ok:false,message:"Library import is unavailable right now. Please retry."};}
@@ -85,7 +88,7 @@ export function SteamLibraryImport({configured}:{configured:boolean}) {
       }
       setSelected(remaining);setFailures(failed);
       setMessage(failed.length ? "Some games could not be imported. Your successful imports are saved; retry the remaining games." : "Import complete. Your games are saved in your profile.");
-    } finally {active.current=false;setBusy(false);}
+    } finally {active.current=false;setBusy(false);setImporting(false);setImportTitle("");}
   }
   async function syncPlaytime() {
     if(active.current || !preview?.syncAppIds.length)return;
@@ -113,7 +116,15 @@ export function SteamLibraryImport({configured}:{configured:boolean}) {
       <label className="min-w-0 space-y-2"><span className="block">{t("Games to show")}</span><select aria-label={t("Games to show")} disabled={busy&&!loading} value={amount} onChange={event=>{const size=event.target.value;setAmount(size);updateFilters(minHours,maxHours,filters.sort,size,0);}} className="w-full rounded-xl bg-surface-container p-3">{["25","50","100","all"].map(size=><option key={size} value={size}>{size==="all" ? t("All") : size}</option>)}</select></label>
       <button type="button" disabled={busy&&!loading} onClick={()=>{setMinHours("");setMaxHours("");updateFilters("","",filters.sort,amount,0);}} className="min-h-11 rounded-xl bg-surface-container text-primary px-4">{t("Clear filters")}</button>
     </div>
-    <p role="status" aria-live="polite">{t(message)}{loading&&<span className="block">{t("Loading library")}: {preview?.games.length ?? 0} / {preview?.total ?? "—"}</span>}{busy&&!loading&&!syncing&&selected.length>0&&<span className="block">{t("Importing games")}: {progress} / {selected.length}</span>}</p>
+    <p role="status" aria-live="polite">{t(message)}{loading&&<span className="block">{t("Loading library")}: {preview?.games.length ?? 0} / {preview?.total ?? "—"}</span>}</p>
+    {importing&&<div className="fixed bottom-5 inset-x-4 z-50 mx-auto max-w-lg rounded-2xl bg-surface-container-high p-5 shadow-2xl border border-primary/20" role="status" aria-live="polite">
+      <div className="flex items-center gap-3">
+        <span aria-hidden="true" className="h-6 w-6 shrink-0 rounded-full border-[3px] border-primary/25 border-t-primary motion-safe:animate-spin"/>
+        <div className="min-w-0 flex-1"><p className="font-headline-md">{t("Importing games")}</p><p translate="no" className="truncate text-body-sm text-on-surface-variant">{importTitle}</p></div>
+        <span className="shrink-0 text-primary tabular-nums">{progress} / {selected.length}</span>
+      </div>
+      <div role="progressbar" aria-label={t("Importing games")} aria-valuemin={0} aria-valuemax={selected.length} aria-valuenow={progress} className="mt-4 h-2 overflow-hidden rounded-full bg-surface-container-highest"><div className="h-full rounded-full bg-primary motion-safe:transition-[width]" style={{width:`${selected.length ? progress/selected.length*100 : 0}%`}}/></div>
+    </div>}
     {loading&&<button type="button" onClick={()=>{stopLoading.current=true;}} className="min-h-11 rounded-xl bg-surface-container text-primary px-4">{t("Stop loading")}</button>}
     {!!failures.length&&<ul className="space-y-2 text-on-surface-variant">{failures.map(failure=><li key={failure.title}><span translate="no">{failure.title}</span>: {t(failure.message)}</li>)}</ul>}
     {preview&&preview.total>0&&<>

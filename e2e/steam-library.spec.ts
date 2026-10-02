@@ -3,6 +3,31 @@ import AxeBuilder from "@axe-core/playwright";
 // @ts-expect-error Local fixture only.
 import {authCookie} from "./fixture-server.mjs";
 
+test("Steam import shows a visible loader while saving and removes it after a failed save",async({page,context})=>{
+  await context.addCookies([authCookie]);
+  await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
+  await page.goto("/profile/import/steam");
+  await page.getByRole("checkbox",{name:"Select game Hades",exact:true}).check();
+  await page.route("**/profile/import/steam",async route=>{
+    if(route.request().method()==="POST")await new Promise(resolve=>setTimeout(resolve,1200));
+    await route.continue();
+  });
+  await fetch("http://127.0.0.1:3101/__fail-save",{method:"POST"});
+  await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
+  const loader=page.getByRole("progressbar",{name:"Importing games",exact:true});
+  await expect(loader).toBeVisible();
+  await expect(loader).toHaveAttribute("aria-valuenow","0");
+  await expect(loader).toHaveAttribute("aria-valuemax","1");
+  await expect(page.getByRole("button",{name:"Import selected games (1)",exact:true})).toBeDisabled();
+  expect(await loader.evaluate(element=>{const box=element.getBoundingClientRect();return box.top>=0&&box.bottom<=innerHeight;})).toBe(true);
+  await expect(page.getByText(/Some games could not be imported/)).toBeVisible();
+  await expect(loader).toHaveCount(0);
+  await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
+  await expect(loader).toBeVisible();
+  await expect(page.getByText("Import complete. Your games are saved in your profile.")).toBeVisible();
+  await expect(loader).toHaveCount(0);
+});
+
 test("Steam sync updates only PC playtime, preserves personal details and retries failures",async({page,context})=>{
   await context.addCookies([authCookie]);
   await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});

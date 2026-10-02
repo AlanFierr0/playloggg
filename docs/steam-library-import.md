@@ -22,7 +22,10 @@
    Filters and sorting apply to the whole library before batches are chosen.
    Select individual matched games, or **Select available games** among loaded cards.
 6. Select **Import selected games**. Games are imported sequentially, with
-   progress and individual errors. Successful imports stay saved if another
+   a fixed loading indicator showing the current title, completed/total count
+   and progress bar, visible even when the library is scrolled. Its spinner
+   respects reduced-motion preferences. The indicator disappears on completion
+   or failure, while errors remain available for retry. Successful imports stay saved if another
    game fails; retry keeps only failed selections. Changing filters, sorting or
    the amount resets the loaded set and selection; loading more preserves them.
 7. **Sync Steam playtime** updates hours for existing PC / Steam entries, including
