@@ -83,7 +83,7 @@ test("editor score and discard controls are accessible in both themes and langua
 test("typed scores sync with the slider, reject invalid values and persist zero", async ({page,context}) => {
   await context.addCookies([authCookie]);
   await page.goto("/log?game=hades");
-  const input=page.getByRole("spinbutton", {name:"Numerical score from 0 to 100"});
+  const input=page.getByRole("textbox", {name:"Numerical score from 0 to 100"});
   const slider=page.getByRole("slider", {name:"Numerical score from 0 to 100"});
   await input.fill("87");
   await expect(slider).toHaveValue("87");
@@ -92,12 +92,22 @@ test("typed scores sync with the slider, reject invalid values and persist zero"
   await expect(input).toHaveValue("100");
   await input.fill("");
   await expect(page.locator("#score-display")).toHaveText("—");
-  for(const value of ["101","-1","12.5"]){
+  await expect(input).toHaveAttribute("maxlength","3");
+  await expect(page.getByRole("spinbutton", {name:"Numerical score from 0 to 100"})).toHaveCount(0);
+  await input.fill("87");
+  for(const value of ["-1","12.5","abc","1e2"]){
     await input.fill(value);
-    await page.locator("#commit-rating").click();
-    await expect(page).toHaveURL(/\/log\?game=hades$/);
-    await expect(input).toHaveAttribute("aria-invalid","true");
+    await expect(input).toHaveValue("87");
+    await expect(slider).toHaveValue("87");
   }
+  await input.fill("1000");
+  await expect(input).toHaveValue("100");
+  await input.pressSequentially("1");
+  await expect(input).toHaveValue("100");
+  await input.fill("101");
+  await page.locator("#commit-rating").click();
+  await expect(page).toHaveURL(/\/log\?game=hades$/);
+  await expect(input).toHaveAttribute("aria-invalid","true");
   await input.fill("0");
   await page.locator("#commit-rating").click();
   await expect(page).toHaveURL(/\/profile$/);
