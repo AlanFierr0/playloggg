@@ -2,9 +2,18 @@
 
 Status: migration applied; the user authorized production rollout from `main`.
 
-The user approved one optional platform using the existing PC / Steam,
-PlayStation 5, Xbox Series X, and Steam Deck choices. Playtime and completion
-date are optional and independent of playback status.
+The user approved one optional played platform. PC choices include Steam,
+Battle.net, GOG, Epic Games, EA app, Ubisoft Connect, Xbox app and Other;
+PlayStation 5, Xbox Series X and Steam Deck remain available. Playtime and
+completion date are optional and independent of playback status.
+
+The shared platform labels and validation live in `src/lib/played-platforms.ts`.
+The editor, bulk organization and profile statistics use the same choices.
+Migration `20261002204157_pc_store_platforms.sql` expands the ratings constraint
+without rewriting existing entries or changing access policies. The legacy `pc`
+value continues to mean PC / Steam; Steam imports and hour synchronization retain
+their existing behavior. Selecting another PC store does not connect that service
+or import its library.
 
 ## Behavior
 

@@ -1,4 +1,5 @@
 import { normalizeTags } from "./collection-input.ts";
+import { isPlayedPlatform } from "./played-platforms.ts";
 import type { PlaybackStatus, PlayedPlatform, Tier } from "../types/domain.ts";
 
 export interface RatingInput {
@@ -28,7 +29,7 @@ export function validateRating(input: unknown): RatingInput | null {
   if (score !== null && (typeof score !== "number" || !Number.isInteger(score) || score < 0 || score > 100)) return null;
   if (tier !== null && !["S", "A", "B", "C", "D", "F"].includes(tier as string)) return null;
   if (status !== null && !["completed", "playing", "backlog", "shelved"].includes(status as string)) return null;
-  if (platform !== null && !["pc", "ps5", "xbox_series_x", "steam_deck"].includes(platform as string)) return null;
+  if (platform !== null && !isPlayedPlatform(platform)) return null;
   if (hoursPlayed !== null && (typeof hoursPlayed !== "number" || !Number.isFinite(hoursPlayed) || hoursPlayed < 0)) return null;
   if (completedOn !== null && !isCalendarDate(completedOn)) return null;
   const tags = normalizeTags(rawTags);

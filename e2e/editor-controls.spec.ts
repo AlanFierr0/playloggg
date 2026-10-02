@@ -3,6 +3,26 @@ import AxeBuilder from "@axe-core/playwright";
 // @ts-expect-error Local fixture session only.
 import { authCookie } from "./fixture-server.mjs";
 
+test("PC stores persist independently and can be cleared without changing other entry data", async ({page,context,request}) => {
+  await context.addCookies([authCookie]);
+  for (const [value,label] of [["pc_battlenet","PC / Battle.net"],["pc_gog","PC / GOG"],["pc_epic","PC / Epic Games"],["pc_ea","PC / EA app"],["pc_ubisoft","PC / Ubisoft Connect"],["pc_xbox","PC / Xbox app"],["pc_other","PC / Other"]]) {
+    await page.goto("/log?game=hades");
+    await page.getByRole("button",{name:label,exact:true}).click();
+    await page.locator("#commit-rating").click();
+    await expect(page).toHaveURL(/\/profile$/);
+    await page.goto("/log?game=hades");
+    await expect(page.getByRole("button",{name:label,exact:true})).toHaveAttribute("aria-pressed","true");
+    const state=await (await request.get("http://127.0.0.1:3101/__state")).json();
+    expect(state.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===1)).toMatchObject({platform:value,score:null,tier:null,status:null});
+  }
+  await page.getByRole("button",{name:"PC / Other",exact:true}).click();
+  await page.locator("#commit-rating").click();
+  await expect(page).toHaveURL(/\/profile$/);
+  await page.goto("/log?game=hades");
+  await expect(page.locator("#platform-selector [aria-pressed=true]")).toHaveCount(0);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+
 test("score slider works on an unrated game and discard returns to profile without saving", async ({ page, context, request }) => {
   await context.addCookies([authCookie]);
   await page.goto("/log?game=hades");

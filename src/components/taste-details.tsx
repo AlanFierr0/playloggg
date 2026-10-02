@@ -1,12 +1,7 @@
 "use client";
 import { useMessages } from "@/components/site-preferences";
 import { tasteStats } from "@/lib/taste";
-const playedPlatformLabels = {
-  pc: "PC / Steam",
-  ps5: "PlayStation 5",
-  xbox_series_x: "Xbox Series X",
-  steam_deck: "Steam Deck",
-};
+import { playedPlatformLabels } from "@/lib/played-platforms";
 import type { Game } from "@/types/domain";
 export function TasteDetails({ games }: { games: Game[] }) {
   const t = useMessages(),
@@ -134,9 +129,9 @@ export function TasteDetails({ games }: { games: Game[] }) {
           <div key={platform} className="flex justify-between gap-4">
             <span>
               {
-                playedPlatformLabels[
+                t(playedPlatformLabels[
                   platform as keyof typeof playedPlatformLabels
-                ]
+                ])
               }
             </span>
             <span>{count}</span>

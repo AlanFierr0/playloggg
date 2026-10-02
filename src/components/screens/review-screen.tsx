@@ -9,6 +9,7 @@ import { usePortfolio } from "@/components/portfolio-provider";
 import { saveRating } from "@/app/actions/ratings";
 import { normalizeTags } from "@/lib/collection-input";
 import { parseHours } from "@/lib/rating-input";
+import { playedPlatformLabels } from "@/lib/played-platforms";
 import type { Game, PlaybackStatus, PlayedPlatform, Tier } from "@/types/domain";
 import { TierBadge, ScoreStars } from "@/components/rating-controls";
 
@@ -127,22 +128,9 @@ return (<><fieldset disabled={pending} className="contents">
 <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{t("Platform Played")}</span>
 
 <div className="flex flex-wrap gap-2" id="platform-selector">
-<button type="button" onClick={() => setPlatform(platform === "pc" ? null : "pc")} title={t("Select platform; click again to clear")} aria-pressed={platform === "pc"} className={platform === "pc" ? "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-primary/15 text-primary shadow-sm flex items-center gap-1.5" : "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface flex items-center gap-1.5"}>
-<span aria-hidden="true" className="material-symbols-outlined text-[14px]">{"desktop_windows"}</span>
-{t(" PC / Steam\n                ")}</button>
-
-<button type="button" onClick={() => setPlatform(platform === "ps5" ? null : "ps5")} title={t("Select platform; click again to clear")} aria-pressed={platform === "ps5"} className={platform === "ps5" ? "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-primary/15 text-primary shadow-sm flex items-center gap-1.5" : "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface flex items-center gap-1.5"}>
-<span aria-hidden="true" className="material-symbols-outlined text-[14px]">{"sports_esports"}</span>
-{t(" PlayStation 5\n                ")}</button>
-
-<button type="button" onClick={() => setPlatform(platform === "xbox_series_x" ? null : "xbox_series_x")} title={t("Select platform; click again to clear")} aria-pressed={platform === "xbox_series_x"} className={platform === "xbox_series_x" ? "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-primary/15 text-primary shadow-sm flex items-center gap-1.5" : "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface flex items-center gap-1.5"}>
-<span aria-hidden="true" className="material-symbols-outlined text-[14px]">{"stadia_controller"}</span>
-{t(" Xbox Series X\n                ")}</button>
-
-<button type="button" onClick={() => setPlatform(platform === "steam_deck" ? null : "steam_deck")} title={t("Select platform; click again to clear")} aria-pressed={platform === "steam_deck"} className={platform === "steam_deck" ? "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-primary/15 text-primary shadow-sm flex items-center gap-1.5" : "platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface flex items-center gap-1.5"}>
-<span aria-hidden="true" className="material-symbols-outlined text-[14px]">{"tablet"}</span>
-{t(" Steam Deck\n                ")}</button>
-
+{(Object.entries(playedPlatformLabels) as [PlayedPlatform, string][]).map(([value, label]) => <button key={value} type="button" onClick={() => setPlatform(platform === value ? null : value)} title={t("Select platform; click again to clear")} aria-pressed={platform === value} className={`platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider flex items-center gap-1.5 ${platform === value ? "bg-primary/15 text-primary shadow-sm" : "bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface"}`}>
+<span aria-hidden="true" className="material-symbols-outlined text-[14px]">{value.startsWith("pc") ? "desktop_windows" : value === "steam_deck" ? "tablet" : "sports_esports"}</span>
+{t(label)}</button>)}
 </div>
 
 </div>

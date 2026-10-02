@@ -247,3 +247,8 @@ that Auth user, revoke sessions and clear browser Auth cookies. Accounts without
 a profile may finish deletion from signup with exact DELETE confirmation. Do not
 preserve the Auth account on successful deletion. Shared games remain. Never
 accept browser-supplied user IDs; failures must show partial completion and allow retry.
+
+Played platforms now include PC / Steam, Battle.net, GOG, Epic Games, EA app,
+Ubisoft Connect, Xbox app and Other alongside the existing consoles and Steam Deck.
+Use shared played-platform labels and validation in the editor, bulk edits and
+stats. Preserve the legacy pc value for PC / Steam and Steam import/sync behavior.

@@ -19,4 +19,6 @@ test("bulk updates accept only bounded game selections and status/platform field
  assert.deepEqual(validateBulkRating({slugs:["hades","hades"],status:null,score:100}),{slugs:["hades"],status:null,platform:undefined});
  for(const input of [{slugs:[]},{slugs:["hades"]},{slugs:["hades"],status:"injected"},{slugs:["bad;sql"],platform:"pc"},{slugs:Array(101).fill("hades"),status:"playing"},{slugs:["hades"],platform:12}])assert.equal(validateBulkRating(input),null);
  assert.equal(validateBulkRating({slugs:["hades"],platform:"pc"}).platform,"pc");
+ for(const platform of ["pc_battlenet","pc_gog","pc_epic","pc_ea","pc_ubisoft","pc_xbox","pc_other"]) assert.equal(validateBulkRating({slugs:["hades"],platform}).platform,platform);
+ for(const platform of ["toString","__proto__","steam"]) assert.equal(validateBulkRating({slugs:["hades"],platform}),null);
 });

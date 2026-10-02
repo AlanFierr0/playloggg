@@ -7,9 +7,9 @@ import { useMessages } from "@/components/site-preferences";
 import { parseHours } from "@/lib/rating-input";
 import { updateBulkRatings } from "@/app/actions/bulk-ratings";
 import type { PlaybackStatus, PlayedPlatform } from "@/types/domain";
+import { playedPlatformLabels as platforms } from "@/lib/played-platforms";
 
 const control="min-h-11 w-full rounded-xl bg-surface-container p-3";
-const platforms={pc:"PC / Steam",ps5:"PlayStation 5",xbox_series_x:"Xbox Series X",steam_deck:"Steam Deck"};
 const statuses={completed:"Completed",playing:"In Progress",backlog:"Backlog",shelved:"Shelved"};
 export function ManageGames() {
   const { games, access }=usePortfolio(),t=useMessages(),router=useRouter();

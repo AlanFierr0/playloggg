@@ -31,11 +31,11 @@ test("unrated backlog/playing entries preserve null instead of inserting score z
 test("optional play details preserve null and supplied zero without requiring completed status", () => {
   assert.deepEqual(validateRating({ ...draft, platform: "steam_deck", hoursPlayed: 0, completedOn: "2024-02-29", status: "playing" }),
     { ...draft, platform: "steam_deck", hoursPlayed: 0, completedOn: "2024-02-29", status: "playing", review: "Independent tier." });
-  for (const platform of ["pc", "ps5", "xbox_series_x", "steam_deck", null]) assert.equal(validateRating({ ...draft, platform }).platform, platform);
+  for (const platform of ["pc", "pc_battlenet", "pc_gog", "pc_epic", "pc_ea", "pc_ubisoft", "pc_xbox", "pc_other", "ps5", "xbox_series_x", "steam_deck", null]) assert.equal(validateRating({ ...draft, platform }).platform, platform);
   assert.equal(validateRating({ ...draft, hoursPlayed: 78.45 }).hoursPlayed, 78.45);
 });
 test("reject invalid platforms, nonfinite/negative hours and impossible or timezone-bearing dates", () => {
-  for (const platform of [undefined, "switch", "PC", [], 1]) assert.equal(validateRating({ ...draft, platform }), null);
+  for (const platform of [undefined, "switch", "PC", "toString", "__proto__", [], 1]) assert.equal(validateRating({ ...draft, platform }), null);
   for (const hoursPlayed of [undefined, -1, NaN, Infinity, -Infinity, "0", true]) assert.equal(validateRating({ ...draft, hoursPlayed }), null);
   for (const completedOn of [undefined, "", "2023-02-29", "2024-02-30", "2024-13-01", "2024-04-31", "0000-01-01", "10000-01-01", "2024-01-01T00:00:00Z", "October 28, 2024"]) assert.equal(validateRating({ ...draft, completedOn }), null);
   for (const completedOn of ["0001-01-01", "0099-12-31", "2024-02-29", "9999-12-31"]) assert.equal(validateRating({ ...draft, completedOn }).completedOn, completedOn);
