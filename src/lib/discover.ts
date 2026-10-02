@@ -1,8 +1,14 @@
 import "server-only";
-import { getCatalogGame, portfolioGames } from "@/lib/portfolio";
-const selection = ["baldurs-gate-3", "disco-elysium", "metaphor-refantazio", "alan-wake-2", "half-life-2"];
+import { randomInt } from "node:crypto";
+import { getCatalog, portfolioGames } from "@/lib/portfolio";
 export async function getDiscover() {
-  const rows=await Promise.all(selection.map(slug=>getCatalogGame(slug)));
-  const games=rows.flatMap(row=>row ? portfolioGames([row],[]) : []);
+  const rows = [...await getCatalog()];
+  const count = Math.min(5, rows.length);
+  // Sample without replacement on each render; shared catalog caching is unchanged.
+  for (let index = 0; index < count; index++) {
+    const selected = randomInt(index, rows.length);
+    [rows[index], rows[selected]] = [rows[selected], rows[index]];
+  }
+  const games = portfolioGames(rows.slice(0, count), []);
   return {games};
 }
