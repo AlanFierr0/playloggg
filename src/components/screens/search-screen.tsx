@@ -114,11 +114,13 @@ return (<div onKeyDown={onKeyDown}>
 
 <div className="search-dialog w-full min-h-0 max-w-3xl bg-surface-container-low shadow-2xl rounded-xl overflow-hidden flex flex-col my-auto transition-all animate-in fade-in duration-200" id="palette-dialog" ref={dialog} role={"dialog"} aria-modal={true} aria-label={t("Search the game catalog")}>
 
+{mode === "log" && <div className="shrink-0 px-4 sm:px-5 py-4 space-y-2"><h2 className="font-headline-lg text-headline-lg text-on-surface">{t("Choose a game")}</h2><p className="text-body-sm text-on-surface-variant">{t("Search the catalog, then select a game to open its log options.")}</p></div>}
+
 <div className="relative flex shrink-0 items-center px-3 sm:px-5 py-3 sm:py-4 bg-surface-container">
 <span aria-hidden="true" className="material-symbols-outlined text-primary text-[22px] mr-3.5 flex-shrink-0 animate-pulse">{"search"}</span>
 
 <div className="min-w-0 flex-1 relative flex items-center">
-<input className="w-full bg-transparent text-on-surface font-headline-md text-headline-md tracking-tight focus:outline-none placeholder:text-on-surface-variant/40 caret-primary" id="command-input" placeholder={t("Search titles, directors, lists, or commands...")} type="text" ref={input} value={query} onChange={(event) => setQuery(event.target.value)} aria-label={t("Search titles, profiles and commands")} />
+<input className="w-full bg-transparent text-on-surface font-headline-md text-headline-md tracking-tight focus:outline-none placeholder:text-on-surface-variant/40 caret-primary" id="command-input" placeholder={t(mode === "log" ? "Search games…" : "Search titles, directors, lists, or commands...")} type="text" ref={input} value={query} onChange={(event) => setQuery(event.target.value)} aria-label={t("Search titles, profiles and commands")} />
 
 <span className="hidden sm:inline-block w-2 h-5 bg-primary/80 ml-0.5 animate-pulse"></span>
 
@@ -133,7 +135,7 @@ return (<div onKeyDown={onKeyDown}>
 
 {portfolio.access?.canImportCatalog && <div className="flex shrink-0 flex-wrap gap-2 px-3 sm:px-5 pt-3"><button aria-pressed={source === "catalog"} onClick={() => setSource("catalog")} className={`rounded px-3 py-2 font-label-md text-label-md ${source === "catalog" ? "bg-surface-container-high text-primary" : "text-on-surface-variant"}`}>{t("Saved catalog")}</button><button aria-pressed={source === "igdb"} onClick={() => setSource("igdb")} className={`rounded px-3 py-2 font-label-md text-label-md ${source === "igdb" ? "bg-surface-container-high text-primary" : "text-on-surface-variant"}`}>{t("Find on IGDB")}</button></div>}
 
-{source === "catalog" && <div className="flex shrink-0 flex-wrap items-center gap-2 px-3 sm:px-5 py-2.5 bg-surface-container-low text-on-surface-variant">
+{source === "catalog" && mode !== "log" && <div className="flex shrink-0 flex-wrap items-center gap-2 px-3 sm:px-5 py-2.5 bg-surface-container-low text-on-surface-variant">
 <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mr-1 flex items-center gap-1">
 <span aria-hidden="true" className="material-symbols-outlined text-[14px]">{"tune"}</span>
 {t(" Scope:\n        ")}</span>
@@ -150,7 +152,7 @@ return (<div onKeyDown={onKeyDown}>
 
 </div>}
 
-{source === "catalog" ? <SearchResults query={query} scope={scope} mode={mode} /> : <div className="scroll-region min-h-0 flex-1 overflow-y-auto overscroll-contain p-3 sm:p-5"><IgdbSearch query={query} mode={mode} /></div>}
+{source === "catalog" ? <SearchResults query={query} scope={mode === "log" ? "games" : scope} mode={mode} /> : <div className="scroll-region min-h-0 flex-1 overflow-y-auto overscroll-contain p-3 sm:p-5"><IgdbSearch query={query} mode={mode} /></div>}
 
 <div className="search-help flex shrink-0 flex-wrap gap-3 items-center justify-between px-3 sm:px-5 py-3 bg-surface-container-lowest text-on-surface-variant font-label-sm text-label-sm">
 <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
