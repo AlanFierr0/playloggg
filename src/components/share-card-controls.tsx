@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useMessages } from "@/components/site-preferences";
 import type { ShareCard } from "@/lib/share-card";
-export function ShareCardControls({ endpoint }: { endpoint: string }) {
+export function ShareCardControls({ endpoint, downloadOnRight = false }: { endpoint: string; downloadOnRight?: boolean }) {
   const t = useMessages(),
     [size, setSize] = useState("square"),
     [pending, setPending] = useState(false),
@@ -148,7 +148,7 @@ export function ShareCardControls({ endpoint }: { endpoint: string }) {
         </label>
         <button
           type="button"
-          className="rounded bg-primary px-5 py-3 text-on-primary disabled:opacity-50"
+          className={`rounded bg-primary px-5 py-3 text-on-primary disabled:opacity-50 ${downloadOnRight ? "ml-auto" : ""}`}
           disabled={pending}
           onClick={download}
         >

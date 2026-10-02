@@ -46,7 +46,7 @@ export function ProfileOverviewScreen() {
       <p className="text-on-surface-variant text-body-sm">{t("Your favorites express what matters to you, independently of scores and tiers.")}</p>
       {featured.length ? <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">{featured.map(f => { const game = bySlug.get(f.slug); return game ? <Link key={f.slug} href={gameHref(game)} className="group min-w-0"><img src={game.cover} alt="" className="w-full aspect-[2/3] object-cover rounded-lg shadow-lg" /><p translate="no" className="mt-3 font-headline-md text-headline-md break-words group-hover:text-primary">{game.title}</p><p className="text-primary font-label-md">#{f.featuredSlot}</p></Link> : null; })}</div> : <p className="text-on-surface-variant">{t("No featured favorites yet.")}</p>}
     <div className="border-t border-outline-variant/20 pt-5">
-    <ShareCardControls endpoint={`/api/share/profile?kind=favorites${publicBase?`&handle=${profile.handle}`:""}`} />
+    <ShareCardControls downloadOnRight endpoint={`/api/share/profile?kind=favorites${publicBase?`&handle=${profile.handle}`:""}`} />
     </div>
     </section>
     <div className="grid xl:grid-cols-2 gap-6 sm:gap-8 items-stretch">
