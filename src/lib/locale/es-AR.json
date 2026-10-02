@@ -1051,5 +1051,10 @@
   "Stop loading": "Dejar de cargar",
   "No Steam games match these filters.": "No hay juegos de Steam que coincidan con estos filtros.",
   "Use nonnegative hours and a minimum no greater than the maximum.": "Usá horas mayores o iguales a cero y un mínimo que no supere el máximo.",
-  "Apply filters": "Aplicar filtros"
+  "Apply filters": "Aplicar filtros",
+  "Sync Steam playtime": "Sincronizar horas de Steam",
+  "Syncing playtime…": "Sincronizando horas…",
+  "Updated games": "Juegos actualizados",
+  "Playtime synced. Other entry details were kept unchanged.": "Horas sincronizadas. Los demás datos de tus entradas se conservaron.",
+  "Some playtimes could not be synced. Retry to update the remaining games.": "No se pudieron sincronizar algunas horas. Volvé a intentar para actualizar los juegos restantes."
 }

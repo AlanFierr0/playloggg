@@ -20,6 +20,7 @@ let games = structuredClone(initialGames);
 let ratings;
 let failSave;
 let steamMode="public";
+let steamMinutes=90;
 let favorites;
 let rankings=[];let curated=[];let listItems=[];let follows=[];let blocks=[];let likes=[];
 let pictures = new Map();
@@ -31,7 +32,7 @@ function reset() { user.app_metadata={};steamMode="public";rankings=[];follows=[
  ratings.push({profile_id:4,game_id:7,score:0,tier:null,status:"playing",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  for (const game_id of Array.from({length:19},(_,i)=>i+8)) for (const profile_id of [3,4]) ratings.push({profile_id,game_id,score:profile_id===3 ? 50 : 40,tier:null,status:"playing",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  ratings.forEach(row=>row.updated_at="2026-09-29T12:00:00Z");
- failSave = false; }
+ failSave = false;steamMinutes=90; }
 reset();
 
 // Deliberately limited contract double, not an implementation/proof of Supabase RLS.
@@ -43,9 +44,11 @@ export async function startFixtureServer() {
       if (url.pathname === "/__health") return reply(200, { fixture: true });
       if (url.pathname === "/__steam-user" && req.method === "POST") {user.app_metadata={playlogg_steam_id:"76561198000000000"};return reply(200,{ok:true});}
       if (url.pathname === "/__steam-private" && req.method === "POST") {steamMode="private";return reply(200,{ok:true});}
+      if (url.pathname === "/__steam-playtime" && req.method === "POST") {steamMinutes=180;return reply(200,{ok:true});}
+      if (url.pathname === "/__steam-sync-entry" && req.method === "POST") {Object.assign(ratings.find(row=>row.profile_id===2&&row.game_id===2),{platform:"pc",hours_played:1,tags:["keep"],completed_on:"2026-09-01"});return reply(200,{ok:true});}
       if (url.pathname === "/__steam-library") {
         if(steamMode==="private")return reply(200,{response:{}});
-        return reply(200,{response:{game_count:128,games:[{appid:101,name:"Hades",playtime_forever:90},{appid:102,name:"Elden Ring",playtime_forever:300},{appid:103,name:"Steam Fixture Adventure",playtime_forever:0},{appid:104,name:"Unmatched Fixture",playtime_forever:45},...Array.from({length:124},(_,index)=>({appid:200+index,name:"ZZZ Fixture "+index,playtime_forever:index===123?6000:0}))]}});
+        return reply(200,{response:{game_count:128,games:[{appid:101,name:"Hades",playtime_forever:steamMinutes},{appid:102,name:"Elden Ring",playtime_forever:300},{appid:103,name:"Steam Fixture Adventure",playtime_forever:0},{appid:104,name:"Unmatched Fixture",playtime_forever:45},...Array.from({length:124},(_,index)=>({appid:200+index,name:"ZZZ Fixture "+index,playtime_forever:index===123?6000:0}))]}});
       }
       if (url.pathname === "/__provider-games") {
         let body=""; for await (const part of req) body+=part;
@@ -104,6 +107,15 @@ export async function startFixtureServer() {
         return reply(201,null);
       }
       const visibleProfiles = profiles.filter((profile) => admin || profile.is_public || (authenticated && profile.owner_user_id === ownerId));
+      if (resource === "ratings" && req.method === "PATCH") {
+        if(!authenticated || url.searchParams.get("profile_id")!=="eq.2")return reply(403,{message:"Fixture ownership denied"});
+        let body="";for await(const part of req)body+=part;const patch=JSON.parse(body);
+        if(Object.keys(patch).some(key=>key!=="hours_played"))return reply(400,{message:"Only playtime may be synced"});
+        if(failSave){failSave=false;return reply(503,{message:"Controlled save failure"});}
+        const matches=ratings.filter(row=>[...url.searchParams].filter(([key])=>key!=="select").every(([key,value])=>value.startsWith("eq.")?String(row[key])===value.slice(3):value==="is.null"&&row[key]===null));
+        matches.forEach(row=>Object.assign(row,patch,{updated_at:new Date().toISOString()}));
+        return reply(200,matches.map(row=>({game_id:row.game_id})));
+      }
       if (resource === "ratings" && req.method === "POST") {
         let body = ""; for await (const part of req) body += part;
         const rating = JSON.parse(body);

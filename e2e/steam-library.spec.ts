@@ -3,14 +3,48 @@ import AxeBuilder from "@axe-core/playwright";
 // @ts-expect-error Local fixture only.
 import {authCookie} from "./fixture-server.mjs";
 
+test("Steam sync updates only PC playtime, preserves personal details and retries failures",async({page,context})=>{
+  await context.addCookies([authCookie]);
+  await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
+  await fetch("http://127.0.0.1:3101/__steam-sync-entry",{method:"POST"});
+  await page.goto("/profile/import/steam");
+  await page.getByRole("checkbox",{name:"Select game Hades",exact:true}).check();
+  await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
+  await expect(page.getByText("Import complete. Your games are saved in your profile.")).toBeVisible();
+  await expect(page.getByRole("checkbox",{name:"Select game Hades",exact:true})).toHaveCount(0);
+  await fetch("http://127.0.0.1:3101/__steam-playtime",{method:"POST"});
+  const before=await (await fetch("http://127.0.0.1:3101/__state")).json();
+  await fetch("http://127.0.0.1:3101/__fail-save",{method:"POST"});
+  await page.getByRole("button",{name:"Sync Steam playtime",exact:true}).click();
+  await expect(page.getByText(/Some playtimes could not be synced/)).toBeVisible();
+  await page.getByRole("button",{name:"Sync Steam playtime",exact:true}).click();
+  await expect(page.getByText(/Playtime synced\. Other entry details were kept unchanged/)).toBeVisible();
+  const after=await (await fetch("http://127.0.0.1:3101/__state")).json();
+  for(const row of before.ratings) {
+    const saved=after.ratings.find((item:{profile_id:number;game_id:number})=>item.profile_id===row.profile_id&&item.game_id===row.game_id);
+    if(row.profile_id===2 && row.platform==="pc") {
+      const {hours_played:oldHours,updated_at:oldDate,...details}=row;
+      void oldHours;void oldDate;
+      expect(saved).toMatchObject(details);
+      expect(saved.hours_played).toBe(row.game_id===1?3:5);
+    } else expect(saved).toEqual(row);
+  }
+  await page.getByRole("button",{name:"Sync Steam playtime",exact:true}).click();
+  await expect(page.getByText(/Updated games: 0/)).toBeVisible();
+  expect((await (await fetch("http://127.0.0.1:3101/__state")).json()).ratings).toEqual(after.ratings);
+  await page.reload();
+  await expect(page.getByText("126 Steam games",{exact:false})).toBeVisible();
+  await expect(page.getByRole("checkbox",{name:"Select game Hades",exact:true})).toHaveCount(0);
+});
+
 test("Steam import previews, selects, saves trusted playtime and preserves existing entries",async({page,context},testInfo)=>{
   await context.addCookies([authCookie]);
   await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
   await page.goto("/profile");
   await page.getByRole("link",{name:"Import from Steam",exact:true}).click();
   await expect(page.getByRole("button",{name:"Preview Steam library"})).toHaveCount(0);
-  await expect(page.getByText("128 Steam games",{exact:false})).toBeVisible();
-  await expect(page.getByRole("checkbox",{name:"Select game Elden Ring",exact:true})).toBeDisabled();
+  await expect(page.getByText("127 Steam games",{exact:false})).toBeVisible();
+  await expect(page.getByRole("checkbox",{name:"Select game Elden Ring",exact:true})).toHaveCount(0);
   await expect(page.getByRole("checkbox",{name:"Select game Unmatched Fixture",exact:true})).toBeDisabled();
   let state=await (await fetch("http://127.0.0.1:3101/__state")).json();
   expect(state.ratings.filter((row:{profile_id:number})=>row.profile_id===2)).toHaveLength(1);
@@ -31,7 +65,8 @@ test("Steam import previews, selects, saves trusted playtime and preserves exist
   expect(own.find((row:{game_id:number})=>row.game_id===2)).toMatchObject({score:80,tier:"B",status:"playing",review:"Private fixture review",hours_played:null});
   expect(own.filter((row:{game_id:number})=>row.game_id!==1&&row.game_id!==2)[0]).toMatchObject({hours_played:0,platform:"pc",score:null,tier:null,status:null});
   await page.getByRole("button",{name:"Refresh library"}).click();
-  await expect(page.getByRole("checkbox",{name:"Select game Hades",exact:true})).toBeDisabled();
+  await expect(page.getByText("125 Steam games",{exact:false})).toBeVisible();
+  await expect(page.getByRole("checkbox",{name:"Select game Hades",exact:true})).toHaveCount(0);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
 
@@ -95,7 +130,7 @@ test("Steam browsing loads more without losing selection, changes amounts and fi
   await page.getByLabel("Games to show",{exact:true}).selectOption("100");
   await expect(page.getByRole("checkbox")).toHaveCount(100);
   await page.getByLabel("Games to show",{exact:true}).selectOption("all");
-  await expect(page.getByRole("checkbox")).toHaveCount(128);
+  await expect(page.getByRole("checkbox")).toHaveCount(127);
   await expect(page.getByRole("button",{name:"Load more",exact:true})).toHaveCount(0);
   await page.getByLabel("Games to show",{exact:true}).selectOption("25");
   await expect(page.getByRole("checkbox")).toHaveCount(25);

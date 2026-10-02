@@ -213,6 +213,12 @@ explicit game selection, PC / Steam and playtime, unset score/tier/status, and
 no replacement of existing entries. Re-fetch verified account ownership and
 Steam playtime on the server; match exact external app IDs, not game titles.
 Keep STEAM_WEB_API_KEY server-only. See docs/steam-library-import.md.
+The user approved hiding all already logged exact Steam matches from the importer,
+including manually logged games. The separate sync button may update only hours
+for existing PC / Steam entries, including manual ones. Never overwrite scores,
+tiers, status, platform, reviews, tags or completion dates. Preserve concurrent
+editor saves and do not touch unchanged playtime timestamps. Earlier imports have
+no provenance marker; do not claim they can be distinguished from manual entries.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

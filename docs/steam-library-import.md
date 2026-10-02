@@ -8,6 +8,8 @@
    to be visible. This does not publish your Playlogg profile.
 4. Your library loads automatically when you open **Import from Steam**.
    **Refresh library** reloads it or retries after an error.
+   Games already logged in your profile are hidden, including manual entries,
+   before filters and pagination. Newly imported games disappear from the cards.
    Choose 25, 50, 100 or All games. **Load more**
    appends the next chosen amount and keeps existing cards and selections.
    All loads every match progressively; **Stop loading** stops after the current
@@ -23,6 +25,13 @@
    progress and individual errors. Successful imports stay saved if another
    game fails; retry keeps only failed selections. Changing filters, sorting or
    the amount resets the loaded set and selection; loading more preserves them.
+7. **Sync Steam playtime** updates hours for existing PC / Steam entries, including
+   manual PC entries with an exact Steam match. It works independently of the
+   current filters or loaded amount, in requests of at most 25 games. The server
+   rechecks ownership, platform and fresh Steam playtime for every request.
+   Scores, tiers, status, platform, reviews, tags and completion dates stay intact.
+   Unchanged hours do not update timestamps; concurrent editor saves are skipped
+   and reported for retry. Partial successes remain saved if another update fails.
 
 Each new entry saves PC / Steam and playtime, rounded from minutes to two decimal
 hours. Zero hours remain zero. Score, tier, status, review and completion date
@@ -31,7 +40,8 @@ concurrent edits. Steam ownership is not treated as proof of completion.
 
 Only Steam sign-in accounts can use the first version. Connecting Steam to an
 email account or merging accounts is not included. This is a manual import,
-not a scheduled synchronization; existing entries' hours are not overwritten.
+not a scheduled synchronization; importing preserves existing entries. Updating
+their hours requires the separate sync button.
 
 ## Production configuration
 
@@ -67,8 +77,11 @@ Preview covers use existing catalog artwork or the exactly matched provider
 cover. If unavailable or broken, try Steam's library capsule and then its header.
 If neither image exists, use a game icon in a consistently sized thumbnail.
 No generated artwork is used, and preview does not import catalog metadata.
-Matching stays in server requests of at most 25 games, including All, to bound
-provider requests and let partial loads/retries retain their progress.
+Preview matching stays in server requests of at most 25 games, including All.
+Stored entries are read with pagination and their provider IDs are resolved in
+batches of 100 before calculating the remaining library count. Earlier imports
+did not record provenance, so hiding applies to all logged exact matches and
+syncing applies to all logged PC / Steam exact matches, as agreed with the user.
 
 No new tables, database grants or migrations are needed. Steam IDs, library
 responses and the API key are not put in public URLs or public profile metadata.
@@ -82,6 +95,8 @@ Only explicitly selected imported entries become visible if the profile is publi
   25/50/100/All amounts, global playtime sorting/ranges, cover failure fallbacks, selected imports,
   missing metadata, zero-hour entries, unchanged existing entries, guest/email
   exclusion, inaccessible libraries, failed-save retry, accessibility and mobile.
+  Also verifies imported games stay hidden after reopening, sync retry, unchanged
+  non-playtime fields and other profiles, and idempotent sync without date changes.
 - The fixture provider intercepts only the isolated test process. It does not
   replace Steam authentication or production RLS verification.
 
