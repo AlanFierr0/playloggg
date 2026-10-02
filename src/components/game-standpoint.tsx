@@ -2,6 +2,7 @@
 import { useMessages } from "@/components/site-preferences";
 
 
+import { GameTags } from "@/components/game-tags";
 import Link from "next/link";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import { usePortfolio } from "@/components/portfolio-provider";
@@ -28,6 +29,7 @@ export function GameStandpoint({ game }: { game: Game }) {
       </div>
       <Link href={access?.canEdit ? `/log?game=${encodeURIComponent(game.slug)}` : "/login"} className="px-3 py-2 rounded bg-surface-container text-primary font-label-sm text-label-sm">{access?.canEdit ? t("Edit log entry") : t("Sign in")}</Link>
     </div>
+    {game.logged && <GameTags tags={game.tags} />}
     {game.review && <p translate="no" className="whitespace-pre-wrap break-words rounded bg-surface-container-lowest/50 p-3.5 text-body-sm text-on-surface-variant">{game.review}</p>}
   </section>;
 }

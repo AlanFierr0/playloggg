@@ -2,6 +2,7 @@
 import { useMessages } from "@/components/site-preferences";
 
 import Link from "next/link";
+import { GameTags } from "@/components/game-tags";
 import { IgdbSearch } from "@/components/igdb-search";
 import { useCallback, useEffect, useRef, useOptimistic, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
@@ -20,7 +21,7 @@ export function GamesScreen({ data, profile, access }: { data: GamesPageData; pr
   const [filters, updateFilters] = useOptimistic(data.filters);
   const sentinel = useRef<HTMLDivElement>(null);
   const [pending, startTransition] = useTransition();
-  const { games: visible, total, matched, genres, platforms, years, page: currentPage, pageCount, offset } = data;
+  const { games: visible, total, matched, genres, tags, platforms, years, page: currentPage, pageCount, offset } = data;
   function navigate(next: GamesFilters, page = 1) {
     window.scrollTo({ top: 0 });
     startTransition(() => { updateFilters(next); const query = gamesQuery(next, page); router.push(`/games${query ? `?${query}` : ""}`, { scroll: false }); });
@@ -52,6 +53,7 @@ export function GamesScreen({ data, profile, access }: { data: GamesPageData; pr
       <Field label={t("Search titles")}><input id="games-query" type="search" className={control} value={filters.query} placeholder={t("Search the catalog…")} onChange={(event) => change("query", event.target.value)} /></Field>
       <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-4 gap-4">
         <Field label={t("Genre")}><select id="games-genre" className={control} value={filters.genre} onChange={(event) => change("genre", event.target.value)}><option value="">{t("All genres")}</option>{genres.map((genre) => <option key={genre} value={genre}>{genre}</option>)}</select></Field>
+        {access?.canEdit && <Field label={t("Tag")}><select id="games-tag" className={control} value={tags.find(tag => tag.toLowerCase() === filters.tag.toLowerCase()) ?? filters.tag} onChange={event => change("tag",event.target.value)}><option value="">{t("All tags")}</option>{tags.map(tag => <option key={tag.toLowerCase()} value={tag}>{tag}</option>)}</select></Field>}
         <Field label={t("Platform")}><select id="games-platform" className={control} value={filters.platform} onChange={(event) => change("platform", event.target.value)}><option value="">{t("All platforms")}</option>{filters.platform && !platforms.some(platform => platform === filters.platform) && <option value={filters.platform} hidden>{filters.platform}</option>}{platforms.map((platform) => <option key={platform} value={platform}>{t(platform)}</option>)}</select></Field>
         <Field label={t("Release year")}><select id="games-year" className={control} value={filters.year} onChange={(event) => change("year", event.target.value)}><option value="">{t("All years")}</option>{years.map((year) => <option key={year} value={year}>{year}</option>)}<option value="unknown">{t("Unknown year")}</option></select></Field>
         <Field label={t("Sort by")}><select id="games-sort" className={control} value={filters.sort} onChange={(event) => change("sort", event.target.value as GamesFilters["sort"])}><option value="title">{t("Title A–Z")}</option><option value="newest">{t("Newest release")}</option><option value="oldest">{t("Oldest release")}</option><option value="score-desc">{t("Profile score: highest")}</option><option value="score-asc">{t("Profile score: lowest")}</option></select></Field>
@@ -67,7 +69,7 @@ export function GamesScreen({ data, profile, access }: { data: GamesPageData; pr
       <div className="flex flex-wrap items-center justify-between gap-3"><p role="status" aria-live="polite" className="text-on-surface-variant font-body-sm text-body-sm">{validScoreRange(filters) ? t(`${matched} of ${total} games${matched ? ` · Showing ${offset + 1}–${offset + visible.length}` : ""}`) : t("Use whole-number scores from 0 to 100, with minimum no greater than maximum.")}</p><button type="button" className={button} onClick={clear}>{t("Clear filters")}</button></div>
     </section>
     {filters.query.trim().length >= 2 && <section className="rounded-xl bg-surface-container-low p-5 space-y-3"><h2 className="font-headline-md text-headline-md">{t("Missing a game?")}</h2>{access?.canImportCatalog ? <IgdbSearch query={filters.query} excludeSlugs={visible.map(game => game.slug)} /> : <Link href="/login" className="text-primary underline">{t("Sign in to search more games and import a game.")}</Link>}</section>}
-    <section aria-label={t("Game catalog results")}><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-3 gap-y-6 sm:gap-x-5">{visible.map((game) => <CatalogCard key={game.slug} game={game} logged={Boolean(game.logged)} canEdit={Boolean(access?.canEdit)} />)}</div>{!visible.length && <div className="py-12 text-center space-y-4"><h2 className="font-headline-lg text-headline-lg">{t("No games match these filters")}</h2><p className="text-on-surface-variant">{t("Try a broader search or clear the filters.")}</p><button className={button} onClick={clear}>{t("Show all games")}</button></div>}</section>
+    <section aria-label={t("Game catalog results")}><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-3 gap-y-6 sm:gap-x-5">{visible.map((game) => <CatalogCard key={game.slug} game={game} logged={Boolean(game.logged)} canEdit={Boolean(access?.canEdit)} filters={filters} />)}</div>{!visible.length && <div className="py-12 text-center space-y-4"><h2 className="font-headline-lg text-headline-lg">{t("No games match these filters")}</h2><p className="text-on-surface-variant">{t("Try a broader search or clear the filters.")}</p><button className={button} onClick={clear}>{t("Show all games")}</button></div>}</section>
     {currentPage < pageCount && <div ref={sentinel} data-infinite-scroll className="flex min-h-14 justify-center items-center">
       {pending ? <p role="status" className="inline-flex items-center gap-2 text-on-surface-variant"><span aria-hidden="true" className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />{t("Loading…")}</p> : <button type="button" className={button} onClick={loadMore}>{t("Load more")}</button>}
     </div>}
@@ -77,10 +79,11 @@ export function GamesScreen({ data, profile, access }: { data: GamesPageData; pr
 function Field({ label, children }: { label: string; children: ReactNode }) {
   const t = useMessages(); return <label className="block min-w-0 space-y-2"><span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{t(label)}</span>{children}</label>; }
 
-function CatalogCard({ game, logged, canEdit }: { game: Game; logged: boolean; canEdit: boolean }) {
+function CatalogCard({ game, logged, canEdit, filters }: { game: Game; logged: boolean; canEdit: boolean; filters: GamesFilters }) {
   const t = useMessages();
   return <article data-catalog-game={game.slug} className="min-w-0 flex flex-col rounded-lg bg-surface-container-low overflow-hidden">
     <Link href={`/game/${encodeURIComponent(game.slug)}`} className="group block flex-1"><div className="relative aspect-[3/4] overflow-hidden bg-surface-container-high"><img src={game.cover} alt={t(`${game.title} cover`)} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />{game.score !== null && <span className="absolute top-2 right-2 rounded bg-surface/90 px-2 py-1 text-primary font-label-sm text-label-sm">{game.score} / 100</span>}</div><div className="p-3 space-y-2"><h2 className="font-headline-md text-headline-md break-words group-hover:text-primary">{game.title}</h2><p className="font-label-sm text-label-sm text-on-surface-variant">{game.year ?? t("Year unknown")}</p><p className="font-body-sm text-body-sm text-on-surface-variant break-words">{game.genres?.join(" · ") || t("Genre unknown")}</p><p className="font-label-sm text-label-sm text-primary break-words">{logged ? `${t(game.status ? playbackLabels[game.status] : "Logged")}${game.tier ? ` · ${t("Tier")} ${game.tier}` : ""}${game.score === null ? ` · ${t("Unrated")}` : ""}` : t("Not logged")}</p></div></Link>
+    {logged && Boolean(game.tags?.length) && <div className="px-3 pb-3"><GameTags tags={game.tags} filters={filters} /></div>}
     {canEdit && <Link href={`/log?game=${encodeURIComponent(game.slug)}`} className="inline-flex justify-center items-center border-t border-outline-variant/20 p-3 text-primary hover:bg-surface-container font-label-sm text-label-sm uppercase tracking-wider">{logged ? t("Edit log entry") : t("Log this game")}</Link>}
   </article>;
 }

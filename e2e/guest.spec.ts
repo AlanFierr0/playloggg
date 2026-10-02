@@ -1,4 +1,6 @@
 import { test, expect } from "./test";
+// @ts-expect-error Local fixture session only.
+import { authCookie } from "./fixture-server.mjs";
 
 // Stable named fixture games, independent of production catalog contents.
 test("catalog combines filters, loads more, clears and handles empty results", async ({ page }) => {
@@ -163,5 +165,32 @@ test("platform filter shows main families and groups the remaining platforms und
   await page.goto("/games?platform=Android");
   await expect(platform).toHaveValue("Android");
   await expect(platform.locator('option[value="Android"]')).toHaveAttribute("hidden", "");
+  await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
+});
+
+
+test("saved tags link game details and catalog cards to a persistent combined filter",async({page,context})=>{
+  await context.addCookies([authCookie]);
+  await page.goto("/log?game=hades");
+  await page.locator("#add-tag").click();
+  await page.getByLabel("Tag label",{exact:true}).fill("Co-op & friends");
+  await page.locator("#confirm-tag").click();
+  await page.locator("#commit-rating").click();
+  await expect(page).toHaveURL(/\/profile$/);
+  await page.goto("/game/hades");
+  await page.getByRole("link",{name:"Co-op & friends",exact:true}).click();
+  await expect(page).toHaveURL(/tag=Co-op/);
+  await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
+  const filter=page.getByRole("combobox",{name:"Tag",exact:true});
+  await expect(filter).toHaveValue("Co-op & friends");
+  await page.reload();await expect(filter).toHaveValue("Co-op & friends");
+  await page.getByLabel("Search titles").fill("missing-title");
+  await expect(page.locator("[data-catalog-game]")).toHaveCount(0);
+  await page.getByRole("button",{name:"Clear filters",exact:true}).click();
+  await expect(filter).toHaveValue("");
+  await page.getByLabel("Search titles").fill("Hades");
+  await page.locator('[data-catalog-game="hades"]').getByRole("link",{name:"Co-op & friends",exact:true}).click();
+  await expect(filter).toHaveValue("Co-op & friends");
+  await expect(page.getByLabel("Search titles")).toHaveValue("Hades");
   await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
 });

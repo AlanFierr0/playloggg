@@ -5,6 +5,7 @@ import { loggedGames } from "./portfolio-view.ts";
 export interface GamesFilters {
   query: string;
   genre: string;
+  tag: string;
   platform: string;
   year: string;
   library: "all" | "logged" | "unlogged";
@@ -16,7 +17,7 @@ export interface GamesFilters {
   sort: "title" | "newest" | "oldest" | "score-desc" | "score-asc";
 }
 
-export const defaultGamesFilters: GamesFilters = { query: "", genre: "", platform: "", year: "", library: "all", status: "all", tier: "all", rating: "all", minScore: "", maxScore: "", sort: "title" };
+export const defaultGamesFilters: GamesFilters = { query: "", genre: "", tag: "", platform: "", year: "", library: "all", status: "all", tier: "all", rating: "all", minScore: "", maxScore: "", sort: "title" };
 
 function scoreBound(value: string): number | null | undefined {
   if (!value.trim()) return null;
@@ -39,6 +40,7 @@ export function filterGames(games: Game[], filters: GamesFilters): Game[] {
     const text = `${game.title} ${game.keywords} ${(game.genres ?? []).join(" ")}`.toLocaleLowerCase();
     return words.every((word) => text.includes(word))
       && (!filters.genre || game.genres?.includes(filters.genre))
+      && (!filters.tag || (isLogged && game.tags?.some(tag => tag.toLowerCase() === filters.tag.toLowerCase())))
       && matchesCatalogPlatform(game.platforms, filters.platform)
       && (!filters.year || (filters.year === "unknown" ? game.year === null : game.year === Number(filters.year)))
       && (filters.library === "all" || (filters.library === "logged" ? isLogged : !isLogged))

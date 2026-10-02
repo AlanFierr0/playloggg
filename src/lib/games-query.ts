@@ -11,6 +11,7 @@ export function parseGamesQuery(params: Pick<URLSearchParams, "get">): { filters
   const filters = { ...defaultGamesFilters };
   filters.query = (params.get("q") ?? "").slice(0, 100);
   filters.genre = (params.get("genre") ?? "").trim().slice(0, 120);
+  filters.tag = (params.get("tag") ?? "").trim().slice(0, 48);
   filters.platform = (params.get("platform") ?? "").trim().slice(0, 120);
   const year = params.get("year") ?? "";
   filters.year = year === "unknown" || (/^\d{1,4}$/.test(year) && Number(year) >= 1) ? year : "";

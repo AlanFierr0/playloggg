@@ -64,3 +64,21 @@ test("catalog platform families include generations, separate other platforms an
   assert.deepEqual(gamesPage(games, {...filters, platform: "Android"}, 1).platforms, ["PC", "PlayStation", "Xbox", "Nintendo", "Other"]);
   assert.equal(filterGames(games, filters).length, 7);
 });
+
+
+test("personal tags filter exactly without case sensitivity and retain safe URLs and card tags",()=>{
+  const games=[
+    {slug:"one",title:"One",score:0,year:2024,keywords:"",cover:"",logged:true,tags:["Co-op & friends", "Favorites"]},
+    {slug:"two",title:"Two",score:null,year:2024,keywords:"",cover:"",logged:true,tags:["favorites"]},
+    {slug:"unlogged",title:"Unlogged",score:null,year:null,keywords:"",cover:"",logged:false,tags:["Favorites"]},
+  ];
+  const filters={...parseGamesQuery(new URLSearchParams()).filters,tag:"FAVORITES"};
+  assert.deepEqual(filterGames(games,filters).map(game=>game.slug),["one","two"]);
+  assert.deepEqual(filterGames(games,{...filters,tag:"favorite"}),[]);
+  assert.deepEqual(filterGames(games,{...filters,rating:"rated"}).map(game=>game.slug),["one"]);
+  const facet=gamesPage(games,filters,1);assert.deepEqual(facet.tags,["Co-op & friends","Favorites"]);
+  assert.deepEqual(facet.games[0].tags,["Co-op & friends","Favorites"]);
+  const tagged={...filters,tag:"Co-op & friends"};
+  assert.equal(parseGamesQuery(new URLSearchParams(gamesQuery(tagged,2))).filters.tag,tagged.tag);
+  assert.equal(parseGamesQuery(new URLSearchParams('tag='+('x'.repeat(100)))).filters.tag.length,48);
+});

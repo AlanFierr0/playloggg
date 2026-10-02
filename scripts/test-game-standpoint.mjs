@@ -1,4 +1,6 @@
 import { test } from "node:test";
+import { gamesQuery } from "../src/lib/games-query.ts";
+import { defaultGamesFilters } from "../src/lib/games-view.ts";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -21,6 +23,9 @@ function loadComponent(path) {
   }).outputText;
   const compiledModule = { exports: {} };
   const imports = {
+    "@/components/game-tags": { GameTags: props => React.createElement(loadComponent("../src/components/game-tags.tsx").GameTags,props) },
+    "@/lib/games-query": { gamesQuery },
+    "@/lib/games-view": { defaultGamesFilters },
     "@/components/site-preferences": { useMessages: () => (source) => translationModule.exports.translateText(source, locale) },
     "next/link": { default: ({ children, ...props }) => React.createElement("a", props, children), __esModule: true },
     "@/components/portfolio-provider": { usePortfolio: () => portfolio },

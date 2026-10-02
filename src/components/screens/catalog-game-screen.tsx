@@ -1,3 +1,4 @@
+import {GameTags} from "@/components/game-tags";
 import {GameFavorite} from "@/components/game-favorite";
 import {getCommunityGameScore} from "@/lib/community";
 import {getCatalogGame} from "@/lib/portfolio";
@@ -43,7 +44,7 @@ export async function CatalogGameScreen({ game, isSample, publicProfile }: { gam
             {game.logged ? <>
               <div className="flex flex-wrap items-center gap-3 font-label-md text-label-md"><span className="text-primary">{game.score === null ? t("Unrated") : t(`${game.score} / 100`)}</span><span>{game.tier ? t(`Tier ${game.tier}`) : t("Tier unassigned")}</span>{game.status && <span>{t(playbackLabels[game.status])}</span>}{game.hoursPlayed != null && <span>{game.hoursPlayed} {t("hrs")}</span>}{game.completedOn && <span>{t("Completed ")}{game.completedOn}</span>}</div>
               {game.review && <p translate="no" className="whitespace-pre-wrap break-words text-on-surface-variant font-body-md text-body-md">{game.review}</p>}
-              {Boolean(game.tags?.length) && <div className="flex flex-wrap gap-2">{game.tags!.map((tag) => <span key={tag} className="max-w-full break-words rounded bg-surface-container px-2 py-1 font-label-sm text-label-sm">{tag}</span>)}</div>}
+              <GameTags tags={game.tags} />
             </> : <p className="text-on-surface-variant">{publicProfile || isSample ? t("This profile has not logged this game.") : t("This game is in the catalog. Add a log entry to save your status, rating or review.")}</p>}
             {!publicProfile && <>
             <Link href={isSample ? "/login" : `/log?game=${encodeURIComponent(game.slug)}`} className="inline-flex rounded px-5 py-2.5 bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider">{isSample ? t("Sign in") : game.logged ? t("Edit log entry") : t("Log this game")}</Link>

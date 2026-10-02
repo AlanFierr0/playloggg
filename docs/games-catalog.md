@@ -67,3 +67,12 @@ end-of-results clamping, empty filters, shared amount/loaded-batch URLs and
 rejection of unsupported sizes. Existing card payload checks still exclude review
 text, full descriptions and screenshots. Browser checks cover load more, all
 amounts, filter resets, reload, history and search return on desktop and mobile.
+
+## Personal tags — 2026-10-02
+
+Saved log tags appear as clickable chips on catalog cards and game details. Each
+chip opens Games with an exact, case-insensitive tag filter. Catalog chips retain
+other active filters; detail links start with just the chosen tag. Changing tags
+resets infinite scroll to the first batch. The Tag selector lists the signed-in
+profile's saved tags and preserves the chosen filter through reload and sharing.
+No other profile's private tags are loaded, and tags never create a log entry.

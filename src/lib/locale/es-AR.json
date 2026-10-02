@@ -1095,5 +1095,7 @@
   "More shared scored games needed": "juegos compartidos más con puntaje necesarios",
   "Game imported. You can now log this game.": "Juego importado. Ya podés registrarlo.",
   "Usage limits could not be checked. Please retry.": "No se pudieron comprobar los límites de uso. Intentá de nuevo.",
-  "Invite a friend to create a profile, publish it and enable discovery. Then search their handle here.": "Invitá a un amigo a crear su perfil, publicarlo y activar discovery. Después buscá su usuario acá."
+  "Invite a friend to create a profile, publish it and enable discovery. Then search their handle here.": "Invitá a un amigo a crear su perfil, publicarlo y activar discovery. Después buscá su usuario acá.",
+  "Tag": "Etiqueta",
+  "Tags": "Etiquetas"
 }
