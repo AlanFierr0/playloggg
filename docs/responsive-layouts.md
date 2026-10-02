@@ -88,3 +88,12 @@ the footer does not cover controls or remain fixed while scrolling.
 The user removed the homepage Editor’s Spotlight section. Discover now opens
 with its page heading followed by the existing Essential Canon game cards;
 the spotlight artwork, copy, actions and reserved hero height are removed.
+
+The profile overview separates identity and statistics from owner tools and
+section navigation. Owner tools use spaced rounded buttons; section tabs use a
+two/three/six-column grid with a contrasting current tab. Favorites, taste,
+recent entries, reviews and lists have distinct rounded panels. The secondary
+panels use two columns on wide screens and stack on smaller screens. Sharing
+controls belong to the favorites panel. Layout checks cover non-overlapping
+controls, 44px minimum touch targets, active tabs and navigation; screenshots
+cover desktop, tablet and mobile using isolated test profiles.

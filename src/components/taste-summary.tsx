@@ -33,8 +33,8 @@ export function TasteSummary({ games, href }: { games: Game[]; href: string }) {
             <h3 className="font-headline-md text-headline-md">{t(label)}</h3>
             {groups.length ? (
               groups.slice(0, 3).map((group) => (
-                <div key={group.name} className="flex justify-between gap-4">
-                  <span translate="no" className="break-words">
+                <div key={group.name} className="flex flex-wrap justify-between gap-x-4 gap-y-1">
+                  <span translate="no" className="min-w-0 break-words">
                     {group.name}
                   </span>
                   <span className="shrink-0 text-primary">
