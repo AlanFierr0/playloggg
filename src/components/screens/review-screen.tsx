@@ -28,7 +28,8 @@ const dateInput = useRef<HTMLInputElement>(null);
 const [tags, setTags] = useState<string[]>(game.tags ?? []);
 const [tagVersion, setTagVersion] = useState(0);
 const [review, setReview] = useState(game.review ?? "");
-function resetDraft() { setScore(saved.score); setTier(saved.tier); setPlatform(saved.platform); setStatus(saved.status); setHours(saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)); setDate(saved.completedOn ?? ""); setReview(saved.review); setTags(saved.tags); setTagVersion((value) => value + 1); setSaveMessage(""); }
+const discardConfirmation = "Draft discarded. Last saved values restored.";
+function resetDraft() { setScore(saved.score); setTier(saved.tier); setPlatform(saved.platform); setStatus(saved.status); setHours(saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)); setDate(saved.completedOn ?? ""); setReview(saved.review); setTags(saved.tags); setTagVersion((value) => value + 1); setSaveMessage(discardConfirmation); }
 function commit() {
   if (dateInput.current && !dateInput.current.validity.valid) { setSaveMessage("Complete a valid calendar date, or clear it. Your draft has been kept."); return; }
   const hoursPlayed = parseHours(hours);
@@ -43,7 +44,7 @@ function commit() {
     } catch { setSaveMessage("Saving is unavailable right now. Your draft has been kept; please try again."); }
   });
 }
-return (<><fieldset disabled={pending} className="contents">
+return (<><fieldset disabled={pending} className="contents" onInputCapture={() => { if (saveMessage === discardConfirmation) setSaveMessage(""); }} onClickCapture={() => { if (saveMessage === discardConfirmation) setSaveMessage(""); }}>
 <div className="w-full  bg-surface"><div className="flex flex-col w-full">
 <div className="relative w-full min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 sm:p-6 lg:p-12 overflow-hidden">
 <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -88,7 +89,7 @@ return (<><fieldset disabled={pending} className="contents">
 <div className="p-4 sm:p-8 lg:p-10 flex flex-col gap-8">
 <p className="text-body-sm text-on-surface-variant">{t("Score: how good is this game? Tier: how much does it mean to you? Favorites and ranking are separate.")}</p>
 <p className="font-body-sm text-body-sm text-on-surface-variant">{canEdit ? t("Commit saves your optional score, independent tier, playback status, platform, playtime, completion date, review and tags.") : <>{t("Sign in to save your entry. ")}<Link href="/login" className="text-primary underline">{t("Sign in")}</Link> {t("to save entries to your own profile.")}</>}</p>
-<p role="status" className="font-body-sm text-body-sm text-primary">{pending ? t("Saving…") : t(saveMessage)}</p>
+<p role="status" className="font-body-sm text-body-sm text-primary">{pending ? t("Saving…") : saveMessage === discardConfirmation ? "" : t(saveMessage)}</p>
 <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-start">
 <div className="relative group flex-shrink-0 w-32 sm:w-40 aspect-[3/4] rounded-lg overflow-hidden bg-surface-container shadow-xl">
 <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt={game.title} src={game.cover} />
@@ -168,7 +169,7 @@ return (<><fieldset disabled={pending} className="contents">
 
 <div className="w-full max-w-xl flex flex-col gap-3">
 <div className="relative w-full flex items-center">
-<input className="w-full h-2 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary focus:outline-none disabled:opacity-30" id="score-slider" disabled={score === null} max="100" min="0" type="range" value={score ?? 0} onChange={(event) => setScore(Number(event.target.value))} aria-label={t("Numerical score from 0 to 100")} />
+<input className="score-slider w-full cursor-pointer disabled:opacity-30" id="score-slider" max="100" min="0" step="1" type="range" value={score ?? 0} onPointerDown={(event) => setScore(Number(event.currentTarget.value))} onKeyDown={(event) => { if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "PageUp", "PageDown"].includes(event.key)) setScore(Number(event.currentTarget.value)); }} onChange={(event) => setScore(Number(event.target.value))} aria-label={t("Numerical score from 0 to 100")} aria-valuetext={score === null ? t("Unrated · a score is optional") : `${score} / 100`} />
 
 </div>
 
@@ -243,7 +244,7 @@ return (<><fieldset disabled={pending} className="contents">
 <div className="relative flex items-center">
 <span aria-hidden="true" className="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">{"calendar_today"}</span>
 
-<input className="min-w-0 w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="date-input" ref={dateInput} type="date" min="0001-01-01" max="9999-12-31" value={date} onChange={(event) => setDate(event.target.value)} />
+<input key={tagVersion} className="min-w-0 w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="date-input" ref={dateInput} type="date" min="0001-01-01" max="9999-12-31" value={date} onChange={(event) => setDate(event.target.value)} />
 
 </div>
 
@@ -269,7 +270,7 @@ return (<><fieldset disabled={pending} className="contents">
 </div>
 
 <div className="w-full bg-surface-container-lowest px-4 py-4 sm:px-10 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 mt-auto">
-<p className="font-label-sm text-label-sm text-on-surface-variant">{t("Updates appear in feeds only while your profile is public and discoverable.")}</p>
+<div className="min-w-0 space-y-2"><p className="font-label-sm text-label-sm text-on-surface-variant">{t("Updates appear in feeds only while your profile is public and discoverable.")}</p><p role="status" className="text-body-sm text-primary">{saveMessage === discardConfirmation ? t(discardConfirmation) : ""}</p></div>
 
 <div className="flex flex-col min-[360px]:flex-row items-center gap-3 w-full sm:w-auto justify-end">
 <button id="discard-rating" className="w-full sm:w-auto px-4 py-2 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-colors" type="button" onClick={resetDraft}>{t("\n            Discard Draft\n          ")}</button>
