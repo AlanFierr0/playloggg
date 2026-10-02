@@ -78,3 +78,30 @@ test("editor score and discard controls are accessible in both themes and langua
     await page.screenshot({ path: `e2e-artifacts/editor-${testInfo.project.name}-${locale}-${theme}.png`, fullPage: true });
   }
 });
+
+
+test("typed scores sync with the slider, reject invalid values and persist zero", async ({page,context}) => {
+  await context.addCookies([authCookie]);
+  await page.goto("/log?game=hades");
+  const input=page.getByRole("spinbutton", {name:"Numerical score from 0 to 100"});
+  const slider=page.getByRole("slider", {name:"Numerical score from 0 to 100"});
+  await input.fill("87");
+  await expect(slider).toHaveValue("87");
+  await expect(page.locator("#score-display")).toHaveText("87");
+  await slider.fill("100");
+  await expect(input).toHaveValue("100");
+  await input.fill("");
+  await expect(page.locator("#score-display")).toHaveText("—");
+  for(const value of ["101","-1","12.5"]){
+    await input.fill(value);
+    await page.locator("#commit-rating").click();
+    await expect(page).toHaveURL(/\/log\?game=hades$/);
+    await expect(input).toHaveAttribute("aria-invalid","true");
+  }
+  await input.fill("0");
+  await page.locator("#commit-rating").click();
+  await expect(page).toHaveURL(/\/profile$/);
+  await page.goto("/log?game=hades");
+  await expect(input).toHaveValue("0");
+  await expect(slider).toHaveValue("0");
+});

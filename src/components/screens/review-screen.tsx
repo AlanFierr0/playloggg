@@ -21,6 +21,8 @@ const [pending, startTransition] = useTransition();
 const [saveMessage, setSaveMessage] = useState("");
 const [saved, setSaved] = useState({ score: game.score, tier: game.tier ?? null, status: game.status ?? null, review: game.review ?? "", platform: game.platform ?? null, hoursPlayed: game.hoursPlayed ?? null, completedOn: game.completedOn ?? null, tags: game.tags ?? [] });
 const [score, setScore] = useState<number | null>(game.score);
+const scoreInput = useRef<HTMLInputElement>(null);
+const invalidScore = score !== null && (!Number.isInteger(score) || score < 0 || score > 100);
 const [tier, setTier] = useState<Tier | null>(game.tier ?? null);
 const [platform, setPlatform] = useState<PlayedPlatform | null>(game.platform ?? null);
 const [status, setStatus] = useState<PlaybackStatus | null>(game.status ?? null);
@@ -32,6 +34,7 @@ const [tagVersion, setTagVersion] = useState(0);
 const [review, setReview] = useState(game.review ?? "");
 function resetDraft() { setScore(saved.score); setTier(saved.tier); setPlatform(saved.platform); setStatus(saved.status); setHours(saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)); setDate(saved.completedOn ?? ""); setReview(saved.review); setTags(saved.tags); setTagVersion((value) => value + 1); setSaveMessage(""); router.push("/profile"); }
 function commit() {
+  if (invalidScore || (scoreInput.current && !scoreInput.current.validity.valid)) { setSaveMessage("Use a whole-number score from 0 to 100."); scoreInput.current?.focus(); return; }
   if (dateInput.current && !dateInput.current.validity.valid) { setSaveMessage("Complete a valid calendar date, or clear it. Your draft has been kept."); return; }
   const hoursPlayed = parseHours(hours);
   if (hoursPlayed === undefined) { setSaveMessage("Enter nonnegative decimal hours, or leave playtime blank. Your draft has been kept."); return; }
@@ -164,6 +167,11 @@ return (<><fieldset disabled={pending} className="contents">
 </div>
 
 {score === null ? <p className="font-body-sm text-body-sm text-on-surface-variant">{t("Unrated · a score is optional")}</p> : <ScoreStars score={score} />}
+<label className="mt-3 flex flex-wrap items-center justify-center gap-3 text-body-sm text-on-surface-variant">
+  <span>{t("Score")}</span>
+  <input ref={scoreInput} id="score-input" type="number" inputMode="numeric" min={0} max={100} step={1} value={score ?? ""} placeholder="0–100" aria-label={t("Numerical score from 0 to 100")} aria-invalid={invalidScore} aria-describedby={invalidScore ? "score-error" : undefined} onChange={event => { setScore(event.target.value === "" ? null : event.target.valueAsNumber); setSaveMessage(""); }} className="w-28 min-h-11 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-2 text-center font-headline-md text-headline-md text-primary focus:outline-none focus:ring-2 focus:ring-primary" />
+</label>
+{invalidScore && <p id="score-error" className="text-body-sm text-error">{t("Use a whole-number score from 0 to 100.")}</p>}
 <button id="toggle-score" type="button" className="mt-2 rounded bg-surface-container px-3 py-1.5 font-label-sm text-label-sm text-on-surface-variant hover:text-primary" onClick={() => setScore(score === null ? 0 : null)}>{score === null ? t("Add score") : t("Remove score")}</button>
 </div>
 
