@@ -4,7 +4,12 @@ import { authCookie } from "./fixture-server.mjs";
 
 test("profile tools, section tabs and content stay separate and usable", async ({ page, context }, testInfo) => {
   await context.addCookies([authCookie]);
-  await page.goto("/profile");
+  await page.goto("/games");
+  const profileLink = page.locator("header").getByRole("link", { name: "Your profile", exact: true });
+  await expect(profileLink).toHaveAttribute("href", "/profile");
+  await expect(page.locator("header").getByRole("link", { name: "Profile", exact: true })).toHaveCount(0);
+  await profileLink.click();
+  await expect(page).toHaveURL(/\/profile$/);
   const tools = page.getByRole("navigation", { name: "Profile tools" });
   const tabs = page.getByRole("navigation", { name: "Profile sections" });
   await expect(tools.getByRole("link")).toHaveCount(6);
