@@ -21,13 +21,14 @@ let ratings;
 let failSave;
 let steamMode="public";
 let quotaMode="allow";
+let accountDeleted=false;let failAuthDelete=false;let failStorageDelete=false;
 let profileDeleted=false;
 let steamMinutes=90;
 let favorites;
 let rankings=[];let curated=[];let listItems=[];let follows=[];let blocks=[];let likes=[];
 let pictures = new Map();
 // Shared catalog imports persist between tests, like the application cache; personal data resets.
-function reset() { quotaMode="allow";user.app_metadata={};steamMode="public";rankings=[];follows=[];blocks=[];likes=[];curated=[{id:10,profile_id:3,name:"Public fixture list",revision:1,description:"Fixture description",is_public:true,is_ranked:true}];listItems=[{list_id:10,game_id:1,position:0}];pictures.clear(); Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false,is_discoverable:false,bio:null,location:null,platform_preference:null,avatar_url:null}); favorites=[{profile_id:3,game_id:1,featured_slot:1,created_at:"2026-09-29T12:00:00Z"}]; ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
+function reset() { accountDeleted=false;failAuthDelete=false;failStorageDelete=false; quotaMode="allow";user.app_metadata={};steamMode="public";rankings=[];follows=[];blocks=[];likes=[];curated=[{id:10,profile_id:3,name:"Public fixture list",revision:1,description:"Fixture description",is_public:true,is_ranked:true}];listItems=[{list_id:10,game_id:1,position:0}];pictures.clear(); Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false,is_discoverable:false,bio:null,location:null,platform_preference:null,avatar_url:null}); favorites=[{profile_id:3,game_id:1,featured_slot:1,created_at:"2026-09-29T12:00:00Z"}]; ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
  for (const game_id of [3,4,5,6]) ratings.push({profile_id:3,game_id,score:50,tier:null,status:"playing",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  for (const game_id of [1,3,4,5,6]) ratings.push({profile_id:4,game_id,score:game_id===1 ? 10 : 40,tier:"A",status:"completed",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  ratings.push({profile_id:3,game_id:7,score:null,tier:"S",status:"backlog",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
@@ -72,14 +73,19 @@ export async function startFixtureServer() {
       }
       if (url.pathname === "/__reset" && req.method === "POST") { reset(); return reply(200, { ok: true }); }
       if (url.pathname === "/__fail-save" && req.method === "POST") { failSave = true; return reply(200, { ok: true }); }
-      if (url.pathname === "/__state") return reply(200, { ratings, favorites, games, profiles:profiles.filter(row=>!profileDeleted||row.id!==2) });
+      if (url.pathname === "/__state") return reply(200, { accountDeleted, pictures:[...pictures.keys()], ratings, favorites, games, profiles:profiles.filter(row=>!profileDeleted||row.id!==2) });
+      if(url.pathname==="/__fail-auth-delete"&&req.method==="POST"){failAuthDelete=true;return reply(200,{ok:true});}
+      if(url.pathname==="/__fail-storage-delete"&&req.method==="POST"){failStorageDelete=true;return reply(200,{ok:true});}
+      if(url.pathname==="/__profileless"&&req.method==="POST"){profileDeleted=true;return reply(200,{ok:true});}
+      if(url.pathname==="/__deletion-pictures"&&req.method==="POST"){pictures.set("2/11111111-1111-4111-8111-111111111111.webp",Buffer.from("own"));pictures.set("3/22222222-2222-4222-8222-222222222222.webp",Buffer.from("other"));return reply(200,{ok:true});}
       const admin = req.headers.authorization === `Bearer ${fixtureAdminKey}`;
-      const authenticated = req.headers.authorization === `Bearer ${token}`;
+      const authenticated = !accountDeleted && req.headers.authorization === `Bearer ${token}`;
+      if(url.pathname===`/auth/v1/admin/users/${ownerId}`&&req.method==="DELETE"){if(!admin)return reply(403,{message:"Server only"});if(failAuthDelete){failAuthDelete=false;return reply(503,{message:"Controlled auth failure"});}if(!profileDeleted||[...pictures.keys()].some(path=>path.startsWith("2/")))return reply(409,{message:"Owned data remains"});accountDeleted=true;return reply(200,user);}
       if (url.pathname === "/auth/v1/user" && req.method === "GET") return authenticated ? reply(200, user) : reply(401, { message: "Fixture session required" });
       if (url.pathname === "/auth/v1/logout" && req.method === "POST") return authenticated ? reply(200,{}) : reply(401,{message:"Unauthorized"});
       if (url.pathname === "/auth/v1/token" && req.method === "POST") {
         let body=""; for await (const part of req) body+=part; const input=JSON.parse(body);
-        return input.email===user.email && input.password==="fixture-password-123" ? reply(200,session) : reply(400,{error_code:"invalid_credentials",msg:"Invalid login credentials"});
+        return !accountDeleted && input.email===user.email && input.password==="fixture-password-123" ? reply(200,session) : reply(400,{error_code:"invalid_credentials",msg:"Invalid login credentials"});
       }
       if (["/auth/v1/signup","/auth/v1/recover","/auth/v1/otp"].includes(url.pathname) && req.method === "POST") return reply(200,{});
       if (url.pathname === "/auth/v1/verify" && req.method === "POST") {
@@ -94,6 +100,7 @@ export async function startFixtureServer() {
           const parts=[];for await(const part of req)parts.push(part); pictures.set(path,Buffer.concat(parts));return reply(200,{Key:path});
         }
         if(req.method==="DELETE") {
+          if(failStorageDelete){failStorageDelete=false;return reply(503,{message:"Controlled storage failure"});}
           if(!authenticated&&!admin)return reply(403,{message:"Fixture ownership denied"});
           let body="";for await(const part of req)body+=part;const input=JSON.parse(body);
           for(const key of input.prefixes??[])if(key.startsWith("2/"))pictures.delete(key);
@@ -123,6 +130,15 @@ export async function startFixtureServer() {
       if(resource==="rpc/consume_operation_limit"&&req.method==="POST") {
         if(req.headers.authorization!==`Bearer ${fixtureAdminKey}`)return reply(403,{message:"Server only"});
         return quotaMode==="unavailable" ? reply(503,{message:"Unavailable"}) : reply(200,quotaMode==="deny" ? 60 : 0);
+      }
+      if(resource==="rpc/account_deletion_objects"&&req.method==="POST"){
+        let body="";for await(const part of req)body+=part;const input=JSON.parse(body);
+        if(!admin||input.p_owner!==ownerId)return reply(403,{message:"Server only"});
+        return reply(200,[...pictures.keys()].filter(path=>path.startsWith("2/")).map(object_name=>({bucket_id:"profile-pictures",object_name})));
+      }
+      if(resource==="rpc/clear_account_operation_limits"&&req.method==="POST"){
+        let body="";for await(const part of req)body+=part;const input=JSON.parse(body);
+        return admin&&input.p_owner===ownerId&&profileDeleted ? reply(200,null) : reply(403,{message:"Remove profile first"});
       }
       if(resource==="rpc/delete_owned_profile"&&req.method==="POST") {
         let body="";for await(const part of req)body+=part;const input=JSON.parse(body);

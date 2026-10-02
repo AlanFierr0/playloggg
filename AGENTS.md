@@ -240,3 +240,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+The user replaced profile-only deletion with complete account deletion. Danger zone
+must say Delete account, remove verified owned data and Storage files, hard-delete
+that Auth user, revoke sessions and clear browser Auth cookies. Accounts without
+a profile may finish deletion from signup with exact DELETE confirmation. Do not
+preserve the Auth account on successful deletion. Shared games remain. Never
+accept browser-supplied user IDs; failures must show partial completion and allow retry.

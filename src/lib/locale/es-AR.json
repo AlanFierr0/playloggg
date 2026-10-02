@@ -1102,5 +1102,12 @@
   "Amazing": "Increíble",
   "Good": "Bueno",
   "Bad": "Malo",
-  "Trash": "Basura"
+  "Trash": "Basura",
+  "Delete account": "Eliminar cuenta",
+  "Sign in to delete your own account.": "Iniciá sesión para eliminar tu cuenta.",
+  "Type DELETE to confirm account deletion.": "Escribí DELETE para confirmar la eliminación de la cuenta.",
+  "Your account could not be deleted. Please retry.": "No se pudo eliminar tu cuenta. Intentá de nuevo.",
+  "Your profile data is removed, but account deletion is incomplete. Type DELETE and retry, or sign in again if your session expired.": "Se eliminaron los datos del perfil, pero falta completar la eliminación de la cuenta. Escribí DELETE y reintentá, o iniciá sesión otra vez si venció tu sesión.",
+  "This permanently deletes your account, profile, ratings, reviews, tags, favorites and uploaded pictures. You will be signed out and must register again to start over.": "Esto elimina permanentemente tu cuenta, perfil, puntajes, reseñas, etiquetas, favoritos y fotos subidas. Se cerrará tu sesión y tendrás que registrarte de nuevo para empezar de cero.",
+  "Your account has been deleted. Create a new account to start again.": "Tu cuenta fue eliminada. Creá una cuenta nueva para volver a empezar."
 }

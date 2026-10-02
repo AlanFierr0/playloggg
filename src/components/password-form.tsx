@@ -5,9 +5,9 @@ import { useMessages } from "@/components/site-preferences";
 
 const input = "w-full rounded-xl bg-surface-container px-4 py-3 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary";
 const button = "w-full rounded-xl bg-primary-container px-5 py-3 font-semibold text-on-primary-container disabled:opacity-50";
-export function PasswordForm() {
+export function PasswordForm({initialMode="signin"}:{initialMode?:"signin"|"register"}) {
   const t = useMessages();
-  const [mode, setMode] = useState<"signin" | "register" | "recover" | "link">("signin");
+  const [mode, setMode] = useState<"signin" | "register" | "recover" | "link">(initialMode);
   return <div className="space-y-5">
     <div className="grid grid-cols-3 gap-2 rounded-xl bg-surface-container p-1" aria-label={t("Email sign-in options")}>
       {(["signin", "register", "link"] as const).map(option => <button key={option} type="button" aria-pressed={mode === option} onClick={() => setMode(option)} className={`px-3 py-2.5 font-label-md ${mode === option ? "bg-surface-container-high text-primary" : "text-on-surface-variant"}`}>{t(option === "signin" ? "Sign in" : option === "register" ? "Create account" : "Email link")}</button>)}

@@ -461,6 +461,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      account_deletion_objects: {
+        Args: { p_owner: string }
+        Returns: {
+          bucket_id: string
+          object_name: string
+        }[]
+      }
+      clear_account_operation_limits: {
+        Args: { p_owner: string }
+        Returns: undefined
+      }
       community_game_scores: {
         Args: { p_ids?: number[] }
         Returns: {
