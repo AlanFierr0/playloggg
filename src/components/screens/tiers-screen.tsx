@@ -1,5 +1,4 @@
 "use client";
-import {ShareCardControls} from "@/components/share-card-controls";
 import { useMessages } from "@/components/site-preferences";
 
 import { ProfileNavigation } from "@/components/profile-navigation";
@@ -23,7 +22,6 @@ return (<>
 <div className="absolute top-10 left-1/2 -translate-x-1/2 w-3/4 h-64 bg-gradient-to-b from-primary/10 via-tertiary/5 to-transparent blur-3xl pointer-events-none -z-10"></div>
 
 {!publicBase && <ProfileNavigation />}
-<ShareCardControls endpoint={publicBase?`/api/share/profile?kind=tiers&handle=${encodeURIComponent(profile.handle)}`:"/api/share/profile?kind=tiers"}/>
 <section className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
 <div className="flex flex-col gap-2">
 <div className="flex flex-wrap items-center gap-3">
