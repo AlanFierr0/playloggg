@@ -79,21 +79,6 @@ test("homepage omits the spotlight and links to the game catalog", async ({ page
 });
 
 
-test("Share copies only the catalog URL and offers a fallback when clipboard is denied", async ({ page }) => {
-  await page.goto("/game/elden-ring-shadow-of-the-erdtree");
-  await page.evaluate(() => {
-    Object.defineProperty(navigator.clipboard, "writeText", { configurable: true, value: async (url: string) => { document.documentElement.dataset.copied = url; } });
-  });
-  await page.getByRole("button", { name: "Copy game link" }).click();
-  await expect(page.getByText("Game link copied. Your profile visibility has not changed.")).toBeVisible();
-  await expect(page.locator("html")).toHaveAttribute("data-copied", "http://127.0.0.1:3100/game/elden-ring-shadow-of-the-erdtree");
-  await page.evaluate(() => {
-    Object.defineProperty(navigator.clipboard, "writeText", { configurable: true, value: async () => { throw new Error("Fixture clipboard denial"); } });
-  });
-  await page.getByRole("button", { name: "Copy game link" }).click();
-  await expect(page.getByRole("textbox", { name: "Game link", exact: true })).toHaveValue("http://127.0.0.1:3100/game/elden-ring-shadow-of-the-erdtree");
-});
-
 
 test("Games URLs retain filters and loaded results through reload, sharing and history", async ({page}) => {
   await page.goto("/games?page=2");

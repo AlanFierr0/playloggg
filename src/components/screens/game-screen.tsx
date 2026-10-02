@@ -1,5 +1,5 @@
 import { getMessages } from "@/lib/locale/server";
-import { ShelfLink, ShareGameButton } from "@/components/game-actions";
+import { ShelfLink } from "@/components/game-actions";
 import { GameStandpoint } from "@/components/game-standpoint";
 import Link from "next/link";
 import type { Game } from "@/types/domain";
@@ -161,10 +161,7 @@ return (<>
 
 </Link>
 
-<ShareGameButton slug={game.slug} className="p-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors ml-auto">
-<span aria-hidden="true" className="material-symbols-outlined text-[18px]">{"share"}</span>
 
-</ShareGameButton>
 
 </div>
 
@@ -180,7 +177,7 @@ return (<>
 
 <div className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-10 w-full"><div className="grid grid-cols-1 lg:grid-cols-12 gap-10"><div className="lg:col-span-8 min-w-0 space-y-8">
 <GameStandpoint game={game} />
-<section className="space-y-4"><h2 className="font-headline-lg text-headline-lg font-bold">{t("About this game")}</h2><p className="whitespace-pre-wrap break-words text-on-surface-variant text-body-lg">{game.summary || t("No overview is available from IGDB yet.")}</p>{game.sourceUrl && <a href={game.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-primary">{t("View source on IGDB ↗")}</a>}</section>
+<section className="space-y-4"><h2 className="font-headline-lg text-headline-lg font-bold">{t("About this game")}</h2><p className="whitespace-pre-wrap break-words text-on-surface-variant text-body-lg">{game.summary || t("No overview is available from IGDB yet.")}</p></section>
 {Boolean(game.screenshots?.length) && <section className="space-y-4"><h2 className="font-headline-lg text-headline-lg font-bold">{t("Screenshots")}</h2><div className="grid sm:grid-cols-2 gap-4">{game.screenshots!.map((src,index)=><img key={src} src={src} alt={t(`${game.title} screenshot ${index+1}`)} loading="lazy" className="w-full aspect-video rounded object-cover" />)}</div></section>}
 </div><aside className="lg:col-span-4 min-w-0"><Link href="/tiers" className="text-primary">{t("View tier board")}</Link></aside></div></div>
 </div></div></>);

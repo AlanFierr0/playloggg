@@ -3,7 +3,6 @@ import {getCommunityGameScore} from "@/lib/community";
 import {getCatalogGame} from "@/lib/portfolio";
 import { getMessages } from "@/lib/locale/server";
 import Link from "next/link";
-import { ShareGameButton } from "@/components/game-actions";
 import type { Game, Profile } from "@/types/domain";
 import { playbackLabels } from "@/lib/playback-status";
 
@@ -29,7 +28,6 @@ export async function CatalogGameScreen({ game, isSample, publicProfile }: { gam
           {!publicProfile&&<GameFavorite slug={game.slug}/>}
           {Boolean(game.publishers?.length) && <p className="break-words text-on-surface-variant font-body-md text-body-md">{t("Publisher · ")}{game.publishers!.join(", ")}</p>}
           <div className="flex flex-wrap gap-2">{game.platforms?.map((platform) => <span key={platform} className="break-words max-w-full px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">{platform}</span>)}</div>
-          <ShareGameButton slug={game.slug} className="inline-flex items-center gap-2 rounded bg-surface-container px-4 py-2 text-on-surface"><span className="material-symbols-outlined" aria-hidden="true">share</span><span>{t("Copy game link")}</span></ShareGameButton>
           <section className="rounded-lg bg-surface-container-low p-4 sm:p-5 space-y-4">
             <h2 className="font-headline-md text-headline-md font-bold">{publicProfile ? t(`${publicProfile.displayName}'s log entry`) : isSample ? t("Sample profile entry") : t("Your log entry")}</h2>
             {game.logged ? <>
@@ -43,7 +41,7 @@ export async function CatalogGameScreen({ game, isSample, publicProfile }: { gam
           </section>
         </div>
       </div>
-      <section className="space-y-4"><h2 className="font-headline-lg text-headline-lg font-bold">{t("About this game")}</h2><p className="max-w-3xl whitespace-pre-wrap break-words text-on-surface-variant font-body-lg text-body-lg leading-relaxed">{game.summary || t("No overview is available from IGDB yet.")}</p>{game.sourceUrl && <a href={game.sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex text-primary font-label-md text-label-md">{t("View source on IGDB ↗")}</a>}</section>
+      <section className="space-y-4"><h2 className="font-headline-lg text-headline-lg font-bold">{t("About this game")}</h2><p className="max-w-3xl whitespace-pre-wrap break-words text-on-surface-variant font-body-lg text-body-lg leading-relaxed">{game.summary || t("No overview is available from IGDB yet.")}</p></section>
       {Boolean(game.screenshots?.length) && <section className="space-y-4"><h2 className="font-headline-lg text-headline-lg font-bold">{t("Screenshots")}</h2><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">{game.screenshots!.map((src, index) => <img key={src} src={src} alt={t(`${game.title} screenshot ${index + 1}`)} loading="lazy" className="w-full aspect-video object-cover rounded-lg bg-surface-container" />)}</div></section>}
     </div>
   </div>;
