@@ -159,7 +159,7 @@ test("lists save description and unranked mode while private exports stay owned"
   ).toBe(404);
   await guest.close();
 });
-test("social controls support follow, unfollow, block and unblock", async ({
+test("social controls support follow and unfollow without block controls", async ({
   page,
   context,
 }) => {
@@ -173,17 +173,8 @@ test("social controls support follow, unfollow, block and unblock", async ({
   await expect(
     page.getByRole("button", { name: "Follow", exact: true }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Block", exact: true }).click();
-  await expect(
-    page.getByRole("button", { name: "Unblock", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Follow", exact: true }),
-  ).toHaveCount(0);
-  await page.getByRole("button", { name: "Unblock", exact: true }).click();
-  await expect(
-    page.getByRole("button", { name: "Follow", exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Block", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Unblock", exact: true })).toHaveCount(0);
 });
 test("share cards export correct PNG sizes and reject private public handles", async ({
   page,

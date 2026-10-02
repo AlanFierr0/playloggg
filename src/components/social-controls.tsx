@@ -32,10 +32,6 @@ export function SocialControls({
                 operation: followed ? "unfollow" : "follow",
                 label: followed ? "Unfollow" : "Follow",
               },
-              {
-                operation: blocked ? "unblock" : "block",
-                label: blocked ? "Unblock" : "Block",
-              },
             ]
         )
           .filter((item) => !(blocked && item.operation === "follow"))

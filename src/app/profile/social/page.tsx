@@ -7,7 +7,7 @@ import { avatarSource } from "@/lib/avatar-input";
 import { SocialControls } from "@/components/social-controls";
 export async function generateMetadata() {
   return localizeMetadata({
-    title: "Following and blocks",
+    title: "Following",
     robots: { index: false, follow: false },
   });
 }
@@ -35,7 +35,6 @@ export default async function Page() {
   const ids = [
     ...new Set([
       ...follows.map((row) => row.followed_id),
-      ...blocks.map((row) => row.blocked_id),
     ]),
   ];
   const { data: profiles, error } = ids.length
@@ -48,15 +47,11 @@ export default async function Page() {
   return (
     <section className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 space-y-8">
       <h1 className="font-headline-xl text-headline-xl">
-        {t("Following and blocks")}
+        {t("Following")}
       </h1>
       <nav aria-label={t("Friends navigation")} className="flex flex-wrap gap-3"><Link href="/people" className="rounded bg-primary/10 text-primary px-4 py-3">{t("Find friends")}</Link><Link href="/profile/activity" className="rounded bg-surface-container text-primary px-4 py-3">{t("Activity feed")}</Link></nav>
       {[
         { label: "Following", rows: follows.map((row) => row.followed_id) },
-        {
-          label: "Blocked profiles",
-          rows: blocks.map((row) => row.blocked_id),
-        },
       ].map(({ label, rows }) => (
         <section key={label} className="space-y-5">
           <h2 className="font-headline-lg text-headline-lg">{t(label)}</h2>

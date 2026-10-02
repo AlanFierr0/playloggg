@@ -85,7 +85,7 @@ export default async function Page() {
         )}
       </p>
       <Link href="/profile/social" className="text-primary">
-        {t("Following and blocks")}
+        {t("Following")}
       </Link>
       {visibleEvents.map((event) => {
         const profile = freshProfiles.find(

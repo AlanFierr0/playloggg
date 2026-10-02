@@ -20,7 +20,7 @@ export function ProfileOverviewScreen() {
   const recent = entries.filter(g => g.updatedAt && Number.isFinite(Date.parse(g.updatedAt))).sort((a, b) => b.updatedAt!.localeCompare(a.updatedAt!) || a.slug.localeCompare(b.slug)).slice(0, 6);
   const gameHref = (game: Game) => publicBase && game.logged ? `${base}/game/${game.slug}` : `/game/${game.slug}`;
   const panel = "min-w-0 rounded-2xl bg-surface-container-low p-5 sm:p-7 space-y-5";
-  const tools = [["Import from Steam", "/profile/import/steam"], ["Edit profile", "/settings"], ["Manage favorites", "/profile/favorites"], ["Year in Gaming", "/profile/wrapped"], ["Activity feed", "/profile/activity"], ["Following and blocks", "/profile/social"]];
+  const tools = [["Import from Steam", "/profile/import/steam"], ["Edit profile", "/settings"], ["Manage favorites", "/profile/favorites"], ["Year in Gaming", "/profile/wrapped"], ["Activity feed", "/profile/activity"], ["Following", "/profile/social"]];
   return <section className="site-container w-full mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-12 space-y-6 sm:space-y-8">
     {!publicBase && <ProfileNavigation />}
     <header className="rounded-2xl bg-surface-container-low p-5 sm:p-8 space-y-8">

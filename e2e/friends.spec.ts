@@ -39,7 +39,7 @@ test("find a friend, follow persistently and compare saved games with your own p
   await expect(page.getByText("You are not following anyone yet. Find a friend to get started.")).toBeVisible();
 });
 
-test("friend search keeps private and link-only profiles hidden and respects blocking", async ({ page, context }) => {
+test("friend search keeps private and link-only profiles hidden and omits blocking controls", async ({ page, context }) => {
   await page.goto("/people?q=fixture_owner");
   await expect(page.getByRole("article")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Follow", exact: true })).toHaveCount(0);
@@ -49,13 +49,11 @@ test("friend search keeps private and link-only profiles hidden and respects blo
   await context.addCookies([authCookie]);
   await page.goto("/people?q=Published");
   await expect(page.getByRole("article")).toHaveCount(1);
-  await page.getByRole("button", { name: "Block", exact: true }).click();
-  await expect(page.getByRole("article")).toHaveCount(0);
-  await page.reload();
-  await expect(page.getByRole("article")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Block", exact: true })).toHaveCount(0);
   await page.goto("/profile/social");
   await expect(page.getByRole("link", { name: "Compare games Published Fixture", exact: true })).toHaveCount(0);
-  await page.getByRole("button", { name: "Unblock", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Blocked profiles", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Unblock", exact: true })).toHaveCount(0);
   await context.addCookies([{ name: "playlogg_locale", value: "es-AR", url: "http://127.0.0.1:3100" }]);
   await page.goto("/people?q=fixture_public");
   await expect(page.getByRole("article")).toHaveCount(1);
