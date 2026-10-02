@@ -1,3 +1,4 @@
+import { GameGenres } from "@/components/game-genres";
 import {GameTags} from "@/components/game-tags";
 import {GameFavorite} from "@/components/game-favorite";
 import {getCommunityGameScore} from "@/lib/community";
@@ -30,7 +31,7 @@ export async function CatalogGameScreen({ game, isSample, publicProfile }: { gam
               <div className="min-w-0 space-y-1"><dt className="text-body-sm text-on-surface-variant">{t("Tier")}</dt><dd className={`font-bold ${game.tier ? "font-headline-xl text-headline-xl" : "font-headline-md text-headline-md text-on-surface-variant"}`}>{game.tier ?? t("Unassigned")}</dd></div>
             </dl>
           </header>
-          <div className="flex flex-wrap gap-x-4 gap-y-2 font-label-md text-label-md text-on-surface-variant"><span>{game.releasedOn ? t(`Released ${game.releasedOn}`) : t("Release date unknown")}</span><span>{game.genres?.join(" / ") || t("Genres unknown")}</span></div>
+          <div className="flex flex-wrap gap-x-4 gap-y-2 font-label-md text-label-md text-on-surface-variant"><span>{game.releasedOn ? t(`Released ${game.releasedOn}`) : t("Release date unknown")}</span><GameGenres genres={game.genres} fallback={t("Genres unknown")} /></div>
           {Boolean(game.developers?.length) && <p className="break-words text-on-surface-variant font-body-md text-body-md">{t("Developer · ")}{game.developers!.join(", ")}</p>}
           <div className="space-y-2">
             <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-body-sm text-on-surface-variant"><span>{t("Community score")}</span><span className="font-headline-md text-headline-md text-on-surface">{communityScore?.average ?? t("Not enough ratings")}</span>{communityScore && <span>{communityScore.count} {t("ratings")}</span>}</p>

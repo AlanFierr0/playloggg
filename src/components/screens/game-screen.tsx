@@ -1,3 +1,4 @@
+import { GameGenres } from "@/components/game-genres";
 import { getMessages } from "@/lib/locale/server";
 import { ShelfLink } from "@/components/game-actions";
 import { GameStandpoint } from "@/components/game-standpoint";
@@ -85,7 +86,7 @@ return (<>
 
 <span className="text-surface-variant">{"•"}</span>
 
-<span>{game.genres?.join(" / ") || t("Genres unknown")}</span>
+<GameGenres genres={game.genres} fallback={t("Genres unknown")} />
 
 <span className="text-surface-variant">{"•"}</span>
 

@@ -194,3 +194,20 @@ test("saved tags link game details and catalog cards to a persistent combined fi
   await expect(page.getByLabel("Search titles")).toHaveValue("Hades");
   await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
 });
+
+
+test("genres on cards and details open Games with the selected genre filter",async({page})=>{
+  await page.goto("/games?q=Hades");
+  await page.locator('[data-catalog-game="hades"]').getByRole("link",{name:"Roguelike",exact:true}).click();
+  await expect(page.getByRole("combobox",{name:"Genre",exact:true})).toHaveValue("Roguelike");
+  await expect(page.getByLabel("Search titles")).toHaveValue("Hades");
+  await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
+  await page.goto("/game/hades");
+  await page.getByRole("link",{name:"Roguelike",exact:true}).click();
+  await expect(page).toHaveURL(/\/games\?genre=Roguelike$/);
+  await expect(page.getByRole("combobox",{name:"Genre",exact:true})).toHaveValue("Roguelike");
+  await expect(page.getByLabel("Search titles")).toHaveValue("");
+  await page.reload();
+  await expect(page.getByRole("combobox",{name:"Genre",exact:true})).toHaveValue("Roguelike");
+  expect(await page.locator("a a").count()).toBe(0);
+});
