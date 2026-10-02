@@ -48,9 +48,9 @@ and behavioral statistics remain Phase 2 work with formulas still to agree.
 
 Applied migrations:
 
-- `20261001172814_profile_identity_favorites.sql`: optional profile fields and
+- `20261001172903_profile_identity_favorites.sql`: optional profile fields and
   `profile_favorites`, independent from `ratings`.
-- `20261001173343_profile_identity_read_access.sql`: column-specific reads for
+- `20261001173355_profile_identity_read_access.sql`: column-specific reads for
   the optional identity fields through existing profile RLS.
 
 Favorites are keyed by profile/game, with unique optional featured positions 1-4.

@@ -54,8 +54,8 @@ already downloaded images cannot be recalled. Existing pictures fall back to
 initials on error. Superseded files are removed through the Storage API; failed
 cleanup may leave an inaccessible orphan for later maintenance.
 
-Migrations: `20261001175944_private_profile_pictures.sql` and
-`20261001181313_picture_profile_folders.sql`, applied to the existing project.
+Migrations: `20261001180304_private_profile_pictures.sql` and
+`20261001181413_picture_profile_folders.sql`, applied to the existing project.
 Rollback SQL in `supabase/tests/private_picture_access.sql` checks owner upload/read,
 cross-account upload/read denial and anonymous denial even after publishing.
 Fixture browser checks also cover upload, publication, unpublication and removal.

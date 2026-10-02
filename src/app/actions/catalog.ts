@@ -1,5 +1,6 @@
 "use server";
 import { revalidatePath, updateTag } from "next/cache";
+import { checkOperationLimit, operationFailure } from "@/lib/operation-limits";
 import { getAccount } from "@/lib/owner";
 import { catalogQuery, igdbId, normalizeImport, normalizeMatch, searchBody, type IgdbMatch } from "@/lib/catalog-input";
 import { queryIgdb } from "@/lib/igdb";
@@ -16,6 +17,7 @@ export async function searchIgdb(input: unknown): Promise<SearchResult> {
   try {
     const owner = await getAccount();
     if (!owner?.profile) return { ok: false, message: "Sign in to search more games.", games: [] };
+    await checkOperationLimit(owner.user.id,"search");
     const records = await queryIgdb(searchBody(query));
     const seen = new Set<number>();
     const games = records.slice(0, 20).map(normalizeMatch).filter((game): game is IgdbMatch => Boolean(game && !seen.has(game.id) && seen.add(game.id)));
@@ -25,8 +27,8 @@ export async function searchIgdb(input: unknown): Promise<SearchResult> {
       for (const game of games) { const existing = stored.find(row => row.igdb_id === game.id); if (existing) game.catalogSlug = existing.slug; }
     }
     return { ok: true, games, message: games.length ? "" : "No games found. Try another title." };
-  } catch {
-    return { ok: false, games: [], message: "Game search is unavailable right now. Please retry." };
+  } catch(error) {
+    return { ok: false, games: [], message: operationFailure(error,"Game search is unavailable right now. Please retry.") };
   }
 }
 
@@ -40,6 +42,7 @@ export async function importIgdb(input: unknown): Promise<ImportResult> {
     if (readError) return { ok: false, message: "The catalog could not be checked. Please retry." };
     let row = existing;
     if (!row) {
+      await checkOperationLimit(owner.user.id,"import");
       const admin = createCatalogAdmin();
       // The browser supplies only the numeric ID. Re-fetch all metadata from IGDB.
       const records = await queryIgdb(`fields id,name,slug,first_release_date,cover.image_id,genres.name,platforms.name,artworks.image_id,screenshots.image_id,url,summary,game_type.type,involved_companies.company.name,involved_companies.developer,involved_companies.publisher; where id = ${input}; limit 1;`);
@@ -55,8 +58,8 @@ export async function importIgdb(input: unknown): Promise<ImportResult> {
     }
     updateTag("game-catalog");
     revalidatePath("/", "layout");
-    return { ok: true, message: existing ? "This game is already in the catalog." : "Game imported. Save a log entry or list separately.", game: { slug: row.slug, title: row.title, cover: row.cover_url, year: row.release_year, keywords: row.search_keywords, score: null, logged: false } };
-  } catch {
-    return { ok: false, message: "Import is unavailable or busy. Please retry; existing games will be reused." };
+    return { ok: true, message: existing ? "This game is already in the catalog." : "Game imported. You can now log this game.", game: { slug: row.slug, title: row.title, cover: row.cover_url, year: row.release_year, keywords: row.search_keywords, score: null, logged: false } };
+  } catch(error) {
+    return { ok: false, message: operationFailure(error,"Import is unavailable or busy. Please retry; existing games will be reused.") };
   }
 }

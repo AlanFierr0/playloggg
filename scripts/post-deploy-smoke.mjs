@@ -6,8 +6,8 @@ const checks = [
   ["/sitemap.xml", 200, "https://playloggg.vercel.app/games"],
   ["/games", 200, "The game archive"],
   ["/people",200,"Explore profiles"],
-  ["/quick-rate",307,null],
-  ["/profile/wrapped",307,null],
+  ["/quick-rate",404,null],
+  ["/profile/wrapped",404,null],
   ["/profile/activity",307,null],
   ["/profile/social",307,null],
   ["/profile/import/steam",307,null],
@@ -34,6 +34,7 @@ for (const [path, status, marker] of checks) {
   try {
     const response = await fetch(new URL(path, base), { redirect: "manual", signal: AbortSignal.timeout(30000), headers: { "Cache-Control": "no-cache" } });
     const body = await response.text();
+    if(response.headers.get("x-content-type-options")!=="nosniff" || response.headers.get("x-frame-options")!=="DENY" || !response.headers.get("content-security-policy")?.includes("frame-ancestors 'none'")) throw new Error("Missing security headers");
     if (response.status !== status || (marker && !body.includes(marker))) throw new Error(`expected ${status}${marker ? " and page marker" : ""}, received ${response.status}`);
     console.log(`PASS ${path} (${status})`);
   } catch (error) {

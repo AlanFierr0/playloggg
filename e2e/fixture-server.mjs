@@ -20,13 +20,14 @@ let games = structuredClone(initialGames);
 let ratings;
 let failSave;
 let steamMode="public";
+let quotaMode="allow";
 let profileDeleted=false;
 let steamMinutes=90;
 let favorites;
 let rankings=[];let curated=[];let listItems=[];let follows=[];let blocks=[];let likes=[];
 let pictures = new Map();
 // Shared catalog imports persist between tests, like the application cache; personal data resets.
-function reset() { user.app_metadata={};steamMode="public";rankings=[];follows=[];blocks=[];likes=[];curated=[{id:10,profile_id:3,name:"Public fixture list",revision:1,description:"Fixture description",is_public:true,is_ranked:true}];listItems=[{list_id:10,game_id:1,position:0}];pictures.clear(); Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false,is_discoverable:false,bio:null,location:null,platform_preference:null,avatar_url:null}); favorites=[{profile_id:3,game_id:1,featured_slot:1,created_at:"2026-09-29T12:00:00Z"}]; ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
+function reset() { quotaMode="allow";user.app_metadata={};steamMode="public";rankings=[];follows=[];blocks=[];likes=[];curated=[{id:10,profile_id:3,name:"Public fixture list",revision:1,description:"Fixture description",is_public:true,is_ranked:true}];listItems=[{list_id:10,game_id:1,position:0}];pictures.clear(); Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false,is_discoverable:false,bio:null,location:null,platform_preference:null,avatar_url:null}); favorites=[{profile_id:3,game_id:1,featured_slot:1,created_at:"2026-09-29T12:00:00Z"}]; ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
  for (const game_id of [3,4,5,6]) ratings.push({profile_id:3,game_id,score:50,tier:null,status:"playing",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  for (const game_id of [1,3,4,5,6]) ratings.push({profile_id:4,game_id,score:game_id===1 ? 10 : 40,tier:"A",status:"completed",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  ratings.push({profile_id:3,game_id:7,score:null,tier:"S",status:"backlog",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
@@ -42,6 +43,9 @@ export async function startFixtureServer() {
     const url = new URL(req.url, fixtureOrigin);
     function reply(status, data) { res.writeHead(status, { "Content-Type": "application/json" }); res.end(data === undefined ? undefined : JSON.stringify(data)); }
     try {
+      if (url.pathname === "/__quota-denied" && req.method === "POST") {quotaMode="deny";return reply(200,{ok:true});}
+      if (url.pathname === "/__quota-unavailable" && req.method === "POST") {quotaMode="unavailable";return reply(200,{ok:true});}
+      if (url.pathname === "/__quota-allow" && req.method === "POST") {quotaMode="allow";return reply(200,{ok:true});}
       if (url.pathname === "/__health") return reply(200, { fixture: true });
       if (url.pathname === "/__steam-user" && req.method === "POST") {user.app_metadata={playlogg_steam_id:"76561198000000000"};return reply(200,{ok:true});}
       if (url.pathname === "/__steam-private" && req.method === "POST") {steamMode="private";return reply(200,{ok:true});}
@@ -109,6 +113,17 @@ export async function startFixtureServer() {
         return reply(201,null);
       }
       const visibleProfiles = profiles.filter(profile=>(!profileDeleted||profile.id!==2)&&(admin || profile.is_public || (authenticated && profile.owner_user_id === ownerId)));
+      if(resource==="rpc/community_trending_games")return reply(200,[]);
+      if(resource==="rpc/community_game_scores"){
+        let body="";for await(const part of req)body+=part;const input=body ? JSON.parse(body) : {};
+        const groups=new Map();
+        for(const row of ratings){const profile=profiles.find(p=>p.id===row.profile_id);if(!profile?.is_public||!profile.is_discoverable||row.score==null||(input.p_ids&&!input.p_ids.includes(row.game_id)))continue;const values=groups.get(row.game_id)??[];values.push(row.score);groups.set(row.game_id,values);}
+        return reply(200,[...groups].filter(([,values])=>values.length>=5).map(([game_id,values])=>{const average=values.reduce((a,b)=>a+b,0)/values.length;return {game_id,sample_count:values.length,average:Math.round(average*10)/10,deviation:Math.sqrt(values.reduce((sum,value)=>sum+(value-average)**2,0)/values.length)};}));
+      }
+      if(resource==="rpc/consume_operation_limit"&&req.method==="POST") {
+        if(req.headers.authorization!==`Bearer ${fixtureAdminKey}`)return reply(403,{message:"Server only"});
+        return quotaMode==="unavailable" ? reply(503,{message:"Unavailable"}) : reply(200,quotaMode==="deny" ? 60 : 0);
+      }
       if(resource==="rpc/delete_owned_profile"&&req.method==="POST") {
         let body="";for await(const part of req)body+=part;const input=JSON.parse(body);
         if(!admin||input.p_owner!==ownerId||input.p_handle!==profiles[1].handle||profileDeleted)return reply(403,{message:"Not owned"});
@@ -122,9 +137,9 @@ export async function startFixtureServer() {
       if (resource === "ratings" && req.method === "PATCH") {
         if(!authenticated || url.searchParams.get("profile_id")!=="eq.2")return reply(403,{message:"Fixture ownership denied"});
         let body="";for await(const part of req)body+=part;const patch=JSON.parse(body);
-        if(Object.keys(patch).some(key=>key!=="hours_played"))return reply(400,{message:"Only playtime may be synced"});
+        if(Object.keys(patch).some(key=>!["hours_played","status","platform","updated_at"].includes(key)))return reply(400,{message:"Only playtime may be synced"});
         if(failSave){failSave=false;return reply(503,{message:"Controlled save failure"});}
-        const matches=ratings.filter(row=>[...url.searchParams].filter(([key])=>key!=="select").every(([key,value])=>value.startsWith("eq.")?String(row[key])===value.slice(3):value==="is.null"&&row[key]===null));
+        const matches=ratings.filter(row=>[...url.searchParams].filter(([key])=>key!=="select").every(([key,value])=>value.startsWith("eq.")?String(row[key])===value.slice(3):value.startsWith("in.(")?value.slice(4,-1).split(",").includes(String(row[key])):value==="is.null"&&row[key]===null));
         matches.forEach(row=>Object.assign(row,patch,{updated_at:new Date().toISOString()}));
         return reply(200,matches.map(row=>({game_id:row.game_id})));
       }

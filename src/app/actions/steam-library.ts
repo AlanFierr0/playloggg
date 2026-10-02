@@ -1,7 +1,8 @@
 "use server";
 import { revalidatePath } from "next/cache";
+import { checkOperationLimit, operationFailure } from "@/lib/operation-limits";
 import { getAccount } from "@/lib/owner";
-import { readSteamLibrary } from "@/lib/steam-library";
+import { readSteamLibrary, readSteamImportContext } from "@/lib/steam-library";
 import { browseSteamLibrary, parseSteamBrowse, matchSteamGames, steamAppId, steamIdentity, steamMatchBody, type SteamGame } from "@/lib/steam-library-input";
 import { normalizeMatch } from "@/lib/catalog-input";
 import { queryIgdb } from "@/lib/igdb";
@@ -16,7 +17,7 @@ const libraryErrors = new Set([
   "Steam returned an invalid library. Please retry.",
   "Steam game details are unavailable. Set Game details to Public in Steam privacy settings, then retry.",
 ]);
-const failure = (error: unknown) => error instanceof Error && libraryErrors.has(error.message) ? error.message : "Library import is unavailable right now. Please retry.";
+const failure = (error: unknown) => error instanceof Error && libraryErrors.has(error.message) ? error.message : operationFailure(error,"Library import is unavailable right now. Please retry.");
 
 // Resolve stored entries in bounded batches before paginating the remaining library.
 async function loggedSteamGames(account: NonNullable<Awaited<ReturnType<typeof getAccount>>>, library: SteamGame[]) {
@@ -50,7 +51,8 @@ export async function previewSteamLibrary(input: unknown): Promise<LibraryPrevie
     const account = await getAccount();
     const steamId = account?.user.app_metadata.playlogg_steam_id;
     if (!account?.profile || !steamIdentity(steamId)) return {...empty,message:"Sign in with Steam to import your library."};
-    const owned = await readSteamLibrary(steamId);
+    await checkOperationLimit(account.user.id,"steam");
+    const owned = await readSteamImportContext(account.user.id,steamId,Boolean(input && typeof input==="object" && "refresh" in input && input.refresh===true));
     const logged = await loggedSteamGames(account,owned);
     const syncAppIds = [...logged].filter(([,rating])=>rating.platform==="pc").map(([id])=>id);
     const library = browseSteamLibrary(owned.filter(game=>!logged.has(game.appId)),query);
@@ -76,6 +78,7 @@ export async function syncSteamPlaytime(input: unknown): Promise<{ok:boolean;mes
     const account=await getAccount();
     const steamId=account?.user.app_metadata.playlogg_steam_id;
     if (!account?.profile || !steamIdentity(steamId)) return {ok:false,message:"Sign in with Steam to import your library.",updated,failed:input.length};
+    await checkOperationLimit(account.user.id,"steam");
     const library=(await readSteamLibrary(steamId)).filter(game=>input.includes(game.appId));
     const logged=await loggedSteamGames(account,library);
     let failed=0;
@@ -103,8 +106,9 @@ export async function importSteamGame(input: unknown): Promise<{ok:boolean;messa
     const account = await getAccount();
     const steamId = account?.user.app_metadata.playlogg_steam_id;
     if (!account?.profile || !steamIdentity(steamId)) return {ok:false,message:"Sign in with Steam to import your library."};
-    // Trust only a fresh library read and provider match, never browser playtime/IDs.
-    const game = (await readSteamLibrary(steamId)).find(game=>game.appId===input);
+    // Re-authorize each game; reuse a server library for at most 30 seconds, never browser playtime/IDs.
+    await checkOperationLimit(account.user.id,"steam");
+    const game = (await readSteamImportContext(account.user.id,steamId)).find(game=>game.appId===input);
     if (!game) return {ok:false,message:"This game is not in your Steam library."};
     const id = matchSteamGames(await queryIgdb(steamMatchBody([input])),[input]).get(input);
     if (!id) return {ok:false,message:"No exact catalog match. This game was not imported."};

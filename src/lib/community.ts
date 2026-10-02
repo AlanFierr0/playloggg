@@ -2,124 +2,65 @@ import "server-only";
 import { cache } from "react";
 import { createPublicClient } from "@/lib/supabase/public";
 import {
-  communityStats,
   tasteRecommendations,
   tasteNeighbors,
 } from "@/lib/community-stats";
 import { getAccount } from "@/lib/owner";
+type CommunityScore={gameId:number;count:number;average:number;deviation:number};
+const toScore=(row:{game_id:number;sample_count:number;average:number;deviation:number}):CommunityScore=>({
+  gameId:row.game_id,count:row.sample_count,average:row.average,deviation:row.deviation,
+});
+
 export const getCommunity = cache(async () => {
-  const client = createPublicClient();
-  const { data: participants, error: participantError } = await client
-    .from("profiles")
-    .select("id")
-    .eq("is_public", true)
-    .eq("is_discoverable", true)
-    .limit(1);
-  if (participantError)
-    throw new Error("Discovery consent could not be checked.");
-  if (!participants.length)
-    return {
-      scores: [],
-      controversial: [],
-      trending: [],
-      ratings: [],
-      reviews: [],
-      lists: [],
-    };
-  const ratings = [];
-  const events = [];
-  const lists = [];
-  for (let offset = 0; ; offset += 500) {
-    const { data, error } = await client
-      .from("ratings")
-      .select(
-        "profile_id,game_id,score,review,updated_at,profiles!inner(handle,display_name,is_public,is_discoverable)",
-      )
-      .eq("profiles.is_public", true)
-      .eq("profiles.is_discoverable", true)
-      .order("profile_id")
-      .order("game_id")
-      .range(offset, offset + 499);
-    if (error) throw new Error("Community ratings could not be loaded.");
-    ratings.push(...data);
-    if (data.length < 500) break;
-  }
-  for (let offset = 0; ; offset += 500) {
-    const { data, error } = await client
-      .from("profile_activity")
-      .select("profile_id,game_id,occurred_at,score_changed")
-      .eq("score_changed", true)
-      .gte("occurred_at", new Date(Date.now() - 30 * 86400000).toISOString())
-      .order("id")
-      .range(offset, offset + 499);
-    if (error) throw new Error("Community activity could not be loaded.");
-    events.push(...data);
-    if (data.length < 500) break;
-  }
-  for (let offset = 0; ; offset += 100) {
-    const { data, error } = await client
-      .from("curated_lists")
-      .select(
-        "id,name,description,profile_id,profiles!inner(handle,display_name,is_public,is_discoverable),curated_list_items(game_id,position)",
-      )
-      .eq("is_public", true)
-      .eq("profiles.is_public", true)
-      .eq("profiles.is_discoverable", true)
-      .order("id")
-      .range(offset, offset + 99);
-    if (error) throw new Error("Community lists could not be loaded.");
-    lists.push(...data);
-    if (data.length < 100) break;
-  }
-  const { data: likeRows, error: likesError } = await client.rpc(
-    "public_list_like_counts",
-  );
-  if (likesError)
-    throw new Error("Public list popularity could not be loaded.");
-  const likes = new Map(likeRows.map((row) => [row.list_id, row.likes]));
-  // Recheck consent after reading data; anonymous RLS also protects every underlying read.
-  const eligible = new Set<number>();
-  for (let offset = 0; ; offset += 500) {
-    const { data, error } = await client
-      .from("profiles")
-      .select("id")
-      .eq("is_public", true)
-      .eq("is_discoverable", true)
-      .order("id")
-      .range(offset, offset + 499);
-    if (error) throw new Error("Discovery consent could not be checked.");
-    data.forEach((row) => eligible.add(row.id));
-    if (data.length < 500) break;
-  }
-  const publicLists = new Set<number>();
-  for (let offset = 0; ; offset += 500) {
-    const { data, error } = await client
-      .from("curated_lists")
-      .select("id")
-      .eq("is_public", true)
-      .order("id")
-      .range(offset, offset + 499);
-    if (error) throw new Error("List visibility could not be checked.");
-    data.forEach((row) => publicLists.add(row.id));
-    if (data.length < 500) break;
-  }
-  const visible = ratings.filter((row) => eligible.has(row.profile_id));
-  const stats = communityStats(
-    visible,
-    events.filter((row) => eligible.has(row.profile_id)),
-  );
+  const client=createPublicClient();
+  const [scoreResult,trendResult,reviewResult]=await Promise.all([
+    client.rpc("community_game_scores").order("deviation",{ascending:false}).order("sample_count",{ascending:false}).order("game_id").limit(5),
+    client.rpc("community_trending_games"),
+    client.from("ratings").select("profile_id,game_id,review,updated_at,profiles!inner(handle,display_name,is_public,is_discoverable)")
+      .eq("profiles.is_public",true).eq("profiles.is_discoverable",true).not("review","is",null).order("updated_at",{ascending:false}).limit(6),
+  ]);
+  if(scoreResult.error||trendResult.error||reviewResult.error)throw new Error("Community results could not be loaded.");
+  const ids=[...new Set(reviewResult.data.map(row=>row.profile_id))];
+  const {data:profiles,error}=ids.length
+    ? await client.from("profiles").select("id").in("id",ids).eq("is_public",true).eq("is_discoverable",true)
+    : {data:[],error:null};
+  if(error)throw new Error("Discovery consent could not be checked.");
+  const eligible=new Set(profiles.map(row=>row.id));
   return {
-    ...stats,
-    ratings: visible,
-    reviews: visible
-      .filter((row) => row.review?.trim())
-      .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
-      .slice(0, 6),
-    lists: lists
-      .filter((row) => eligible.has(row.profile_id) && publicLists.has(row.id))
-      .map((row) => ({ ...row, likes: likes.get(row.id) ?? 0 }))
-      .sort((a, b) => b.likes - a.likes || b.id - a.id),
+    controversial:scoreResult.data.map(toScore),
+    trending:trendResult.data.map(row=>({gameId:row.game_id,count:row.sample_count})),
+    reviews:reviewResult.data.filter(row=>eligible.has(row.profile_id)&&row.review?.trim()),
   };
+});
+
+export const getCommunityScores=cache(async (gameIds:number[])=>{
+  const scores:CommunityScore[]=[];
+  for(let offset=0;offset<gameIds.length;offset+=100){
+    const {data,error}=await createPublicClient().rpc("community_game_scores",{p_ids:gameIds.slice(offset,offset+100)}).limit(100);
+    if(error)throw new Error("Community score could not be loaded.");
+    scores.push(...data.map(toScore));
+  }
+  return scores;
+});
+export const getCommunityGameScore=cache(async (gameId:number)=>(await getCommunityScores([gameId]))[0]);
+
+// Recommendations need individual scores; load those only for signed-in taste discovery.
+const readDiscoveryRatings=cache(async()=>{
+  const client=createPublicClient(),all=[];
+  for(let offset=0;;offset+=500){
+    const {data,error}=await client.from("ratings").select("profile_id,game_id,score,profiles!inner(handle,display_name,is_public,is_discoverable)")
+      .eq("profiles.is_public",true).eq("profiles.is_discoverable",true).order("profile_id").order("game_id").range(offset,offset+499);
+    if(error)throw new Error("Recommendations could not be loaded.");
+    all.push(...data);
+    if(data.length<500)break;
+  }
+  const ids=[...new Set(all.map(row=>row.profile_id))],eligible=new Set<number>();
+  for(let offset=0;offset<ids.length;offset+=100){
+    const {data,error}=await client.from("profiles").select("id").in("id",ids.slice(offset,offset+100)).eq("is_public",true).eq("is_discoverable",true);
+    if(error)throw new Error("Discovery consent could not be checked.");
+    data.forEach(row=>eligible.add(row.id));
+  }
+  return all.filter(row=>eligible.has(row.profile_id));
 });
 export const getTasteDiscovery = cache(async () => {
   const account = await getAccount();
@@ -136,7 +77,7 @@ export const getTasteDiscovery = cache(async () => {
     own.push(...data);
     if (data.length < 500) break;
   }
-  const community = await getCommunity();
+  const ratings = await readDiscoveryRatings();
   const { data: blocks, error } = await account.supabase
     .from("profile_blocks")
     .select("blocker_id,blocked_id");
@@ -146,7 +87,7 @@ export const getTasteDiscovery = cache(async () => {
       row.blocker_id === account.profile!.id ? row.blocked_id : row.blocker_id,
     ),
   );
-  const eligible = community.ratings.filter(
+  const eligible = ratings.filter(
     (row) => !excluded.has(row.profile_id),
   );
   const neighbors = tasteNeighbors(own, eligible, account.profile.id).flatMap(

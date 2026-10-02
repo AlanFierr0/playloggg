@@ -1,4 +1,5 @@
 import "server-only";
+import { recentRead } from "@/lib/recent-read";
 import { parseSteamLibrary, steamIdentity } from "@/lib/steam-library-input";
 
 export async function readSteamLibrary(steamId: string) {
@@ -17,4 +18,11 @@ export async function readSteamLibrary(steamId: string) {
   try { data = await response.json(); }
   catch { throw new Error("Steam returned an invalid library. Please retry."); }
   return parseSteamLibrary(data);
+}
+
+// Keys bind the verified Auth owner and Steam identity. No browser-supplied library is trusted.
+// Vercel instances may not share this cache; misses always fetch a fresh server library.
+const recentLibraries=recentRead(async (key:string)=>readSteamLibrary(key.split(":")[1]),30_000,50);
+export function readSteamImportContext(ownerId:string,steamId:string,refresh=false){
+  return recentLibraries(`${ownerId}:${steamId}`,refresh);
 }

@@ -9,6 +9,7 @@ export function translateText(source: string, locale: SiteLocale): string {
   let translated = translations[plain];
   if (!translated) {
     const templates: [RegExp, (parts: RegExpMatchArray) => string][] = [
+      [/^Too many requests\. Try again in (\d+) seconds\.$/,m=>`Demasiadas solicitudes. Intentá de nuevo en ${m[1]} segundos.`],
       [/^(20\d{2}) Year in Gaming$/,m=>`${m[1]} en videojuegos`],
       [/^Biggest agreement: (.*)$/,m=>`Mayor coincidencia: ${m[1]}`],
       [/^Biggest disagreement: (.*)$/,m=>`Mayor desacuerdo: ${m[1]}`],

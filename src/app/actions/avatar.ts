@@ -1,4 +1,5 @@
 "use server";
+import { checkOperationLimit, operationFailure } from "@/lib/operation-limits";
 import sharp from "sharp";
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
@@ -14,6 +15,7 @@ export async function saveAvatar(_previous: {message: string}, form: FormData) {
     if (!(file instanceof File) || file.size === 0 || file.size > avatarLimit) return {message: "Choose a JPEG, PNG or WebP image up to 2 MB."};
     const bytes = Buffer.from(await file.arrayBuffer());
     if (!avatarFormat(bytes)) return {message: "Choose a JPEG, PNG or WebP image up to 2 MB."};
+    await checkOperationLimit(account.user.id,"avatar");
     // Decode, limit memory, orient and resize. Re-encoding removes original metadata.
     const picture = await sharp(bytes, {limitInputPixels: 20_000_000, animated: false}).rotate().resize(512,512,{fit: "cover", withoutEnlargement: true}).webp({quality:80}).toBuffer();
     const path = `${account.profile.id}/${randomUUID()}.webp`;
@@ -27,7 +29,7 @@ export async function saveAvatar(_previous: {message: string}, form: FormData) {
     if (avatarPath(previous.avatar_url) && previous.avatar_url.startsWith(`${account.profile.id}/`)) await account.supabase.storage.from("profile-pictures").remove([previous.avatar_url]);
     revalidatePath("/", "layout");
     return {message:"Profile picture saved."};
-  } catch { return {message:"Your picture could not be processed. Try a smaller JPEG, PNG or WebP image."}; }
+  } catch(error) { return {message:operationFailure(error,"Your picture could not be processed. Try a smaller JPEG, PNG or WebP image.")}; }
 }
 export async function removeAvatar() {
   try {

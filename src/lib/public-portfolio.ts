@@ -7,7 +7,7 @@ import {readPreferenceRanking} from "@/lib/preference-ranking";
 import { readFavorites } from "@/lib/favorites";
 import { publicProfilePath } from "@/lib/profile-settings";
 import type { Database } from "@/types/database";
-import type { CuratedList, CuratedListSummary, Portfolio } from "@/types/domain";
+import type { CuratedList, Portfolio } from "@/types/domain";
 
 type RatingRow = Database["public"]["Tables"]["ratings"]["Row"];
 type PublicRating = Pick<RatingRow, "game_id" | "score" | "tier" | "review" | "status" | "platform" | "hours_played" | "completed_on" | "tags" | "updated_at">;
@@ -20,7 +20,7 @@ export const getPublicPortfolio = cache(async (handle: string): Promise<Portfoli
     .select("id,handle,display_name,is_public,avatar_url,bio,location,platform_preference,is_discoverable").eq("handle", handle).eq("is_public", true).maybeSingle();
   if (error) throw new Error("This portfolio could not be loaded.");
   if (!profile) return null;
-  const [rows, ratings, lists, favorites] = await Promise.all([
+  const [rows, ratings, favorites] = await Promise.all([
     getCatalog(),
     (async () => {
       const all: PublicRating[] = [];
@@ -33,16 +33,6 @@ export const getPublicPortfolio = cache(async (handle: string): Promise<Portfoli
         if (data.length < 500) return all;
       }
     })(),
-    (async () => {
-      const all: CuratedListSummary[] = [];
-      for (let offset = 0; ; offset += 100) {
-        const { data, error } = await supabase.from("curated_lists").select("id,name,revision,description,is_public,is_ranked")
-          .eq("profile_id", profile.id).order("id").range(offset, offset + 99);
-        if (error) throw new Error("This portfolio's lists could not be loaded.");
-        all.push(...data);
-        if (data.length < 100) return all;
-      }
-    })(),
     readFavorites(supabase, profile.id),
   ]);
   const ranking=await readPreferenceRanking(supabase,profile.id,rows);
@@ -52,7 +42,7 @@ export const getPublicPortfolio = cache(async (handle: string): Promise<Portfoli
   if (currentError) throw new Error("This portfolio could not be loaded.");
   if (!current) return null;
   return {
-    games: portfolioGames(rows, ratings), lists, favorites, publicBase, ranking,
+    games: portfolioGames(rows, ratings), lists: [], favorites, publicBase, ranking,
     profile: { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: false, avatarUrl: avatarSource(profile.id, profile.avatar_url), bio: profile.bio, location: profile.location, platformPreference: profile.platform_preference, isPublic: true, isDiscoverable:profile.is_discoverable },
     access: { signedIn: false, canEdit: false, canImportCatalog: false },
   };

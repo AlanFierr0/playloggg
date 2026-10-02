@@ -106,3 +106,5 @@ Only explicitly selected imported entries become visible if the profile is publi
 
 API references: [Steam GetOwnedGames](https://partner.steamgames.com/doc/webapi/IPlayerService#GetOwnedGames)
 and [external-game matching](https://api-docs.igdb.com/#external-game).
+
+The review implementation reuses an owner-bound server library for at most 30 seconds between filters/pages/imports. Opening the page and Refresh force a fresh read; sync also re-fetches. Authorization remains fresh for every action. The cache is bounded to 50 warm-instance entries and does not guarantee cross-instance deduplication. See [the execution plan](review-execution-plan.md) for quotas, final import counts, retries and manual search behavior.

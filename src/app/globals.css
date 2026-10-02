@@ -5,7 +5,7 @@
 /* Preserve the base behavior of the Stitch export. */
 @layer base {
   html, body { margin: 0; padding: 0; }
-  html { --site-header-height: 10rem; scroll-padding-top: calc(var(--site-header-height) + 1rem); }
+  html { --site-header-height: 7rem; scroll-padding-top: calc(var(--site-header-height) + 1rem); }
   @media (min-width: 640px) { html { --site-header-height: 7rem; } }
   @media (min-width: 1280px) { html { --site-header-height: 4rem; } }
   body { overscroll-behavior: none; }

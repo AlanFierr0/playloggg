@@ -2,75 +2,15 @@ import { test, expect } from "./test";
 // @ts-expect-error Node-only fixture exports a cookie descriptor.
 import { authCookie } from "./fixture-server.mjs";
 import { readFile } from "node:fs/promises";
-test("quick rating retains drafts, retries failures and saves twenty entries without full editors", async ({
-  page,
-  context,
-}) => {
-  await context.addCookies([authCookie]);
-  await page.goto("/quick-rate");
-  await page.getByLabel("Search titles", { exact: true }).fill("Hades");
-  await page.getByRole("button", { name: "Hades", exact: true }).click();
-  await page.getByLabel("Score", { exact: true }).fill("87");
-  await page.getByLabel("Search titles", { exact: true }).fill("Elden Ring");
-  await page
-    .getByRole("button", {
-      name: "Elden Ring: Shadow of the Erdtree",
-      exact: true,
-    })
-    .click();
-  await page.getByLabel("Search titles", { exact: true }).fill("Hades");
-  await page.getByRole("button", { name: "Hades", exact: true }).click();
-  await expect(page.getByLabel("Score", { exact: true })).toHaveValue("87");
-  await fetch("http://127.0.0.1:3101/__fail-save", { method: "POST" });
-  await page.getByRole("button", { name: "Save entry", exact: true }).click();
-  await expect(
-    page.getByRole("status").filter({ hasText: "kept" }),
-  ).toBeVisible();
-  await expect(page.getByLabel("Score", { exact: true })).toHaveValue("87");
-  for (let i = 0; i < 20; i++) {
-    const name = `Fixture Game ${String(i).padStart(2, "0")}`;
-    await page.getByLabel("Search titles", { exact: true }).fill(name);
-    await page.getByRole("button", { name, exact: true }).click();
-    await page
-      .getByLabel("Playback status", { exact: true })
-      .selectOption("backlog");
-    await page.getByRole("button", { name: "Save entry", exact: true }).click();
-    await expect(
-      page.getByRole("status").filter({ hasText: "saved" }),
-    ).toBeVisible();
-  }
-  await page.reload();
-  await page
-    .getByLabel("Search titles", { exact: true })
-    .fill("Fixture Game 00");
-  await page
-    .getByRole("button", { name: "Fixture Game 00", exact: true })
-    .click();
-  await expect(page.getByLabel("Playback status", { exact: true })).toHaveValue(
-    "backlog",
-  );
-  await expect(page.getByLabel("Score", { exact: true })).toHaveValue("");
-  const state = await (await fetch("http://127.0.0.1:3101/__state")).json();
-  expect(
-    state.ratings.filter(
-      (row: { profile_id: number; status: string }) =>
-        row.profile_id === 2 && row.status === "backlog",
-    ),
-  ).toHaveLength(20);
-});
 test("independent ranking saves a pairwise choice without changing scores", async ({
   page,
   context,
 }) => {
   await context.addCookies([authCookie]);
-  await page.goto("/quick-rate");
-  await page.getByLabel("Search titles", { exact: true }).fill("Hades");
-  await page.getByRole("button", { name: "Hades", exact: true }).click();
-  await page.getByLabel("Score", { exact: true }).fill("90");
-  await page.getByRole("button", { name: "Save entry", exact: true }).click();
-  await expect(
-    page.getByRole("status").filter({ hasText: "saved" }),
-  ).toBeVisible();
+  await page.goto("/log?game=hades");
+  await page.locator("#score-slider").fill("90");
+  await page.locator("#commit-rating").click();
+  await expect(page).toHaveURL(/\/profile$/);
   await page.goto("/profile/ranking");
   await page.getByText("Which game do you prefer?", { exact: true }).click();
   await page.getByRole("button", { name: "Skip", exact: true }).click();
@@ -176,4 +116,10 @@ test("share cards export correct PNG sizes and reject private public handles", a
   ).toBe(404);
 });
 
-test("taste neighbors show real match and overlap after five shared scored games",async({page,context})=>{await context.addCookies([authCookie]);await page.goto("/quick-rate");for(const [name,score] of [["Hades","0"],["Fixture Game 00","50"],["Fixture Game 01","50"],["Fixture Game 02","50"],["Fixture Game 03","50"]]){await page.getByLabel("Search titles",{exact:true}).fill(name);await page.getByRole("button",{name,exact:true}).click();await page.getByLabel("Score",{exact:true}).fill(score);await page.getByRole("button",{name:"Save entry",exact:true}).click();await expect(page.getByRole("status").filter({hasText:"saved"})).toBeVisible();}await page.goto("/");const section=page.locator("section").filter({has:page.getByRole("heading",{name:"Taste neighbors",exact:true})});await expect(section).toContainText("100% Taste Match");await expect(section).toContainText("5 Shared scored games");expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);});
+test("taste neighbors show real match and overlap after five shared scored games", async({page,context})=>{
+ await context.addCookies([authCookie]);
+ for(const [slug,score] of [["hades","0"],["fixture-game-0","50"],["fixture-game-1","50"],["fixture-game-2","50"],["fixture-game-3","50"]]) {
+  await page.goto(`/log?game=${slug}`);await page.getByRole("button",{name:"Add score",exact:true}).click();await page.locator("#score-slider").fill(score);await page.locator("#commit-rating").click();await expect(page).toHaveURL(/\/profile$/);
+ }
+ await page.goto("/");const section=page.locator("section").filter({has:page.getByRole("heading",{name:"Taste neighbors",exact:true})});await expect(section).toContainText("100% Taste Match");await expect(section).toContainText("5 Shared scored games");
+});

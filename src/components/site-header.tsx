@@ -42,10 +42,10 @@ export function SiteHeader() {
           <Link className="flex h-11 w-11 shrink-0 items-center justify-center" href={access?.signedIn ? "/profile" : "/login"} aria-label={access?.signedIn ? t("Your profile") : t("Sign in")}><ProfileAvatar src={access?.canEdit ? profile.avatarUrl : null} name={access?.canEdit ? profile.displayName : "Account"} className="w-8 h-8 rounded-full ring-1 ring-surface-variant hover:ring-primary transition-all" /></Link>
         </div>
       </div>
-      <nav aria-label={t("Main navigation")} className="scroll-region xl:hidden flex h-12 items-center justify-start gap-1 overflow-x-auto px-4 sm:px-6 bg-surface-container-low/80">
+      <div className="xl:hidden flex bg-surface-container-low/80"><nav aria-label={t("Main navigation")} className="min-w-0 flex-1 scroll-region flex h-12 items-center justify-start gap-1 overflow-x-auto px-4 sm:px-6 bg-surface-container-low/80">
         {navigation.map((item) => <Link key={item.href} href={item.href} aria-current={isActive(item.href) ? "page" : undefined} className={`flex shrink-0 min-h-11 items-center justify-center rounded px-2 font-body-md text-body-md transition-colors ${isActive(item.href) ? "text-primary bg-primary/10 font-semibold" : "text-on-surface-variant hover:text-on-surface"}`}>{t(item.label)}</Link>)}
       </nav>
-      <div className="sm:hidden h-12 flex items-center justify-end gap-2 px-4 bg-surface-container-low/80"><PreferenceControls locale={locale} theme={theme} setLocale={setLocale} setTheme={setTheme} /></div>
+      <div className="sm:hidden h-12 flex shrink-0 items-center gap-1 pr-2"><PreferenceControls locale={locale} theme={theme} setLocale={setLocale} setTheme={setTheme} /></div></div>
     </header>
   );
 }

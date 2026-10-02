@@ -25,7 +25,7 @@ After deletion the existing signed-in account returns to profile setup. This is
 profile deletion, not Auth-account deletion or account merging. No scheduled
 backups or historical storage purge are promised by this control.
 
-Migration: `supabase/migrations/20261002153000_delete_owned_profile.sql`.
+Migration: `supabase/migrations/20261002164955_delete_owned_profile.sql`.
 Generated function signature is reflected in `src/types/database.ts`.
 `supabase/verify-profile-deletion.sql` verifies own-profile deletion, wrong-owner
 rejection, child cleanup, other-profile/catalog preservation, Auth preservation

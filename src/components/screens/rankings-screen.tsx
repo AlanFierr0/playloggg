@@ -1,6 +1,7 @@
 "use client";
 import { useMessages } from "@/components/site-preferences";
 
+import {ManageGames} from "@/components/manage-games";
 import {PreferenceRanking} from "@/components/preference-ranking";
 import Link from "next/link";
 import { useState } from "react";
@@ -34,7 +35,7 @@ return (<>
 <div className="absolute top-48 right-10 w-80 h-80 bg-secondary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
 {!publicBase && <div className="mb-8"><ProfileNavigation /></div>}
-<div className="mb-10"><PreferenceRanking/></div>
+<ManageGames/><div className="mb-10"><PreferenceRanking/></div>
 <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-12">
 <div className="flex min-w-0 items-center gap-4 sm:gap-6">
 <div className="relative shrink-0 group">
@@ -139,6 +140,6 @@ return <article className="relative group flex flex-col cursor-pointer transitio
 <div className="absolute top-3 right-3 flex items-center"><span className="font-label-md text-label-md font-bold px-2.5 py-1 rounded bg-surface-container-lowest/90 text-primary backdrop-blur-md shadow-md">{game.score ?? "—"}</span></div>
 <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-surface-container-lowest/90 backdrop-blur-md flex items-center justify-between"><span className="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">{game.tier ? t("Tier") + " " + game.tier : t("Unassigned tier")}</span><div className="flex items-center gap-1 text-primary">{game.score !== null && <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">star</span>}<span className="font-label-sm text-label-sm font-bold">{game.score === null ? t("Unrated") : (game.score / 20).toFixed(1)}</span></div></div>
 </div>
-<div className="mt-3.5 space-y-1"><div className="flex items-baseline justify-between gap-2"><h2 className="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight truncate group-hover:text-primary transition-colors"><Link className="after:absolute after:inset-0" href={(publicBase ?? "") + "/game/" + game.slug}>{game.title}</Link></h2><span className="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">{game.year ?? "—"}</span></div><p className="font-body-sm text-body-sm text-on-surface-variant truncate">{game.status ? t(playbackLabels[game.status]) : game.genres?.join(" · ") || t("Profile rating")}</p></div>
+<div className="mt-3.5 space-y-1"><div className="flex items-baseline justify-between gap-2"><h2 className="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight min-w-0 line-clamp-2 group-hover:text-primary transition-colors"><Link className="after:absolute after:inset-0" href={(publicBase ?? "") + "/game/" + game.slug}>{game.title}</Link></h2><span className="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">{game.year ?? "—"}</span></div><p className="font-body-sm text-body-sm text-on-surface-variant truncate">{game.status ? t(playbackLabels[game.status]) : game.genres?.join(" · ") || t("Profile rating")}</p></div>
 </article>;
 }

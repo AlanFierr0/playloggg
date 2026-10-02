@@ -1,5 +1,5 @@
 import {GameFavorite} from "@/components/game-favorite";
-import {getCommunity} from "@/lib/community";
+import {getCommunityGameScore} from "@/lib/community";
 import {getCatalogGame} from "@/lib/portfolio";
 import { getMessages } from "@/lib/locale/server";
 import Link from "next/link";
@@ -10,8 +10,8 @@ import { playbackLabels } from "@/lib/playback-status";
 // Imported games use real catalog details and the selected profile's saved entry.
 // The Stitch sample reviews/community statistics belong to the original samples.
 export async function CatalogGameScreen({ game, isSample, publicProfile }: { game: Game; isSample: boolean; publicProfile?: Profile }) {
-  const [t,community,row] = await Promise.all([getMessages(),getCommunity(),getCatalogGame(game.slug)]);
-  const communityScore=community.scores.find(score=>score.gameId===row?.id);
+  const [t,row] = await Promise.all([getMessages(),getCatalogGame(game.slug)]);
+  const communityScore=row ? await getCommunityGameScore(row.id) : undefined;
   return <div className="relative overflow-hidden bg-surface-container-lowest">
     {game.artwork && <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[620px] bg-cover bg-top opacity-25" style={{ backgroundImage: `url(${game.artwork})` }} />}
     <div className="absolute inset-0 bg-gradient-to-b from-surface/70 via-surface/90 to-surface pointer-events-none" />

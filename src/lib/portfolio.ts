@@ -4,7 +4,6 @@ import { cache } from "react";
 import type { Database } from "@/types/database";
 import type { Game, Portfolio } from "@/types/domain";
 import { readProfileRatings } from "@/lib/profile-ratings";
-import { getLists } from "@/lib/collections";
 import {readPreferenceRanking} from "@/lib/preference-ranking";
 import { readFavorites } from "@/lib/favorites";
 import { createClient } from "@/lib/supabase/server";
@@ -59,9 +58,9 @@ const selectedRatings = cache(async () => {
 });
 export const getPortfolio = cache(async (): Promise<Portfolio> => {
   const [shell, rows, ratings] = await Promise.all([getPortfolioShell(), getCatalog(), selectedRatings()]);
-  const [lists, favorites] = !shell.profile.id ? [[], []] : await Promise.all([getLists(Number(shell.profile.id)), (async () => readFavorites(await createClient(), Number(shell.profile.id)))()]);
+  const favorites = shell.profile.id ? await readFavorites(await createClient(), Number(shell.profile.id)) : [];
   const ranking=shell.profile.id ? await readPreferenceRanking(await createClient(),Number(shell.profile.id),rows) : undefined;
-  return { ...shell, games: portfolioGames(rows, ratings), lists, favorites, ranking };
+  return { ...shell, games: portfolioGames(rows, ratings), lists: [], favorites, ranking };
 });
 export const getPublicGame = cache(async (slug: string) => {
   const row = await getCatalogGame(slug);

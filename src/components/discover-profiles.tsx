@@ -91,6 +91,7 @@ export async function DiscoverProfiles({
         </div>
       ) : (
         <p className="text-on-surface-variant">
+          {full && !search && <span className="block mb-2">{t("Invite a friend to create a profile, publish it and enable discovery. Then search their handle here.")}</span>}
           {t(search ? "No friends match this search." : "No profiles have opted into discovery yet.")}
         </p>
       )}

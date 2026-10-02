@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "node --experimental-strip-types scripts/bootstrap-catalog.mjs && next build",
+    "build": "next typegen && tsc --noEmit && eslint . && node --experimental-strip-types --test scripts/test-*.mjs && node --experimental-strip-types scripts/bootstrap-catalog.mjs && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",

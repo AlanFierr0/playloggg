@@ -461,6 +461,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      community_game_scores: {
+        Args: { p_ids?: number[] }
+        Returns: {
+          average: number
+          deviation: number
+          game_id: number
+          sample_count: number
+        }[]
+      }
+      community_trending_games: {
+        Args: never
+        Returns: {
+          game_id: number
+          sample_count: number
+        }[]
+      }
+      consume_operation_limit: {
+        Args: {
+          p_actor: string
+          p_limit: number
+          p_operation: string
+          p_seconds: number
+        }
+        Returns: number
+      }
       delete_owned_profile: {
         Args: { p_handle: string; p_owner: string }
         Returns: Json

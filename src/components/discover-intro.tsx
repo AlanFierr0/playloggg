@@ -16,28 +16,28 @@ export function DiscoverIntro() {
       <p className="max-w-2xl text-body-lg text-on-surface-variant">
         {t("Rate games. Rank your favorites. Compare your taste.")}
       </p>
-      <div className="flex flex-wrap gap-3">
+      <div className="grid grid-cols-3 sm:flex sm:flex-wrap gap-3">
         <Link
           href="/profile"
-          className="inline-flex items-center rounded bg-primary px-6 py-3 text-on-primary font-label-md"
+          className="col-span-3 inline-flex justify-center items-center rounded bg-primary px-6 py-3 text-on-primary font-label-md"
         >
           {t(access?.canEdit ? "Open your profile" : "Create your profile")}
         </Link>
         <Link
           href="/people"
-          className="inline-flex items-center rounded bg-surface-container px-6 py-3 text-on-surface font-label-md"
+          className="inline-flex justify-center items-center rounded bg-surface-container px-2 sm:px-6 py-3 text-center text-on-surface font-body-sm"
         >
           {t("Explore profiles")}
         </Link>
         <Link
           href="/games"
-          className="inline-flex items-center rounded bg-surface-container px-6 py-3 text-on-surface font-label-md"
+          className="inline-flex justify-center items-center rounded bg-surface-container px-2 sm:px-6 py-3 text-center text-on-surface font-body-sm"
         >
           {t("Explore games")}
         </Link>
         <Link
           href="/compare"
-          className="inline-flex items-center rounded px-6 py-3 text-primary font-label-md"
+          className="inline-flex justify-center items-center rounded px-2 sm:px-6 py-3 text-center text-primary font-body-sm"
         >
           {t("Compare profiles")}
         </Link>
