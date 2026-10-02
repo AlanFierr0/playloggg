@@ -1,4 +1,5 @@
 "use client";
+import { tierLabels } from "@/lib/tier-labels";
 import { useMessages } from "@/components/site-preferences";
 
 import Link from "next/link";
@@ -119,7 +120,7 @@ return (<>
 </>);
 }
 
-const tierThemes: Record<string, { label: string; color: string }> = {"S":{"label":"Pinnacle","color":"text-primary"},"A":{"label":"Essential","color":"text-secondary"},"B":{"label":"Commendable","color":"text-tertiary"},"C":{"label":"Average","color":"text-outline"},"D":{"label":"Subpar","color":"text-on-surface-variant"},"F":{"label":"Unplayable","color":"text-error"},"Unassigned":{"label":"Unassigned","color":"text-on-surface-variant"}};
+const tierThemes: Record<string, { label: string; color: string }> = {"S":{"label":tierLabels.S,"color":"text-primary"},"A":{"label":tierLabels.A,"color":"text-secondary"},"B":{"label":tierLabels.B,"color":"text-tertiary"},"C":{"label":tierLabels.C,"color":"text-outline"},"D":{"label":tierLabels.D,"color":"text-on-surface-variant"},"F":{"label":tierLabels.F,"color":"text-error"},"Unassigned":{"label":"Unassigned","color":"text-on-surface-variant"}};
 function TierCard({ game, color, publicBase }: { game: Game; color: string; publicBase?: string }) {
   const t = useMessages();
 

@@ -1097,5 +1097,10 @@
   "Usage limits could not be checked. Please retry.": "No se pudieron comprobar los límites de uso. Intentá de nuevo.",
   "Invite a friend to create a profile, publish it and enable discovery. Then search their handle here.": "Invitá a un amigo a crear su perfil, publicarlo y activar discovery. Después buscá su usuario acá.",
   "Tag": "Etiqueta",
-  "Tags": "Etiquetas"
+  "Tags": "Etiquetas",
+  "God": "Dios",
+  "Amazing": "Increíble",
+  "Good": "Bueno",
+  "Bad": "Malo",
+  "Trash": "Basura"
 }
