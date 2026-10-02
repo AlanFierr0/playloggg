@@ -93,7 +93,7 @@ return (<>
  const theme = tierThemes[key];
  return <section key={key} className="flex flex-col md:flex-row gap-4 p-4 lg:p-6 rounded-xl bg-surface-container-low shadow-sm" id={"tier-" + key.toLowerCase()}>
  <div className="flex flex-wrap gap-2 md:flex-col justify-between items-center md:items-start w-full md:w-44 flex-shrink-0 p-4 rounded-lg bg-surface-container">
- <div className="flex items-center md:flex-col md:items-start gap-2"><span className={"font-display-lg text-display-lg font-bold leading-none " + theme.color}>{group.tier ?? "—"}</span><div className="flex flex-col"><span className="font-label-md text-label-md font-semibold uppercase tracking-wider text-on-surface">{t(theme.label)}</span><span className={"font-label-sm text-label-sm " + theme.color}>{group.tier ? t("Independent tier") : t("No tier selected")}</span></div></div>
+ <div className="flex items-center md:flex-col md:items-start gap-2"><span className={"font-display-lg text-display-lg font-bold leading-none " + theme.color}>{group.tier ?? "—"}</span><div className="flex flex-col"><span className="font-label-md text-label-md font-semibold uppercase tracking-wider text-on-surface">{t(theme.label)}</span>{!group.tier && <span className={"font-label-sm text-label-sm " + theme.color}>{t("No tier selected")}</span>}</div></div>
  <div className="flex items-center gap-1.5 pt-0 md:pt-6"><span className="font-label-sm text-label-sm text-on-surface-variant">{group.games.length} {group.games.length === 1 ? t("game") : t("games")}</span><span className={"w-1.5 h-1.5 rounded-full bg-current " + theme.color}></span></div>
  </div>
  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 flex-1 min-w-0">
