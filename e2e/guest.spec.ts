@@ -162,6 +162,12 @@ test("platform filter shows main families and groups the remaining platforms und
   await expect(page.getByRole("heading", {name: "Hades", exact: true})).toBeVisible();
   await page.reload(); await expect(platform).toHaveValue("Other");
   await platform.selectOption("PC");
+  await expect(page).toHaveURL(/platform=PC/);
+  await expect(page.locator("[data-catalog-game]")).toHaveCount(25);
+  await expect(page.getByRole("heading", {name: "Fixture Game 01", exact: true})).toBeVisible();
+  await expect(page.getByRole("heading", {name: "Hades", exact: true})).toHaveCount(0);
+  await page.getByRole("combobox", {name: "Games to show", exact: true}).selectOption("all");
+  await expect(page).toHaveURL(/size=all/);
   await expect(page.getByRole("heading", {name: "Hades", exact: true})).toBeVisible();
   await page.goto("/games?platform=Android");
   await expect(platform).toHaveValue("Android");
