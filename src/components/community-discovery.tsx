@@ -20,7 +20,7 @@ export async function CommunityDiscovery() {
     !community.reviews.length
   )
     return (
-      <section className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 space-y-4">
+      <section className="w-full site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 space-y-4">
         <h2 className="font-headline-lg text-headline-lg">
           {t("Community discovery")}
         </h2>
@@ -71,7 +71,7 @@ export async function CommunityDiscovery() {
     },
   ];
   return (
-    <div className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 space-y-12">
+    <div className="w-full site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 space-y-12">
       {neighbors.length > 0 && (
         <section className="space-y-4">
           <h2 className="font-headline-lg text-headline-lg">
@@ -147,7 +147,7 @@ export async function CommunityDiscovery() {
           {!section.rows.length && (
             <p className="text-on-surface-variant">
               {t(
-                "There is not enough eligible activity yet. No results have been invented.",
+                "Not enough data yet.",
               )}
             </p>
           )}

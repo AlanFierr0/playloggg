@@ -14,7 +14,7 @@ export async function DiscoverProfiles({
     getMessages(),
   ]);
   return (
-    <section className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 space-y-6">
+    <section className="w-full site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 space-y-6">
       <div className="flex flex-wrap gap-4 justify-between items-center">
         <h2 className="font-headline-xl text-headline-xl">
           {t(full ? "Explore profiles" : "Gaming identities")}

@@ -977,5 +977,6 @@
   "Discoverable public profiles with at least 85% Taste Match across 5 shared scored games.": "Perfiles públicos en descubrimiento con al menos 85% de compatibilidad en 5 juegos puntuados en común.",
   "Entry saved: score, tier, playback status, platform, playtime, completion date, review and tags.": "Registro guardado: puntuación, tier, estado, plataforma, horas jugadas, fecha de finalización, reseña y etiquetas.",
   "Commit saves your optional score, independent tier, playback status, platform, playtime, completion date, review and tags.": "Confirmar guarda tu puntuación opcional, tier independiente, estado, plataforma, horas jugadas, fecha de finalización, reseña y etiquetas.",
-  "Updates appear in feeds only while your profile is public and discoverable.": "Las actualizaciones aparecen en la actividad solo mientras tu perfil sea público y participe en descubrimiento."
+  "Updates appear in feeds only while your profile is public and discoverable.": "Las actualizaciones aparecen en la actividad solo mientras tu perfil sea público y participe en descubrimiento.",
+  "Not enough data yet.": "Todavía no hay suficientes datos."
 }

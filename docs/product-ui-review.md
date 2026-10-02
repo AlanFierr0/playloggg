@@ -98,3 +98,9 @@ old publishing message. After correcting those assertions, the targeted rerun
 passed both favorites cases plus new likes/taste-neighbor and share-export checks.
 No application failures remain from those runs. Production retains 1,000 games,
 zero profiles and zero recorded activity following the user's earlier deletion.
+
+The live visual review also caught intrinsic-width home sections inside the flex
+layout. Hero, directory and community sections now explicitly fill the shared
+container width; a desktop/mobile browser assertion checks hero/catalog alignment.
+Production smoke checks cover guest redirects, unavailable private export APIs,
+unknown public handles, catalog, search, login, Compare and the opt-in directory.

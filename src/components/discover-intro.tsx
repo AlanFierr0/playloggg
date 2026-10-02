@@ -6,7 +6,7 @@ export function DiscoverIntro() {
   const t = useMessages(),
     { access } = usePortfolio();
   return (
-    <header className="site-container mx-auto px-4 sm:px-6 lg:px-12 pt-10 sm:pt-16 pb-8 space-y-6">
+    <header className="w-full site-container mx-auto px-4 sm:px-6 lg:px-12 pt-10 sm:pt-16 pb-8 space-y-6">
       <p className="text-primary font-label-md uppercase tracking-widest">
         {t("Your games. Your taste.")}
       </p>

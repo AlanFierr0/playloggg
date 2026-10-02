@@ -67,6 +67,7 @@ test("homepage omits the spotlight and links to the game catalog", async ({ page
   await page.goto("/");
   await expect(page.getByText("Editor's Spotlight", {exact:true})).toHaveCount(0);
   await expect(page.getByRole("heading", {name:"Build your gaming identity.", exact:true})).toBeVisible();
+  const hero=await page.locator("main header").boundingBox();const catalog=await page.locator("main section").filter({has:page.getByRole("heading",{name:"Games worth exploring",exact:true})}).boundingBox();expect(hero!.x).toBe(catalog!.x);expect(hero!.width).toBe(catalog!.width);
   await page.getByRole("link", {name:"Explore All Games", exact:true}).click();
   await expect(page).toHaveURL(/\/games$/);
   await page.goto("/compare");
