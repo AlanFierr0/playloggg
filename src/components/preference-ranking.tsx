@@ -61,18 +61,6 @@ export function PreferenceRanking() {
       <h2 className="font-headline-xl text-headline-xl">
         {t("Personal ranking")}
       </h2>
-      <p className="text-on-surface-variant">
-        {t(
-          "Arrange games by your preference. This order never changes scores, tiers or favorites.",
-        )}
-      </p>
-      {!ranking && (
-        <p className="text-body-sm text-on-surface-variant">
-          {t(
-            "No personal ranking saved yet. The draft starts alphabetically; arrange it and save your choices.",
-          )}
-        </p>
-      )}
       {canEdit && left && right && (
         <details className="space-y-5">
           <summary className="cursor-pointer text-primary">
@@ -157,11 +145,6 @@ export function PreferenceRanking() {
           ) : null;
         })}
       </ol>
-      {!order.length && (
-        <p className="text-on-surface-variant">
-          {t("Log games to start your ranking.")}
-        </p>
-      )}
       {canEdit && order.length > 0 && (
         <button className={button} disabled={pending} onClick={save}>
           {t(pending ? "Saving…" : "Save personal ranking")}
