@@ -13,16 +13,17 @@ below is historical. See [accounts, pictures and catalog](accounts-pictures-and-
 
 ## Behavior
 
-A signed-in user with a profile can choose **Find on IGDB** in the existing search dialog.
-Enter 2–100 characters, then press Search IGDB or Enter. Searches return at most
-20 matches with title, earliest release year, game type, platforms and cover.
-Check these fields before choosing an edition. Query edits hide old matches.
-Search is explicit, rather than calling the provider on every keystroke.
+Game search combines saved games and provider matches in one list, without source
+labels or separate tabs. Signed-in users with a profile automatically search for
+additional games after entering 2-100 characters and pausing for 400 ms. Query
+changes hide old results; successful queries are cached for the search session.
+Stored games appear once, identified by their provider ID. Missing games have an
+**Import** button; search failures show a retry control without hiding saved games.
 
-Import & view opens the game page; Import & log opens the existing log editor.
-The list editor's **Find another game on IGDB** imports and adds a game to its
-current draft while preserving the name and order. Save the list separately.
-Catalog import itself creates no rating, playback status or list membership.
+Import opens the game page or the selected log editor, depending on the current
+flow. In the list editor it adds the game to the current draft; save that list
+separately. Import creates no rating, playback status or saved list membership.
+Guests search saved games and sign in to search/import additional games.
 
 Existing IGDB IDs reuse the same catalog row. Concurrent imports use the unique
 index with ON CONFLICT DO NOTHING, preserving metadata, slugs,

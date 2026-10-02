@@ -7,6 +7,7 @@ export interface IgdbMatch {
   year: number | null;
   platforms: string[];
   type: string | null;
+  catalogSlug?: string;
 }
 
 export function igdbId(value: unknown): value is number {

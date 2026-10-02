@@ -120,7 +120,8 @@ test("Games URLs retain filters and loaded results through reload, sharing and h
   await expect(page.getByRole("combobox",{name:"Genre",exact:true})).toHaveValue("Unknown");
 });
 
-test("Games amount selector supports 25, 50, 100 and all while retaining filters",async({page})=>{
+test("Games amount selector supports 25, 50, 100 and all while retaining filters",async({page,request})=>{
+  const catalogSize=(await (await request.get("http://127.0.0.1:3101/__state")).json()).games.length;
   await page.goto("/games");
   const amount=page.getByRole("combobox",{name:"Games to show",exact:true});
   await expect(amount).toHaveValue("25");
@@ -129,19 +130,19 @@ test("Games amount selector supports 25, 50, 100 and all while retaining filters
     await expect(page.locator("[data-catalog-game]")).toHaveCount(size);
     await expect(page.getByRole("button",{name:"Load more",exact:true})).toBeVisible();
     await page.getByRole("button",{name:"Load more",exact:true}).click();
-    await expect(page.locator("[data-catalog-game]")).toHaveCount(Math.min(size*2,122));
+    await expect(page.locator("[data-catalog-game]")).toHaveCount(Math.min(size*2,catalogSize));
   }
   await expect(page.getByRole("button",{name:"Load more",exact:true})).toHaveCount(0);
   await amount.selectOption("all");
   await expect(page).toHaveURL(/size=all$/);
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(122);
+  await expect(page.locator("[data-catalog-game]")).toHaveCount(catalogSize);
   await expect(page.getByRole("button",{name:"Load more",exact:true})).toHaveCount(0);
   await page.reload();await expect(amount).toHaveValue("all");
   await page.getByLabel("Search titles").fill("Hades");
   await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
   await expect(amount).toHaveValue("all");
   await page.getByRole("button",{name:"Clear filters",exact:true}).click();
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(122);
+  await expect(page.locator("[data-catalog-game]")).toHaveCount(catalogSize);
   await amount.selectOption("25");
   await expect(page.locator("[data-catalog-game]")).toHaveCount(25);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);

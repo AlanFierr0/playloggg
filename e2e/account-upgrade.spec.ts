@@ -60,7 +60,7 @@ test('pictures persist, stay private, follow publication and revert to initials 
 
 test('guest routes contain no demo player and missing-game search asks for sign-in',async({page})=>{
   await page.goto('/games?q=absent-game');
-  await expect(page.getByRole('link',{name:'Sign in to search IGDB and add a game.'})).toBeVisible();
+  await expect(page.getByRole('link',{name:'Sign in to search more games and import a game.'})).toBeVisible();
   await expect(page.getByText(/Sample Player|Sample profile/)).toHaveCount(0);
   await page.goto('/u/alexvance');await expect(page.getByRole('heading',{name:'This page isn’t available.'})).toBeVisible();
   await page.goto('/profile');await expect(page).toHaveURL(/\/login$/);
