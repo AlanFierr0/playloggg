@@ -1042,5 +1042,14 @@
   "Steam game imported.": "Juego de Steam importado.",
   "Existing entry kept unchanged.": "Se mantuvo el registro existente.",
   "Some games could not be imported. Your successful imports are saved; retry the remaining games.": "Algunos juegos no se pudieron importar. Los demás ya están guardados; volvé a intentar con los pendientes.",
-  "Import complete. Your games are saved in your profile.": "Importación completa. Tus juegos están guardados en tu perfil."
+  "Import complete. Your games are saved in your profile.": "Importación completa. Tus juegos están guardados en tu perfil.",
+  "Most played": "Más jugados",
+  "Least played": "Menos jugados",
+  "Minimum hours": "Horas mínimas",
+  "Maximum hours": "Horas máximas",
+  "Loading library": "Cargando biblioteca",
+  "Stop loading": "Dejar de cargar",
+  "No Steam games match these filters.": "No hay juegos de Steam que coincidan con estos filtros.",
+  "Use nonnegative hours and a minimum no greater than the maximum.": "Usá horas mayores o iguales a cero y un mínimo que no supere el máximo.",
+  "Apply filters": "Aplicar filtros"
 }

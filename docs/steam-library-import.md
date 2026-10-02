@@ -6,11 +6,18 @@
 2. Open **Import from Steam** from your profile tools or Profile settings.
 3. In Steam privacy settings, make **Game details** public and allow playtime
    to be visible. This does not publish your Playlogg profile.
-4. Select **Preview Steam library**. Browse pages of 25 games.
-5. Select individual matched games, or **Select available games** on the page.
+4. Select **Preview Steam library**. Choose 25, 50, 100 or All games. **Load more**
+   appends the next chosen amount and keeps existing cards and selections.
+   All loads every match progressively; **Stop loading** stops after the current
+   request and keeps games already loaded. Load more can resume a stopped load.
+5. Sort by title, most played or least played, and optionally apply minimum and
+   maximum hours. Blank limits are unrestricted; zero includes unplayed games.
+   Filters and sorting apply to the whole library before batches are chosen.
+   Select individual matched games, or **Select available games** among loaded cards.
 6. Select **Import selected games**. Games are imported sequentially, with
    progress and individual errors. Successful imports stay saved if another
-   game fails; retry keeps only failed selections. Page changes clear selection.
+   game fails; retry keeps only failed selections. Changing filters, sorting or
+   the amount resets the loaded set and selection; loading more preserves them.
 
 Each new entry saves PC / Steam and playtime, rounded from minutes to two decimal
 hours. Zero hours remain zero. Score, tier, status, review and completion date
@@ -51,6 +58,13 @@ existing trusted catalog import action. Personal entry insertion uses the
 authenticated client and existing RLS, with ON CONFLICT DO NOTHING on
 `profile_id,game_id`; the admin client never writes personal entries.
 
+Preview covers use existing catalog artwork or the exactly matched provider
+cover. If unavailable or broken, try Steam's library capsule and then its header.
+If neither image exists, use a game icon in a consistently sized thumbnail.
+No generated artwork is used, and preview does not import catalog metadata.
+Matching stays in server requests of at most 25 games, including All, to bound
+provider requests and let partial loads/retries retain their progress.
+
 No new tables, database grants or migrations are needed. Steam IDs, library
 responses and the API key are not put in public URLs or public profile metadata.
 Only explicitly selected imported entries become visible if the profile is public.
@@ -59,7 +73,8 @@ Only explicitly selected imported entries become visible if the profile is publi
 
 - `scripts/test-steam-library.mjs`: strict library parsing, zero playtime,
   minutes-to-hours conversion, bad IDs, ambiguous and cross-store matches.
-- `e2e/steam-library.spec.ts`: preview before writes, pagination, selected imports,
+- `e2e/steam-library.spec.ts`: preview before writes, load-more preservation,
+  25/50/100/All amounts, global playtime sorting/ranges, cover failure fallbacks, selected imports,
   missing metadata, zero-hour entries, unchanged existing entries, guest/email
   exclusion, inaccessible libraries, failed-save retry, accessibility and mobile.
 - The fixture provider intercepts only the isolated test process. It does not

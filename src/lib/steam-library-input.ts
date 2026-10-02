@@ -1,4 +1,19 @@
 export interface SteamGame { appId: number; title: string; hours: number }
+export interface SteamBrowse {offset:number;sort:"title"|"hours_desc"|"hours_asc";minHours:number|null;maxHours:number|null}
+
+export function parseSteamBrowse(value: unknown): SteamBrowse | null {
+  if (!value || typeof value !== "object") return null;
+  const {offset,sort,minHours,maxHours} = value as Record<string,unknown>;
+  const hours = (value:unknown) => value === null || typeof value === "number" && Number.isFinite(value) && value >= 0;
+  if (typeof offset !== "number" || !Number.isSafeInteger(offset) || offset < 0 || offset > 50000 || typeof sort !== "string" || !["title","hours_desc","hours_asc"].includes(sort) || !hours(minHours) || !hours(maxHours)) return null;
+  if (typeof minHours === "number" && typeof maxHours === "number" && minHours > maxHours) return null;
+  return {offset,sort:sort as SteamBrowse["sort"],minHours:minHours as number|null,maxHours:maxHours as number|null};
+}
+
+export function browseSteamLibrary(games: SteamGame[], query: SteamBrowse) {
+  return games.filter(game=>(query.minHours===null||game.hours>=query.minHours)&&(query.maxHours===null||game.hours<=query.maxHours))
+    .sort((a,b)=>(query.sort==="hours_desc" ? b.hours-a.hours : query.sort==="hours_asc" ? a.hours-b.hours : 0)||a.title.localeCompare(b.title)||a.appId-b.appId);
+}
 
 export function steamAppId(value: unknown): value is number {
   return typeof value === "number" && Number.isSafeInteger(value) && value > 0 && value <= 2147483647;
@@ -40,5 +55,5 @@ export function matchSteamGames(records: unknown[], appIds: number[]): Map<numbe
 
 export function steamMatchBody(appIds: number[]) {
   if (!appIds.length || appIds.length > 25 || appIds.some(id => !steamAppId(id))) throw new Error("Invalid library selection.");
-  return `fields id,external_games.uid,external_games.external_game_source; where external_games.uid = (${appIds.map(id=>JSON.stringify(String(id))).join(",")}) & external_games.external_game_source = 1; limit 500;`;
+  return `fields id,name,cover.image_id,external_games.uid,external_games.external_game_source; where external_games.uid = (${appIds.map(id=>JSON.stringify(String(id))).join(",")}) & external_games.external_game_source = 1; limit 500;`;
 }

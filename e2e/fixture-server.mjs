@@ -45,12 +45,12 @@ export async function startFixtureServer() {
       if (url.pathname === "/__steam-private" && req.method === "POST") {steamMode="private";return reply(200,{ok:true});}
       if (url.pathname === "/__steam-library") {
         if(steamMode==="private")return reply(200,{response:{}});
-        return reply(200,{response:{game_count:27,games:[{appid:101,name:"Hades",playtime_forever:90},{appid:102,name:"Elden Ring",playtime_forever:300},{appid:103,name:"Steam Fixture Adventure",playtime_forever:0},{appid:104,name:"Unmatched Fixture",playtime_forever:45},...Array.from({length:23},(_,index)=>({appid:200+index,name:"ZZZ Fixture "+index,playtime_forever:0}))]}});
+        return reply(200,{response:{game_count:128,games:[{appid:101,name:"Hades",playtime_forever:90},{appid:102,name:"Elden Ring",playtime_forever:300},{appid:103,name:"Steam Fixture Adventure",playtime_forever:0},{appid:104,name:"Unmatched Fixture",playtime_forever:45},...Array.from({length:124},(_,index)=>({appid:200+index,name:"ZZZ Fixture "+index,playtime_forever:index===123?6000:0}))]}});
       }
       if (url.pathname === "/__provider-games") {
         let body=""; for await (const part of req) body+=part;
         const candidate={id:9001,name:"Unified Fixture Adventure",slug:"unified-fixture-adventure",first_release_date:1577836800,platforms:[{name:"PC"}],genres:[{name:"Adventure"}]};
-        if(body.includes("fields id,external_games.uid"))return reply(200,[{id:1,external_games:[{uid:"101",external_game_source:1}]},{id:2,external_games:[{uid:"102",external_game_source:1}]},{id:9004,external_games:[{uid:"103",external_game_source:1}]}]);
+        if(body.includes("external_games.uid"))return reply(200,[{id:1,external_games:[{uid:"101",external_game_source:1}]},{id:2,external_games:[{uid:"102",external_game_source:1}]},{id:9004,external_games:[{uid:"103",external_game_source:1}]}]);
         if(body.includes("where id = 9004"))return reply(200,[{...candidate,id:9004,name:"Steam Fixture Adventure",slug:"steam-fixture-adventure"}]);
         const mobileCandidate={...candidate,id:9003,name:"Unified Mobile Adventure",slug:"unified-mobile-adventure"};
         if(body.includes("where id = 9001"))return reply(200,[candidate]);

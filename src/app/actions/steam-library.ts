@@ -2,12 +2,13 @@
 import { revalidatePath } from "next/cache";
 import { getAccount } from "@/lib/owner";
 import { readSteamLibrary } from "@/lib/steam-library";
-import { matchSteamGames, steamAppId, steamIdentity, steamMatchBody, type SteamGame } from "@/lib/steam-library-input";
+import { browseSteamLibrary, parseSteamBrowse, matchSteamGames, steamAppId, steamIdentity, steamMatchBody, type SteamGame } from "@/lib/steam-library-input";
+import { normalizeMatch } from "@/lib/catalog-input";
 import { queryIgdb } from "@/lib/igdb";
 import { importIgdb } from "@/app/actions/catalog";
 
 export type LibraryRow = SteamGame & { matched: boolean; logged: boolean; cover: string | null };
-export type LibraryPreview = { ok: boolean; message: string; games: LibraryRow[]; total: number; page: number };
+export type LibraryPreview = { ok: boolean; message: string; games: LibraryRow[]; total: number; nextOffset: number };
 const libraryErrors = new Set([
   "Steam library import is not configured yet.",
   "Steam is unavailable right now. Please retry.",
@@ -17,25 +18,27 @@ const libraryErrors = new Set([
 const failure = (error: unknown) => error instanceof Error && libraryErrors.has(error.message) ? error.message : "Library import is unavailable right now. Please retry.";
 
 export async function previewSteamLibrary(input: unknown): Promise<LibraryPreview> {
-  const empty: LibraryPreview = {ok:false,message:"",games:[],total:0,page:1};
-  if (typeof input !== "number" || !Number.isSafeInteger(input) || input < 1 || input > 2000) return {...empty,message:"Choose a valid library page."};
+  const empty: LibraryPreview = {ok:false,message:"",games:[],total:0,nextOffset:0};
+  const query = parseSteamBrowse(input);
+  if (!query) return {...empty,message:"Use nonnegative hours and a minimum no greater than the maximum."};
   try {
     const account = await getAccount();
     const steamId = account?.user.app_metadata.playlogg_steam_id;
     if (!account?.profile || !steamIdentity(steamId)) return {...empty,message:"Sign in with Steam to import your library."};
-    const library = await readSteamLibrary(steamId);
-    const page = Math.min(input,Math.max(1,Math.ceil(library.length/25)));
-    const entries = library.slice((page-1)*25,page*25);
-    if (!entries.length) return {ok:true,message:"Your Steam library is empty.",games:[],total:0,page};
-    const matches = matchSteamGames(await queryIgdb(steamMatchBody(entries.map(game=>game.appId))), entries.map(game=>game.appId));
+    const library = browseSteamLibrary(await readSteamLibrary(steamId),query);
+    const entries = library.slice(query.offset,query.offset+25);
+    if (!entries.length) return {ok:true,message:library.length ? "" : "No Steam games match these filters.",games:[],total:library.length,nextOffset:query.offset};
+    const records = await queryIgdb(steamMatchBody(entries.map(game=>game.appId)));
+    const matches = matchSteamGames(records, entries.map(game=>game.appId));
+    const covers = new Map(records.map(normalizeMatch).flatMap(game=>game?.cover ? [[game.id,game.cover] as const] : []));
     const ids = [...new Set(matches.values())];
     const {data:catalog,error} = ids.length ? await account.supabase.from("games").select("id,igdb_id,cover_url").in("igdb_id",ids) : {data:[],error:null};
     if (error) throw new Error("Catalog read failed");
     const {data:logged,error:entryError} = catalog.length ? await account.supabase.from("ratings").select("game_id").eq("profile_id",account.profile.id).in("game_id",catalog.map(game=>game.id)) : {data:[],error:null};
     if (entryError) throw new Error("Entry read failed");
-    return {ok:true,message:"",total:library.length,page,games:entries.map(game=>{
+    return {ok:true,message:"",total:library.length,nextOffset:query.offset+entries.length,games:entries.map(game=>{
       const stored = catalog.find(row=>row.igdb_id===matches.get(game.appId));
-      return {...game,matched:matches.has(game.appId),logged:Boolean(stored && logged.some(row=>row.game_id===stored.id)),cover:stored?.cover_url ?? null};
+      return {...game,matched:matches.has(game.appId),logged:Boolean(stored && logged.some(row=>row.game_id===stored.id)),cover:stored?.cover_url && !["/icon.svg","/images/missing-cover.svg"].includes(stored.cover_url) ? stored.cover_url : covers.get(matches.get(game.appId)!) ?? null};
     })};
   } catch(error) { return {...empty,message:failure(error)}; }
 }
