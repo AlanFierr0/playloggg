@@ -49,11 +49,11 @@ export function ProfileOverviewScreen() {
     <ShareCardControls endpoint={`/api/share/profile?kind=favorites${publicBase?`&handle=${profile.handle}`:""}`} />
     </div>
     </section>
-    <div className="grid xl:grid-cols-2 gap-6 sm:gap-8 items-start">
+    <div className="grid xl:grid-cols-2 gap-6 sm:gap-8 items-stretch">
     <div className={panel}>
     <TasteSummary games={games} href={`${base}/stats`} />
     </div>
-    <section className={panel}><h2 className="font-headline-lg text-headline-lg">{t("Recently updated entries")}</h2><p className="text-body-sm text-on-surface-variant">{t("Latest saved entry updates, including rating, review or playback edits.")}</p>
+    <section className={panel}><div className="flex min-h-11 items-center"><h2 className="font-headline-lg text-headline-lg">{t("Recently updated entries")}</h2></div><p className="text-body-sm text-on-surface-variant">{t("Latest saved entry updates, including rating, review or playback edits.")}</p>
       {recent.length ? <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">{recent.map(game => <Link href={gameHref(game)} key={game.slug} className="min-w-0"><img loading="lazy" src={game.cover} alt="" className="w-full aspect-[2/3] object-cover rounded" /><h3 translate="no" className="mt-2 font-headline-md text-headline-md break-words">{game.title}</h3><p className="text-primary text-body-sm">{t("Score")}: {game.score ?? t("Unrated")}</p><time className="text-body-sm text-on-surface-variant" dateTime={game.updatedAt}>{game.updatedAt!.slice(0, 10)}</time></Link>)}</div> : <p className="text-on-surface-variant">{t("No dated entry updates yet.")}</p>}
     </section>
       <section className={panel}><h2 className="font-headline-lg text-headline-lg">{t("Reviews")}</h2>{reviews.length ? reviews.map(game => <article key={game.slug} className="space-y-2"><Link href={gameHref(game)} translate="no" className="text-primary font-headline-md text-headline-md">{game.title}</Link><p translate="no" className="text-on-surface-variant break-words whitespace-pre-wrap line-clamp-3">{game.review}</p></article>) : <p className="text-on-surface-variant">{t("No reviews yet.")}</p>}<Link className="inline-flex min-h-11 items-center text-primary" href={`${base}/reviews`}>{t("All reviews")}</Link></section>
