@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import Link from "next/link";
 import { useMessages } from "@/components/site-preferences";
 import { importSteamGame, previewSteamLibrary, type LibraryPreview } from "@/app/actions/steam-library";
@@ -12,8 +12,8 @@ export function SteamLibraryImport({configured}:{configured:boolean}) {
   const t = useMessages();
   const [preview,setPreview] = useState<LibraryPreview|null>(null);
   const [selected,setSelected] = useState<number[]>([]);
-  const [busy,setBusy] = useState(false);
-  const [loading,setLoading] = useState(false);
+  const [busy,setBusy] = useState(configured);
+  const [loading,setLoading] = useState(configured);
   const [amount,setAmount] = useState("25");
   const [filters,setFilters] = useState<Omit<SteamBrowse,"offset">>({sort:"title",minHours:null,maxHours:null});
   const [minHours,setMinHours] = useState("");
@@ -28,6 +28,8 @@ export function SteamLibraryImport({configured}:{configured:boolean}) {
   const filterTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingLoad = useRef<{query:Omit<SteamBrowse,"offset">;size:string}|null>(null);
   useEffect(()=>()=>{if(filterTimer.current)clearTimeout(filterTimer.current);revision.current++;pendingLoad.current=null;},[]);
+  const loadOnOpen = useEffectEvent(()=>{void load();});
+  useEffect(()=>{if(configured)loadOnOpen();},[configured]);
   async function load(query=filters,size=amount,append=false) {
     if (active.current) {if(!append)pendingLoad.current={query,size};return;}
     hasPreview.current=true;
@@ -88,7 +90,7 @@ export function SteamLibraryImport({configured}:{configured:boolean}) {
   const available=preview?.games.filter(game=>game.matched&&!game.logged) ?? [];
   return <div className="space-y-6">
     <p className="text-body-sm text-on-surface-variant">{t("Steam Game details must be Public, including playtime. Your Playlogg profile visibility does not change.")}</p>
-    <div className="flex flex-wrap gap-3"><button className={button} disabled={busy} onClick={()=>load()}>{t(loading ? "Loading…" : preview ? "Refresh library" : "Preview Steam library")}</button><Link href="/profile" className="inline-flex min-h-11 items-center rounded-xl bg-surface-container text-primary px-5 py-3">{t("View profile")}</Link></div>
+    <div className="flex flex-wrap gap-3"><button className={button} disabled={busy} onClick={()=>load()}>{t(loading ? "Loading…" : "Refresh library")}</button><Link href="/profile" className="inline-flex min-h-11 items-center rounded-xl bg-surface-container text-primary px-5 py-3">{t("View profile")}</Link></div>
     <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end rounded-xl bg-surface-container-low p-5">
       <label className="min-w-0 space-y-2"><span className="block">{t("Sort by")}</span><select aria-label={t("Sort by")} disabled={busy&&!loading} value={filters.sort} onChange={event=>updateFilters(minHours,maxHours,event.target.value as SteamBrowse["sort"],amount,0)} className="w-full rounded-xl bg-surface-container p-3"><option value="title">{t("Title A–Z")}</option><option value="hours_desc">{t("Most played")}</option><option value="hours_asc">{t("Least played")}</option></select></label>
       <label className="min-w-0 space-y-2"><span className="block">{t("Minimum hours")}</span><input disabled={busy&&!loading} type="number" min="0" step="any" value={minHours} onChange={event=>{setMinHours(event.target.value);updateFilters(event.target.value,maxHours);}} className="w-full rounded-xl bg-surface-container p-3" /></label>

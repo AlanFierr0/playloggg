@@ -6,7 +6,9 @@
 2. Open **Import from Steam** from your profile tools or Profile settings.
 3. In Steam privacy settings, make **Game details** public and allow playtime
    to be visible. This does not publish your Playlogg profile.
-4. Select **Preview Steam library**. Choose 25, 50, 100 or All games. **Load more**
+4. Your library loads automatically when you open **Import from Steam**.
+   **Refresh library** reloads it or retries after an error.
+   Choose 25, 50, 100 or All games. **Load more**
    appends the next chosen amount and keeps existing cards and selections.
    All loads every match progressively; **Stop loading** stops after the current
    request and keeps games already loaded. Load more can resume a stopped load.

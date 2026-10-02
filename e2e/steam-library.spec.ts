@@ -8,7 +8,7 @@ test("Steam import previews, selects, saves trusted playtime and preserves exist
   await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
   await page.goto("/profile");
   await page.getByRole("link",{name:"Import from Steam",exact:true}).click();
-  await page.getByRole("button",{name:"Preview Steam library"}).click();
+  await expect(page.getByRole("button",{name:"Preview Steam library"})).toHaveCount(0);
   await expect(page.getByText("128 Steam games",{exact:false})).toBeVisible();
   await expect(page.getByRole("checkbox",{name:"Select game Elden Ring",exact:true})).toBeDisabled();
   await expect(page.getByRole("checkbox",{name:"Select game Unmatched Fixture",exact:true})).toBeDisabled();
@@ -45,11 +45,10 @@ test("Steam import protects guests and email accounts and handles hidden librari
   await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
   await fetch("http://127.0.0.1:3101/__steam-private",{method:"POST"});
   await page.reload();
-  await page.getByRole("button",{name:"Preview Steam library"}).click();
   await expect(page.getByText("Steam game details are unavailable. Set Game details to Public in Steam privacy settings, then retry.")).toBeVisible();
   await fetch("http://127.0.0.1:3101/__reset",{method:"POST"});
   await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
-  await page.getByRole("button",{name:"Preview Steam library"}).click();
+  await page.getByRole("button",{name:"Refresh library",exact:true}).click();
   await page.getByRole("checkbox",{name:"Select game Hades",exact:true}).check();
   await fetch("http://127.0.0.1:3101/__fail-save",{method:"POST"});
   await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
@@ -63,7 +62,6 @@ test("Steam import does not overwrite an entry logged after preview",async({page
   await context.addCookies([authCookie]);
   await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
   await page.goto("/profile/import/steam");
-  await page.getByRole("button",{name:"Preview Steam library"}).click();
   await page.getByRole("checkbox",{name:"Select game Hades",exact:true}).check();
   const editor=await context.newPage();
   await editor.goto("/log?game=hades");
@@ -85,7 +83,6 @@ test("Steam browsing loads more without losing selection, changes amounts and fi
   await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
   await page.route("https://shared.steamstatic.com/**",route=>route.fulfill({contentType:"image/svg+xml",body:'<svg xmlns="http://www.w3.org/2000/svg" width="60" height="90"><rect width="60" height="90" fill="#ba831f"/></svg>'}));
   await page.goto("/profile/import/steam");
-  await page.getByRole("button",{name:"Preview Steam library"}).click();
   await expect(page.getByRole("checkbox")).toHaveCount(25);
   const hades=page.getByRole("checkbox",{name:"Select game Hades",exact:true});
   await hades.check();
@@ -125,7 +122,6 @@ test("Steam playtime filters keep typing responsive and discard outdated results
   await context.addCookies([authCookie]);
   await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
   await page.goto("/profile/import/steam");
-  await page.getByRole("button",{name:"Preview Steam library"}).click();
   await expect(page.getByRole("checkbox")).toHaveCount(25);
   let delayed=false;
   await page.route("**/profile/import/steam",async route=>{
@@ -152,7 +148,6 @@ test("Steam artwork falls back to its header and then a placeholder if images fa
   await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
   await page.route("https://shared.steamstatic.com/**",route=>route.request().url().endsWith("/header.jpg") ? route.fulfill({contentType:"image/svg+xml",body:'<svg xmlns="http://www.w3.org/2000/svg" width="60" height="90"><rect width="60" height="90" fill="#ba831f"/></svg>'}) : route.fulfill({status:404}));
   await page.goto("/profile/import/steam");
-  await page.getByRole("button",{name:"Preview Steam library"}).click();
   const row=page.getByRole("listitem").filter({has:page.getByRole("checkbox",{name:"Select game Steam Fixture Adventure",exact:true})});
   await row.scrollIntoViewIfNeeded();
   await expect(row.locator("img")).toHaveAttribute("src",/\/103\/header\.jpg$/);
