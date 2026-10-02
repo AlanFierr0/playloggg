@@ -57,13 +57,11 @@ export function TierBadge({ value, onChange }: { value: Tier | null; onChange: (
 }
 
 export function ScoreStars({ score }: { score: number }) {
-  const t = useMessages();
   const full = Math.floor(score / 20);
   const half = score % 20 >= 10;
   return (
-    <div className="flex flex-wrap justify-center items-center gap-1.5 text-primary mt-1" id="star-display" aria-label={t(`${(score / 20).toFixed(1)} out of 5 equivalent`)}>
+    <div className="flex flex-wrap justify-center items-center gap-1.5 text-primary mt-1" id="star-display" aria-hidden="true">
       {Array.from({ length: 5 }, (_, index) => <span key={index} aria-hidden="true" className={`material-symbols-outlined text-[20px] ${index < full || (index === full && half) ? "" : "text-on-surface-variant/40"}`} style={{ fontVariationSettings: index < full || (index === full && half) ? "'FILL' 1" : "'FILL' 0" }}>{index < full ? "star" : index === full && half ? "star_half" : "star"}</span>)}
-      <span className="font-label-sm text-label-sm text-on-surface-variant ml-2 tracking-widest">({(score / 20).toFixed(1)} {t("/ 5.0 Equiv)")}</span>
     </div>
   );
 }
