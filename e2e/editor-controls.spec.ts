@@ -3,7 +3,7 @@ import AxeBuilder from "@axe-core/playwright";
 // @ts-expect-error Local fixture session only.
 import { authCookie } from "./fixture-server.mjs";
 
-test("score slider works on an unrated game and discard restores the saved entry", async ({ page, context }) => {
+test("score slider works on an unrated game and discard returns to profile without saving", async ({ page, context, request }) => {
   await context.addCookies([authCookie]);
   await page.goto("/log?game=hades");
   const slider = page.getByRole("slider", { name: "Numerical score from 0 to 100" });
@@ -27,12 +27,16 @@ test("score slider works on an unrated game and discard restores the saved entry
   await page.locator("#hours-input").fill("12.5");
   await page.locator("#date-input").fill("2026-10-01");
   await page.locator("#discard-rating").click();
-  await expect(page.getByText("Draft discarded. Last saved values restored.", { exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/\/profile$/);
+  await expect(page.locator("#score-slider")).toHaveCount(0);
+  await page.goto("/log?game=hades");
   await expect(page.locator("#score-display")).toHaveText("—");
   await expect(page.locator("#dispatch-textarea")).toHaveValue("");
   await expect(page.locator("#hours-input")).toHaveValue("");
   await expect(page.locator("#date-input")).toHaveValue("");
   await expect(page.getByRole("button", { name: /Backlog$/ })).toHaveAttribute("aria-pressed", "false");
+  const state = await (await request.get("http://127.0.0.1:3101/__state")).json();
+  expect(state.ratings.filter((row: { profile_id: number; game_id: number }) => row.profile_id === 2 && row.game_id === 1)).toEqual([]);
 });
 
 test("score keyboard controls and discard retain the last committed score", async ({ page, context }) => {
@@ -51,7 +55,9 @@ test("score keyboard controls and discard retain the last committed score", asyn
   await expect(page.locator("#score-display")).toHaveText("99");
   await page.locator("#dispatch-textarea").fill("Discard this draft");
   await page.locator("#discard-rating").click();
-  await expect(page.getByText("Draft discarded. Last saved values restored.", { exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/\/profile$/);
+  await expect(page.locator("#score-slider")).toHaveCount(0);
+  await page.goto("/log?game=hades");
   await expect(page.locator("#score-display")).toHaveText("100");
   await expect(page.locator("#dispatch-textarea")).toHaveValue("Keep this saved review");
   await page.reload();

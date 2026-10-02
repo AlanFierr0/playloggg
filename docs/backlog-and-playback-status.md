@@ -11,8 +11,9 @@ The user approved adding backlog and playing games without rating them.
 - Save optional status: `completed`, `playing`, `backlog`, or `shelved`.
   Null means not supplied. Do not guess statuses for the existing sample data.
 - The log starts an unrated game without a score or status. Add/Remove score
-  and Clear status controls make the distinction explicit. Discard restores the
-  last saved score, tier, status, and review; failures preserve the draft.
+  and Clear status controls make the distinction explicit. Discard closes the
+  editor and returns to Profile without saving; the last saved score, tier,
+  status and review remain unchanged. Failed saves preserve the draft.
 - Rankings, threshold filters, rating counts and averages use scored games only.
   The Backlog tab uses saved `backlog` entries, including unrated games. An
   unrated backlog card has no numeric rank or fake star rating. Ordering remains

@@ -2,6 +2,7 @@
 import { useMessages } from "@/components/site-preferences";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { TagEditor } from "@/components/tag-editor";
 import { useRef, useState, useTransition } from "react";
 import { usePortfolio } from "@/components/portfolio-provider";
@@ -13,6 +14,7 @@ import { TierBadge, ScoreStars } from "@/components/rating-controls";
 
 export function ReviewScreen({ game }: { game: Game }) {
   const t = useMessages();
+  const router = useRouter();
 const { access } = usePortfolio();
 const canEdit = access?.canEdit ?? false;
 const [pending, startTransition] = useTransition();
@@ -28,8 +30,7 @@ const dateInput = useRef<HTMLInputElement>(null);
 const [tags, setTags] = useState<string[]>(game.tags ?? []);
 const [tagVersion, setTagVersion] = useState(0);
 const [review, setReview] = useState(game.review ?? "");
-const discardConfirmation = "Draft discarded. Last saved values restored.";
-function resetDraft() { setScore(saved.score); setTier(saved.tier); setPlatform(saved.platform); setStatus(saved.status); setHours(saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)); setDate(saved.completedOn ?? ""); setReview(saved.review); setTags(saved.tags); setTagVersion((value) => value + 1); setSaveMessage(discardConfirmation); }
+function resetDraft() { setScore(saved.score); setTier(saved.tier); setPlatform(saved.platform); setStatus(saved.status); setHours(saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)); setDate(saved.completedOn ?? ""); setReview(saved.review); setTags(saved.tags); setTagVersion((value) => value + 1); setSaveMessage(""); router.push("/profile"); }
 function commit() {
   if (dateInput.current && !dateInput.current.validity.valid) { setSaveMessage("Complete a valid calendar date, or clear it. Your draft has been kept."); return; }
   const hoursPlayed = parseHours(hours);
@@ -44,7 +45,7 @@ function commit() {
     } catch { setSaveMessage("Saving is unavailable right now. Your draft has been kept; please try again."); }
   });
 }
-return (<><fieldset disabled={pending} className="contents" onInputCapture={() => { if (saveMessage === discardConfirmation) setSaveMessage(""); }} onClickCapture={() => { if (saveMessage === discardConfirmation) setSaveMessage(""); }}>
+return (<><fieldset disabled={pending} className="contents">
 <div className="w-full  bg-surface"><div className="flex flex-col w-full">
 <div className="relative w-full min-h-[calc(100dvh-var(--site-header-height))] flex items-stretch p-4 sm:p-6 lg:p-8 overflow-hidden">
 <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -89,7 +90,7 @@ return (<><fieldset disabled={pending} className="contents" onInputCapture={() =
 <div className="p-4 sm:p-6 lg:p-8 grid grid-cols-1 xl:grid-cols-2 items-start gap-8">
 <p className="xl:col-span-2 text-body-sm text-on-surface-variant">{t("Score: how good is this game? Tier: how much does it mean to you? Favorites and ranking are separate.")}</p>
 <p className="xl:col-span-2 font-body-sm text-body-sm text-on-surface-variant">{canEdit ? t("Commit saves your optional score, independent tier, playback status, platform, playtime, completion date, review and tags.") : <>{t("Sign in to save your entry. ")}<Link href="/login" className="text-primary underline">{t("Sign in")}</Link> {t("to save entries to your own profile.")}</>}</p>
-<p role="status" className="xl:col-span-2 font-body-sm text-body-sm text-primary">{pending ? t("Saving…") : saveMessage === discardConfirmation ? "" : t(saveMessage)}</p>
+<p role="status" className="xl:col-span-2 font-body-sm text-body-sm text-primary">{pending ? t("Saving…") : t(saveMessage)}</p>
 <div className="xl:col-span-2 flex flex-col sm:flex-row gap-6 sm:gap-8 items-start">
 <div className="relative group flex-shrink-0 w-32 sm:w-40 aspect-[3/4] rounded-lg overflow-hidden bg-surface-container shadow-xl">
 <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt={game.title} src={game.cover} />
@@ -270,7 +271,7 @@ return (<><fieldset disabled={pending} className="contents" onInputCapture={() =
 </div>
 
 <div className="w-full bg-surface-container-lowest px-4 py-4 sm:px-10 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 mt-auto">
-<div className="min-w-0 space-y-2"><p className="font-label-sm text-label-sm text-on-surface-variant">{t("Updates appear in feeds only while your profile is public and discoverable.")}</p><p role="status" className="text-body-sm text-primary">{saveMessage === discardConfirmation ? t(discardConfirmation) : ""}</p></div>
+<div className="min-w-0 space-y-2"><p className="font-label-sm text-label-sm text-on-surface-variant">{t("Updates appear in feeds only while your profile is public and discoverable.")}</p></div>
 
 <div className="flex flex-col min-[360px]:flex-row items-center gap-3 w-full sm:w-auto justify-end">
 <button id="discard-rating" className="w-full sm:w-auto px-4 py-2 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-colors" type="button" onClick={resetDraft}>{t("\n            Discard Draft\n          ")}</button>
