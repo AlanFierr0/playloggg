@@ -46,7 +46,7 @@ function commit() {
 }
 return (<><fieldset disabled={pending} className="contents" onInputCapture={() => { if (saveMessage === discardConfirmation) setSaveMessage(""); }} onClickCapture={() => { if (saveMessage === discardConfirmation) setSaveMessage(""); }}>
 <div className="w-full  bg-surface"><div className="flex flex-col w-full">
-<div className="relative w-full min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 sm:p-6 lg:p-12 overflow-hidden">
+<div className="relative w-full min-h-[calc(100dvh-var(--site-header-height))] flex items-stretch p-4 sm:p-6 lg:p-8 overflow-hidden">
 <div className="absolute inset-0 pointer-events-none overflow-hidden">
 <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[720px] h-[360px] bg-primary/5 rounded-full blur-[140px]"></div>
 
@@ -56,7 +56,7 @@ return (<><fieldset disabled={pending} className="contents" onInputCapture={() =
 
 </div>
 
-<div className="relative w-full max-w-4xl bg-surface-container-low rounded-xl shadow-2xl overflow-hidden flex flex-col my-auto">
+<div className="relative w-full min-w-0 bg-surface-container-low rounded-xl shadow-2xl overflow-hidden flex flex-col">
 <div className="w-full bg-surface-container px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
 <div className="flex items-center gap-3 min-w-0">
 <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
@@ -86,11 +86,11 @@ return (<><fieldset disabled={pending} className="contents" onInputCapture={() =
 
 </div>
 
-<div className="p-4 sm:p-8 lg:p-10 flex flex-col gap-8">
-<p className="text-body-sm text-on-surface-variant">{t("Score: how good is this game? Tier: how much does it mean to you? Favorites and ranking are separate.")}</p>
-<p className="font-body-sm text-body-sm text-on-surface-variant">{canEdit ? t("Commit saves your optional score, independent tier, playback status, platform, playtime, completion date, review and tags.") : <>{t("Sign in to save your entry. ")}<Link href="/login" className="text-primary underline">{t("Sign in")}</Link> {t("to save entries to your own profile.")}</>}</p>
-<p role="status" className="font-body-sm text-body-sm text-primary">{pending ? t("Saving…") : saveMessage === discardConfirmation ? "" : t(saveMessage)}</p>
-<div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-start">
+<div className="p-4 sm:p-6 lg:p-8 grid grid-cols-1 xl:grid-cols-2 items-start gap-8">
+<p className="xl:col-span-2 text-body-sm text-on-surface-variant">{t("Score: how good is this game? Tier: how much does it mean to you? Favorites and ranking are separate.")}</p>
+<p className="xl:col-span-2 font-body-sm text-body-sm text-on-surface-variant">{canEdit ? t("Commit saves your optional score, independent tier, playback status, platform, playtime, completion date, review and tags.") : <>{t("Sign in to save your entry. ")}<Link href="/login" className="text-primary underline">{t("Sign in")}</Link> {t("to save entries to your own profile.")}</>}</p>
+<p role="status" className="xl:col-span-2 font-body-sm text-body-sm text-primary">{pending ? t("Saving…") : saveMessage === discardConfirmation ? "" : t(saveMessage)}</p>
+<div className="xl:col-span-2 flex flex-col sm:flex-row gap-6 sm:gap-8 items-start">
 <div className="relative group flex-shrink-0 w-32 sm:w-40 aspect-[3/4] rounded-lg overflow-hidden bg-surface-container shadow-xl">
 <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt={game.title} src={game.cover} />
 
@@ -148,7 +148,7 @@ return (<><fieldset disabled={pending} className="contents" onInputCapture={() =
 
 </div>
 
-<div className="bg-surface-container/60 rounded-xl p-4 sm:p-8 flex flex-col items-center gap-6 relative">
+<div className="min-w-0 bg-surface-container/60 rounded-xl p-4 sm:p-8 flex flex-col items-center gap-6 relative">
 <div className="w-full flex flex-wrap gap-2 items-center justify-between">
 <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{t("Score")}</span>
 
@@ -201,7 +201,7 @@ return (<><fieldset disabled={pending} className="contents" onInputCapture={() =
 
 </div>
 
-<div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+<div className="min-w-0 grid grid-cols-1 md:grid-cols-12 gap-6">
 <div className="md:col-span-12 flex flex-col gap-2.5">
 <div className="flex flex-wrap items-center justify-between gap-2"><span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{t("Playback status")}</span><button id="clear-status" type="button" className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary" onClick={() => setStatus(null)}>{status === null ? t("Not set") : t("Clear status")}</button></div>
 
