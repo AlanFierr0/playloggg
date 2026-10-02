@@ -10,6 +10,7 @@ const checks = [
   ["/profile/wrapped",307,null],
   ["/profile/activity",307,null],
   ["/profile/social",307,null],
+  ["/profile/import/steam",307,null],
   ["/api/share/profile",404,null],
   ["/api/share/list?id=999999",404,null],
   ["/api/share/compare?left=unknown_smoke_profile&right=missing_smoke_profile",404,null],

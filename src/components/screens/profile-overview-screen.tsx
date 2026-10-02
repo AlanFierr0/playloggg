@@ -21,7 +21,7 @@ export function ProfileOverviewScreen() {
   const reviews = entries.filter(g => g.review?.trim()).sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "") || a.slug.localeCompare(b.slug)).slice(0, 3);
   const gameHref = (game: Game) => publicBase && game.logged ? `${base}/game/${game.slug}` : `/game/${game.slug}`;
   const panel = "min-w-0 rounded-2xl bg-surface-container-low p-5 sm:p-7 space-y-5";
-  const tools = [["Quick rating", "/quick-rate"], ["Edit profile", "/settings"], ["Manage favorites", "/profile/favorites"], ["Year in Gaming", "/profile/wrapped"], ["Activity feed", "/profile/activity"], ["Following and blocks", "/profile/social"]];
+  const tools = [["Quick rating", "/quick-rate"], ["Import from Steam", "/profile/import/steam"], ["Edit profile", "/settings"], ["Manage favorites", "/profile/favorites"], ["Year in Gaming", "/profile/wrapped"], ["Activity feed", "/profile/activity"], ["Following and blocks", "/profile/social"]];
   return <section className="site-container w-full mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-12 space-y-6 sm:space-y-8">
     <header className="rounded-2xl bg-surface-container-low p-5 sm:p-8 space-y-8">
       <div className="grid xl:grid-cols-[minmax(0,1fr)_24rem] gap-8">

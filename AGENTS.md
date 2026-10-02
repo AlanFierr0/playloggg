@@ -204,6 +204,11 @@ public friend. Resolve ownership through verified Auth and `owner_user_id`;
 anonymous comparisons and share-card exports still require public profiles.
 Friends search reuses opt-in public discovery and excludes blocked connections.
 See docs/friends-and-comparison.md.
+Steam library import is approved for Steam sign-in accounts only: preview and
+explicit game selection, PC / Steam and playtime, unset score/tier/status, and
+no replacement of existing entries. Re-fetch verified account ownership and
+Steam playtime on the server; match exact external app IDs, not game titles.
+Keep STEAM_WEB_API_KEY server-only. See docs/steam-library-import.md.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
