@@ -109,7 +109,7 @@ return (<div onKeyDown={onKeyDown}>
 
 <div className="fixed inset-0 top-[var(--site-header-height)] z-40 bg-surface-container-lowest/80 backdrop-blur-md flex items-start justify-center p-3 sm:p-6 overflow-hidden" onClick={(event) => { if (event.target === event.currentTarget) close(); }}>
 
-<div className="search-dialog w-full min-h-0 max-w-3xl bg-surface-container-low shadow-2xl rounded-xl overflow-hidden flex flex-col my-auto transition-all animate-in fade-in duration-200" id="palette-dialog" ref={dialog} role={"dialog"} aria-modal={true} aria-label={t("Search the game catalog")}>
+<div className="search-dialog w-full min-w-0 min-h-0 bg-surface-container-low shadow-2xl rounded-xl overflow-hidden flex flex-col my-auto transition-all animate-in fade-in duration-200" id="palette-dialog" ref={dialog} role={"dialog"} aria-modal={true} aria-label={t("Search the game catalog")}>
 
 {mode === "log" && <div className="shrink-0 px-4 sm:px-5 py-4 space-y-2"><h2 className="font-headline-lg text-headline-lg text-on-surface">{t("Choose a game")}</h2><p className="text-body-sm text-on-surface-variant">{t("Search for a game, then select it to open its log options.")}</p></div>}
 
