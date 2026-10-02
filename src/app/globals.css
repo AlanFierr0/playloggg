@@ -115,12 +115,12 @@ html.light {
   --color-background: 250 249 253;
   --color-outline-variant: 212 197 175;
   --color-on-primary-fixed: 42 25 0;
-  --color-on-primary-container: 42 25 0;
+  --color-on-primary-container: 255 255 255;
   --color-on-primary: 255 255 255;
   --color-on-primary-fixed-variant: 96 65 0;
-  --color-surface-tint: 121 84 0;
+  --color-surface-tint: 154 52 18;
   --color-surface-bright: 250 249 253;
-  --color-primary: 121 84 0;
+  --color-primary: 154 52 18;
   --color-on-tertiary: 255 255 255;
   --color-surface: 250 249 253;
   --color-on-tertiary-container: 0 29 55;
@@ -141,7 +141,7 @@ html.light {
   --color-surface-container-lowest: 255 255 255;
   --color-on-secondary-container: 0 33 12;
   --color-on-background: 28 27 31;
-  --color-primary-fixed-dim: 121 84 0;
+  --color-primary-fixed-dim: 154 52 18;
   --color-on-secondary-fixed-variant: 0 82 39;
   --color-on-tertiary-fixed: 0 28 57;
   --color-tertiary-fixed-dim: 164 201 255;
@@ -157,7 +157,7 @@ html.light {
   --color-surface-container-high: 232 231 235;
   --color-surface-dim: 222 221 225;
   --color-secondary-container: 145 244 173;
-  --color-primary-container: 255 221 170;
+  --color-primary-container: 180 83 9;
 }
 /* Keep the editorial artwork readable and vivid against the light page. */
 html.light .home-spotlight {
@@ -170,7 +170,7 @@ html.light .home-spotlight {
   --color-primary-fixed-dim: 250 188 77;
   --color-on-primary: 67 44 0;
 }
-html.light :focus-visible { outline-color: #795400; }
+html.light :focus-visible { outline-color: rgb(var(--color-primary)); }
 html.light .scroll-region { scrollbar-color: #b0a18b #f4f3f7; }
 
 /* Keep keyboard focus visible when form utilities suppress the default outline. */
