@@ -1055,6 +1055,9 @@
   "Sync Steam playtime": "Sincronizar horas de Steam",
   "Syncing playtime…": "Sincronizando horas…",
   "Updated games": "Juegos actualizados",
+  "Processing now": "Procesando ahora",
+  "Games processed": "Juegos procesados",
+  "Games remaining": "Juegos restantes",
   "Playtime synced. Other entry details were kept unchanged.": "Horas sincronizadas. Los demás datos de tus entradas se conservaron.",
   "Some playtimes could not be synced. Retry to update the remaining games.": "No se pudieron sincronizar algunas horas. Volvé a intentar para actualizar los juegos restantes."
 }

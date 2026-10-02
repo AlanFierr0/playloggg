@@ -25,12 +25,20 @@ export function SteamLibraryImport({configured}:{configured:boolean}) {
   const [progress,setProgress] = useState(0);
   const [failures,setFailures] = useState<{title:string;message:string}[]>([]);
   const active = useRef(false);
+  const importDialog = useRef<HTMLDialogElement>(null);
   const stopLoading = useRef(false);
   const hasPreview = useRef(false);
   const revision = useRef(0);
   const filterTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingLoad = useRef<{query:Omit<SteamBrowse,"offset">;size:string}|null>(null);
   useEffect(()=>()=>{if(filterTimer.current)clearTimeout(filterTimer.current);revision.current++;pendingLoad.current=null;},[]);
+  useEffect(()=>{
+    const dialog=importDialog.current;
+    if(!importing || !dialog)return;
+    const overflow=document.body.style.overflow;
+    dialog.showModal();document.body.style.overflow="hidden";
+    return ()=>{dialog.close();document.body.style.overflow=overflow;};
+  },[importing]);
   const loadOnOpen = useEffectEvent(()=>{void load();});
   useEffect(()=>{if(configured)loadOnOpen();},[configured]);
   async function load(query=filters,size=amount,append=false) {
@@ -117,14 +125,17 @@ export function SteamLibraryImport({configured}:{configured:boolean}) {
       <button type="button" disabled={busy&&!loading} onClick={()=>{setMinHours("");setMaxHours("");updateFilters("","",filters.sort,amount,0);}} className="min-h-11 rounded-xl bg-surface-container text-primary px-4">{t("Clear filters")}</button>
     </div>
     <p role="status" aria-live="polite">{t(message)}{loading&&<span className="block">{t("Loading library")}: {preview?.games.length ?? 0} / {preview?.total ?? "—"}</span>}</p>
-    {importing&&<div className="fixed bottom-5 inset-x-4 z-50 mx-auto max-w-lg rounded-2xl bg-surface-container-high p-5 shadow-2xl border border-primary/20" role="status" aria-live="polite">
+    <dialog ref={importDialog} tabIndex={-1} aria-labelledby="steam-import-title" onCancel={event=>event.preventDefault()} className="fixed inset-0 m-auto w-[calc(100%_-_2rem)] max-w-lg max-h-[calc(100dvh_-_2rem)] overflow-y-auto rounded-2xl bg-surface-container-high text-on-surface p-6 sm:p-8 shadow-2xl border border-primary/20 backdrop:bg-black/65 backdrop:backdrop-blur-sm">
       <div className="flex items-center gap-3">
         <span aria-hidden="true" className="h-6 w-6 shrink-0 rounded-full border-[3px] border-primary/25 border-t-primary motion-safe:animate-spin"/>
-        <div className="min-w-0 flex-1"><p className="font-headline-md">{t("Importing games")}</p><p translate="no" className="truncate text-body-sm text-on-surface-variant">{importTitle}</p></div>
-        <span className="shrink-0 text-primary tabular-nums">{progress} / {selected.length}</span>
+        <h2 id="steam-import-title" className="font-headline-md text-headline-md">{t("Importing games")}</h2>
+      </div>
+      <div role="status" aria-live="polite" className="mt-6 space-y-5">
+        <div><p className="text-body-sm text-on-surface-variant">{t("Processing now")}</p><p translate="no" className="mt-1 font-headline-md break-words">{importTitle}</p></div>
+        <div className="grid grid-cols-2 gap-4"><div><p className="text-body-sm text-on-surface-variant">{t("Games processed")}</p><p className="mt-1 text-2xl text-primary tabular-nums">{progress} / {selected.length}</p></div><div><p className="text-body-sm text-on-surface-variant">{t("Games remaining")}</p><p className="mt-1 text-2xl text-primary tabular-nums">{Math.max(0,selected.length-progress)}</p></div></div>
       </div>
       <div role="progressbar" aria-label={t("Importing games")} aria-valuemin={0} aria-valuemax={selected.length} aria-valuenow={progress} className="mt-4 h-2 overflow-hidden rounded-full bg-surface-container-highest"><div className="h-full rounded-full bg-primary motion-safe:transition-[width]" style={{width:`${selected.length ? progress/selected.length*100 : 0}%`}}/></div>
-    </div>}
+    </dialog>
     {loading&&<button type="button" onClick={()=>{stopLoading.current=true;}} className="min-h-11 rounded-xl bg-surface-container text-primary px-4">{t("Stop loading")}</button>}
     {!!failures.length&&<ul className="space-y-2 text-on-surface-variant">{failures.map(failure=><li key={failure.title}><span translate="no">{failure.title}</span>: {t(failure.message)}</li>)}</ul>}
     {preview&&preview.total>0&&<>
