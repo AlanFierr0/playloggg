@@ -80,6 +80,9 @@ for unlogged games. Games uses Load more with 25/50/100/All amounts (default 25)
 Retain prior cards, reset loaded batches when filters/sort/amount change and keep
 filters, amount and loaded batches shareable/reloadable in the URL. Clear filters
 preserves the selected amount; All means all matches. See docs/games-catalog.md.
+The user moved the personal Tier List to the shared top navigation at /tiers.
+Do not include it in personal profile tabs or show profile tabs on /tiers.
+Published profiles retain their own tier link for viewing someone else's board.
 The user requested light mode and English/Español (Argentina) toggles. Preserve
 the dark English defaults and existing routes; store guest and owner display
 preferences in cookies. Keep icon ligatures, game titles, company names and

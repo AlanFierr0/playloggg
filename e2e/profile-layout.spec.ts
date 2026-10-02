@@ -16,7 +16,8 @@ test("profile tools, section tabs and content stay separate and usable", async (
   await expect(tools.getByRole("link", { name: "Year in Gaming", exact: true })).toHaveCount(0);
   await expect(tools.getByRole("link", { name: "Quick rating", exact: true })).toHaveCount(0);
   await expect(tools.getByRole("link", { name: "Import from Steam", exact: true })).toHaveAttribute("href", "/profile/import/steam");
-  await expect(tabs.getByRole("link")).toHaveCount(6);
+  await expect(tabs.getByRole("link")).toHaveCount(5);
+  await expect(tabs.getByRole("link",{name:"Tier List",exact:true})).toHaveCount(0);
   await expect(tabs.getByRole("link", { name: "Overview", exact: true })).toHaveAttribute("aria-current", "page");
   const profileBox = (await tools.locator("xpath=ancestor::header").boundingBox())!;
   const tabsBox = (await tabs.boundingBox())!;
@@ -43,4 +44,9 @@ test("profile tools, section tabs and content stay separate and usable", async (
   await tabs.getByRole("link", { name: "Stats", exact: true }).click();
   await expect(page).toHaveURL(/\/profile\/stats$/);
   await expect(page.getByRole("navigation", { name: "Profile sections" }).getByRole("link", { name: "Stats", exact: true })).toHaveAttribute("aria-current", "page");
+  const tierLink=page.getByRole("navigation",{name:"Main navigation"}).filter({visible:true}).getByRole("link",{name:"Tier List",exact:true});
+  await tierLink.click();
+  await expect(page).toHaveURL(/\/tiers$/);
+  await expect(tierLink).toHaveAttribute("aria-current","page");
+  await expect(page.getByRole("navigation",{name:"Profile sections"})).toHaveCount(0);
 });
