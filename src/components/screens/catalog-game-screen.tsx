@@ -19,12 +19,22 @@ export async function CatalogGameScreen({ game, isSample, publicProfile }: { gam
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-start">
         <div className="sm:col-span-4 xl:col-span-3 w-full max-w-[240px] sm:max-w-none mx-auto"><img src={game.cover} alt={t(`${game.title} cover`)} className="w-full aspect-[3/4] rounded-lg object-cover bg-surface-container-high shadow-2xl" /></div>
         <div className="sm:col-span-8 xl:col-span-9 min-w-0 space-y-5">
-          {game.kind && <span className="inline-flex rounded bg-primary/10 px-2 py-1 text-primary font-label-sm text-label-sm uppercase tracking-wider">{game.kind}</span>}
-          <h1 className="font-headline-xl text-headline-xl lg:text-[44px] lg:leading-[48px] tracking-tight font-bold break-words">{game.title}</h1>
+          <header className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] items-start gap-5 lg:gap-8">
+            <div className="min-w-0 space-y-3">
+              {game.kind && <span className="inline-flex rounded bg-primary/10 px-2 py-1 text-primary font-label-sm text-label-sm uppercase tracking-wider">{game.kind}</span>}
+              <h1 className="font-headline-xl text-headline-xl lg:text-[44px] lg:leading-[48px] tracking-tight font-bold break-words">{game.title}</h1>
+            </div>
+            <dl className="flex flex-wrap gap-8 lg:justify-end">
+              <div className="min-w-0 space-y-1"><dt className="text-body-sm text-on-surface-variant">{t(publicProfile ? "Profile score" : "Your score")}</dt><dd className={`text-primary font-bold ${game.score === null ? "font-headline-md text-headline-md" : "font-headline-xl text-headline-xl"}`}>{game.score ?? t("Unrated")}</dd></div>
+              <div className="min-w-0 space-y-1"><dt className="text-body-sm text-on-surface-variant">{t("Tier")}</dt><dd className={`font-bold ${game.tier ? "font-headline-xl text-headline-xl" : "font-headline-md text-headline-md text-on-surface-variant"}`}>{game.tier ?? t("Unassigned")}</dd></div>
+            </dl>
+          </header>
           <div className="flex flex-wrap gap-x-4 gap-y-2 font-label-md text-label-md text-on-surface-variant"><span>{game.releasedOn ? t(`Released ${game.releasedOn}`) : t("Release date unknown")}</span><span>{game.genres?.join(" / ") || t("Genres unknown")}</span></div>
           {Boolean(game.developers?.length) && <p className="break-words text-on-surface-variant font-body-md text-body-md">{t("Developer · ")}{game.developers!.join(", ")}</p>}
-          <div className="flex flex-wrap gap-6 py-3"><div><p className="text-body-sm text-on-surface-variant">{t(publicProfile?"Profile score":"Your score")}</p><p className="font-headline-xl text-headline-xl text-primary">{game.score ?? t("Unrated")}</p></div><div><p className="text-body-sm text-on-surface-variant">{t("Community score")}</p><p className="font-headline-xl text-headline-xl">{communityScore?.average ?? t("Not enough ratings")}</p>{communityScore&&<p className="text-body-sm">{communityScore.count} {t("ratings")}</p>}</div><div><p className="text-body-sm text-on-surface-variant">{t("Tier")}</p><p className="font-headline-xl text-headline-xl">{game.tier ?? t("Unassigned")}</p></div></div>
-          <p className="text-body-sm text-on-surface-variant">{t("Community scores use discoverable public profiles and require at least 5 ratings.")}</p>
+          <div className="space-y-2">
+            <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-body-sm text-on-surface-variant"><span>{t("Community score")}</span><span className="font-headline-md text-headline-md text-on-surface">{communityScore?.average ?? t("Not enough ratings")}</span>{communityScore && <span>{communityScore.count} {t("ratings")}</span>}</p>
+            <p className="text-body-sm text-on-surface-variant">{t("Community scores use discoverable public profiles and require at least 5 ratings.")}</p>
+          </div>
           {!publicProfile&&<GameFavorite slug={game.slug}/>}
           {Boolean(game.publishers?.length) && <p className="break-words text-on-surface-variant font-body-md text-body-md">{t("Publisher · ")}{game.publishers!.join(", ")}</p>}
           <div className="flex flex-wrap gap-2">{game.platforms?.map((platform) => <span key={platform} className="break-words max-w-full px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">{platform}</span>)}</div>
