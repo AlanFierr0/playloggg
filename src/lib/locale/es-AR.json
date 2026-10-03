@@ -1110,5 +1110,13 @@
   "Your account could not be deleted. Please retry.": "No se pudo eliminar tu cuenta. Intentá de nuevo.",
   "Your profile data is removed, but account deletion is incomplete. Type DELETE and retry, or sign in again if your session expired.": "Se eliminaron los datos del perfil, pero falta completar la eliminación de la cuenta. Escribí DELETE y reintentá, o iniciá sesión otra vez si venció tu sesión.",
   "This permanently deletes your account, profile, ratings, reviews, tags, favorites and uploaded pictures. You will be signed out and must register again to start over.": "Esto elimina permanentemente tu cuenta, perfil, puntajes, reseñas, etiquetas, favoritos y fotos subidas. Se cerrará tu sesión y tendrás que registrarte de nuevo para empezar de cero.",
-  "Your account has been deleted. Create a new account to start again.": "Tu cuenta fue eliminada. Creá una cuenta nueva para volver a empezar."
+  "Your account has been deleted. Create a new account to start again.": "Tu cuenta fue eliminada. Creá una cuenta nueva para volver a empezar.",
+  "Choose a valid game and tier.": "Elegí un juego y un tier válidos.",
+  "Tier saved.": "Tier guardado.",
+  "Saving tier…": "Guardando tier…",
+  "Tier could not be saved. Your game stayed in its previous tier. Please retry.": "No se pudo guardar el tier. El juego quedó en su tier anterior. Intentá de nuevo.",
+  "Drag to change tier": "Arrastrá para cambiar el tier",
+  "Tier for": "Tier de",
+  "Drag games between tiers, or use each game's tier selector. Changes save automatically.": "Arrastrá los juegos entre tiers o usá el selector de cada juego. Los cambios se guardan automáticamente.",
+  "Your saved ratings. Tier changes do not change scores or favorites.": "Tus registros guardados. Cambiar un tier no modifica los puntajes ni los favoritos."
 }

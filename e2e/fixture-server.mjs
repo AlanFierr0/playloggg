@@ -153,7 +153,7 @@ export async function startFixtureServer() {
       if (resource === "ratings" && req.method === "PATCH") {
         if(!authenticated || url.searchParams.get("profile_id")!=="eq.2")return reply(403,{message:"Fixture ownership denied"});
         let body="";for await(const part of req)body+=part;const patch=JSON.parse(body);
-        if(Object.keys(patch).some(key=>!["hours_played","status","platform","updated_at"].includes(key)))return reply(400,{message:"Only playtime may be synced"});
+        if(Object.keys(patch).some(key=>!["hours_played","status","platform","tier","updated_at"].includes(key)))return reply(400,{message:"Unsupported entry fields"});
         if(failSave){failSave=false;return reply(503,{message:"Controlled save failure"});}
         const matches=ratings.filter(row=>[...url.searchParams].filter(([key])=>key!=="select").every(([key,value])=>value.startsWith("eq.")?String(row[key])===value.slice(3):value.startsWith("in.(")?value.slice(4,-1).split(",").includes(String(row[key])):value==="is.null"&&row[key]===null));
         matches.forEach(row=>Object.assign(row,patch,{updated_at:new Date().toISOString()}));

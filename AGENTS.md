@@ -252,3 +252,8 @@ Played platforms now include PC / Steam, Battle.net, GOG, Epic Games, EA app,
 Ubisoft Connect, Xbox app and Other alongside the existing consoles and Steam Deck.
 Use shared played-platform labels and validation in the editor, bulk edits and
 stats. Preserve the legacy pc value for PC / Steam and Steam import/sync behavior.
+
+The owner Tier List supports drag/drop and an accessible per-game tier selector,
+with automatic persistence of tier only. Never use a full entry upsert for a board
+move or create an unlogged entry. Public boards remain read-only. See
+docs/tier-board-editing.md.
