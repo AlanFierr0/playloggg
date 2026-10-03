@@ -82,9 +82,15 @@ test("Steam import previews, selects, saves trusted playtime and preserves exist
   await expect(page.getByRole("checkbox",{name:"Select game Unmatched Fixture",exact:true})).toBeDisabled();
   let state=await (await fetch("http://127.0.0.1:3101/__state")).json();
   expect(state.ratings.filter((row:{profile_id:number})=>row.profile_id===2)).toHaveLength(1);
-  await expect(page.getByRole("checkbox")).toHaveCount(25);
-  await page.getByRole("button",{name:"Load more",exact:true}).click();
-  await expect(page.getByRole("checkbox")).toHaveCount(50);
+  await expect(page.getByRole("checkbox")).toHaveCount(127);
+  await expect(page.getByLabel("Games to show",{exact:true})).toHaveValue("all");
+  await expect(page.getByRole("button",{name:"Load more",exact:true})).toHaveCount(0);
+  const importButton=page.getByRole("button",{name:"Import selected games (0)",exact:true});
+  const importBox=(await importButton.boundingBox())!;
+  const firstGameBox=(await page.getByRole("checkbox").first().boundingBox())!;
+  expect(importBox.y).toBeLessThan(firstGameBox.y);
+  const controlsBox=(await importButton.locator("..").boundingBox())!;
+  expect(Math.abs(importBox.x+importBox.width-controlsBox.x-controlsBox.width)).toBeLessThan(2);
   await page.getByRole("checkbox",{name:"Select game Hades",exact:true}).check();
   await page.getByRole("checkbox",{name:"Select game Steam Fixture Adventure",exact:true}).check();
   await page.evaluate(()=>window.scrollTo(0,0));
@@ -152,6 +158,8 @@ test("Steam browsing loads more without losing selection, changes amounts and fi
   await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
   await page.route("https://shared.steamstatic.com/**",route=>route.fulfill({contentType:"image/svg+xml",body:'<svg xmlns="http://www.w3.org/2000/svg" width="60" height="90"><rect width="60" height="90" fill="#ba831f"/></svg>'}));
   await page.goto("/profile/import/steam");
+  await expect(page.getByRole("checkbox")).toHaveCount(127);
+  await page.getByLabel("Games to show",{exact:true}).selectOption("25");
   await expect(page.getByRole("checkbox")).toHaveCount(25);
   const hades=page.getByRole("checkbox",{name:"Select game Hades",exact:true});
   await hades.check();
@@ -191,7 +199,7 @@ test("Steam playtime filters keep typing responsive and discard outdated results
   await context.addCookies([authCookie]);
   await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
   await page.goto("/profile/import/steam");
-  await expect(page.getByRole("checkbox")).toHaveCount(25);
+  await expect(page.getByRole("checkbox")).toHaveCount(127);
   let delayed=false;
   await page.route("**/profile/import/steam",async route=>{
     if(route.request().method()==="POST"&&!delayed){delayed=true;await new Promise(resolve=>setTimeout(resolve,700));}
@@ -209,7 +217,7 @@ test("Steam playtime filters keep typing responsive and discard outdated results
   await page.getByLabel("Maximum hours",{exact:true}).fill("100");
   await expect(page.getByText("Use nonnegative hours and a minimum no greater than the maximum.")).toBeVisible();
   await page.getByRole("button",{name:"Clear filters",exact:true}).click();
-  await expect(page.getByRole("checkbox")).toHaveCount(25);
+  await expect(page.getByRole("checkbox")).toHaveCount(127);
 });
 
 test("Steam artwork falls back to its header and then a placeholder if images fail",async({page,context})=>{

@@ -10,9 +10,11 @@
    **Refresh library** reloads it or retries after an error.
    Games already logged in your profile are hidden, including manual entries,
    before filters and pagination. Newly imported games disappear from the cards.
-   Choose 25, 50, 100 or All games. **Load more**
+   All games is selected by default. The complete available list appears together
+   after loading; the loading indicator reports progress meanwhile.
+   You can choose 25, 50, 100 or All games. **Load more**
    appends the next chosen amount and keeps existing cards and selections.
-   All loads every match progressively; **Stop loading** stops after the current
+   All fetches every match in bounded requests; **Stop loading** stops after the current
    request and keeps games already loaded. Load more can resume a stopped load.
 5. Sort by title, most played or least played, and optionally type minimum and
    maximum hours. Results update automatically after a 350 ms typing pause;
@@ -21,7 +23,7 @@
    Blank limits are unrestricted; zero includes unplayed games.
    Filters and sorting apply to the whole library before batches are chosen.
    Select individual matched games, or **Select available games** among loaded cards.
-6. Select **Import selected games**. Games are imported sequentially, with
+6. Select **Import selected games** in the upper-right toolbar. Games are imported sequentially, with
    a centered modal over the library showing the current title, processed/total
    count, remaining count and progress bar. It keeps focus and disables interaction
    with the page behind it while saving. Its spinner
