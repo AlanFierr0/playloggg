@@ -5,9 +5,7 @@
 /* Preserve the base behavior of the Stitch export. */
 @layer base {
   html, body { margin: 0; padding: 0; }
-  html { --site-header-height: 7rem; scroll-padding-top: calc(var(--site-header-height) + 1rem); }
-  @media (min-width: 640px) { html { --site-header-height: 7rem; } }
-  @media (min-width: 1280px) { html { --site-header-height: 4rem; } }
+  html { --site-header-height: 4rem; scroll-padding-top: calc(var(--site-header-height) + 1rem); }
   body { overscroll-behavior: none; }
   main > :first-child { margin-top: 0 !important; }
   main > :last-child { margin-bottom: 0 !important; }
@@ -181,3 +179,18 @@ html.light .scroll-region { scrollbar-color: #b0a18b #f4f3f7; }
 /* A shared radius for actions; circular account controls keep their shape. */
 button:not(.rounded-full), input[type="submit"], [role="button"]:not(.rounded-full),
 a.inline-flex:not(.rounded-full), a[class*="bg-primary"]:not(.rounded-full) { border-radius: .75rem; }
+
+@layer components {
+  .ui-action { @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 py-3 font-body-md text-body-lg font-semibold transition-colors; }
+  .ui-action:active { transform: scale(.98); }
+  .catalog-control { @apply w-full min-w-0 rounded-xl border border-outline bg-surface-container px-3 py-2.5 font-body-md text-body-md text-on-surface; }
+}
+/* Explicit surface scale: actions/panels 12px, artwork 8px, avatars circular. */
+@layer utilities {
+  .rounded-lg { border-radius: .5rem; }
+  .rounded-xl { border-radius: .75rem; }
+  .rounded-full { border-radius: 9999px; }
+}
+
+/* Reserve icon space while its existing font loads; ligature text cannot shift navigation. */
+.material-symbols-outlined { display: inline-block; width: 1em; flex-shrink: 0; overflow: hidden; white-space: nowrap; vertical-align: middle; }

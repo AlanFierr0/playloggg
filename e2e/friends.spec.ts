@@ -1,5 +1,9 @@
 import { test, expect } from "./test";
 import AxeBuilder from "@axe-core/playwright";
+async function openNavigation(page: import("@playwright/test").Page) {
+  const menu = page.getByRole("button", { name: /Navigation menu|Menú de navegación/ });
+  if (await menu.isVisible() && await page.locator("header details").getAttribute("open") === null) await menu.click();
+}
 // @ts-expect-error Local fixture identity only.
 import { authCookie } from "./fixture-server.mjs";
 
@@ -10,6 +14,7 @@ test("find a friend, follow persistently and compare saved games with your own p
   await page.getByRole("slider").press("End");
   await page.locator("#commit-rating").click();
   await expect(page).toHaveURL(/\/profile$/);
+  await openNavigation(page);
   await page.getByRole("navigation", { name: "Main navigation" }).filter({ visible: true }).getByRole("link", { name: "Friends", exact: true }).click();
   await page.getByLabel("Find friends", { exact: true }).fill("@FIXTURE_PUBLIC");
   await page.getByRole("button", { name: "Search", exact: true }).click();

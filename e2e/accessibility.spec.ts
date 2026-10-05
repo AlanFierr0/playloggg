@@ -1,5 +1,9 @@
 import AxeBuilder from "@axe-core/playwright";
 import { test, expect } from "./test";
+async function openNavigation(page: import("@playwright/test").Page) {
+  const menu = page.getByRole("button", { name: /Navigation menu|Menú de navegación/ });
+  if (await menu.isVisible() && await page.locator("header details").getAttribute("open") === null) await menu.click();
+}
 // @ts-expect-error The fake session is exported by the Node-only fixture server.
 import { authCookie } from "./fixture-server.mjs";
 
@@ -34,8 +38,9 @@ test("Spanish HTML and metadata are translated before JavaScript runs", async ({
   const page = await context.newPage();
   for (const route of ["/", "/games", "/login", "/game/hades", "/u/fixture_public"]) {
     await page.goto(`http://127.0.0.1:3100${route}`);
-    await expect(page.getByRole("navigation", { name: "Navegación principal" }).first()).toBeVisible();
-    await expect(page.getByRole("link", { name: "Descubrir", exact: true }).first()).toBeVisible();
+    await openNavigation(page);
+    await expect(page.getByRole("navigation", { name: "Navegación principal" }).filter({ visible: true })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Navegación principal" }).filter({ visible: true }).getByRole("link", { name: "Descubrir", exact: true })).toBeVisible();
     await expect(page.locator('meta[name="description"]')).not.toHaveAttribute("content", /Browse|personal gaming|Game details|Public game/);
   }
   await page.goto("http://127.0.0.1:3100/games");
@@ -46,16 +51,20 @@ test("Spanish HTML and metadata are translated before JavaScript runs", async ({
 test("language changes preserve catalog filters and an owner’s unsaved review", async ({ page, context }) => {
   await page.goto("/games");
   await page.locator("#games-query").fill("Hades");
+  await expect(page).toHaveURL(/q=Hades/);
+  await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
+  await openNavigation(page);
   await page.getByRole("button", { name: "Switch to Spanish (Argentina)" }).click();
-  await expect(page.getByRole("navigation", { name: "Navegación principal" }).first()).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Navegación principal" }).filter({ visible: true })).toBeVisible();
   await expect(page.locator("#games-query")).toHaveValue("Hades");
   await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
   await context.addCookies([authCookie]);
   await page.goto("/log?game=hades");
   await page.locator("#dispatch-textarea").fill("Private English review: Games and Discover stay exactly as written.");
   await page.locator("#hours-input").fill("0");
+  await openNavigation(page);
   await page.getByRole("button", { name: "Cambiar a inglés" }).click();
-  await expect(page.getByRole("navigation", { name: "Main navigation" }).first()).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Main navigation" }).filter({ visible: true })).toBeVisible();
   await expect(page.locator("#dispatch-textarea")).toHaveValue("Private English review: Games and Discover stay exactly as written.");
   await expect(page.locator("#hours-input")).toHaveValue("0");
 });

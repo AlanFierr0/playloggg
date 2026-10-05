@@ -1118,5 +1118,20 @@
   "Drag to change tier": "Arrastrá para cambiar el tier",
   "Tier for": "Tier de",
   "Drag games between tiers, or use each game's tier selector. Changes save automatically.": "Arrastrá los juegos entre tiers o usá el selector de cada juego. Los cambios se guardan automáticamente.",
-  "Your saved ratings. Tier changes do not change scores or favorites.": "Tus registros guardados. Cambiar un tier no modifica los puntajes ni los favoritos."
+  "Your saved ratings. Tier changes do not change scores or favorites.": "Tus registros guardados. Cambiar un tier no modifica los puntajes ni los favoritos.",
+  "Profile preview": "Vista previa del perfil",
+  "A place for your favorites": "Un lugar para tus favoritos",
+  "Example rating and tier": "Ejemplo de puntuación y nivel",
+  "Illustrative layout. Your profile starts empty and private.": "Diseño de ejemplo. Tu perfil empieza vacío y privado.",
+  "Navigation menu": "Menú de navegación",
+  "Display preferences": "Preferencias de visualización",
+  "Manage profile visibility": "Administrar visibilidad del perfil",
+  "Try another name or handle.": "Probá con otro nombre o usuario.",
+  "Filters and sorting": "Filtros y orden",
+  "Profile handle": "Nombre de usuario",
+  "What a comparison shows": "Qué muestra una comparación",
+  "Find where your tastes meet": "Encontrá dónde coinciden sus gustos",
+  "See the games you both logged, side by side.": "Mirá los juegos que ambos registraron, uno al lado del otro.",
+  "Discover the games you rated alike and the ones you see differently.": "Descubrí los juegos que puntuaron parecido y los que ven distinto.",
+  "Find a favorite from their collection that you have not logged.": "Encontrá un favorito de su colección que todavía no registraste."
 }

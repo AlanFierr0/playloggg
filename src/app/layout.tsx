@@ -9,6 +9,11 @@ import { localeCookie, siteLocale, siteTheme, themeCookie } from "@/lib/locale/p
 import { SitePreferences } from "@/components/site-preferences";
 import { siteOrigin, noIndex } from "@/lib/site-url";
 import "./globals.css";
+import { Hanken_Grotesk, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+
+const bodyFont = Hanken_Grotesk({ subsets: ["latin"], style: ["normal", "italic"], display: "swap", variable: "--font-hanken" });
+const headingFont = Space_Grotesk({ subsets: ["latin"], display: "swap", variable: "--font-space" });
+const labelFont = JetBrains_Mono({ subsets: ["latin"], style: ["normal", "italic"], display: "swap", variable: "--font-jetbrains" });
 
 export async function generateMetadata() { return localizeMetadata({
   metadataBase: new URL(siteOrigin),
@@ -25,11 +30,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const locale = siteLocale(cookieStore.get(localeCookie)?.value);
   const theme = siteTheme(cookieStore.get(themeCookie)?.value);
   return (
-    <html lang={locale} className={theme}>
+    <html lang={locale} className={`${theme} ${bodyFont.variable} ${headingFont.variable} ${labelFont.variable}`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..700;1,300..700&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
       </head>
       <body className="flex min-h-dvh flex-col bg-surface font-body-md text-on-surface antialiased">

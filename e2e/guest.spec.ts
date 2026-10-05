@@ -2,6 +2,18 @@ import { test, expect } from "./test";
 // @ts-expect-error Local fixture session only.
 import { authCookie } from "./fixture-server.mjs";
 
+async function openNavigation(page: import("@playwright/test").Page) {
+  const menu = page.getByRole("button", { name: /Navigation menu|Menú de navegación/ });
+  if (await menu.isVisible() && await page.locator("header details").getAttribute("open") === null) await menu.click();
+}
+async function openFilters(page: import("@playwright/test").Page) {
+  const button = page.getByRole("button", { name: /Filters and sorting/ });
+  if (page.viewportSize()!.width < 1024) {
+    await expect(button).toBeVisible();
+    if (await button.getAttribute("aria-expanded") !== "true") await button.click();
+    await expect(button).toHaveAttribute("aria-expanded", "true");
+  }
+}
 // Stable named fixture games, independent of production catalog contents.
 test("catalog combines filters, loads more, clears and handles empty results", async ({ page }) => {
   await page.goto("/games");
@@ -12,6 +24,7 @@ test("catalog combines filters, loads more, clears and handles empty results", a
   await expect(page.locator(`[data-catalog-game="${initial}"]`)).toBeVisible();
   await page.getByLabel("Search titles").fill("Hades");
   await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
+  await openFilters(page);
   await page.getByRole("combobox", { name: "Genre", exact: true }).selectOption("Roguelike");
   await expect(page.getByRole("heading", { name: "Hades", exact: true })).toBeVisible();
   await page.getByLabel("Search titles").fill("absent-game");
@@ -42,6 +55,7 @@ test("search supports keyboard selection and returns to its originating route", 
 
 test("theme and Argentine Spanish persist across navigation and reload", async ({ page, context }) => {
   await page.goto("/");
+  await openNavigation(page);
   await page.getByRole("button", { name: "Switch to light mode" }).click();
   await page.getByRole("button", { name: "Switch to Spanish (Argentina)" }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "es-AR");
@@ -49,6 +63,7 @@ test("theme and Argentine Spanish persist across navigation and reload", async (
   await page.reload();
   await expect(page.locator("html")).toHaveClass(/light/);
   await expect(page.locator("html")).toHaveAttribute("lang", "es-AR");
+  await openNavigation(page);
   await expect(page.getByRole("button", { name: "Cambiar a inglés" })).toBeVisible();
   const cookies = await context.cookies();
   expect(cookies.find((cookie) => cookie.name === "playlogg_theme")?.value).toBe("light");
@@ -62,6 +77,7 @@ test("navigation stays usable and layouts avoid horizontal page overflow", async
   await page.locator("header").getByRole("link", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
   for (const [name, path] of [["Games", "/games"], ["Compare", "/compare"], ["Discover", "/"]]) {
+    await openNavigation(page);
     await navigation.getByRole("link", { name, exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`${path === "/" ? "/" : path}$`));
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
@@ -90,10 +106,12 @@ test("Games URLs retain filters and loaded results through reload, sharing and h
   await page.getByLabel("Search titles").fill("Hades");
   await expect(page).toHaveURL(/q=Hades$/);
   await expect(page.getByRole("heading",{name:"Hades",exact:true})).toBeVisible();
+  await openFilters(page);
   await page.getByRole("combobox",{name:"Genre",exact:true}).selectOption("Roguelike");
   await expect(page).toHaveURL(/q=Hades&genre=Roguelike$/);
   await page.reload();
   await expect(page.getByLabel("Search titles")).toHaveValue("Hades");
+  await openFilters(page);
   await expect(page.getByRole("combobox",{name:"Genre",exact:true})).toHaveValue("Roguelike");
   await page.getByRole("link",{name:"Open game search"}).filter({visible:true}).click();
   await expect(page.getByRole("dialog")).toBeVisible();
@@ -107,6 +125,7 @@ test("Games URLs retain filters and loaded results through reload, sharing and h
   await expect(page.getByLabel("Search titles")).toHaveValue("");
   await page.goto("/games?genre=Unknown&sort=invalid&page=-1");
   await expect(page.getByRole("heading",{name:"No games match these filters"})).toBeVisible();
+  await openFilters(page);
   await expect(page.getByRole("combobox",{name:"Genre",exact:true})).toHaveValue("Unknown");
 });
 
@@ -140,6 +159,7 @@ test("Games automatically append batches on scroll and reset with filters",async
 
 test("platform filter shows main families and groups the remaining platforms under Other", async ({page}) => {
   await page.goto("/games");
+  await openFilters(page);
   const platform = page.getByRole("combobox", {name: "Platform", exact: true});
   await expect(platform.locator("option")).toHaveText(["All platforms", "PC", "PlayStation", "Xbox", "Nintendo", "Other"]);
   for (const family of ["PlayStation", "Xbox", "Nintendo"]) {
@@ -150,7 +170,7 @@ test("platform filter shows main families and groups the remaining platforms und
   await platform.selectOption("Other");
   await expect(page.locator("[data-catalog-game]")).toHaveCount(2);
   await expect(page.getByRole("heading", {name: "Hades", exact: true})).toBeVisible();
-  await page.reload(); await expect(platform).toHaveValue("Other");
+  await page.reload(); await openFilters(page); await expect(platform).toHaveValue("Other");
   await platform.selectOption("PC");
   await expect(page).toHaveURL(/platform=PC/);
   await expect(page.locator("[data-catalog-game]")).toHaveCount(25);
@@ -163,6 +183,7 @@ test("platform filter shows main families and groups the remaining platforms und
   }
   await expect(page.getByRole("heading", {name: "Hades", exact: true})).toBeVisible();
   await page.goto("/games?platform=Android");
+  await openFilters(page);
   await expect(platform).toHaveValue("Android");
   await expect(platform.locator('option[value="Android"]')).toHaveAttribute("hidden", "");
   await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
@@ -182,8 +203,9 @@ test("saved tags link game details and catalog cards to a persistent combined fi
   await expect(page).toHaveURL(/tag=Co-op/);
   await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
   const filter=page.getByRole("combobox",{name:"Tag",exact:true});
+  await openFilters(page);
   await expect(filter).toHaveValue("Co-op & friends");
-  await page.reload();await expect(filter).toHaveValue("Co-op & friends");
+  await page.reload();await openFilters(page);await expect(filter).toHaveValue("Co-op & friends");
   await page.getByLabel("Search titles").fill("missing-title");
   await expect(page.locator("[data-catalog-game]")).toHaveCount(0);
   await page.getByRole("button",{name:"Clear filters",exact:true}).click();
@@ -199,15 +221,19 @@ test("saved tags link game details and catalog cards to a persistent combined fi
 test("genres on cards and details open Games with the selected genre filter",async({page})=>{
   await page.goto("/games?q=Hades");
   await page.locator('[data-catalog-game="hades"]').getByRole("link",{name:"Roguelike",exact:true}).click();
+  await expect(page).toHaveURL(/genre=Roguelike/);
+  await openFilters(page);
   await expect(page.getByRole("combobox",{name:"Genre",exact:true})).toHaveValue("Roguelike");
   await expect(page.getByLabel("Search titles")).toHaveValue("Hades");
   await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
   await page.goto("/game/hades");
   await page.getByRole("link",{name:"Roguelike",exact:true}).click();
   await expect(page).toHaveURL(/\/games\?genre=Roguelike$/);
+  await openFilters(page);
   await expect(page.getByRole("combobox",{name:"Genre",exact:true})).toHaveValue("Roguelike");
   await expect(page.getByLabel("Search titles")).toHaveValue("");
   await page.reload();
+  await openFilters(page);
   await expect(page.getByRole("combobox",{name:"Genre",exact:true})).toHaveValue("Roguelike");
   expect(await page.locator("a a").count()).toBe(0);
 });

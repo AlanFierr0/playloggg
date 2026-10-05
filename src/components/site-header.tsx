@@ -3,6 +3,7 @@ import { useMessages } from "@/components/site-preferences";
 
 
 import Link from "next/link";
+import { useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import { usePortfolio } from "@/components/portfolio-provider";
@@ -12,6 +13,8 @@ const navigation = [{ href: "/", label: "Discover" }, { href: "/games", label: "
 
 export function SiteHeader() {
   const t = useMessages();
+  const menu = useRef<HTMLDetailsElement>(null);
+  function closeMenu() { if (menu.current) menu.current.open = false; }
   const { access, profile } = usePortfolio();
   const { locale, theme, setLocale, setTheme } = useSitePreferences();
   const pathname = usePathname();
@@ -20,7 +23,7 @@ export function SiteHeader() {
   const searchHref = `/search?q=&from=${encodeURIComponent(pathname === "/search" ? "/" : returnPath)}`;
   const isActive = (href: string) => pathname === href;
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+    <header onKeyDown={event => { if (event.key === "Escape" && menu.current?.open) { closeMenu(); menu.current.querySelector("summary")?.focus(); } }} className="fixed top-0 left-0 right-0 z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
       <div className="h-16 site-container mx-auto px-4 sm:px-6 lg:px-12 flex items-center justify-between gap-2 lg:gap-6">
         <div className="flex min-w-0 shrink-0 items-center gap-4 xl:gap-8">
           <Link className="flex shrink-0 items-center gap-2 lg:gap-3 group min-h-11" href="/" aria-label={t("Playlogg home")}>
@@ -37,15 +40,26 @@ export function SiteHeader() {
             <span className="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px] pointer-events-none" aria-hidden="true">search</span>
             <span className="w-full truncate bg-surface-container-low pl-9 pr-3 py-2 rounded text-on-surface-variant font-body-sm text-body-sm">{t("Search games")}</span>
           </Link>
-          <Link aria-label={t("Log a game")} className="inline-flex shrink-0 min-h-11 min-w-11 justify-center items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded bg-primary-container text-on-primary-container hover:bg-primary transition-colors font-label-md text-label-md tracking-wider uppercase font-semibold" href="/log"><span className="material-symbols-outlined text-[16px]" aria-hidden="true">add</span><span className="hidden sm:inline">{t("Log")}</span></Link>
-          <div className="hidden sm:flex shrink-0 items-center gap-1"><PreferenceControls locale={locale} theme={theme} setLocale={setLocale} setTheme={setTheme} /></div>
+          <Link aria-label={t("Log a game")} className="inline-flex shrink-0 min-h-11 min-w-11 justify-center items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded bg-primary-container text-on-primary-container hover:bg-primary transition-colors font-body-md text-body-md font-semibold" href="/log"><span className="material-symbols-outlined text-[16px]" aria-hidden="true">add</span><span className="hidden sm:inline">{t("Log")}</span></Link>
+          <div className="hidden xl:flex shrink-0 items-center gap-1"><PreferenceControls locale={locale} theme={theme} setLocale={setLocale} setTheme={setTheme} /></div>
+          <details ref={menu} className="xl:hidden">
+            <summary role="button" className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-xl bg-surface-container text-on-surface [&::-webkit-details-marker]:hidden" aria-label={t("Navigation menu")}>
+              <span aria-hidden="true" className="material-symbols-outlined text-[24px]">menu</span>
+            </summary>
+            <div className="absolute inset-x-0 top-16 max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-outline-variant/40 bg-surface p-4 sm:px-6 shadow-xl">
+              <nav aria-label={t("Main navigation")} className="grid gap-1">
+                {navigation.map(item => <Link key={item.href} href={item.href} onClick={closeMenu} aria-current={isActive(item.href) ? "page" : undefined} className={`flex min-h-12 items-center rounded-xl px-4 text-body-lg ${isActive(item.href) ? "bg-primary/10 text-primary font-semibold" : "text-on-surface-variant hover:bg-surface-container"}`}>{t(item.label)}</Link>)}
+              </nav>
+              <div className="mt-3 flex items-center justify-between gap-3 border-t border-outline-variant/30 pt-3">
+                <span className="text-body-md text-on-surface-variant">{t("Display preferences")}</span>
+                <div className="flex gap-2"><PreferenceControls locale={locale} theme={theme} setLocale={setLocale} setTheme={setTheme} /></div>
+              </div>
+            </div>
+          </details>
           <Link className="flex h-11 w-11 shrink-0 items-center justify-center" href={access?.signedIn ? "/profile" : "/login"} aria-label={access?.signedIn ? t("Your profile") : t("Sign in")}><ProfileAvatar src={access?.canEdit ? profile.avatarUrl : null} name={access?.canEdit ? profile.displayName : "Account"} className="w-8 h-8 rounded-full ring-1 ring-surface-variant hover:ring-primary transition-all" /></Link>
         </div>
       </div>
-      <div className="xl:hidden flex bg-surface-container-low/80"><nav aria-label={t("Main navigation")} className="min-w-0 flex-1 scroll-region flex h-12 items-center justify-start gap-1 overflow-x-auto px-4 sm:px-6 bg-surface-container-low/80">
-        {navigation.map((item) => <Link key={item.href} href={item.href} aria-current={isActive(item.href) ? "page" : undefined} className={`flex shrink-0 min-h-11 items-center justify-center rounded px-2 font-body-md text-body-md transition-colors ${isActive(item.href) ? "text-primary bg-primary/10 font-semibold" : "text-on-surface-variant hover:text-on-surface"}`}>{t(item.label)}</Link>)}
-      </nav>
-      <div className="sm:hidden h-12 flex shrink-0 items-center gap-1 pr-2"><PreferenceControls locale={locale} theme={theme} setLocale={setLocale} setTheme={setTheme} /></div></div>
+
     </header>
   );
 }

@@ -45,9 +45,12 @@ test("profile tools, section tabs and content stay separate and usable", async (
   await tabs.getByRole("link", { name: "Stats", exact: true }).click();
   await expect(page).toHaveURL(/\/profile\/stats$/);
   await expect(page.getByRole("navigation", { name: "Profile sections" }).getByRole("link", { name: "Stats", exact: true })).toHaveAttribute("aria-current", "page");
+  const menu = page.getByRole("button", { name: "Navigation menu" });
+  if (await menu.isVisible()) await menu.click();
   const tierLink=page.getByRole("navigation",{name:"Main navigation"}).filter({visible:true}).getByRole("link",{name:"Tier List",exact:true});
   await tierLink.click();
   await expect(page).toHaveURL(/\/tiers$/);
+  if (await menu.isVisible()) await menu.click();
   await expect(tierLink).toHaveAttribute("aria-current","page");
   await expect(page.getByRole("navigation",{name:"Profile sections"})).toHaveCount(0);
 });

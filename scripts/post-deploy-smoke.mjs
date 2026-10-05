@@ -4,7 +4,7 @@ const checks = [
   ["/", 200, "Build your gaming identity."],
   ["/robots.txt", 200, "Sitemap: https://playloggg.vercel.app/sitemap.xml"],
   ["/sitemap.xml", 200, "https://playloggg.vercel.app/games"],
-  ["/games", 200, "The game archive"],
+  ["/games", 200, "Catalog filters"],
   ["/people",200,"Explore profiles"],
   ["/quick-rate",404,null],
   ["/profile/wrapped",404,null],

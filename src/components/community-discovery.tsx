@@ -19,7 +19,7 @@ export async function CommunityDiscovery() {
     !community.reviews.length
   )
     return (
-      <section className="w-full site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 space-y-4">
+      <section className="w-full site-container mx-auto px-4 sm:px-6 lg:px-12 py-10 sm:py-16 space-y-4">
         <h2 className="font-headline-lg text-headline-lg">
           {t("Community discovery")}
         </h2>
@@ -28,6 +28,7 @@ export async function CommunityDiscovery() {
             "Community discovery grows with profiles that choose to participate. Publish your profile and opt into discovery to join.",
           )}
         </p>
+        <Link href="/settings" className="ui-action bg-surface-container text-primary">{t("Manage profile visibility")}</Link>
         <details className="text-body-sm text-on-surface-variant space-y-3">
           <summary className="cursor-pointer text-primary">
             {t("How community results work")}
@@ -105,7 +106,7 @@ export async function CommunityDiscovery() {
           </div>
         </section>
       )}
-      {sections.map((section) => (
+      {sections.filter(section => section.rows.length > 0).map((section) => (
         <section key={section.title} className="space-y-4">
           <h2 className="font-headline-lg text-headline-lg">
             {t(section.title)}

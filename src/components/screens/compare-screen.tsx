@@ -8,8 +8,8 @@ import type { getPublicComparison } from "@/lib/public-comparison";
 import type { Profile } from "@/types/domain";
 
 type Comparison = NonNullable<Awaited<ReturnType<typeof getPublicComparison>>>;
-const panel="rounded-xl bg-surface-container-low p-5 sm:p-8 shadow-lg";
-const control="w-full min-w-0 rounded bg-surface-container px-3 py-2.5 text-on-surface";
+const panel="rounded-xl bg-surface-container-low p-5 sm:p-8";
+const control="catalog-control";
 export async function CompareScreen({left,right,comparison,requestedPage,ownProfile=false,friends=[]}:{friends?:{handle:string;display_name:string}[];left:string;right:string;comparison:Comparison|null;requestedPage:number;ownProfile?:boolean}) {
   const t=await getMessages();
   const result=comparison ? compareGames(comparison.left.games,comparison.right.games) : null;
@@ -25,14 +25,21 @@ export async function CompareScreen({left,right,comparison,requestedPage,ownProf
     return <article key={entry.game.slug} className={panel}><div className="flex gap-4 items-start"><img src={entry.game.cover} alt="" className="w-20 sm:w-28 aspect-[3/4] object-cover rounded shrink-0" /><div className="min-w-0"><Link href={`/game/${entry.game.slug}`} className="font-headline-md text-headline-md font-semibold hover:text-primary">{entry.game.title}</Link><p className="text-on-surface-variant mt-2">{t("Score difference")}: {entry.difference}</p></div></div><div className="mt-6 grid grid-cols-2 gap-4 border-t border-outline-variant/20 pt-4">{[entry.game,entry.other].map((game,index) => <div key={index} className="min-w-0"><p className="text-body-sm text-on-surface-variant break-words">{index===0 ? comparison!.left.profile.displayName : comparison!.right.profile.displayName}</p><p className="text-[32px] font-semibold text-primary">{game.score}</p><p className="text-body-sm">{t("Tier")}: {game.tier ?? t("Unassigned")}</p></div>)}</div></article>;
   }
   return <div className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-10 md:py-16 space-y-10">
-    <header className="space-y-4"><Link href={ownProfile ? "/profile/social" : "/people"} className="text-primary inline-flex min-h-11 items-center">{t("Find friends to compare")}</Link><p className="font-label-sm text-label-sm uppercase tracking-widest text-outline">{t("Shared Taste")}</p><h1 className="font-headline-xl text-headline-xl font-semibold">{t("Compare gaming taste")}</h1><p className="text-on-surface-variant">{t(ownProfile ? "Your profile is selected. Choose a friend’s public handle to compare games." : "Enter two published profile handles. Private and unknown profiles are unavailable.")}</p></header>
+    <header className="space-y-4"><Link href={ownProfile ? "/profile/social" : "/people"} className="text-primary inline-flex min-h-11 items-center">{t("Find friends to compare")}</Link><h1 className="font-headline-xl text-headline-xl font-semibold">{t("Compare gaming taste")}</h1><p className="text-on-surface-variant">{t(ownProfile ? "Your profile is selected. Choose a friend’s public handle to compare games." : "Enter two published profile handles. Private and unknown profiles are unavailable.")}</p></header>
     <form action="/compare" method="get" className={`${panel} grid sm:grid-cols-2 lg:grid-cols-[1fr_1fr_auto] gap-4 items-end`}>
-      <label className="space-y-2 min-w-0"><span className="block">{t("First profile handle")}</span><input className={control} name="left" defaultValue={left} readOnly={ownProfile} required maxLength={30} autoCapitalize="none" autoCorrect="off" spellCheck={false} /></label>
-      <label className="space-y-2 min-w-0"><span className="block">{t("Second profile handle")}</span><input className={control} name="right" list="compare-friends" defaultValue={right} required maxLength={30} autoCapitalize="none" autoCorrect="off" spellCheck={false} /></label>
+      <label className="space-y-2 min-w-0"><span className="block">{t("First profile handle")}</span><input className={control} placeholder={t("Profile handle")} name="left" defaultValue={left} readOnly={ownProfile} required maxLength={30} autoCapitalize="none" autoCorrect="off" spellCheck={false} /></label>
+      <label className="space-y-2 min-w-0"><span className="block">{t("Second profile handle")}</span><input className={control} placeholder={t("Profile handle")} name="right" list="compare-friends" defaultValue={right} required maxLength={30} autoCapitalize="none" autoCorrect="off" spellCheck={false} /></label>
       <datalist id="compare-friends">{friends.map(friend=><option key={friend.handle} value={friend.handle}>{friend.display_name}</option>)}</datalist>
-      <button className="rounded bg-primary-container text-on-primary-container px-6 py-3 font-label-md text-label-md">{t("Compare profiles")}</button>
+      <button className="rounded bg-primary-container text-on-primary-container px-6 py-3 font-body-md text-body-lg font-semibold">{t("Compare profiles")}</button>
     </form>
     {!comparison && <p role="status" className={panel}>{t(left && right ? left===right ? "Choose two different published profiles." : "Comparison unavailable. Check both handles and make sure both profiles are published." : "Choose two published profiles to see their shared games and scores.")}</p>}
+    {!comparison && !right && (!left || ownProfile) && <section aria-label={t("What a comparison shows")} className="space-y-5">
+      <h2 className="font-headline-lg text-headline-lg">{t("Find where your tastes meet")}</h2>
+      <div className="grid sm:grid-cols-3 gap-6">
+        {[ ["Shared games", "See the games you both logged, side by side."], ["Biggest agreements", "Discover the games you rated alike and the ones you see differently."], ["Games to try", "Find a favorite from their collection that you have not logged."] ].map(([title, description]) => <div key={title} className="border-t border-outline-variant/40 pt-4 space-y-2"><h3 className="font-headline-md text-headline-md">{t(title)}</h3><p className="text-body-lg text-on-surface-variant max-w-[35ch]">{t(description)}</p></div>)}
+      </div>
+      <p className="text-body-sm text-on-surface-variant">{t("At least 5 shared scored games are needed to show affinity.")}</p>
+    </section>}
     {comparison && result && <>
       <section aria-label={t("Profile comparison")} className={`${panel} grid xl:grid-cols-[1fr_auto_1fr] gap-8 items-center`}>
         {identity(comparison.left.profile,comparison.left.games.filter(game=>game.logged).length)}

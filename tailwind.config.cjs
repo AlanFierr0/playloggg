@@ -71,40 +71,40 @@ module.exports = {
       },
       "fontFamily": {
         "headline-xl": [
-          "Space Grotesk"
+          "var(--font-space)", "Arial"
         ],
         "label-lg": [
-          "JetBrains Mono"
+          "var(--font-jetbrains)", "monospace"
         ],
         "display-lg": [
-          "Space Grotesk"
+          "var(--font-space)", "Arial"
         ],
         "body-md": [
-          "Hanken Grotesk"
+          "var(--font-hanken)", "Arial"
         ],
         "label-md": [
-          "JetBrains Mono"
+          "var(--font-jetbrains)", "monospace"
         ],
         "headline-xl-mobile": [
-          "Space Grotesk"
+          "var(--font-space)", "Arial"
         ],
         "headline-lg": [
-          "Space Grotesk"
+          "var(--font-space)", "Arial"
         ],
         "label-sm": [
-          "JetBrains Mono"
+          "var(--font-jetbrains)", "monospace"
         ],
         "body-sm": [
-          "Hanken Grotesk"
+          "var(--font-hanken)", "Arial"
         ],
         "body-lg": [
-          "Hanken Grotesk"
+          "var(--font-hanken)", "Arial"
         ],
         "headline-md": [
-          "Space Grotesk"
+          "var(--font-space)", "Arial"
         ],
         "display-lg-mobile": [
-          "Space Grotesk"
+          "var(--font-space)", "Arial"
         ]
       },
       "fontSize": {

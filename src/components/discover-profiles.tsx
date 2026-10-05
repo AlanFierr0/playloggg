@@ -49,7 +49,7 @@ export async function DiscoverProfiles({
           {account?.profile ? <><Link href="/profile/social" className="rounded bg-primary/10 text-primary px-4 py-3">{t("Following")}</Link><Link href="/profile/activity" className="rounded bg-surface-container text-primary px-4 py-3">{t("Activity feed")}</Link></> : <Link href="/login" className="rounded bg-primary-container text-on-primary-container px-4 py-3">{t("Sign in to follow friends")}</Link>}
         </nav>
         <form action="/people" method="get" className="flex flex-col sm:flex-row gap-3 items-end">
-          <label className="w-full min-w-0 space-y-2"><span className="block">{t("Find friends")}</span><input name="q" defaultValue={search} maxLength={80} placeholder={t("Search by name or handle")} className="w-full rounded bg-surface-container p-3" /></label>
+          <label className="w-full min-w-0 space-y-2"><span className="block">{t("Find friends")}</span><input name="q" defaultValue={search} maxLength={80} placeholder={t("Search by name or handle")} className="catalog-control" /></label>
           <button className="shrink-0 rounded bg-primary-container text-on-primary-container px-5 py-3">{t("Search")}</button>
           {search && <Link href="/people" className="shrink-0 text-primary px-4 py-3">{t("Clear search")}</Link>}
         </form>
@@ -90,10 +90,11 @@ export async function DiscoverProfiles({
           ))}
         </div>
       ) : (
-        <p className="text-on-surface-variant">
-          {full && !search && <span className="block mb-2">{t("Invite a friend to create a profile, publish it and enable discovery. Then search their handle here.")}</span>}
-          {t(search ? "No friends match this search." : "No profiles have opted into discovery yet.")}
-        </p>
+        <div className="rounded-xl border border-outline-variant/40 p-6 sm:p-8 space-y-4">
+          <h3 className="font-headline-lg text-headline-lg">{t(search ? "No friends match this search." : "No profiles have opted into discovery yet.")}</h3>
+          <p className="max-w-[55ch] text-on-surface-variant">{t(search ? "Try another name or handle." : "Invite a friend to create a profile, publish it and enable discovery. Then search their handle here.")}</p>
+          {!search && <Link href={account?.profile ? "/settings" : "/profile"} className="ui-action bg-surface-container text-primary">{t(account?.profile ? "Manage profile visibility" : "Create your profile")}</Link>}
+        </div>
       )}
       {full && (
         <nav aria-label={t("Profile directory pages")} className="flex gap-6">

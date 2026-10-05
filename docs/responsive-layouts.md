@@ -5,11 +5,11 @@ catalog imagery and desktop screen design. Original design references are intact
 
 ## Layout behavior
 
-- Below 1280px, navigation stays visible in a second header row. Search, Log and
-  Account remain accessible; phones use a search icon and compact Log button.
-  Theme/language controls occupy a third row on phones. `--site-header-height`
-  controls page padding, search positioning and anchor offsets: 160px below
-  640px, 112px from 640px to 1279px, and 64px from 1280px upward.
+- The approved UI design update uses a 64px header at all widths. Below 1280px,
+  a native Navigation menu disclosure contains all five destinations and display
+  preferences. Search, Log and Account remain directly accessible; phones use
+  a search icon and compact Log button. `--site-header-height` controls page
+  padding, search positioning and anchor offsets. See `ui-design-improvements.md`.
 - Phones use the export's mobile headline/display sizes, 16px form text,
   tighter gutters and spacing. Coarse-pointer controls have 44px minimum heights.
   Grids grow from phone columns into tablet and desktop arrangements.
