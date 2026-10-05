@@ -2,12 +2,14 @@ import Link from "next/link";
 import { getCommunity, getTasteDiscovery } from "@/lib/community";
 import { getCatalog } from "@/lib/portfolio";
 import { getMessages } from "@/lib/locale/server";
+import { getAccount } from "@/lib/owner";
 export async function CommunityDiscovery() {
-  const [community, discovery, catalog, t] = await Promise.all([
+  const [community, discovery, catalog, t, account] = await Promise.all([
     getCommunity(),
     getTasteDiscovery(),
     getCatalog(),
     getMessages(),
+    getAccount(),
   ]);
   const { recommendations, neighbors } = discovery;
   const games = new Map(catalog.map((game) => [game.id, game]));
@@ -19,7 +21,7 @@ export async function CommunityDiscovery() {
     !community.reviews.length
   )
     return (
-      <section className="w-full site-container mx-auto px-4 sm:px-6 lg:px-12 py-10 sm:py-16 space-y-4">
+      <section className="w-full site-container mx-auto px-4 sm:px-6 lg:px-12 py-6 sm:py-10 space-y-3">
         <h2 className="font-headline-lg text-headline-lg">
           {t("Community discovery")}
         </h2>
@@ -28,7 +30,7 @@ export async function CommunityDiscovery() {
             "Community discovery grows with profiles that choose to participate. Publish your profile and opt into discovery to join.",
           )}
         </p>
-        <Link href="/settings" className="ui-action bg-surface-container text-primary">{t("Manage profile visibility")}</Link>
+        <Link href={account?.profile ? "/settings" : account ? "/signup" : "/login?mode=register"} className="ui-action bg-surface-container text-primary">{t(account?.profile ? "Manage profile visibility" : "Create your profile")}</Link>
         <details className="text-body-sm text-on-surface-variant space-y-3">
           <summary className="cursor-pointer text-primary">
             {t("How community results work")}

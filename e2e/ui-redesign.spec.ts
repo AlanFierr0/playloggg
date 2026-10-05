@@ -1,12 +1,15 @@
 import { test, expect } from "./test";
 import AxeBuilder from "@axe-core/playwright";
+// @ts-expect-error The fake session is exported by the Node-only fixture server.
+import { authCookie } from "./fixture-server.mjs";
 
 test("profile preview, responsive menu and catalog disclosure work in both themes", async ({ page }, testInfo) => {
   await page.goto("/");
   await expect(page.getByRole("figure", { name: "Profile preview" })).toBeVisible();
   await expect(page.getByText("Illustrative layout. Your profile starts empty and private.")).toBeVisible();
   const hero = page.locator("main header");
-  await expect(hero.getByRole("link")).toHaveCount(2);
+  await expect(hero.getByRole("link", {name:"Create your profile", exact:true})).toHaveAttribute("href", "/login?mode=register");
+  await expect(hero.getByRole("figure").getByRole("link")).toHaveCount(4);
   await page.screenshot({path: `e2e-artifacts/ui-home-${testInfo.project.name}.png`, fullPage: true});
   const menu = page.getByRole("button", {name: "Navigation menu"});
   if (await menu.isVisible()) {
@@ -26,7 +29,7 @@ test("profile preview, responsive menu and catalog disclosure work in both theme
   await expect(page.getByRole("heading",{name:"Construí tu identidad gamer."})).toBeVisible();
   if (await page.locator("header summary").isVisible()) await page.locator("header summary").press("Escape");
   await page.screenshot({path: `e2e-artifacts/ui-home-light-es-${testInfo.project.name}.png`, fullPage: true});
-  for (const width of [390, 768, 1440]) {
+  for (const width of [320, 390, 768, 1440]) {
     await page.setViewportSize({width,height:1000});
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
@@ -51,6 +54,22 @@ test("profile preview, responsive menu and catalog disclosure work in both theme
   await expect(page.locator("[data-catalog-game]").getByText("No registrado",{exact:true})).toHaveCount(0);
   await page.screenshot({path: `e2e-artifacts/ui-catalog-${testInfo.project.name}.png`, fullPage: true});
   expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
+});
+
+test("profile creation preserves registration intent and ordinary sign-in", async ({page,context}) => {
+  await page.goto("/");
+  await page.locator("main header").getByRole("link", {name:"Create your profile",exact:true}).click();
+  await expect(page).toHaveURL(/\/login\?mode=register$/);
+  await expect(page.getByRole("heading",{name:"Create account",exact:true})).toBeVisible();
+  await expect(page.getByRole("button",{name:"Create account",exact:true}).first()).toHaveAttribute("aria-pressed","true");
+  await expect(page.getByLabel("Password",{exact:true})).toHaveAttribute("autocomplete","new-password");
+  await page.goto("/login");
+  await expect(page.getByRole("heading",{name:"Sign in",exact:true})).toBeVisible();
+  await expect(page.getByRole("button",{name:"Sign in",exact:true})).toHaveAttribute("aria-pressed","true");
+  await expect(page.getByLabel("Password",{exact:true})).toHaveAttribute("autocomplete","current-password");
+  await context.addCookies([authCookie]);
+  await page.goto("/");
+  await expect(page.locator("main header").getByRole("link",{name:"Open your profile",exact:true})).toHaveAttribute("href","/profile");
 });
 
 test("comparison and game details prioritize useful actions without inventing data", async ({page},testInfo) => {

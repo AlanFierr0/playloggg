@@ -6,7 +6,6 @@
 @layer base {
   html, body { margin: 0; padding: 0; }
   html { --site-header-height: 4rem; scroll-padding-top: calc(var(--site-header-height) + 1rem); }
-  body { overscroll-behavior: none; }
   main > :first-child { margin-top: 0 !important; }
   main > :last-child { margin-bottom: 0 !important; }
   :focus-visible { outline: 2px solid #ffc665; outline-offset: 3px; }
@@ -26,7 +25,12 @@
 @media (pointer: coarse) {
   button, a.inline-flex, a.flex, input:not([type="checkbox"]):not([type="range"]), select { min-height: 44px; }
 }
-::-webkit-scrollbar { display: none; }
+@media (pointer: fine) {
+  html { scrollbar-width: thin; scrollbar-color: rgb(var(--color-outline-variant)) rgb(var(--color-surface)); }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: rgb(var(--color-surface)); }
+  ::-webkit-scrollbar-thumb { background: rgb(var(--color-outline-variant)); border-radius: 4px; }
+}
 .score-slider { appearance: none; height: 44px; background: transparent; touch-action: pan-y; }
 .score-slider::-webkit-slider-runnable-track { height: 8px; border-radius: 999px; background: rgb(var(--color-surface-container-highest)); }
 .score-slider::-moz-range-track { height: 8px; border-radius: 999px; background: rgb(var(--color-surface-container-highest)); }

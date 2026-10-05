@@ -34,6 +34,15 @@ Keep the existing amber/dark identity, light theme, typography, routes and priva
 
 ## Validation
 
+The follow-up homepage pass preserves registration intent with `/login?mode=register`
+while ordinary login still selects sign-in. Signed-in visitors keep the profile route.
+Mobile hero/preview spacing is tighter; the four covers link to their games and
+titles wrap without clamping. The duplicated sample title/cover remain desktop-only.
+Empty community discovery links guests to registration, unfinished accounts to
+setup and profile owners to visibility settings. Homepage descriptions accurately
+describe catalog selection. Desktop scrollbars are visible and touch page scrolling
+uses browser defaults; contained scroll regions keep their existing behavior.
+
 Use `pnpm typecheck`, `pnpm lint`, `pnpm test` and the Playwright guest,
 comparison, friends, accessibility and ui-redesign journeys. The fixture runner
 builds the production application with local test identities/data and isolated
