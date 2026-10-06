@@ -38,7 +38,7 @@ export function SiteHeader() {
           <Link href={searchHref} aria-label={t("Open game search")} className="flex h-11 w-11 shrink-0 items-center justify-center rounded text-on-surface-variant hover:text-primary sm:hidden"><span className="material-symbols-outlined text-[20px]" aria-hidden="true">search</span></Link>
           <Link href={searchHref} aria-label={t("Open game search")} className="relative hidden sm:flex flex-1 items-center min-w-0 min-h-11">
             <span className="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px] pointer-events-none" aria-hidden="true">search</span>
-            <span className="w-full truncate bg-surface-container-low pl-9 pr-3 py-2 rounded text-on-surface-variant font-body-sm text-body-sm">{t("Search games")}</span>
+            <span className={`w-full truncate bg-surface-container-low pl-9 pr-3 py-2 ${pathname === "/" ? "rounded-2xl" : "rounded"} text-on-surface-variant font-body-sm text-body-sm`}>{t("Search games")}</span>
           </Link>
           <Link aria-label={t("Log a game")} className="inline-flex shrink-0 min-h-11 min-w-11 justify-center items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded bg-primary-container text-on-primary-container hover:bg-primary transition-colors font-body-md text-body-md font-semibold" href="/log"><span className="material-symbols-outlined text-[16px]" aria-hidden="true">add</span><span className="hidden sm:inline">{t("Log")}</span></Link>
           <div className="hidden xl:flex shrink-0 items-center gap-1"><PreferenceControls locale={locale} theme={theme} setLocale={setLocale} setTheme={setTheme} /></div>
