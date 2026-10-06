@@ -125,7 +125,8 @@ test("score descriptions follow typing and sliding without numeric labels", asyn
   await expect(active).toHaveText("Average");
   await expect(page.locator("#score-display")).toHaveValue("50");
   await page.locator("#score-display").fill("999");
-  await expect(active).toHaveCount(0);
+  await expect(page.locator("#score-display")).toHaveValue("50");
+  await expect(active).toHaveText("Average");
   await page.locator("#score-display").fill("");
   await expect(active).toHaveCount(0);
 });
@@ -186,7 +187,7 @@ test("typed scores sync with the slider, reject invalid values and persist zero"
   await expect(input).toHaveAttribute("maxlength","3");
   await expect(page.getByRole("spinbutton", {name:"Numerical score from 0 to 100"})).toHaveCount(0);
   await input.fill("87");
-  for(const value of ["-1","12.5","abc","1e2"]){
+  for(const value of ["-1","12.5","abc","1e2","101","999"]){
     await input.fill(value);
     await expect(input).toHaveValue("87");
     await expect(slider).toHaveValue("87");
@@ -196,9 +197,14 @@ test("typed scores sync with the slider, reject invalid values and persist zero"
   await input.pressSequentially("1");
   await expect(input).toHaveValue("100");
   await input.fill("101");
-  await page.locator("#commit-rating").click();
-  await expect(page).toHaveURL(/\/log\?game=hades$/);
-  await expect(input).toHaveAttribute("aria-invalid","true");
+  await expect(input).toHaveValue("100");
+  await expect(input).toHaveAttribute("aria-invalid","false");
+  await expect(page.locator("#score-error")).toHaveCount(0);
+  await input.fill("10");
+  await input.pressSequentially("1");
+  await expect(input).toHaveValue("10");
+  await input.pressSequentially("0");
+  await expect(input).toHaveValue("100");
   await input.fill("0");
   await page.locator("#commit-rating").click();
   await expect(page).toHaveURL(/\/profile$/);

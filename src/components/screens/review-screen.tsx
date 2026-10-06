@@ -157,14 +157,13 @@ return (<><fieldset disabled={pending} className="contents">
 
 <div className="flex flex-col items-center justify-center gap-1 my-2">
 <div className="flex items-baseline gap-2">
-<input ref={scoreInput} id="score-display" type="text" inputMode="numeric" maxLength={3} pattern="[0-9]{0,3}" value={score ?? ""} placeholder="—" aria-label={t("Numerical score from 0 to 100")} aria-invalid={invalidScore} aria-describedby={invalidScore ? "score-error" : undefined} onFocus={event => event.currentTarget.select()} onChange={event => { const value = event.target.value; if (!/^[0-9]{0,3}$/.test(value)) return; setScore(value === "" ? null : Number(value)); setSaveMessage(""); }} style={{ width: `${Math.max(1, String(score ?? "").length)}ch` }} className="min-w-0 appearance-none rounded-none border-0 border-b border-transparent bg-transparent p-0 text-center font-display-lg text-display-lg font-bold tracking-tighter text-primary font-headline-xl placeholder:text-primary placeholder:opacity-100 focus:border-primary/50 focus:outline-none" />
+<input ref={scoreInput} id="score-display" type="text" inputMode="numeric" maxLength={3} pattern="[0-9]{0,3}" value={score ?? ""} placeholder="—" aria-label={t("Numerical score from 0 to 100")} aria-invalid={invalidScore} onFocus={event => event.currentTarget.select()} onChange={event => { const value = event.target.value; if (!/^[0-9]{0,3}$/.test(value) || Number(value) > 100) return; setScore(value === "" ? null : Number(value)); setSaveMessage(""); }} style={{ width: `${Math.max(1, String(score ?? "").length)}ch` }} className="min-w-0 appearance-none rounded-none border-0 border-b border-transparent bg-transparent p-0 text-center font-display-lg text-display-lg font-bold tracking-tighter text-primary font-headline-xl placeholder:text-primary placeholder:opacity-100 focus:border-primary/50 focus:outline-none" />
 
 <span className="font-headline-md text-headline-md text-on-surface-variant">{"/100"}</span>
 
 </div>
 
 {score === null ? <p className="font-body-sm text-body-sm text-on-surface-variant">{t("Unrated · a score is optional")}</p> : <ScoreStars score={score} />}
-{invalidScore && <p id="score-error" className="text-body-sm text-error">{t("Use a whole-number score from 0 to 100.")}</p>}
 <button id="toggle-score" type="button" className="mt-2 rounded bg-surface-container px-3 py-1.5 font-label-sm text-label-sm text-on-surface-variant hover:text-primary" onClick={() => setScore(score === null ? 0 : null)}>{score === null ? t("Add score") : t("Remove score")}</button>
 </div>
 
