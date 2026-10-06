@@ -138,9 +138,9 @@ The review implementation reuses an owner-bound server library for at most 30 se
 
 
 The rating screen focuses on one game. Import progress and reviewed counts are
-opened as a compact bottom-right toast through Import details. The native manual
+automatically shown as a compact bottom-right toast when rating imports starts or resumes. There is no Import details button. The native manual
 popover stays above the rating modal without a second backdrop or focus trap;
-users can continue scoring, dismiss it, or reopen it. Close rating session hides the editor
+users can continue scoring or dismiss it. Resuming the rating session shows it again. Close rating session hides the editor
 without stopping imports; Resume rating games reopens it. The queue, position and
 current score/tier/status draft are kept in localStorage scoped to the verified
 profile ID. Refreshing or leaving the page restores a closed session in the same
@@ -155,7 +155,7 @@ to import remaining games. Pending requests are not a durable background job.
 Rating queues start with the most-played selected games (Steam hours descending),
 for both all-games and filtered some-games sessions, regardless of selection order.
 
-The rating popup includes Game info, opening the stored catalog game in a new
+The rating popup places Game info to the right of the game name, opening the stored catalog game in a new
 tab so the current draft and running import stay on the original page. It loads
 Steam overall review summaries only for the displayed game. A verified Steam
 account and the existing operation limit are required. Fixed Steam URLs use a

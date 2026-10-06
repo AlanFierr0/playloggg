@@ -255,9 +255,10 @@ test("Steam rates all games while import continues and retries rating saves with
   const dialog=page.getByRole("dialog",{name:"Rate imported games",exact:true});
   await expect(dialog.getByRole("heading",{name:"Hades",exact:true})).toBeVisible();
   await expect(dialog.getByText("Games processed",{exact:true})).not.toBeVisible();
-  await dialog.getByRole("button",{name:"Import details",exact:true}).click();
+  await expect(page.getByRole("button",{name:"Import details",exact:true})).toHaveCount(0);
   const details=page.getByRole("region",{name:"Import details",exact:true});
   await expect(page.getByRole("dialog",{name:"Import details",exact:true})).toHaveCount(0);
+  await expect(details).toBeVisible();
   const toastBox=await details.boundingBox();
   const viewport=page.viewportSize()!;
   expect(viewport.width-toastBox!.x-toastBox!.width).toBeCloseTo(16,0);
@@ -272,6 +273,10 @@ test("Steam rates all games while import continues and retries rating saves with
   await page.getByRole("button",{name:"Resume rating games (2)",exact:true}).click();
   const infoLink=dialog.getByRole("link",{name:"Game info Opens in a new tab",exact:true});
   await expect(infoLink).toHaveAttribute("href","/game/hades");
+  const titleBox=await dialog.getByRole("heading",{name:"Hades",exact:true}).boundingBox();
+  const linkBox=await infoLink.boundingBox();
+  expect(linkBox!.x).toBeGreaterThanOrEqual(titleBox!.x+titleBox!.width);
+  expect(linkBox!.y).toBeCloseTo(titleBox!.y,0);
   await expect(infoLink).toHaveAttribute("target","_blank");
   await expect(dialog.getByRole("link",{name:"Mostly Positive Opens in a new tab",exact:true})).toHaveAttribute("href","https://store.steampowered.com/app/101/#app_reviews_hash");
   await expect(dialog.getByText("80% positive · 100 reviews · All languages",{exact:true})).toBeVisible();
@@ -283,7 +288,7 @@ test("Steam rates all games while import continues and retries rating saves with
   await expect(dialog.getByRole("heading",{name:"Hades",exact:true})).toBeVisible();
   await dialog.getByRole("textbox",{name:"Score",exact:true}).fill("73");
   await expect(dialog.getByRole("textbox",{name:"Score",exact:true})).toHaveValue("73");
-  await dialog.getByRole("button",{name:"Import details",exact:true}).click();
+  await expect(details).toBeVisible();
   await expect(details.getByRole("progressbar")).toHaveAttribute("aria-valuenow","2");
   await page.screenshot({path:`e2e-artifacts/steam-toast-${info.project.name}.png`});
   await dialog.getByRole("button",{name:"Close rating session",exact:true}).click();
