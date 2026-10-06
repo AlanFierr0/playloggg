@@ -57,16 +57,29 @@ test("owner favorites stay independent, feature atomically, persist and follow p
   expect(state.ratings.find((r: { profile_id: number; game_id: number }) => r.profile_id === 2 && r.game_id === 2)).toMatchObject({ score: 80, tier: "B", status: "playing" });
 });
 
-test("public profile sections use real zero scores, review text and independent favorites", async ({ page }) => {
+test("public profile sections use real zero scores, review text and independent favorites", async ({ page, context }, testInfo) => {
   await page.goto("/u/fixture_public");
   await expect(page.getByRole("heading", { name: "Published Fixture", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Featured favorites" })).toBeVisible();
+  const viewedProfile = page.getByRole("link", { name: "Viewing profile Published Fixture", exact: true });
+  await expect(viewedProfile).toContainText("@fixture_public");
+  await expect(viewedProfile).toHaveAttribute("href", "/u/fixture_public");
   const navigation = page.getByRole("navigation", { name: "Profile sections" });
+  const identityBox = await viewedProfile.boundingBox();
+  const tabsBox = await navigation.boundingBox();
+  expect(identityBox!.y + identityBox!.height).toBeLessThan(tabsBox!.y);
+  expect(identityBox!.x + identityBox!.width).toBeCloseTo(tabsBox!.x + tabsBox!.width, 0);
   for (const [name, suffix] of [["Ranking", "ranking"], ["Reviews", "reviews"], ["Stats", "stats"], ["Tier List", "tiers"]]) {
     await navigation.getByRole("link", { name, exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`/u/fixture_public/${suffix}$`));
+    await expect(viewedProfile).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
   }
+  await context.addCookies([authCookie]);
+  await page.reload();
+  await expect(viewedProfile).toContainText("Published Fixture");
+  await expect(viewedProfile).not.toContainText("Fixture Owner");
+  await page.screenshot({ path: `e2e-artifacts/viewed-profile-${testInfo.project.name}.png` });
   await navigation.getByRole("link", { name: "Stats", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Rating distribution" })).toBeVisible();
   await expect(page.getByText("1 (4.2%)", { exact: true })).toBeVisible();
