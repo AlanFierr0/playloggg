@@ -62,14 +62,14 @@ return (<>
 
 <div className="flex flex-wrap items-center gap-2 p-1.5 bg-surface-container rounded-lg self-start md:self-auto max-w-full">
 <a className="flex items-center gap-2 px-3 py-1.5 rounded bg-surface-container-high hover:bg-surface-bright transition-colors text-on-surface group" href="#tier-s">
-<span className="font-label-md text-label-md font-bold text-primary">{"S"}</span>
+<span className={"font-label-md text-label-md font-bold " + tierThemes.S.color}>{"S"}</span>
 
 <span className="font-label-sm text-label-sm text-on-surface-variant group-hover:text-on-surface">{groups.find((group) => group.tier === "S")!.games.length}</span>
 
 </a>
 
 <a className="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-surface-container-high transition-colors text-on-surface-variant hover:text-on-surface group" href="#tier-a">
-<span className="font-label-md text-label-md font-bold text-secondary">{"A"}</span>
+<span className={"font-label-md text-label-md font-bold " + tierThemes.A.color}>{"A"}</span>
 
 <span className="font-label-sm text-label-sm text-on-surface-variant group-hover:text-on-surface">{groups.find((group) => group.tier === "A")!.games.length}</span>
 
@@ -97,7 +97,7 @@ return (<>
 </a>
 
 <a className="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-surface-container-high transition-colors text-on-surface-variant hover:text-on-surface group" href="#tier-f">
-<span className="font-label-md text-label-md font-bold text-error">{"F"}</span>
+<span className={"font-label-md text-label-md font-bold " + tierThemes.F.color}>{"F"}</span>
 
 <span className="font-label-sm text-label-sm text-on-surface-variant group-hover:text-on-surface">{groups.find((group) => group.tier === "F")!.games.length}</span>
 
@@ -109,19 +109,20 @@ return (<>
 
 {canEdit&&<p className="text-body-sm text-on-surface-variant">{t("Drag games between tiers, or use each game's tier selector. Changes save automatically.")}</p>}
 {canEdit&&<p role="status" aria-live="polite" className="text-body-sm text-primary">{t(pending ? "Saving tier…" : message)}</p>}
-<div className="flex flex-col gap-6 w-full" aria-busy={pending}>
+<div className="flex flex-col gap-px w-full border border-black bg-black" aria-busy={pending}>
 {groups.filter((group) => canEdit || group.tier !== null || group.games.length > 0).map((group) => {
  const key = group.tier ?? "Unassigned";
  const theme = tierThemes[key];
- return <section key={key} data-tier-drop={group.tier??"unassigned"} className={`flex flex-col md:flex-row gap-4 p-4 lg:p-6 rounded-xl shadow-sm ${theme.surface} ${over===key ? "ring-2 ring-on-surface ring-offset-2 ring-offset-surface" : ""}`} id={"tier-" + key.toLowerCase()}
+ return <section key={key} data-tier-drop={group.tier??"unassigned"} className={`flex min-h-20 bg-surface-container-low text-on-surface ${over===key ? "relative z-10 ring-2 ring-primary" : ""}`} id={"tier-" + key.toLowerCase()}
  onDragOver={event=>{if(canEdit&&dragged&&!pending){event.preventDefault();event.dataTransfer.dropEffect="move";setOver(key);}}}
  onDragLeave={event=>{if(!(event.relatedTarget instanceof Node)||!event.currentTarget.contains(event.relatedTarget))setOver(null);}}
  onDrop={event=>{if(!canEdit||!dragged||pending)return;event.preventDefault();const slug=dragged;endDrag();moveGame(slug,group.tier);}}>
- <div className="flex flex-wrap gap-2 md:flex-col justify-between items-center md:items-start w-full md:w-44 flex-shrink-0 p-4 rounded-lg">
- <div className="flex items-center md:flex-col md:items-start gap-2"><span className="font-display-lg text-display-lg font-bold leading-none">{group.tier ?? "—"}</span><div className="flex flex-col"><span className="font-label-md text-label-md font-semibold uppercase tracking-wider">{t(theme.label)}</span>{!group.tier && <span className="font-label-sm text-label-sm">{t("No tier selected")}</span>}</div></div>
- <div className="flex items-center gap-1.5 pt-0 md:pt-6"><span className="font-label-sm text-label-sm">{group.games.length} {group.games.length === 1 ? t("game") : t("games")}</span><span className="w-1.5 h-1.5 rounded-full bg-current"></span></div>
+ <div className={`flex w-16 sm:w-24 shrink-0 flex-col items-center justify-center gap-1 border-r border-black px-1 py-3 text-center ${theme.surface}`}>
+ <span className="font-body-lg text-2xl leading-none">{group.tier ?? "—"}</span>
+ <span className="font-label-sm text-label-sm uppercase tracking-wider">{t(theme.label)}</span>
+ <span className="font-label-sm text-label-sm">{group.games.length}</span>
  </div>
- <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-2 flex-1 min-w-0">
+ <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] content-start gap-2 flex-1 min-w-0 p-2">
  {group.games.map((game) => <TierCard key={game.slug} game={game} color={theme.color} publicBase={publicBase} editable={canEdit} disabled={pending} dragged={dragged===game.slug} onStart={()=>setDragged(game.slug)} onEnd={endDrag} onHover={tier=>setOver(tier===undefined ? null : tier??"Unassigned")} onMove={tier=>moveGame(game.slug,tier)} />)}
  {group.games.length === 0 && <p className="col-span-full py-8 font-body-sm text-body-sm">{t("No games assigned to this tier.")}</p>}
  </div>
@@ -148,12 +149,12 @@ return (<>
 }
 
 const tierThemes: Record<string, { label: string; color: string; surface: string }> = {
- S:{label:tierLabels.S,color:"text-primary",surface:"bg-primary text-on-primary"},
- A:{label:tierLabels.A,color:"text-secondary",surface:"bg-secondary text-on-secondary"},
- B:{label:tierLabels.B,color:"text-teal-300 [.light_&]:text-teal-700",surface:"bg-teal-300 text-teal-950"},
- C:{label:tierLabels.C,color:"text-[#d99b73] [.light_&]:text-[#8a4b25]",surface:"bg-[#d99b73] text-[#3e2316]"},
- D:{label:tierLabels.D,color:"text-[#ff9f87] [.light_&]:text-[#9a3412]",surface:"bg-[#ff9f87] text-[#4a170c]"},
- F:{label:tierLabels.F,color:"text-error",surface:"bg-error text-on-error"},
+ S:{label:tierLabels.S,color:"text-[#ff7f7f] [.light_&]:text-[#a32929]",surface:"bg-[#ff7f7f] text-black"},
+ A:{label:tierLabels.A,color:"text-[#ffbf7f] [.light_&]:text-[#854000]",surface:"bg-[#ffbf7f] text-black"},
+ B:{label:tierLabels.B,color:"text-[#ffdf7f] [.light_&]:text-[#735700]",surface:"bg-[#ffdf7f] text-black"},
+ C:{label:tierLabels.C,color:"text-[#ffff7f] [.light_&]:text-[#626200]",surface:"bg-[#ffff7f] text-black"},
+ D:{label:tierLabels.D,color:"text-[#bfff7f] [.light_&]:text-[#3c6200]",surface:"bg-[#bfff7f] text-black"},
+ F:{label:tierLabels.F,color:"text-[#7fff7f] [.light_&]:text-[#176117]",surface:"bg-[#7fff7f] text-black"},
  Unassigned:{label:"Unassigned",color:"text-on-surface-variant",surface:"bg-surface-container-low text-on-surface-variant"},
 };
 function TierCard({ game, color, publicBase, editable, disabled, dragged, onStart, onEnd, onHover, onMove }: { game: Game; color: string; publicBase?: string; editable:boolean; disabled:boolean; dragged:boolean; onStart:()=>void; onEnd:()=>void; onHover:(tier:Tier|null|undefined)=>void; onMove:(tier:Tier|null)=>void }) {

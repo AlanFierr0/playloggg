@@ -66,7 +66,7 @@ test("compact board clears a tier while preserving the log entry",async({page,co
   await context.addCookies([authCookie]);await page.goto("/tiers");
   const before=(await (await request.get("http://127.0.0.1:3101/__state")).json()).ratings;
   const columns=await page.locator("#tier-b > div").last().evaluate(node=>getComputedStyle(node).gridTemplateColumns.split(" ").length);
-  expect(columns).toBeGreaterThanOrEqual(info.project.name==="mobile"?3:8);
+  expect(columns).toBeGreaterThanOrEqual(info.project.name==="mobile"?2:8);
   await page.getByRole("button",{name:"Clear tier for Elden Ring: Shadow of the Erdtree",exact:true}).click();
   await expect(page.locator('#tier-unassigned [data-tier-game="elden-ring-shadow-of-the-erdtree"]')).toBeVisible();
   await expect(page.getByRole("button",{name:/Clear tier for/})).toHaveCount(0);
