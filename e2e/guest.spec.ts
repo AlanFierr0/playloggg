@@ -76,12 +76,16 @@ test("navigation stays usable and layouts avoid horizontal page overflow", async
   await expect(navigation.getByRole("link", { name: "Profile", exact: true })).toHaveCount(0);
   await page.locator("header").getByRole("link", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
-  for (const [name, path] of [["Games", "/games"], ["Compare", "/compare"], ["Discover", "/"]]) {
+  await expect(navigation.getByRole("link", {name:"Discover", exact:true})).toHaveCount(0);
+  for (const [name, path] of [["Games", "/games"], ["Compare", "/compare"]]) {
     await openNavigation(page);
     await navigation.getByRole("link", { name, exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`${path === "/" ? "/" : path}$`));
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   }
+  await page.getByRole("link", {name:"Playlogg home",exact:true}).click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveTitle("Home | Playlogg");
 });
 
 test("homepage omits the spotlight and links to the game catalog", async ({ page }) => {

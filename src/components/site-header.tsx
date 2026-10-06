@@ -9,7 +9,7 @@ import { ProfileAvatar } from "@/components/profile-avatar";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { useSitePreferences } from "@/components/site-preferences";
 
-const navigation = [{ href: "/", label: "Discover" }, { href: "/games", label: "Games" }, { href: "/tiers", label: "Tier List" }, { href: "/people", label: "Friends" }, { href: "/compare", label: "Compare" }];
+const navigation = [{ href: "/games", label: "Games" }, { href: "/tiers", label: "Tier List" }, { href: "/people", label: "Friends" }, { href: "/compare", label: "Compare" }];
 
 export function SiteHeader() {
   const t = useMessages();
@@ -26,7 +26,7 @@ export function SiteHeader() {
     <header onKeyDown={event => { if (event.key === "Escape" && menu.current?.open) { closeMenu(); menu.current.querySelector("summary")?.focus(); } }} className="fixed top-0 left-0 right-0 z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
       <div className="h-16 site-container mx-auto px-4 sm:px-6 lg:px-12 flex items-center justify-between gap-2 lg:gap-6">
         <div className="flex min-w-0 shrink-0 items-center gap-4 xl:gap-8">
-          <Link className="flex shrink-0 items-center gap-2 lg:gap-3 group min-h-11" href="/" aria-label={t("Playlogg home")}>
+          <Link className="flex shrink-0 items-center gap-2 lg:gap-3 group min-h-11" href="/" onClick={closeMenu} aria-label={t("Playlogg home")} aria-current={pathname === "/" ? "page" : undefined}>
             <span aria-hidden="true" className="material-symbols-outlined text-primary text-[28px]">sports_esports</span>
             <span translate="no" className="font-headline-md text-headline-md tracking-tight uppercase text-on-surface font-bold">Playlog<span className="text-primary">.gg</span></span>
           </Link>

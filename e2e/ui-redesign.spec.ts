@@ -56,7 +56,7 @@ test("profile preview, responsive menu and catalog disclosure work in both theme
   expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
 });
 
-test("profile creation preserves registration intent and ordinary sign-in", async ({page,context}) => {
+test("profile creation preserves registration intent and ordinary sign-in", async ({page,context},testInfo) => {
   await page.goto("/");
   await page.locator("main header").getByRole("link", {name:"Create your profile",exact:true}).click();
   await expect(page).toHaveURL(/\/login\?mode=register$/);
@@ -70,6 +70,14 @@ test("profile creation preserves registration intent and ordinary sign-in", asyn
   await context.addCookies([authCookie]);
   await page.goto("/");
   await expect(page.locator("main header").getByRole("link",{name:"Open your profile",exact:true})).toHaveAttribute("href","/profile");
+  await expect(page.getByRole("heading",{name:"Welcome back, Fixture Owner."})).toBeVisible();
+  await expect(page.locator("main header").getByRole("link",{name:"Log a game",exact:true})).toHaveAttribute("href","/log");
+  await expect(page.locator("main header").getByRole("link",{name:"Tier List",exact:true})).toHaveAttribute("href","/tiers");
+  await expect(page.getByRole("region",{name:"Recently logged"}).getByRole("link")).toHaveCount(1);
+  await expect(page.getByRole("region",{name:"Recently logged"}).getByRole("link")).toHaveAttribute("href","/game/elden-ring-shadow-of-the-erdtree");
+  await expect(page.getByRole("figure",{name:"Profile preview"})).toHaveCount(0);
+  await page.screenshot({path:`e2e-artifacts/ui-home-owner-${testInfo.project.name}.png`,fullPage:true});
+  expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
 });
 
 test("comparison and game details prioritize useful actions without inventing data", async ({page},testInfo) => {
