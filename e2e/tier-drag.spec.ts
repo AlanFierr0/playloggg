@@ -69,7 +69,14 @@ test("compact board clears a tier while preserving the log entry",async({page,co
   await expect(page.locator('[data-tier-game] .material-symbols-outlined').filter({hasText:"drag_indicator"})).toHaveCount(0);
   const columns=await page.locator("#tier-b > div").last().evaluate(node=>getComputedStyle(node).gridTemplateColumns.split(" ").length);
   expect(columns).toBeGreaterThanOrEqual(info.project.name==="mobile"?3:8);
-  await page.getByRole("button",{name:"Clear tier for Elden Ring: Shadow of the Erdtree",exact:true}).click();
+  const remove=page.getByRole("button",{name:"Clear tier for Elden Ring: Shadow of the Erdtree",exact:true});
+  await page.mouse.move(0,0);
+  if(await page.evaluate(()=>matchMedia("(hover: hover)").matches)){
+    await expect(remove).toHaveCSS("opacity","0");
+    await remove.focus();await expect(remove).toHaveCSS("opacity","1");
+    await remove.blur();await page.locator('[data-tier-game="elden-ring-shadow-of-the-erdtree"]').hover();
+  }
+  await expect(remove).toHaveCSS("opacity","1");await remove.click();
   await expect(page.locator('#tier-unassigned [data-tier-game="elden-ring-shadow-of-the-erdtree"]')).toBeVisible();
   await expect(page.getByRole("button",{name:/Clear tier for/})).toHaveCount(0);
   await page.reload();await expect(page.getByRole("combobox",{name:"Tier for Elden Ring: Shadow of the Erdtree",exact:true})).toHaveValue("");
