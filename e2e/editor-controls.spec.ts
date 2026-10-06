@@ -82,6 +82,28 @@ test("score slider works on an unrated game and discard returns to profile witho
   expect(state.ratings.filter((row: { profile_id: number; game_id: number }) => row.profile_id === 2 && row.game_id === 1)).toEqual([]);
 });
 
+test("editor tier dropdown matches the tier board colors in both themes", async ({ page, context }, testInfo) => {
+  await context.addCookies([authCookie]);
+  for (const theme of ["dark", "light"]) {
+    await context.addCookies([{ name: "playlogg_theme", value: theme, url: "http://127.0.0.1:3100" }]);
+    await page.goto("/log?game=hades");
+    await page.locator("#tier-badge").click();
+    const options = page.getByRole("menuitemradio");
+    for (const [index, color] of ["rgb(255, 127, 127)", "rgb(255, 191, 127)", "rgb(255, 223, 127)", "rgb(255, 255, 127)", "rgb(191, 255, 127)", "rgb(127, 255, 127)"].entries()) {
+      await expect(options.nth(index)).toHaveCSS("background-color", color);
+      await expect(options.nth(index)).toHaveCSS("color", "rgb(0, 0, 0)");
+    }
+    expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
+    await page.screenshot({ path: `e2e-artifacts/editor-tiers-${testInfo.project.name}-${theme}.png`, fullPage: true });
+    await options.nth(0).click();
+    await expect(page.locator("#tier-badge")).toHaveCSS("background-color", "rgb(255, 127, 127)");
+    await page.locator("#tier-badge").click();
+    await expect(page.getByRole("menuitemradio").nth(0)).toHaveAttribute("aria-checked", "true");
+    await page.keyboard.press("Escape");
+    await expect(page.locator("#tier-badge")).toBeFocused();
+  }
+});
+
 test("score descriptions follow typing and sliding without numeric labels", async ({ page, context }) => {
   await context.addCookies([authCookie]);
   await page.goto("/log?game=hades");

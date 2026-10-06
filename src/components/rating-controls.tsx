@@ -8,8 +8,8 @@ import type { Tier } from "@/types/domain";
 
 const tiers: (Tier | null)[] = ["S", "A", "B", "C", "D", "F", null];
 const colors: Record<Tier, string> = {
-  S: "bg-primary/10 text-primary", A: "bg-secondary/10 text-secondary", B: "bg-tertiary/10 text-tertiary",
-  C: "bg-surface-container-high text-on-surface-variant", D: "bg-surface-container-high text-on-surface-variant", F: "bg-error/10 text-error",
+  S: "bg-[#ff7f7f] text-black", A: "bg-[#ffbf7f] text-black", B: "bg-[#ffdf7f] text-black",
+  C: "bg-[#ffff7f] text-black", D: "bg-[#bfff7f] text-black", F: "bg-[#7fff7f] text-black",
 };
 
 export function TierBadge({ value, onChange }: { value: Tier | null; onChange: (tier: Tier | null) => void }) {
@@ -43,7 +43,7 @@ export function TierBadge({ value, onChange }: { value: Tier | null; onChange: (
           }
         }}>
           {tiers.map((tier, index) => (
-            <button ref={(element) => { items.current[index] = element; }} key={tier ?? "unassigned"} role="menuitemradio" aria-checked={value === tier} type="button" className={`flex w-full items-center gap-3 rounded px-3 py-2 text-left font-label-md text-label-md hover:bg-surface-container-highest ${value === tier ? "text-primary" : "text-on-surface"}`} onClick={() => { onChange(tier); setOpen(false); trigger.current?.focus(); }}>
+            <button ref={(element) => { items.current[index] = element; }} key={tier ?? "unassigned"} role="menuitemradio" aria-checked={value === tier} type="button" className={`flex w-full items-center gap-3 rounded px-3 py-2 text-left font-label-md text-label-md hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-on-surface ${tier ? colors[tier] : "text-on-surface"} ${value === tier ? "ring-2 ring-inset ring-current" : ""}`} onClick={() => { onChange(tier); setOpen(false); trigger.current?.focus(); }}>
               <span className="w-4">{tier ?? "—"}</span><span className="font-body-sm text-body-sm">{tier ? t(labels[tier]) : t("Unassigned")}</span>
             </button>
           ))}
