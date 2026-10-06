@@ -56,7 +56,7 @@ export function SiteHeader() {
               </div>
             </div>
           </details>
-          <Link className="flex h-11 w-11 shrink-0 items-center justify-center" href={access?.signedIn ? "/profile" : "/login"} aria-label={access?.signedIn ? t("Your profile") : t("Sign in")}><ProfileAvatar src={access?.canEdit ? profile.avatarUrl : null} name={access?.canEdit ? profile.displayName : "Account"} className="w-8 h-8 rounded-full ring-1 ring-surface-variant hover:ring-primary transition-all" /></Link>
+          <Link className="group flex h-11 w-11 shrink-0 items-center justify-center rounded-xl" href={access?.signedIn ? "/profile" : "/login"} aria-label={access?.signedIn ? t("Your profile") : t("Sign in")} title={access?.signedIn ? t("Your profile") : t("Sign in")}><ProfileAvatar src={access?.canEdit ? profile.avatarUrl : null} name={access?.canEdit ? profile.displayName : "Account"} className="h-11 w-11 rounded-xl ring-1 ring-inset ring-outline-variant/30 group-hover:ring-primary group-focus-visible:ring-primary transition-colors" /></Link>
         </div>
       </div>
 
@@ -68,7 +68,7 @@ function PreferenceControls({ locale, theme, setLocale, setTheme }: { locale: "e
   const nextTheme = theme === "dark" ? "light" : "dark";
   const nextLocale = locale === "en" ? "es-AR" : "en";
   return <>
-    <button translate="no" type="button" onClick={() => setTheme(nextTheme)} aria-label={locale === "en" ? `Switch to ${nextTheme} mode` : `Cambiar a modo ${nextTheme === "light" ? "claro" : "oscuro"}`} aria-pressed={theme === "light"} title={locale === "en" ? `Switch to ${nextTheme} mode` : `Cambiar a modo ${nextTheme === "light" ? "claro" : "oscuro"}`} className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded bg-surface-container-low text-on-surface-variant hover:text-primary focus-visible:text-primary"><span className="material-symbols-outlined text-[20px]" aria-hidden="true">{theme === "dark" ? "light_mode" : "dark_mode"}</span></button>
-    <button translate="no" type="button" onClick={() => setLocale(nextLocale)} aria-label={locale === "en" ? "Switch to Spanish (Argentina)" : "Cambiar a inglés"} title={locale === "en" ? "Switch to Spanish (Argentina)" : "Cambiar a inglés"} className="inline-flex h-10 min-w-11 shrink-0 items-center justify-center rounded bg-surface-container-low px-2 text-primary font-label-sm text-label-sm font-semibold hover:bg-surface-container-high">{locale === "en" ? "EN" : "ES-AR"}</button>
+    <button translate="no" type="button" onClick={() => setTheme(nextTheme)} aria-label={locale === "en" ? `Switch to ${nextTheme} mode` : `Cambiar a modo ${nextTheme === "light" ? "claro" : "oscuro"}`} aria-pressed={theme === "light"} title={locale === "en" ? `Switch to ${nextTheme} mode` : `Cambiar a modo ${nextTheme === "light" ? "claro" : "oscuro"}`} className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high hover:text-primary focus-visible:text-primary transition-colors"><span className="material-symbols-outlined text-[20px]" aria-hidden="true">{theme === "dark" ? "light_mode" : "dark_mode"}</span></button>
+    <button translate="no" type="button" onClick={() => setLocale(nextLocale)} aria-label={locale === "en" ? "Switch to Spanish (Argentina)" : "Cambiar a inglés"} title={locale === "en" ? "Switch to Spanish (Argentina)" : "Cambiar a inglés"} className="inline-flex h-11 min-w-11 shrink-0 items-center justify-center rounded-xl bg-surface-container-low px-2 text-primary font-label-sm text-label-sm font-semibold hover:bg-surface-container-high transition-colors">{locale === "en" ? "EN" : "ES-AR"}</button>
   </>;
 }
