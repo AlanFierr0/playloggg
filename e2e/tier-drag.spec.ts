@@ -44,6 +44,7 @@ test("pointer handle moves a game, supports cancellation and keeps navigation av
 test("keyboard tier changes can clear assignment and failed saves keep the existing tier",async({page,context,request})=>{
   await context.addCookies([authCookie]);await page.goto("/tiers");
   const selector=page.getByRole("combobox",{name:"Tier for Elden Ring: Shadow of the Erdtree",exact:true});
+  await selector.focus();
   await request.post("http://127.0.0.1:3101/__fail-save");await selector.selectOption("S");
   await expect(page.getByRole("status")).toContainText("Tier could not be saved");
   await expect(selector).toHaveValue("B");await expect(page.locator('#tier-b [data-tier-game="elden-ring-shadow-of-the-erdtree"]')).toBeVisible();
@@ -65,6 +66,7 @@ test("another user's public tier board has no editing or dragging controls",asyn
 test("compact board clears a tier while preserving the log entry",async({page,context,request},info)=>{
   await context.addCookies([authCookie]);await page.goto("/tiers");
   const before=(await (await request.get("http://127.0.0.1:3101/__state")).json()).ratings;
+  await expect(page.locator('[data-tier-game] .material-symbols-outlined').filter({hasText:"drag_indicator"})).toHaveCount(0);
   const columns=await page.locator("#tier-b > div").last().evaluate(node=>getComputedStyle(node).gridTemplateColumns.split(" ").length);
   expect(columns).toBeGreaterThanOrEqual(info.project.name==="mobile"?3:8);
   await page.getByRole("button",{name:"Clear tier for Elden Ring: Shadow of the Erdtree",exact:true}).click();
@@ -74,6 +76,14 @@ test("compact board clears a tier while preserving the log entry",async({page,co
   const after=(await (await request.get("http://127.0.0.1:3101/__state")).json()).ratings;
   expect(after).toHaveLength(before.length);
   for(const row of before){const saved=after.find((r:{profile_id:number;game_id:number})=>r.profile_id===row.profile_id&&r.game_id===row.game_id);if(row.profile_id===2&&row.game_id===2){const {tier,updated_at,...details}=row;void tier;void updated_at;expect(saved).toMatchObject({...details,tier:null});}else expect(saved).toEqual(row);}
+  const card=page.locator('[data-tier-game="elden-ring-shadow-of-the-erdtree"]');
+  const expandedHeight=(await card.boundingBox())!.height;
+  await page.getByRole("combobox").selectOption("A");
+  await expect(page.locator('#tier-a [data-tier-game="elden-ring-shadow-of-the-erdtree"]')).toBeVisible();
+  await expect.poll(async()=>(await card.boundingBox())!.height).toBeLessThan(expandedHeight);
+  await expect(card.locator("select")).toHaveClass(/sr-only/);
+  await expect.poll(async()=>(await card.locator("select").boundingBox())!.height).toBeLessThanOrEqual(1);
+  await expect(card.locator('.material-symbols-outlined').filter({hasText:"drag_indicator"})).toHaveCount(0);
   await page.screenshot({path:`e2e-artifacts/tier-compact-${info.project.name}.png`,fullPage:true});
 });
 
