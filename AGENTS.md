@@ -257,3 +257,8 @@ The owner Tier List supports drag/drop and an accessible per-game tier selector,
 with automatic persistence of tier only. Never use a full entry upsert for a board
 move or create an unlogged entry. Public boards remain read-only. See
 docs/tier-board-editing.md.
+
+The user approved live friend search across all public profiles, even without
+discovery opt-in. Blank-query browsing, following and community feeds still use
+discovery consent; private and blocked profiles stay hidden. See
+docs/friends-and-comparison.md.

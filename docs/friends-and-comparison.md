@@ -1,16 +1,23 @@
 # Friends and game comparisons
 
 1. Open **Friends** in the main navigation.
-2. Search by display name or handle (an initial `@` is optional).
+2. Type a display name or handle (an initial `@` is optional). Results update after
+   a 250 ms pause; Search/Enter still work, and clearing resets pagination.
 3. Follow a profile to keep it in **Following** and see its eligible updates in
-   **Activity feed**. Unfollow and block controls remain available.
+   **Activity feed**. Following requires discovery consent; Unfollow remains available.
 4. Choose **Compare games** on a friend card or in Following. Your authenticated
    profile is always first; the friend is preselected as the second profile.
 
-Friends appear in search only after publishing their profile and separately
-opting into discovery in Profile settings. Profiles remain private by default.
+The user approved searching all public profiles, including those without discovery
+consent. Private profiles stay hidden. The empty-query directory still lists only
+discovery participants; following and community feeds retain their existing consent
+requirements. Search cards offer comparison for any public match and hide Follow
+when the target has not enabled discovery. Profiles default to public, and owners
+may make them private.
 Blocked connections in either direction are excluded from friend search.
-Search is case-insensitive and pagination preserves the search term.
+Search is case-insensitive and pagination preserves the search term. Next.js Form
+reuses the server-rendered query and anonymous reads; live updates replace history,
+preserve focus/scroll and cancel pending timers on submit/unmount.
 
 ## Owner-only private comparison
 
@@ -32,7 +39,7 @@ difference. Shared games can still be compared below that threshold.
 ## Verification
 
 `e2e/friends.spec.ts` covers desktop/mobile search, follow persistence, comparison,
-unfollow, block/unblock, private/link-only discovery exclusion, Argentine Spanish,
+unfollow, private profile exclusion, public link-only search, rapid input/clear/reload, Argentine Spanish,
 accessibility and horizontal overflow. It also checks that the owner's private
 public page and comparison image export remain unavailable. Comparison tests
 cover guest/public access and exclusion of other users' private profiles.

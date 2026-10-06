@@ -4,6 +4,7 @@ import { getMessages } from "@/lib/locale/server";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import { getAccount } from "@/lib/owner";
 import { SocialControls } from "@/components/social-controls";
+import { FriendSearch } from "@/components/friend-search";
 export async function DiscoverProfiles({
   full = false,
   page = 1,
@@ -48,12 +49,8 @@ export async function DiscoverProfiles({
         <nav aria-label={t("Friends navigation")} className="flex flex-wrap gap-3">
           {account?.profile ? <><Link href="/profile/social" className="rounded bg-primary/10 text-primary px-4 py-3">{t("Following")}</Link><Link href="/profile/activity" className="rounded bg-surface-container text-primary px-4 py-3">{t("Activity feed")}</Link></> : <Link href="/login" className="rounded bg-primary-container text-on-primary-container px-4 py-3">{t("Sign in to follow friends")}</Link>}
         </nav>
-        <form action="/people" method="get" className="flex flex-col sm:flex-row gap-3 items-end">
-          <label className="w-full min-w-0 space-y-2"><span className="block">{t("Find friends")}</span><input name="q" defaultValue={search} maxLength={80} placeholder={t("Search by name or handle")} className="catalog-control" /></label>
-          <button className="shrink-0 rounded bg-primary-container text-on-primary-container px-5 py-3">{t("Search")}</button>
-          {search && <Link href="/people" className="shrink-0 text-primary px-4 py-3">{t("Clear search")}</Link>}
-        </form>
-        <p className="text-body-sm text-on-surface-variant">{t("Friends need a public profile with discovery enabled to appear here.")}</p>
+        <FriendSearch query={search} />
+        <p className="text-body-sm text-on-surface-variant">{t("Search any public profile by name or handle. Private profiles stay hidden.")}</p>
       </div>}
       {profiles.length ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -85,7 +82,7 @@ export async function DiscoverProfiles({
                 )}
               </div>
             </Link>
-            {full && account?.profile && account.profile.id !== profile.id && <div className="space-y-3"><SocialControls target={profile.id} followed={followed.has(profile.id)} /><Link href={`/compare?right=${encodeURIComponent(profile.handle)}`} aria-label={`${t("Compare games")} ${profile.display_name}`} className="inline-flex min-h-11 items-center rounded bg-primary/10 text-primary px-4 py-2">{t("Compare games")}</Link></div>}
+            {full && account?.profile && account.profile.id !== profile.id && <div className="space-y-3">{(profile.is_discoverable || followed.has(profile.id)) && <SocialControls target={profile.id} followed={followed.has(profile.id)} />}<Link href={`/compare?right=${encodeURIComponent(profile.handle)}`} aria-label={`${t("Compare games")} ${profile.display_name}`} className="inline-flex min-h-11 items-center rounded bg-primary/10 text-primary px-4 py-2">{t("Compare games")}</Link></div>}
             </article>
           ))}
         </div>
