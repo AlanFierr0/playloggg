@@ -109,20 +109,19 @@ return (<>
 
 {canEdit&&<p className="text-body-sm text-on-surface-variant">{t("Drag games between tiers, or use each game's tier selector. Changes save automatically.")}</p>}
 {canEdit&&<p role="status" aria-live="polite" className="text-body-sm text-primary">{t(pending ? "Saving tier…" : message)}</p>}
-<div className="flex flex-col gap-px w-full border border-black bg-black" aria-busy={pending}>
+<div className="flex flex-col gap-6 w-full" aria-busy={pending}>
 {groups.filter((group) => canEdit || group.tier !== null || group.games.length > 0).map((group) => {
  const key = group.tier ?? "Unassigned";
  const theme = tierThemes[key];
- return <section key={key} data-tier-drop={group.tier??"unassigned"} className={`flex min-h-20 bg-surface-container-low text-on-surface ${over===key ? "relative z-10 ring-2 ring-primary" : ""}`} id={"tier-" + key.toLowerCase()}
+ return <section key={key} data-tier-drop={group.tier??"unassigned"} className={`flex flex-col md:flex-row gap-4 p-4 lg:p-6 rounded-xl shadow-sm ${theme.surface} ${over===key ? "ring-2 ring-on-surface ring-offset-2 ring-offset-surface" : ""}`} id={"tier-" + key.toLowerCase()}
  onDragOver={event=>{if(canEdit&&dragged&&!pending){event.preventDefault();event.dataTransfer.dropEffect="move";setOver(key);}}}
  onDragLeave={event=>{if(!(event.relatedTarget instanceof Node)||!event.currentTarget.contains(event.relatedTarget))setOver(null);}}
  onDrop={event=>{if(!canEdit||!dragged||pending)return;event.preventDefault();const slug=dragged;endDrag();moveGame(slug,group.tier);}}>
- <div className={`flex w-16 sm:w-24 shrink-0 flex-col items-center justify-center gap-1 border-r border-black px-1 py-3 text-center ${theme.surface}`}>
- <span className="font-body-lg text-2xl leading-none">{group.tier ?? "—"}</span>
- <span className="font-label-sm text-label-sm uppercase tracking-wider">{t(theme.label)}</span>
- <span className="font-label-sm text-label-sm">{group.games.length}</span>
+ <div className="flex flex-wrap gap-2 md:flex-col justify-between items-center md:items-start w-full md:w-44 flex-shrink-0 p-4 rounded-lg">
+ <div className="flex items-center md:flex-col md:items-start gap-2"><span className="font-display-lg text-display-lg font-bold leading-none">{group.tier ?? "—"}</span><div className="flex flex-col"><span className="font-label-md text-label-md font-semibold uppercase tracking-wider">{t(theme.label)}</span>{!group.tier && <span className="font-label-sm text-label-sm">{t("No tier selected")}</span>}</div></div>
+ <div className="flex items-center gap-1.5 pt-0 md:pt-6"><span className="font-label-sm text-label-sm">{group.games.length} {group.games.length === 1 ? t("game") : t("games")}</span><span className="w-1.5 h-1.5 rounded-full bg-current"></span></div>
  </div>
- <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] content-start gap-2 flex-1 min-w-0 p-2">
+ <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-2 flex-1 min-w-0">
  {group.games.map((game) => <TierCard key={game.slug} game={game} color={theme.color} publicBase={publicBase} editable={canEdit} disabled={pending} dragged={dragged===game.slug} onStart={()=>setDragged(game.slug)} onEnd={endDrag} onHover={tier=>setOver(tier===undefined ? null : tier??"Unassigned")} onMove={tier=>moveGame(game.slug,tier)} />)}
  {group.games.length === 0 && <p className="col-span-full py-8 font-body-sm text-body-sm">{t("No games assigned to this tier.")}</p>}
  </div>
