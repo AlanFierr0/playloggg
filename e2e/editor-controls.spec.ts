@@ -7,6 +7,8 @@ test("PC stores persist independently and can be cleared without changing other 
   await context.addCookies([authCookie]);
   for (const [value,label] of [["pc_battlenet","PC / Battle.net"],["pc_gog","PC / GOG"],["pc_epic","PC / Epic Games"],["pc_ea","PC / EA app"],["pc_ubisoft","PC / Ubisoft Connect"],["pc_xbox","PC / Xbox app"],["pc_other","PC / Other"]]) {
     await page.goto("/log?game=hades");
+    const pc=page.getByRole("button",{name:"PC",exact:true});
+    if(await pc.getAttribute("aria-pressed")!=="true") await pc.click();
     await page.getByRole("button",{name:label,exact:true}).click();
     await page.locator("#commit-rating").click();
     await expect(page).toHaveURL(/\/profile$/);
@@ -21,6 +23,27 @@ test("PC stores persist independently and can be cleared without changing other 
   await page.goto("/log?game=hades");
   await expect(page.locator("#platform-selector [aria-pressed=true]")).toHaveCount(0);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+
+test("PC stores appear below main platforms and collapse for console selection",async({page,context},testInfo)=>{
+  await context.addCookies([authCookie]);
+  await page.goto("/log?game=hades");
+  const pc=page.getByRole("button",{name:"PC",exact:true});
+  const stores=page.getByRole("group",{name:"PC store",exact:true});
+  await expect(stores).toBeHidden();
+  await pc.click();
+  await expect(stores).toBeVisible();
+  await expect(page.getByRole("button",{name:"PC / Steam",exact:true})).toHaveAttribute("aria-pressed","true");
+  const main=await page.locator("#platform-selector").boundingBox();
+  const submenu=await stores.boundingBox();
+  expect(submenu!.y).toBeGreaterThanOrEqual(main!.y+main!.height);
+  await page.locator("#pc-store-selector").screenshot({path:`e2e-artifacts/pc-stores-${testInfo.project.name}.png`});
+  await page.getByRole("button",{name:"PC / GOG",exact:true}).click();
+  await expect(pc).toHaveAttribute("aria-pressed","true");
+  await page.getByRole("button",{name:"PlayStation 5",exact:true}).click();
+  await expect(stores).toBeHidden();
+  await expect(pc).toHaveAttribute("aria-expanded","false");
+  await expect(page.getByRole("button",{name:"PlayStation 5",exact:true})).toHaveAttribute("aria-pressed","true");
 });
 
 test("score slider works on an unrated game and discard returns to profile without saving", async ({ page, context, request }) => {

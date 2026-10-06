@@ -26,6 +26,7 @@ const scoreInput = useRef<HTMLInputElement>(null);
 const invalidScore = score !== null && (!Number.isInteger(score) || score < 0 || score > 100);
 const [tier, setTier] = useState<Tier | null>(game.tier ?? null);
 const [platform, setPlatform] = useState<PlayedPlatform | null>(game.platform ?? null);
+const isPC = platform?.startsWith("pc") ?? false;
 const [status, setStatus] = useState<PlaybackStatus | null>(game.status ?? null);
 const [hours, setHours] = useState(game.hoursPlayed == null ? "" : String(game.hoursPlayed));
 const [date, setDate] = useState(game.completedOn ?? "");
@@ -128,9 +129,16 @@ return (<><fieldset disabled={pending} className="contents">
 <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{t("Platform Played")}</span>
 
 <div className="flex flex-wrap gap-2" id="platform-selector">
-{(Object.entries(playedPlatformLabels) as [PlayedPlatform, string][]).map(([value, label]) => <button key={value} type="button" onClick={() => setPlatform(platform === value ? null : value)} title={t("Select platform; click again to clear")} aria-pressed={platform === value} className={`platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider flex items-center gap-1.5 ${platform === value ? "bg-primary/15 text-primary shadow-sm" : "bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface"}`}>
+<button type="button" onClick={() => setPlatform(isPC ? null : "pc")} title={t("Select platform; click again to clear")} aria-pressed={isPC} aria-expanded={isPC} aria-controls="pc-store-selector" className={`platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider flex items-center gap-1.5 ${isPC ? "bg-primary/15 text-primary shadow-sm" : "bg-surface-container-highest text-on-surface-variant hover:bg-surface-bright hover:text-on-surface"}`}><span aria-hidden="true" className="material-symbols-outlined text-[14px]">desktop_windows</span>PC</button>
+{(Object.entries(playedPlatformLabels) as [PlayedPlatform, string][]).filter(([value]) => !value.startsWith("pc")).map(([value, label]) => <button key={value} type="button" onClick={() => setPlatform(platform === value ? null : value)} title={t("Select platform; click again to clear")} aria-pressed={platform === value} className={`platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider flex items-center gap-1.5 ${platform === value ? "bg-primary/15 text-primary shadow-sm" : "bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface"}`}>
 <span aria-hidden="true" className="material-symbols-outlined text-[14px]">{value.startsWith("pc") ? "desktop_windows" : value === "steam_deck" ? "tablet" : "sports_esports"}</span>
 {t(label)}</button>)}
+</div>
+<div id="pc-store-selector" hidden={!isPC}>
+  {isPC && <div className="ml-3 border-l-2 border-primary/30 pl-3 space-y-2" role="group" aria-label={t("PC store")}>
+    <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{t("PC store")}</span>
+    <div className="flex flex-wrap gap-2">{(Object.entries(playedPlatformLabels) as [PlayedPlatform, string][]).filter(([value]) => value.startsWith("pc")).map(([value,label]) => <button key={value} type="button" aria-label={t(label)} aria-pressed={platform === value} onClick={() => setPlatform(platform === value ? null : value)} title={t("Select platform; click again to clear")} className={`platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider ${platform === value ? "bg-primary/15 text-primary shadow-sm" : "bg-surface-container-highest text-on-surface-variant hover:bg-surface-bright hover:text-on-surface"}`}>{t(label).replace(/^PC \/ /, "")}</button>)}</div>
+  </div>}
 </div>
 
 </div>
