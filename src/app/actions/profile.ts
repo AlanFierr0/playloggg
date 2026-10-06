@@ -32,7 +32,7 @@ export async function createProfile(_previous: { message: string }, form: FormDa
     if (!account) return { message: "Sign in before creating your profile." };
     if (!account.profile) {
       const admin = createAuthAdmin();
-      const { error } = await admin.from("profiles").insert({ ...names, owner_user_id: account.user.id, is_public: false });
+      const { error } = await admin.from("profiles").insert({ ...names, owner_user_id: account.user.id, is_public: true });
       if (error) {
         // A concurrent submission may already have created this user's one profile.
         const { data: existing } = await account.supabase.from("profiles").select("id").eq("owner_user_id", account.user.id).maybeSingle();

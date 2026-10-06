@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import ts from "typescript";
 import { profileSettings, publicProfilePath } from "../src/lib/profile-settings.ts";
+import { profileNames } from "../src/lib/steam-openid.ts";
 
 const form = (values) => { const data = new FormData(); for (const [key, value] of Object.entries(values)) data.set(key, value); return data; };
 function load(relative, dependencies) {
@@ -13,6 +14,23 @@ function load(relative, dependencies) {
   vm.runInNewContext(compiled, context);
   return context.exports;
 }
+
+test("new profiles are public and owned by the verified account", async () => {
+  let account = null, inserted;
+  const { createProfile } = load("../src/app/actions/profile.ts", {
+    "next/navigation": { redirect(path) { assert.equal(path, "/profile"); } },
+    "next/cache": { revalidatePath() {} },
+    "@/lib/owner": { getAccount: async () => account },
+    "@/lib/steam-openid": { profileNames }, "@/lib/profile-settings": { profileSettings },
+    "@/lib/supabase/auth-admin": { createAuthAdmin: () => ({ from(table) { assert.equal(table, "profiles"); return { async insert(value) { inserted = value; return { error: null }; } }; } }) },
+  });
+  const input = form({ handle: "new_player", displayName: "New Player", owner_user_id: "forged", is_public: "false", is_discoverable: "true" });
+  assert.match((await createProfile({}, input)).message, /Sign in/);
+  assert.equal(inserted, undefined);
+  account = { user: { id: "verified-user" }, profile: null };
+  await createProfile({}, input);
+  assert.deepEqual(JSON.parse(JSON.stringify(inserted)), { handle: "new_player", display_name: "New Player", owner_user_id: "verified-user", is_public: true });
+});
 
 test("settings require explicit operations and whitelist names or visibility independently", () => {
   assert.deepEqual(profileSettings(form({ setting: "names", handle: "valid_user", displayName: "  Player  ", is_public: "true", owner_user_id: "other" })), { setting: "names", values: { handle: "valid_user", display_name: "Player" } });

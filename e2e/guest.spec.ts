@@ -126,6 +126,8 @@ test("navigation stays usable and layouts avoid horizontal page overflow", async
 
 test("homepage omits the spotlight and links to the game catalog", async ({ page }) => {
   await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Community discovery", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Manage profile visibility", exact: true })).toHaveCount(0);
   await expect(page.getByText("Editor's Spotlight", {exact:true})).toHaveCount(0);
   await expect(page.getByRole("heading", {name:"Build your gaming identity.", exact:true})).toBeVisible();
   const hero=await page.locator("main header").boundingBox();const catalog=await page.locator("main section").filter({has:page.getByRole("heading",{name:"Games worth exploring",exact:true})}).boundingBox();expect(hero!.x).toBe(catalog!.x);expect(hero!.width).toBe(catalog!.width);

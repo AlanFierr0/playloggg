@@ -12,7 +12,7 @@ favorites, then the taste engine, Compare v2, discovery and sharing/social growt
 The roadmap authorizes this direction and visible redesign scope, but alternative
 favorite formats, customization, formulas and access changes still need agreement.
 Do not infer favorites from scores/tiers or independent preference rankings from
-score sorting. Keep private defaults. Discovery is an explicitly approved separate opt-in after
+score sorting. Profiles default to public, as subsequently requested by the user. Owners can still make them private. Existing profiles were approved for a one-time change to public; discovery remains opt-in. Discovery is an explicitly approved separate opt-in after
 publishing; link-only public profiles must not appear in discovery. Backup/recovery implementation is deferred.
 
 Profile v2 decisions are agreed: unlimited independent favorites, optional ordered

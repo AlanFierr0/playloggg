@@ -2,14 +2,12 @@ import Link from "next/link";
 import { getCommunity, getTasteDiscovery } from "@/lib/community";
 import { getCatalog } from "@/lib/portfolio";
 import { getMessages } from "@/lib/locale/server";
-import { getAccount } from "@/lib/owner";
 export async function CommunityDiscovery() {
-  const [community, discovery, catalog, t, account] = await Promise.all([
+  const [community, discovery, catalog, t] = await Promise.all([
     getCommunity(),
     getTasteDiscovery(),
     getCatalog(),
     getMessages(),
-    getAccount(),
   ]);
   const { recommendations, neighbors } = discovery;
   const games = new Map(catalog.map((game) => [game.id, game]));
@@ -20,29 +18,7 @@ export async function CommunityDiscovery() {
     !neighbors.length &&
     !community.reviews.length
   )
-    return (
-      <section className="w-full site-container mx-auto px-4 sm:px-6 lg:px-12 py-6 sm:py-10 space-y-3">
-        <h2 className="font-headline-lg text-headline-lg">
-          {t("Community discovery")}
-        </h2>
-        <p className="max-w-3xl text-on-surface-variant">
-          {t(
-            "Community discovery grows with profiles that choose to participate. Publish your profile and opt into discovery to join.",
-          )}
-        </p>
-        <Link href={account?.profile ? "/settings" : account ? "/signup" : "/login?mode=register"} className="ui-action bg-surface-container text-primary">{t(account?.profile ? "Manage profile visibility" : "Create your profile")}</Link>
-        <details className="text-body-sm text-on-surface-variant space-y-3">
-          <summary className="cursor-pointer text-primary">
-            {t("How community results work")}
-          </summary>
-          <p className="pt-3">
-            {t(
-              "Trending uses distinct rating activity over 30 days. Scores and controversy require at least 5 ratings. Recommendations need 85% Taste Match across 5 shared scored games.",
-            )}
-          </p>
-        </details>
-      </section>
-    );
+    return null;
   const sections = [
     {
       title: "Trending games",

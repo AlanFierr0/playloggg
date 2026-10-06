@@ -14,12 +14,12 @@ test('email login options, recovery and verified profile routing work without sa
   await expect(page.getByLabel('Password',{exact:true})).toHaveCount(0);
   await page.getByLabel('Email',{exact:true}).fill('new-player@example.com');
   await page.getByRole('button',{name:'Send sign-in link',exact:true}).click();
-  await expect(page.getByText('Check your inbox for a sign-in link. New accounts start with a private profile.')).toBeVisible();
+  await expect(page.getByText('Check your inbox for a sign-in link. New accounts start with a public profile.')).toBeVisible();
   await page.getByRole('button',{name:'Create account',exact:true}).first().click();
   await page.getByLabel('Email',{exact:true}).first().fill('new-player@example.com');
   await page.getByLabel('Password',{exact:true}).fill('fixture-password-123');
   await page.getByRole('button',{name:'Create account',exact:true}).last().click();
-  await expect(page.getByText('Check your inbox to verify your email, then sign in and create your private profile.')).toBeVisible();
+  await expect(page.getByText('Check your inbox to verify your email, then sign in and create your public profile.')).toBeVisible();
   await page.getByRole('button',{name:'Forgot password?',exact:true}).click();
   await page.getByLabel('Email',{exact:true}).first().fill('owner@fixture.test');
   await page.getByRole('button',{name:'Send reset link',exact:true}).click();

@@ -49,7 +49,7 @@ export function ProfileSettingsForm({ profile }: { profile: Profile }) {
       <h2 className="font-headline-lg text-headline-lg">{t("Profile visibility")}</h2>
       <p className="text-primary">{profile.isPublic ? t("Public") : t("Private")}</p>
       <p className="text-on-surface-variant">{t("Publishing makes your profile and its public data visible to anyone with the link. Your account email and Steam ID stay private.")}</p>
-      <p className="text-on-surface-variant">{t("Profiles start private. You can make yours private again at any time; future public visits will no longer show it.")}</p>
+      <p className="text-on-surface-variant">{t("Profiles start public. You can make yours private at any time; future public visits will no longer show it.")}</p>
       {profile.isPublic && <Link className="block break-all text-primary underline" href={`/u/${profile.handle}`}>{t("Open public profile: /u/")}{profile.handle}</Link>}
       {profile.isPublic && <button type="button" className="text-primary underline" onClick={async () => {
         try { await navigator.clipboard.writeText(new URL(`/u/${profile.handle}`, window.location.origin).href); setCopyMessage("Public profile link copied."); }
