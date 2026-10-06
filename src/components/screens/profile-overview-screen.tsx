@@ -2,7 +2,6 @@
 import Link from "next/link";
 import { useMessages } from "@/components/site-preferences";
 import { usePortfolio } from "@/components/portfolio-provider";
-import {ShareCardControls} from "@/components/share-card-controls";
 import { TasteSummary } from "@/components/taste-summary";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import { ProfileAccountControls } from "@/components/profile-account-controls";
@@ -45,9 +44,6 @@ export function ProfileOverviewScreen() {
     <section className={panel}><div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-headline-xl text-headline-xl">{t("Featured favorites")}</h2><Link className="inline-flex min-h-11 items-center text-primary" href={`${base}/favorites`}>{t("All favorites")}</Link></div>
       <p className="text-on-surface-variant text-body-sm">{t("Your favorites express what matters to you, independently of scores and tiers.")}</p>
       {featured.length ? <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">{featured.map(f => { const game = bySlug.get(f.slug); return game ? <Link key={f.slug} href={gameHref(game)} className="group min-w-0"><img src={game.cover} alt="" className="w-full aspect-[2/3] object-cover rounded-lg shadow-lg" /><p translate="no" className="mt-3 font-headline-md text-headline-md break-words group-hover:text-primary">{game.title}</p><p className="text-primary font-label-md">#{f.featuredSlot}</p></Link> : null; })}</div> : <p className="text-on-surface-variant">{t("No featured favorites yet.")}</p>}
-    <div className="border-t border-outline-variant/20 pt-5">
-    <ShareCardControls downloadOnRight endpoint={`/api/share/profile?kind=favorites${publicBase?`&handle=${profile.handle}`:""}`} />
-    </div>
     </section>
     <div className="grid xl:grid-cols-2 gap-6 sm:gap-8 items-stretch">
     <div className={panel}>

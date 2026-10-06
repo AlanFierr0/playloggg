@@ -85,12 +85,18 @@ test("social controls support follow and unfollow without block controls", async
   await expect(page.getByRole("button", { name: "Block", exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Unblock", exact: true })).toHaveCount(0);
 });
-test("share cards export correct PNG sizes and reject private public handles", async ({
+test("profile hides share controls; comparison cards export correct PNG sizes and reject private handles", async ({
   page,
   context,
 }) => {
   await context.addCookies([authCookie]);
   await page.goto("/profile");
+  await expect(page.getByLabel("Share card format", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Download share card", exact: true })).toHaveCount(0);
+  await page.goto("/u/fixture_public");
+  await expect(page.getByRole("button", { name: "Download share card", exact: true })).toHaveCount(0);
+  await context.clearCookies();
+  await page.goto("/compare?left=fixture_public&right=fixture_peer");
   for (const [value, width, height] of [
     ["square", 1080, 1080],
     ["story", 1080, 1920],
