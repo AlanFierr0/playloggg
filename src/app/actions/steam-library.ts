@@ -147,3 +147,21 @@ export async function saveSteamImportRating(input: unknown, updatedAt: unknown) 
     return {ok:true,message:"Saved."};
   } catch { return {ok:false,message:"Your rating could not be saved. Please retry or skip this game."}; }
 }
+
+export type SteamReviewSummary = {description:string;positive:number;total:number};
+export async function getSteamReviewSummary(input:unknown):Promise<SteamReviewSummary|null> {
+  if(!steamAppId(input))return null;
+  try {
+    const account=await getAccount();
+    if(!account?.profile || !steamIdentity(account.user.app_metadata.playlogg_steam_id))return null;
+    await checkOperationLimit(account.user.id,"steam");
+    const response=await fetch(`https://store.steampowered.com/appreviews/${input}?json=1&filter=all&language=all&review_type=all&purchase_type=steam&num_per_page=1&l=english`,{next:{revalidate:3600},signal:AbortSignal.timeout(8000),redirect:"error"});
+    if(!response.ok)return null;
+    const data:unknown=await response.json();
+    if(!data || typeof data!=="object" || !("success" in data) || data.success!==1 || !("query_summary" in data) || !data.query_summary || typeof data.query_summary!=="object")return null;
+    const summary=data.query_summary as Record<string,unknown>;
+    const {review_score_desc:description,total_positive:positive,total_reviews:total}=summary;
+    if(typeof total!=="number" || !Number.isSafeInteger(total) || total<0 || typeof positive!=="number" || !Number.isSafeInteger(positive) || positive<0 || positive>total || typeof description!=="string" || description.length>100 || (total>0 && !description.trim()))return null;
+    return {description:total ? description : "No user reviews",positive,total};
+  } catch {return null;}
+}

@@ -52,6 +52,10 @@ export async function startFixtureServer() {
       if (url.pathname === "/__steam-private" && req.method === "POST") {steamMode="private";return reply(200,{ok:true});}
       if (url.pathname === "/__steam-playtime" && req.method === "POST") {steamMinutes=180;return reply(200,{ok:true});}
       if (url.pathname === "/__steam-sync-entry" && req.method === "POST") {Object.assign(ratings.find(row=>row.profile_id===2&&row.game_id===2),{platform:"pc",hours_played:1,tags:["keep"],completed_on:"2026-09-01"});return reply(200,{ok:true});}
+      if (url.pathname === "/__steam-reviews") {
+        if(url.searchParams.get("appId")==="103")return reply(503,{success:0});
+        return reply(200,{success:1,query_summary:{review_score_desc:"Mostly Positive",total_positive:80,total_reviews:100}});
+      }
       if (url.pathname === "/__steam-library") {
         if(steamMode==="private")return reply(200,{response:{}});
         return reply(200,{response:{game_count:128,games:[{appid:101,name:"Hades",playtime_forever:steamMinutes},{appid:102,name:"Elden Ring",playtime_forever:300},{appid:103,name:"Steam Fixture Adventure",playtime_forever:0},{appid:104,name:"Unmatched Fixture",playtime_forever:45},...Array.from({length:124},(_,index)=>({appid:200+index,name:"ZZZ Fixture "+index,playtime_forever:index===123?6000:0}))]}});

@@ -263,6 +263,17 @@ test("Steam rates all games while import continues and retries rating saves with
   await expect(dialog).not.toBeVisible();
   await expect(page.getByText("Import complete. Your games are saved in your profile.",{exact:true})).toBeVisible();
   await page.getByRole("button",{name:"Resume rating games (2)",exact:true}).click();
+  const infoLink=dialog.getByRole("link",{name:"Game info Opens in a new tab",exact:true});
+  await expect(infoLink).toHaveAttribute("href","/game/hades");
+  await expect(infoLink).toHaveAttribute("target","_blank");
+  await expect(dialog.getByRole("link",{name:"Mostly Positive Opens in a new tab",exact:true})).toHaveAttribute("href","https://store.steampowered.com/app/101/#app_reviews_hash");
+  await expect(dialog.getByText("80% positive · 100 reviews · All languages",{exact:true})).toBeVisible();
+  const gamePagePromise=page.waitForEvent("popup");
+  await infoLink.click();
+  const gamePage=await gamePagePromise;
+  await expect(gamePage.getByRole("heading",{name:"Hades",exact:true})).toBeVisible();
+  await gamePage.close();
+  await expect(dialog.getByRole("heading",{name:"Hades",exact:true})).toBeVisible();
   await dialog.getByRole("textbox",{name:"Score",exact:true}).fill("73");
   await expect(dialog.getByRole("textbox",{name:"Score",exact:true})).toHaveValue("73");
   await dialog.getByRole("button",{name:"Import details",exact:true}).click();
@@ -299,6 +310,7 @@ test("Steam rates all games while import continues and retries rating saves with
   await expect(dialog.getByRole("textbox",{name:"Score",exact:true})).toHaveValue("73");
   await dialog.getByRole("button",{name:"Save and next",exact:true}).click();
   await expect(dialog.getByRole("heading",{name:"Steam Fixture Adventure",exact:true})).toBeVisible();
+  await expect(dialog.getByText("Steam reviews unavailable",{exact:true})).toBeVisible();
   await page.goto("/profile");
   await page.goto("/profile/import/steam");
   await page.getByRole("button",{name:"Resume rating games (1)",exact:true}).click();

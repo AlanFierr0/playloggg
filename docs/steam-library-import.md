@@ -152,3 +152,14 @@ to import remaining games. Pending requests are not a durable background job.
 
 Rating queues start with the most-played selected games (Steam hours descending),
 for both all-games and filtered some-games sessions, regardless of selection order.
+
+The rating popup includes Game info, opening the stored catalog game in a new
+tab so the current draft and running import stay on the original page. It loads
+Steam overall review summaries only for the displayed game. A verified Steam
+account and the existing operation limit are required. Fixed Steam URLs use a
+validated app ID, an eight-second timeout and a one-hour public fetch cache.
+Show Valve's description, positive percentage, review count and all-language
+scope for Steam purchases, using the default off-topic filtering. Review labels
+link to the Steam store reviews. Missing/failed reviews do not block ratings.
+No user score is inferred and no review text or reviewer identities are returned.
+Provider reference: https://partner.steamgames.com/doc/store/getreviews
