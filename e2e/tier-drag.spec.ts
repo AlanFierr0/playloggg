@@ -7,6 +7,9 @@ test("dragging between tiers saves only the owner's tier and persists on reload"
   await context.addCookies([authCookie]);await page.goto("/tiers");
   const before=await (await request.get("http://127.0.0.1:3101/__state")).json();
   const card=page.locator('[data-tier-game="elden-ring-shadow-of-the-erdtree"]');
+  // The fixture catalog has many games, but this owner has only one saved log.
+  await expect(page.locator('[data-tier-game]')).toHaveCount(1);
+  await expect(page.locator('[data-tier-game="hades"]')).toHaveCount(0);
   await expect(page.locator("#tier-b").locator(card)).toBeVisible();
   await card.dragTo(page.locator("#tier-a"));
   await expect(page.getByRole("status")).toHaveText("Tier saved.");
@@ -56,6 +59,22 @@ test("another user's public tier board has no editing or dragging controls",asyn
   await expect(page.locator('[data-tier-game][draggable="true"]')).toHaveCount(0);
   await expect(page.getByRole("combobox")).toHaveCount(0);
   await expect(page.getByRole("button",{name:/Drag to change tier/})).toHaveCount(0);
+  await expect(page.getByRole("button",{name:/Clear tier for/})).toHaveCount(0);
+});
+
+test("compact board clears a tier while preserving the log entry",async({page,context,request},info)=>{
+  await context.addCookies([authCookie]);await page.goto("/tiers");
+  const before=(await (await request.get("http://127.0.0.1:3101/__state")).json()).ratings;
+  const columns=await page.locator("#tier-b > div").last().evaluate(node=>getComputedStyle(node).gridTemplateColumns.split(" ").length);
+  expect(columns).toBeGreaterThanOrEqual(info.project.name==="mobile"?3:8);
+  await page.getByRole("button",{name:"Clear tier for Elden Ring: Shadow of the Erdtree",exact:true}).click();
+  await expect(page.locator('#tier-unassigned [data-tier-game="elden-ring-shadow-of-the-erdtree"]')).toBeVisible();
+  await expect(page.getByRole("button",{name:/Clear tier for/})).toHaveCount(0);
+  await page.reload();await expect(page.getByRole("combobox",{name:"Tier for Elden Ring: Shadow of the Erdtree",exact:true})).toHaveValue("");
+  const after=(await (await request.get("http://127.0.0.1:3101/__state")).json()).ratings;
+  expect(after).toHaveLength(before.length);
+  for(const row of before){const saved=after.find((r:{profile_id:number;game_id:number})=>r.profile_id===row.profile_id&&r.game_id===row.game_id);if(row.profile_id===2&&row.game_id===2){const {tier,updated_at,...details}=row;void tier;void updated_at;expect(saved).toMatchObject({...details,tier:null});}else expect(saved).toEqual(row);}
+  await page.screenshot({path:`e2e-artifacts/tier-compact-${info.project.name}.png`,fullPage:true});
 });
 
 test("touch dragging scrolls to an offscreen tier and saves it",async({page,context},info)=>{

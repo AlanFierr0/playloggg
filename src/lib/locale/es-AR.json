@@ -1117,6 +1117,8 @@
   "Tier could not be saved. Your game stayed in its previous tier. Please retry.": "No se pudo guardar el tier. El juego quedó en su tier anterior. Intentá de nuevo.",
   "Drag to change tier": "Arrastrá para cambiar el tier",
   "Tier for": "Tier de",
+  "Clear tier for": "Quitar tier de",
+  "Clear tier; keep log entry": "Quitar tier; conservar el registro",
   "Drag games between tiers, or use each game's tier selector. Changes save automatically.": "Arrastrá los juegos entre tiers o usá el selector de cada juego. Los cambios se guardan automáticamente.",
   "Your saved ratings. Tier changes do not change scores or favorites.": "Tus registros guardados. Cambiar un tier no modifica los puntajes ni los favoritos.",
   "Profile preview": "Vista previa del perfil",
