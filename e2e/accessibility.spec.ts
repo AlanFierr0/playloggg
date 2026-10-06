@@ -40,7 +40,7 @@ test("Spanish HTML and metadata are translated before JavaScript runs", async ({
     await page.goto(`http://127.0.0.1:3100${route}`);
     await openNavigation(page);
     await expect(page.getByRole("navigation", { name: "Navegación principal" }).filter({ visible: true })).toBeVisible();
-    await expect(page.getByRole("navigation", { name: "Navegación principal" }).filter({ visible: true }).getByRole("link", { name: "Descubrir", exact: true })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Navegación principal" }).filter({ visible: true }).getByRole("link", { name: "Juegos", exact: true })).toBeVisible();
     await expect(page.locator('meta[name="description"]')).not.toHaveAttribute("content", /Browse|personal gaming|Game details|Public game/);
   }
   await page.goto("http://127.0.0.1:3100/games");
