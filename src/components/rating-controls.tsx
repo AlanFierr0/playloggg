@@ -29,9 +29,9 @@ export function TierBadge({ value, onChange }: { value: Tier | null; onChange: (
   }, [open, value]);
   return (
     <div className="relative max-w-full" ref={root}>
-      <button ref={trigger} id="tier-badge" type="button" aria-label={t(`Choose tier, currently ${value ?? "unassigned"}`)} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)} className={`px-2.5 py-1 rounded-full font-label-sm text-label-sm tracking-wider uppercase flex items-center gap-1.5 transition-all ${value ? tierColors[value] : "bg-surface-container-high text-on-surface-variant"}`}>
-        <span className="h-1.5 w-1.5 rounded-full bg-current" />
-        <span id="tier-label">{value ? `${t("Tier")} ${value} · ${t(labels[value])}` : t("Unassigned tier")}</span>
+      <button ref={trigger} id="tier-badge" type="button" aria-label={t(`Choose tier, currently ${value ?? "unassigned"}`)} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)} className={`min-h-11 min-w-[10rem] max-w-full px-3 py-2 rounded-xl border border-outline-variant font-body-md text-body-md flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary ${value ? tierColors[value] : "bg-surface-container-high text-on-surface-variant"}`}>
+        <span id="tier-label" className="min-w-0 flex-1 text-left">{value ? `${t("Tier")} ${value} · ${t(labels[value])}` : t("Choose a tier")}</span>
+        <span aria-hidden="true" className={`material-symbols-outlined shrink-0 ${open ? "rotate-180" : ""}`}>expand_more</span>
       </button>
       {open && (
         <div role="menu" aria-label={t("Independent tier")} className="absolute right-0 top-full z-20 mt-2 w-52 max-w-[calc(100vw-4rem)] rounded-lg bg-surface-container-high p-1 shadow-2xl ring-1 ring-outline-variant" onKeyDown={(event) => {
