@@ -24,7 +24,7 @@ const [saved, setSaved] = useState({ score: game.score, tier: game.tier ?? null,
 const [score, setScore] = useState<number | null>(game.score);
 const scoreInput = useRef<HTMLInputElement>(null);
 const invalidScore = score !== null && (!Number.isInteger(score) || score < 0 || score > 100);
-const scoreDescription = score === null || invalidScore ? null : score < 50 ? "Terrible" : score < 75 ? "Average" : score < 100 ? "Great" : "Masterpiece";
+const scoreDescription = score === null || invalidScore ? null : score < 25 ? "Terrible" : score < 50 ? "Poor" : score < 75 ? "Average" : score < 100 ? "Great" : "Masterpiece";
 const [tier, setTier] = useState<Tier | null>(game.tier ?? null);
 const [platform, setPlatform] = useState<PlayedPlatform | null>(game.platform ?? null);
 const isPC = platform?.startsWith("pc") ?? false;
@@ -175,7 +175,7 @@ return (<><fieldset disabled={pending} className="contents">
 </div>
 
 <div id="score-descriptions" className="relative mx-[11px] h-8 text-on-surface-variant font-label-sm text-label-sm">
-{["Terrible", "Average", "Great", "Masterpiece"].map((description, index) => <span key={description} style={{ left: `${[0, 50, 75, 100][index]}%` }} aria-current={scoreDescription === description ? "true" : undefined} className={`absolute w-1/4 -translate-x-1/2 text-center ${scoreDescription === description ? "text-primary font-bold" : ""}`}>{t(description)}</span>)}
+{["Terrible", "Poor", "Average", "Great", "Masterpiece"].map((description, index) => <span key={description} style={{ left: `${index * 25}%` }} aria-current={scoreDescription === description ? "true" : undefined} className={`absolute w-1/4 -translate-x-1/2 text-center ${scoreDescription === description ? "text-primary font-bold" : ""}`}>{t(description)}</span>)}
 </div>
 
 <div className="flex items-center justify-center gap-2 mt-2">
