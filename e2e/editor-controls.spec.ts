@@ -82,6 +82,27 @@ test("score slider works on an unrated game and discard returns to profile witho
   expect(state.ratings.filter((row: { profile_id: number; game_id: number }) => row.profile_id === 2 && row.game_id === 1)).toEqual([]);
 });
 
+test("score descriptions follow typing and sliding without numeric labels", async ({ page, context }) => {
+  await context.addCookies([authCookie]);
+  await page.goto("/log?game=hades");
+  const descriptions = page.locator("#score-descriptions");
+  const active = descriptions.locator('[aria-current="true"]');
+  await expect(descriptions.locator("span")).toHaveText(["Terrible", "Average", "Great", "Masterpiece"]);
+  await expect(active).toHaveCount(0);
+  for (const [value, label] of [["0", "Terrible"], ["49", "Terrible"], ["50", "Average"], ["74", "Average"], ["75", "Great"], ["99", "Great"], ["100", "Masterpiece"]]) {
+    await page.locator("#score-display").fill(value);
+    await expect(active).toHaveText(label);
+    await expect(page.locator("#score-slider")).toHaveValue(value);
+  }
+  await page.locator("#score-slider").fill("50");
+  await expect(active).toHaveText("Average");
+  await expect(page.locator("#score-display")).toHaveValue("50");
+  await page.locator("#score-display").fill("999");
+  await expect(active).toHaveCount(0);
+  await page.locator("#score-display").fill("");
+  await expect(active).toHaveCount(0);
+});
+
 test("score keyboard controls and discard retain the last committed score", async ({ page, context }) => {
   await context.addCookies([authCookie]);
   await page.goto("/log?game=hades");

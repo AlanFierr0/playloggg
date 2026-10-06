@@ -24,6 +24,7 @@ const [saved, setSaved] = useState({ score: game.score, tier: game.tier ?? null,
 const [score, setScore] = useState<number | null>(game.score);
 const scoreInput = useRef<HTMLInputElement>(null);
 const invalidScore = score !== null && (!Number.isInteger(score) || score < 0 || score > 100);
+const scoreDescription = score === null || invalidScore ? null : score < 50 ? "Terrible" : score < 75 ? "Average" : score < 100 ? "Great" : "Masterpiece";
 const [tier, setTier] = useState<Tier | null>(game.tier ?? null);
 const [platform, setPlatform] = useState<PlayedPlatform | null>(game.platform ?? null);
 const isPC = platform?.startsWith("pc") ?? false;
@@ -173,15 +174,8 @@ return (<><fieldset disabled={pending} className="contents">
 
 </div>
 
-<div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-on-surface-variant font-label-sm text-label-sm px-1">
-<span>{t("0 (Terrible)")}</span>
-
-<span>{t("50 (Average)")}</span>
-
-<span>{t("75 (Great)")}</span>
-
-<span className="text-primary font-bold">{t("100 (Masterpiece)")}</span>
-
+<div id="score-descriptions" className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-on-surface-variant font-label-sm text-label-sm px-1">
+{["Terrible", "Average", "Great", "Masterpiece"].map((description) => <span key={description} aria-current={scoreDescription === description ? "true" : undefined} className={scoreDescription === description ? "text-primary font-bold" : undefined}>{t(description)}</span>)}
 </div>
 
 <div className="flex items-center justify-center gap-2 mt-2">
