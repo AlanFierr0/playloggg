@@ -1,4 +1,13 @@
 {
+  "Your imported games have been reviewed. Refresh the library to import remaining games.": "Ya calificaste los juegos importados. Actualizá la biblioteca para importar los restantes.",
+  "Import details": "Detalles de importación",
+  "Close import details": "Cerrar detalles de importación",
+  "Close rating session": "Cerrar sesión de calificación",
+  "Resume rating games": "Continuar calificando juegos",
+  "Your unfinished ratings are kept in this browser.": "Tus calificaciones pendientes se guardan en este navegador.",
+  "Import interrupted. Refresh the library to import remaining games.": "La importación se interrumpió. Actualizá la biblioteca para importar los juegos restantes.",
+  "Your rating session could not be restored in this browser.": "No se pudo recuperar tu sesión de calificación en este navegador.",
+  "This browser could not keep your rating session. Keep this page open to avoid losing your place.": "Este navegador no pudo guardar tu sesión. Mantené esta página abierta para no perder tu lugar.",
   "Viewing profile": "Viendo el perfil",
   "Friends": "Amigos",
   "Find friends": "Buscar amigos",

@@ -135,3 +135,17 @@ API references: [Steam GetOwnedGames](https://partner.steamgames.com/doc/webapi/
 and [external-game matching](https://api-docs.igdb.com/#external-game).
 
 The review implementation reuses an owner-bound server library for at most 30 seconds between filters/pages/imports. Opening the page and Refresh force a fresh read; sync also re-fetches. Authorization remains fresh for every action. The cache is bounded to 50 warm-instance entries and does not guarantee cross-instance deduplication. See [the execution plan](review-execution-plan.md) for quotas, final import counts, retries and manual search behavior.
+
+
+The rating screen focuses on one game. Import progress and reviewed counts are
+opened separately through Import details. Close rating session hides the editor
+without stopping imports; Resume rating games reopens it. The queue, position and
+current score/tier/status draft are kept in localStorage scoped to the verified
+profile ID. Refreshing or leaving the page restores a closed session in the same
+browser. Completed sessions are removed when Done is clicked. Storage errors
+are reported, and invalid cached sessions are ignored. No credentials are stored.
+Server ownership and timestamp checks still run on every save.
+
+Imports only continue while the page is open. If a page is left mid-import,
+acknowledged successful imports remain available for rating; refresh the library
+to import remaining games. Pending requests are not a durable background job.
