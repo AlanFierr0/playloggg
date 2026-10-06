@@ -244,8 +244,9 @@ test("Steam artwork falls back to its header and then a placeholder if images fa
 test("Steam rates all games while import continues and retries rating saves without losing playtime",async({page,context},info)=>{
   await context.addCookies([authCookie]);await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
   await page.goto("/profile/import/steam");
-  await page.getByRole("checkbox",{name:"Select game Hades",exact:true}).check();
+  // Select the zero-hour game first; the rating queue must still show Hades first.
   await page.getByRole("checkbox",{name:"Select game Steam Fixture Adventure",exact:true}).check();
+  await page.getByRole("checkbox",{name:"Select game Hades",exact:true}).check();
   await page.getByRole("button",{name:"Import selected games (2)",exact:true}).click();
   const before=await (await fetch("http://127.0.0.1:3101/__state")).json();
   expect(before.ratings.filter((row:{profile_id:number})=>row.profile_id===2)).toHaveLength(1);

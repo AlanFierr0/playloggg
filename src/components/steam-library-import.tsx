@@ -124,7 +124,9 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
   async function importSelected(retry=false,rateIds:number[]=[]) {
     const ids=retry ? failures.map(failure=>failure.appId) : selected;
     const wanted=new Set(rateIds);
-    const queue=[...ids.filter(id=>wanted.has(id)),...ids.filter(id=>!wanted.has(id))];
+    const hours=new Map(preview?.games.map(game=>[game.appId,game.hours]));
+    const rated=ids.filter(id=>wanted.has(id)).sort((a,b)=>(hours.get(b)??0)-(hours.get(a)??0));
+    const queue=[...rated,...ids.filter(id=>!wanted.has(id))];
     if (active.current || !queue.length) return;
     setChoice(null);setRatingHidden(false);setDraft(emptySteamRatingDraft);setRatingSession(rateIds.length>0);setRatingGames([]);setRatingIndex(0);setRatingTarget(rateIds.length);
     setSelected(queue);

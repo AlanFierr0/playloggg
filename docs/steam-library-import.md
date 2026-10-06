@@ -149,3 +149,6 @@ Server ownership and timestamp checks still run on every save.
 Imports only continue while the page is open. If a page is left mid-import,
 acknowledged successful imports remain available for rating; refresh the library
 to import remaining games. Pending requests are not a durable background job.
+
+Rating queues start with the most-played selected games (Steam hours descending),
+for both all-games and filtered some-games sessions, regardless of selection order.
