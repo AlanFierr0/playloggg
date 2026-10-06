@@ -269,7 +269,16 @@ test("Steam rates all games while import continues and retries rating saves with
   await details.getByRole("button",{name:"Close import details",exact:true}).click();
   await dialog.getByRole("button",{name:"Choose tier, currently unassigned",exact:true}).click();
   await dialog.getByRole("menuitemradio",{name:"A Amazing",exact:true}).click();
-  await dialog.getByLabel("Playback status",{exact:true}).selectOption("completed");
+  const statuses=dialog.getByRole("group",{name:"Playback status",exact:true});
+  const statusButtons=statuses.getByRole("button");
+  await expect(statusButtons).toHaveCount(4);
+  const boxes=await statusButtons.evaluateAll(buttons=>buttons.map(button=>button.getBoundingClientRect().top));
+  expect(new Set(boxes).size).toBe(1);
+  await statuses.getByRole("button",{name:"Completed",exact:true}).click();
+  await expect(statuses.getByRole("button",{name:"Completed",exact:true})).toHaveAttribute("aria-pressed","true");
+  await statuses.getByRole("button",{name:"Completed",exact:true}).click();
+  await expect(statuses.getByText("Not set",{exact:true})).toBeVisible();
+  await statuses.getByRole("button",{name:"Completed",exact:true}).click();
   await dialog.getByRole("button",{name:"Close rating session",exact:true}).click();
   await expect(dialog).not.toBeVisible();
   await page.getByRole("button",{name:"Resume rating games (2)",exact:true}).click();
@@ -279,7 +288,7 @@ test("Steam rates all games while import continues and retries rating saves with
   await page.getByRole("button",{name:"Resume rating games (2)",exact:true}).click();
   await expect(dialog.getByRole("heading",{name:"Hades",exact:true})).toBeVisible();
   await expect(dialog.getByRole("textbox",{name:"Score",exact:true})).toHaveValue("73");
-  await expect(dialog.getByLabel("Playback status",{exact:true})).toHaveValue("completed");
+  await expect(dialog.getByRole("button",{name:"Completed",exact:true})).toHaveAttribute("aria-pressed","true");
   await expect(dialog.getByRole("button",{name:"Choose tier, currently A",exact:true})).toBeVisible();
   await page.screenshot({path:`e2e-artifacts/steam-rating-${info.project.name}.png`});
   expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
@@ -320,7 +329,7 @@ test("Steam some-games picker filters genre, hours and title while other selecte
   await dialog.getByRole("button",{name:"Import and rate selected games (1)",exact:true}).click();
   await expect(dialog.getByRole("heading",{name:"Steam Fixture Adventure",exact:true})).toBeVisible();
   await dialog.getByRole("textbox",{name:"Score",exact:true}).fill("0");
-  await dialog.getByLabel("Playback status",{exact:true}).selectOption("backlog");
+  await dialog.getByRole("group",{name:"Playback status",exact:true}).getByRole("button",{name:"Backlog",exact:true}).click();
   await dialog.getByRole("button",{name:"Save and next",exact:true}).click();
   await dialog.getByRole("button",{name:"Done",exact:true}).click();
   const state=await (await fetch("http://127.0.0.1:3101/__state")).json();
