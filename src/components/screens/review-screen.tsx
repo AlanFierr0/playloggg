@@ -252,13 +252,13 @@ return (<><fieldset disabled={pending} className="contents">
 
 <div className="md:col-span-12 flex flex-col gap-2">
 <div className="flex flex-wrap gap-2 items-center justify-between">
-<label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" htmlFor="dispatch-textarea">{t("Critical Dispatch / Review")}</label>
+<label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" htmlFor="dispatch-textarea">{t("Review")}</label>
 
 <span className="font-label-sm text-label-sm text-on-surface-variant">{t("Plain text · 20,000 characters max")}</span>
 
 </div>
 
-<textarea className="w-full bg-surface-container p-4 rounded text-on-surface font-body-md text-body-md placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-high transition-colors resize-none leading-relaxed" id="dispatch-textarea" placeholder={t("Write a dispatch or critical thoughts (optional)...")} rows={4} maxLength={20000} value={review} onChange={(event) => setReview(event.target.value)}></textarea>
+<textarea className="w-full bg-surface-container p-4 rounded text-on-surface font-body-md text-body-md placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-high transition-colors resize-none leading-relaxed" id="dispatch-textarea" placeholder={t("Write a review (optional)...")} rows={4} maxLength={20000} value={review} onChange={(event) => setReview(event.target.value)}></textarea>
 
 </div>
 
