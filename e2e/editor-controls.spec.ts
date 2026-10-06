@@ -88,6 +88,11 @@ test("score descriptions follow typing and sliding without numeric labels", asyn
   const descriptions = page.locator("#score-descriptions");
   const active = descriptions.locator('[aria-current="true"]');
   await expect(descriptions.locator("span")).toHaveText(["Terrible", "Average", "Great", "Masterpiece"]);
+  const track = (await page.locator("#score-slider").boundingBox())!;
+  for (const [index, value] of [0, 50, 75, 100].entries()) {
+    const label = (await descriptions.locator("span").nth(index).boundingBox())!;
+    expect(Math.abs(label.x + label.width / 2 - (track.x + 11 + (track.width - 22) * value / 100))).toBeLessThan(1);
+  }
   await expect(active).toHaveCount(0);
   for (const [value, label] of [["0", "Terrible"], ["49", "Terrible"], ["50", "Average"], ["74", "Average"], ["75", "Great"], ["99", "Great"], ["100", "Masterpiece"]]) {
     await page.locator("#score-display").fill(value);

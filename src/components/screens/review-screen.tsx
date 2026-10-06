@@ -174,8 +174,8 @@ return (<><fieldset disabled={pending} className="contents">
 
 </div>
 
-<div id="score-descriptions" className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-on-surface-variant font-label-sm text-label-sm px-1">
-{["Terrible", "Average", "Great", "Masterpiece"].map((description) => <span key={description} aria-current={scoreDescription === description ? "true" : undefined} className={scoreDescription === description ? "text-primary font-bold" : undefined}>{t(description)}</span>)}
+<div id="score-descriptions" className="relative mx-[11px] h-8 text-on-surface-variant font-label-sm text-label-sm">
+{["Terrible", "Average", "Great", "Masterpiece"].map((description, index) => <span key={description} style={{ left: `${[0, 50, 75, 100][index]}%` }} aria-current={scoreDescription === description ? "true" : undefined} className={`absolute w-1/4 -translate-x-1/2 text-center ${scoreDescription === description ? "text-primary font-bold" : ""}`}>{t(description)}</span>)}
 </div>
 
 <div className="flex items-center justify-center gap-2 mt-2">
