@@ -151,7 +151,7 @@ const tierThemes: Record<string, { label: string; color: string; surface: string
  S:{label:tierLabels.S,color:"text-primary",surface:"bg-primary text-on-primary"},
  A:{label:tierLabels.A,color:"text-secondary",surface:"bg-secondary text-on-secondary"},
  B:{label:tierLabels.B,color:"text-teal-300 [.light_&]:text-teal-700",surface:"bg-teal-300 text-teal-950"},
- C:{label:tierLabels.C,color:"text-yellow-300 [.light_&]:text-yellow-800",surface:"bg-yellow-300 text-yellow-950"},
+ C:{label:tierLabels.C,color:"text-[#d99b73] [.light_&]:text-[#8a4b25]",surface:"bg-[#d99b73] text-[#3e2316]"},
  D:{label:tierLabels.D,color:"text-[#ff9f87] [.light_&]:text-[#9a3412]",surface:"bg-[#ff9f87] text-[#4a170c]"},
  F:{label:tierLabels.F,color:"text-error",surface:"bg-error text-on-error"},
  Unassigned:{label:"Unassigned",color:"text-on-surface-variant",surface:"bg-surface-container-low text-on-surface-variant"},
