@@ -2,6 +2,42 @@ import { test, expect } from "./test";
 // @ts-expect-error Local fixture session only.
 import { authCookie } from "./fixture-server.mjs";
 
+test("game cover actions reveal on hover and focus, edit logged games and stay available on touch", async ({page,context,browser},testInfo) => {
+  await context.addCookies([authCookie]);
+  await page.goto("/games?q=Hades");
+  const card=page.locator('[data-catalog-game="hades"]');
+  const add=card.getByRole("link",{name:"Log this game",exact:true});
+  await page.mouse.move(0,0);
+  await expect(add).toHaveCSS("opacity","0");
+  await card.hover();
+  await expect(add).toHaveCSS("opacity","1");
+  await expect(add).toHaveAttribute("href","/log?game=hades");
+  await page.screenshot({path:`e2e-artifacts/game-hover-${testInfo.project.name}.png`});
+  await page.mouse.move(0,0);
+  await add.focus();
+  await expect(add).toHaveCSS("opacity","1");
+  await add.click();
+  await expect(page).toHaveURL(/\/log\?game=hades$/);
+  await page.goto("/games?q=Elden");
+  const edit=page.locator("[data-catalog-game]").getByRole("link",{name:"Edit log entry",exact:true});
+  await edit.focus();
+  await expect(edit).toHaveCSS("opacity","1");
+  await edit.click();
+  await expect(page).toHaveURL(/\/log\?game=elden-ring-shadow-of-the-erdtree$/);
+  await page.goto("/");
+  const recent=page.getByRole("region",{name:"Recently logged"});
+  await recent.hover();
+  await recent.getByRole("link",{name:"Edit log entry",exact:true}).focus();
+  await expect(recent.getByRole("link",{name:"Edit log entry",exact:true})).toHaveCSS("opacity","1");
+  expect(await page.locator("a a").count()).toBe(0);
+  const touch=await browser.newContext({hasTouch:true,viewport:{width:375,height:812}});
+  await touch.addCookies([authCookie]);
+  const touchPage=await touch.newPage();
+  await touchPage.goto("http://127.0.0.1:3100/games?q=Hades");
+  await expect(touchPage.locator("[data-catalog-game]").getByRole("link",{name:"Log this game",exact:true})).toHaveCSS("opacity","1");
+  await touch.close();
+});
+
 async function openNavigation(page: import("@playwright/test").Page) {
   const menu = page.getByRole("button", { name: /Navigation menu|Menú de navegación/ });
   if (await menu.isVisible() && await page.locator("header details").getAttribute("open") === null) await menu.click();

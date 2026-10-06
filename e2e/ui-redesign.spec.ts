@@ -73,8 +73,8 @@ test("profile creation preserves registration intent and ordinary sign-in", asyn
   await expect(page.getByRole("heading",{name:"Welcome back, Fixture Owner."})).toBeVisible();
   await expect(page.locator("main header").getByRole("link",{name:"Log a game",exact:true})).toHaveAttribute("href","/log");
   await expect(page.locator("main header").getByRole("link",{name:"Tier List",exact:true})).toHaveAttribute("href","/tiers");
-  await expect(page.getByRole("region",{name:"Recently logged"}).getByRole("link")).toHaveCount(1);
-  await expect(page.getByRole("region",{name:"Recently logged"}).getByRole("link")).toHaveAttribute("href","/game/elden-ring-shadow-of-the-erdtree");
+  await expect(page.getByRole("region",{name:"Recently logged"}).getByRole("link",{name:"Elden Ring: Shadow of the Erdtree",exact:true})).toHaveCount(2);
+  await expect(page.getByRole("region",{name:"Recently logged"}).getByRole("link",{name:"Edit log entry",exact:true})).toHaveAttribute("href","/log?game=elden-ring-shadow-of-the-erdtree");
   await expect(page.getByRole("figure",{name:"Profile preview"})).toHaveCount(0);
   await page.screenshot({path:`e2e-artifacts/ui-home-owner-${testInfo.project.name}.png`,fullPage:true});
   expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);

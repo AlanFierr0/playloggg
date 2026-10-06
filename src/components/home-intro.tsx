@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useMessages } from "@/components/site-preferences";
 import { usePortfolio } from "@/components/portfolio-provider";
 import type { Game } from "@/types/domain";
+import { GameLogAction } from "@/components/game-actions";
 
 export function HomeIntro({ preview, recent }: { preview: ReactNode; recent: Pick<Game, "slug" | "title" | "cover">[] }) {
   const t = useMessages();
@@ -23,7 +24,7 @@ export function HomeIntro({ preview, recent }: { preview: ReactNode; recent: Pic
         </div>
         {access?.canEdit ? <section aria-label={t("Recently logged")} className="min-w-0 rounded-xl border border-outline-variant/40 bg-surface-container-low p-4 sm:p-7 space-y-6">
           <h2 className="font-headline-lg text-headline-lg">{t("Recently logged")}</h2>
-          {recent.length ? <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">{recent.map(game => <Link key={game.slug} href={`/game/${game.slug}`} className="group min-w-0 space-y-2"><img src={game.cover} alt="" width={180} height={240} className="aspect-[3/4] w-full rounded-lg object-cover bg-surface-container-high" /><p translate="no" className="text-body-sm line-clamp-2 group-hover:text-primary">{game.title}</p></Link>)}</div> : <p className="text-on-surface-variant">{t("Your next game starts here. Log your first game to build your collection.")}</p>}
+          {recent.length ? <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">{recent.map(game => <div key={game.slug} className="group/game min-w-0 space-y-2"><div className="relative"><Link href={`/game/${game.slug}`} aria-label={game.title}><img src={game.cover} alt="" width={180} height={240} className="aspect-[3/4] w-full rounded-lg object-cover bg-surface-container-high" /></Link><GameLogAction slug={game.slug} logged /></div><Link href={`/game/${game.slug}`} translate="no" className="block text-body-sm line-clamp-2 group-hover/game:text-primary">{game.title}</Link></div>)}</div> : <p className="text-on-surface-variant">{t("Your next game starts here. Log your first game to build your collection.")}</p>}
         </section> : preview}
       </div>
     </header>

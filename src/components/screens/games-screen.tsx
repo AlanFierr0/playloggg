@@ -4,6 +4,7 @@ import { useMessages } from "@/components/site-preferences";
 import Link from "next/link";
 import { GameGenres } from "@/components/game-genres";
 import { GameTags } from "@/components/game-tags";
+import { GameLogAction } from "@/components/game-actions";
 import { IgdbSearch } from "@/components/igdb-search";
 import { useCallback, useEffect, useRef, useOptimistic, useTransition, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
@@ -87,8 +88,8 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 
 function CatalogCard({ game, logged, canEdit, filters }: { game: Game; logged: boolean; canEdit: boolean; filters: GamesFilters }) {
   const t = useMessages();
-  return <article data-catalog-game={game.slug} className="min-w-0 flex flex-col rounded-lg bg-surface-container-low overflow-hidden">
-    <Link href={`/game/${encodeURIComponent(game.slug)}`} aria-label={game.title} className="group block"><div className="relative aspect-[3/4] overflow-hidden bg-surface-container-high"><img src={game.cover} alt={t(`${game.title} cover`)} loading="lazy" className="w-full h-full object-cover group-hover:opacity-90 transition-opacity" />{game.score !== null && <span className="absolute top-2 right-2 rounded bg-surface/90 px-2 py-1 text-primary font-label-sm text-label-sm">{game.score} / 100</span>}</div></Link>
+  return <article data-catalog-game={game.slug} className="group/game min-w-0 flex flex-col rounded-lg bg-surface-container-low overflow-hidden">
+    <div className="relative aspect-[3/4] overflow-hidden bg-surface-container-high"><Link href={`/game/${encodeURIComponent(game.slug)}`} aria-label={game.title} className="group block h-full"><img src={game.cover} alt={t(`${game.title} cover`)} loading="lazy" className="w-full h-full object-cover group-hover:opacity-90 transition-opacity" />{game.score !== null && <span className="absolute top-2 right-2 rounded bg-surface/90 px-2 py-1 text-primary font-label-sm text-label-sm">{game.score} / 100</span>}</Link>{canEdit && <GameLogAction slug={game.slug} logged={logged} />}</div>
     <div className="p-3 space-y-2 flex-1">
       <h2 className="font-headline-md text-headline-md break-words"><Link href={`/game/${encodeURIComponent(game.slug)}`} className="hover:text-primary">{game.title}</Link></h2>
       <p className="font-body-sm text-body-sm text-on-surface-variant">{game.year ?? t("Year unknown")}</p>
@@ -96,6 +97,5 @@ function CatalogCard({ game, logged, canEdit, filters }: { game: Game; logged: b
       <p className="font-body-sm text-body-sm text-on-surface-variant break-words">{logged ? `${t(game.status ? playbackLabels[game.status] : "Logged")}${game.tier ? ` · ${t("Tier")} ${game.tier}` : ""}${game.score === null ? ` · ${t("Unrated")}` : ""}` : canEdit ? t("Not logged") : null}</p>
     </div>
     {logged && Boolean(game.tags?.length) && <div className="px-3 pb-3"><GameTags tags={game.tags} filters={filters} /></div>}
-    {canEdit && <Link href={`/log?game=${encodeURIComponent(game.slug)}`} className="inline-flex justify-center items-center border-t border-outline-variant/20 p-3 text-primary hover:bg-surface-container font-body-md text-body-md">{logged ? t("Edit log entry") : t("Log this game")}</Link>}
   </article>;
 }
