@@ -39,7 +39,7 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
   // ponytail: browser-local resume; use server persistence if cross-device resume is needed.
   const storageKey = `playlogg-steam-ratings:${profileId}`;
   const modalOpen = choice !== null || (importing && !ratingSession) || (ratingSession && !ratingHidden);
-  const detailsDialog = useRef<HTMLDialogElement>(null);
+  const detailsToast = useRef<HTMLElement>(null);
   const restoreSession = useEffectEvent(()=>{
     try {
       const raw=localStorage.getItem(storageKey);
@@ -73,14 +73,15 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
     return ()=>dialog.close();
   },[modalOpen]);
   useEffect(()=>{
-    if(!detailsOpen || !detailsDialog.current)return;
-    const dialog=detailsDialog.current;dialog.showModal();return ()=>dialog.close();
-  },[detailsOpen]);
+    if(!detailsOpen || !detailsToast.current)return;
+    const toast=detailsToast.current;toast.showPopover();
+    return ()=>{if(toast.matches(":popover-open"))toast.hidePopover();};
+  },[detailsOpen,modalOpen]);
   useEffect(()=>{
-    if(!modalOpen && !detailsOpen)return;
+    if(!modalOpen)return;
     const overflow=document.body.style.overflow;document.body.style.overflow="hidden";
     return ()=>{document.body.style.overflow=overflow;};
-  },[modalOpen,detailsOpen]);
+  },[modalOpen]);
   function nextRating(){setRatingIndex(current=>current+1);setDraft(emptySteamRatingDraft);}
   const loadOnOpen = useEffectEvent(()=>{void load(filters,amount,false,true);});
   useEffect(()=>{if(configured)loadOnOpen();},[configured]);
@@ -179,6 +180,15 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
     {ratingSession&&<p className="mt-4 text-body-sm text-on-surface-variant">{t("Games reviewed")}: {ratingIndex} / {ratingTarget}. {t("Only successful new imports are shown here.")}</p>}
     {importing&&<p className="mt-4 text-body-sm text-on-surface-variant">{t("Import continues while you rate. Keep this page open until it finishes.")}</p>}
   </>;
+  const progressToast = detailsOpen ? <aside ref={detailsToast} popover="manual" role="region" aria-labelledby="steam-import-details-title" onKeyDown={event=>{if(event.key==="Escape"){event.stopPropagation();setDetailsOpen(false);}}} className="fixed inset-auto right-4 bottom-4 m-0 w-[calc(100%_-_2rem)] max-w-xs max-h-40 overflow-y-auto rounded-xl border border-primary/20 bg-surface-container-high p-4 text-on-surface shadow-2xl backdrop:bg-transparent">
+    <div className="flex items-center justify-between gap-3"><h2 id="steam-import-details-title" className="font-semibold text-body-md">{t("Import details")}</h2><button aria-label={t("Close import details")} className="min-h-11 min-w-11 text-primary -my-2 -mr-2" onClick={()=>setDetailsOpen(false)}>×</button></div>
+    <div role="status" className="mt-2 space-y-1 text-body-sm">
+      <p className="flex justify-between gap-2"><span>{t("Games processed")}: {progress} / {importTotal}</span><span>{t("Games remaining")}: {Math.max(0,importTotal-progress)}</span></p>
+      {importing ? <p translate="no" className="truncate text-on-surface-variant">{importTitle}</p> : <p className="text-on-surface-variant">{t(progress<importTotal ? "Import interrupted. Refresh the library to import remaining games." : "Import complete")}</p>}
+      {ratingSession&&<p className="text-on-surface-variant">{t("Games reviewed")}: {ratingIndex} / {ratingTarget}</p>}
+    </div>
+    <div role="progressbar" aria-label={t("Importing games")} aria-valuemin={0} aria-valuemax={Math.max(1,importTotal)} aria-valuenow={progress} className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-container-highest"><div className="h-full rounded-full bg-primary" style={{width:`${importTotal ? progress/importTotal*100 : 0}%`}}/></div>
+  </aside> : null;
   return <div className="space-y-6">
     {ratingSession&&ratingHidden&&<div className="flex flex-wrap items-center gap-3 rounded-xl bg-surface-container-low p-4"><button className={button} onClick={()=>setRatingHidden(false)}>{t("Resume rating games")} ({Math.max(0,ratingGames.length-ratingIndex)})</button><button className="min-h-11 text-primary px-3" onClick={()=>setDetailsOpen(true)}>{t("Import details")}</button><p className="text-body-sm text-on-surface-variant">{t("Your unfinished ratings are kept in this browser.")}</p></div>}
     <p className="text-body-sm text-on-surface-variant">{t("Steam Game details must be Public, including playtime. Your Playlogg profile visibility does not change.")}</p>
@@ -191,7 +201,7 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
       <button type="button" disabled={busy&&!loading} onClick={()=>{setMinHours("");setMaxHours("");updateFilters("","",filters.sort,amount,0);}} className="min-h-11 rounded-xl bg-surface-container text-primary px-4">{t("Clear filters")}</button>
     </div>
     <p role="status" aria-live="polite">{t(message)}{loading&&<span className="flex items-center gap-2"><span aria-hidden="true" className="w-5 h-5 rounded-full border-2 border-primary/25 border-t-primary motion-safe:animate-spin"/>{t("Loading library")}: {preview?.games.length ?? 0} / {preview?.total ?? "—"}</span>}</p>
-    <dialog ref={importDialog} tabIndex={-1} aria-labelledby="steam-import-title" onCancel={event=>{if(ratingSession){event.preventDefault();setRatingHidden(true);}else if(importing)event.preventDefault();else setChoice(null);}} className="fixed inset-0 m-auto w-[calc(100%_-_2rem)] max-w-lg max-h-[calc(100dvh_-_2rem)] overflow-y-auto rounded-2xl bg-surface-container-high text-on-surface p-6 sm:p-8 shadow-2xl border border-primary/20 backdrop:bg-black/65 backdrop:backdrop-blur-sm">
+    <dialog ref={importDialog} tabIndex={-1} aria-labelledby="steam-import-title" onCancel={event=>{if(ratingSession){event.preventDefault();setRatingHidden(true);}else if(importing)event.preventDefault();else setChoice(null);}} className={`fixed inset-0 m-auto w-[calc(100%_-_2rem)] max-w-lg max-h-[calc(100dvh_-_2rem)] overflow-y-auto rounded-2xl bg-surface-container-high text-on-surface p-6 sm:p-8 shadow-2xl border border-primary/20 backdrop:bg-black/65 backdrop:backdrop-blur-sm ${detailsOpen ? "max-xl:!mt-4 max-xl:!mb-auto max-xl:!max-h-[calc(100dvh_-_13rem)]" : ""}`}>
       <div className="flex items-center gap-3">
         {importing&&!ratingSession&&<span aria-hidden="true" className="h-6 w-6 shrink-0 rounded-full border-[3px] border-primary/25 border-t-primary motion-safe:animate-spin"/>}
         <h2 id="steam-import-title" className="font-headline-md text-headline-md">{t(choice ? "How would you like to rate your games?" : ratingSession ? "Rate imported games" : "Importing games")}</h2>
@@ -204,11 +214,9 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
       {!ratingSession&&importProgress}
       {ratingSession&&<>{ratingGames[ratingIndex] ? <SteamRatingEditor key={ratingGames[ratingIndex].slug} game={ratingGames[ratingIndex]} draft={draft} onDraft={setDraft} onNext={nextRating}/> : importing ? <p role="status" className="mt-5">{t("Waiting for the next imported game…")}</p> : <div className="mt-5 space-y-4"><p>{t(progress<importTotal ? "Your imported games have been reviewed. Refresh the library to import remaining games." : "Your imports and rating session are complete.")}</p><button className={button} onClick={()=>setRatingSession(false)}>{t("Done")}</button></div>}</>}
       </>}
+      {modalOpen&&progressToast}
     </dialog>
-    <dialog ref={detailsDialog} aria-labelledby="steam-import-details-title" onCancel={()=>setDetailsOpen(false)} className="fixed inset-0 m-auto w-[calc(100%_-_2rem)] max-w-lg max-h-[calc(100dvh_-_2rem)] overflow-y-auto rounded-2xl bg-surface-container-high text-on-surface p-6 sm:p-8 shadow-2xl border border-primary/20 backdrop:bg-black/65 backdrop:backdrop-blur-sm">
-      <div className="flex items-center justify-between gap-3"><h2 id="steam-import-details-title" className="font-headline-md text-headline-md">{t("Import details")}</h2><button aria-label={t("Close import details")} className="min-h-11 min-w-11 text-primary" onClick={()=>setDetailsOpen(false)}>×</button></div>
-      {importProgress}
-    </dialog>
+    {!modalOpen&&progressToast}
     {loading&&<button type="button" onClick={()=>{stopLoading.current=true;}} className="min-h-11 rounded-xl bg-surface-container text-primary px-4">{t("Stop loading")}</button>}
     {summary&&<p role="status">{t("Imported")}: {summary.imported} · {t("Skipped")}: {summary.skipped} · {t("Failed")}: {summary.failed}</p>}
     {!!failures.length&&<button disabled={busy||ratingSession} onClick={()=>importSelected(true)} className={button}>{t("Retry failed games")}</button>}

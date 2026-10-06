@@ -138,7 +138,9 @@ The review implementation reuses an owner-bound server library for at most 30 se
 
 
 The rating screen focuses on one game. Import progress and reviewed counts are
-opened separately through Import details. Close rating session hides the editor
+opened as a compact bottom-right toast through Import details. The native manual
+popover stays above the rating modal without a second backdrop or focus trap;
+users can continue scoring, dismiss it, or reopen it. Close rating session hides the editor
 without stopping imports; Resume rating games reopens it. The queue, position and
 current score/tier/status draft are kept in localStorage scoped to the verified
 profile ID. Refreshing or leaving the page restores a closed session in the same
