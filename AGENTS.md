@@ -206,8 +206,10 @@ Do not enable public database writes without an
 agreed ownership/access design. Inspect Supabase before finalizing a schema;
 track approved changes in versioned migrations. Keep credentials in ignored
 environment files. Never commit secrets or place them in documentation.
-Push completed, verified milestones to `main` and let Vercel deploy them without
-asking again. Ask before infrastructure resets/deletion or destructive Git actions.
+Push completed, verified milestones to GitHub `main` and deploy them to Vercel
+production without asking for confirmation. The user explicitly granted standing
+authorization for routine pushes and deployments, including pending verified
+changes. Ask before infrastructure resets/deletion or destructive Git actions.
 The user approved owner-only comparisons of their private profile against a
 public friend. Resolve ownership through verified Auth and `owner_user_id`;
 anonymous comparisons and share-card exports still require public profiles.
