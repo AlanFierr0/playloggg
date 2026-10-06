@@ -1,9 +1,9 @@
 import "server-only";
 import { randomInt } from "node:crypto";
 import { getCatalog, portfolioGames } from "@/lib/portfolio";
-export async function getDiscover() {
+export async function getDiscover(amount = 5) {
   const rows = [...await getCatalog()];
-  const count = Math.min(5, rows.length);
+  const count = Math.min(amount, rows.length);
   // Sample without replacement on each render; shared catalog caching is unchanged.
   for (let index = 0; index < count; index++) {
     const selected = randomInt(index, rows.length);

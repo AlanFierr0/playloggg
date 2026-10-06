@@ -1124,7 +1124,7 @@
   "Profile preview": "Vista previa del perfil",
   "A place for your favorites": "Un lugar para tus favoritos",
   "Example rating and tier": "Ejemplo de puntuación y nivel",
-  "Illustrative layout. Your profile starts empty and private.": "Diseño de ejemplo. Tu perfil empieza vacío y público.",
+  "Illustrative layout. Your profile starts empty and public.": "Diseño de ejemplo. Tu perfil empieza vacío y público.",
   "Navigation menu": "Menú de navegación",
   "Display preferences": "Preferencias de visualización",
   "Manage profile visibility": "Administrar visibilidad del perfil",
@@ -1145,5 +1145,17 @@
   "Welcome back,": "Qué bueno verte de nuevo,",
   "Pick up where you left off. Log a game, update your profile or arrange your tiers.": "Seguí donde lo dejaste. Registrá un juego, actualizá tu perfil u organizá tus tiers.",
   "Recently logged": "Registrados recientemente",
-  "Your next game starts here. Log your first game to build your collection.": "Tu próximo juego empieza acá. Registrá tu primer juego para armar tu colección."
+  "Your next game starts here. Log your first game to build your collection.": "Tu próximo juego empieza acá. Registrá tu primer juego para armar tu colección.",
+  "Continue playing": "Seguí jugando",
+  "Recently updated": "Actualizados recientemente",
+  "Your taste": "Tus gustos",
+  "Your highest-rated genres, based on at least 3 scored games in each genre.": "Tus géneros mejor puntuados, con al menos 3 juegos puntuados por género.",
+  "Explore your taste": "Explorá según tus gustos",
+  "Unlogged games in your highest-rated genres.": "Juegos sin registrar de tus géneros mejor puntuados.",
+  "Your genres": "Tus géneros",
+  "Your tags": "Tus etiquetas",
+  "From your genres": "De tus géneros",
+  "No unlogged suggestions right now. Explore your collection in Games.": "Por ahora no hay sugerencias sin registrar. Explorá tu colección en Juegos.",
+  "Open your profile": "Abrí tu perfil",
+  "Recent reviews": "Reseñas recientes"
 }

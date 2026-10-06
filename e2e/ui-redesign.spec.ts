@@ -6,10 +6,13 @@ import { authCookie } from "./fixture-server.mjs";
 test("profile preview, responsive menu and catalog disclosure work in both themes", async ({ page }, testInfo) => {
   await page.goto("/");
   await expect(page.getByRole("figure", { name: "Profile preview" })).toBeVisible();
-  await expect(page.getByText("Illustrative layout. Your profile starts empty and private.")).toBeVisible();
+  await expect(page.getByText("Illustrative layout. Your profile starts empty and public.")).toBeVisible();
   const hero = page.locator("main header");
   await expect(hero.getByRole("link", {name:"Create your profile", exact:true})).toHaveAttribute("href", "/login?mode=register");
   await expect(hero.getByRole("figure").getByRole("link")).toHaveCount(4);
+  const previewLinks = await hero.getByRole("figure").getByRole("link").evaluateAll(links => links.map(link => link.getAttribute("href")));
+  const suggestions = page.getByRole("region", {name:"Games worth exploring"});
+  for (const href of previewLinks) await expect(suggestions.locator(`a[href="${href}"]`)).toHaveCount(0);
   await page.screenshot({path: `e2e-artifacts/ui-home-${testInfo.project.name}.png`, fullPage: true});
   const menu = page.getByRole("button", {name: "Navigation menu"});
   if (await menu.isVisible()) {
@@ -73,8 +76,8 @@ test("profile creation preserves registration intent and ordinary sign-in", asyn
   await expect(page.getByRole("heading",{name:"Welcome back, Fixture Owner."})).toBeVisible();
   await expect(page.locator("main header").getByRole("link",{name:"Log a game",exact:true})).toHaveAttribute("href","/log");
   await expect(page.locator("main header").getByRole("link",{name:"Tier List",exact:true})).toHaveAttribute("href","/tiers");
-  await expect(page.getByRole("region",{name:"Recently logged"}).getByRole("link",{name:"Elden Ring: Shadow of the Erdtree",exact:true})).toHaveCount(2);
-  await expect(page.getByRole("region",{name:"Recently logged"}).getByRole("link",{name:"Edit log entry",exact:true})).toHaveAttribute("href","/log?game=elden-ring-shadow-of-the-erdtree");
+  await expect(page.getByRole("region",{name:"Continue playing"}).getByRole("link",{name:"Elden Ring: Shadow of the Erdtree",exact:true})).toHaveCount(2);
+  await expect(page.getByRole("region",{name:"Continue playing"}).getByRole("link",{name:"Edit log entry",exact:true})).toHaveAttribute("href","/log?game=elden-ring-shadow-of-the-erdtree");
   await expect(page.getByRole("figure",{name:"Profile preview"})).toHaveCount(0);
   await page.screenshot({path:`e2e-artifacts/ui-home-owner-${testInfo.project.name}.png`,fullPage:true});
   expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);

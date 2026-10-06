@@ -104,3 +104,25 @@ layout. Hero, directory and community sections now explicitly fill the shared
 container width; a desktop/mobile browser assertion checks hero/catalog alignment.
 Production smoke checks cover guest redirects, unavailable private export APIs,
 unknown public handles, catalog, search, login, Compare and the opt-in directory.
+
+
+## Personal Home improvements (2026-10-06)
+
+Home keeps the existing navigation, typography, cover art and amber accent.
+Owners see up to four In Progress games with platform/playtime and direct edit
+links, followed by up to four recently updated entries not already shown there.
+Cards show optional score, independent colored tier and saved playback status.
+Only card fields enter the Home client component; reviews remain server-side.
+
+A compact taste summary reuses `tasteStats`: genres need three scored games,
+including zero, and are ordered by their average score. Explore your taste shows
+up to five unlogged catalog games matching the top three eligible genres, with
+clickable explanations. This is genre browsing, not a predicted game score or a
+change to community recommendation formulas. Without eligible matches, Home
+uses general unlogged suggestions. Genre and tag shortcuts open existing Games
+filters; no new persistence or permissions are introduced.
+
+Guest preview covers and catalog suggestions use disjoint samples. Public-default
+copy matches signup. Empty personal shelves and unavailable taste summaries stay
+quiet. Browser checks cover selection thresholds, zero playtime, filters, editing,
+guest isolation, both languages/themes, and desktop/mobile including 320px.

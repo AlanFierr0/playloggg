@@ -4,9 +4,30 @@ import type { ReactNode } from "react";
 import { useMessages } from "@/components/site-preferences";
 import { usePortfolio } from "@/components/portfolio-provider";
 import type { Game } from "@/types/domain";
-import { GameLogAction } from "@/components/game-actions";
+import { tierColors } from "@/components/rating-controls";
+import { tierLabels } from "@/lib/tier-labels";
+import { playbackLabels } from "@/lib/playback-status";
+import { playedPlatformLabels } from "@/lib/played-platforms";
 
-export function HomeIntro({ preview, recent }: { preview: ReactNode; recent: Pick<Game, "slug" | "title" | "cover">[] }) {
+export type HomeEntry = Pick<Game, "slug" | "title" | "cover" | "score" | "tier" | "status" | "platform" | "hoursPlayed">;
+
+function HomeGameCard({ game, continuing = false }: { game: HomeEntry; continuing?: boolean }) {
+  const t = useMessages();
+  return <article className="group/game flex min-w-0 items-start gap-4">
+    <Link href={`/game/${game.slug}`} aria-label={game.title} className={`shrink-0 rounded-xl ${continuing ? "w-20 sm:w-24" : "w-14 sm:w-16"}`}><img src={game.cover} alt="" width={96} height={128} className="aspect-[3/4] w-full rounded-xl object-cover bg-surface-container-high" /></Link>
+    <div className="min-w-0 flex-1 space-y-2">
+      <Link href={`/game/${game.slug}`} translate="no" className="block font-headline-md text-body-md font-semibold line-clamp-2 hover:text-primary">{game.title}</Link>
+      <div className="flex flex-wrap items-center gap-2 text-body-sm">
+        <span className="text-primary">{game.score === null ? t("Unrated") : `${game.score} / 100`}</span>
+        {game.tier && <span className={`rounded px-2 py-0.5 font-label-sm text-label-sm ${tierColors[game.tier]}`}>{game.tier} · {t(tierLabels[game.tier])}</span>}
+      </div>
+      {continuing ? <p className="text-body-sm text-on-surface-variant">{[game.platform ? t(playedPlatformLabels[game.platform]) : null, game.hoursPlayed != null ? `${game.hoursPlayed} ${t("hrs")}` : null].filter(Boolean).join(" · ") || t("In Progress")}</p> : game.status && <p className="text-body-sm text-on-surface-variant">{t(playbackLabels[game.status])}</p>}
+      <Link href={`/log?game=${encodeURIComponent(game.slug)}`} className="inline-flex min-h-11 items-center gap-2 text-body-sm text-primary hover:underline underline-offset-4"><span aria-hidden="true" className="material-symbols-outlined text-[16px]">edit</span>{t("Edit log entry")}</Link>
+    </div>
+  </article>;
+}
+
+export function HomeIntro({ preview, recent, playing }: { preview: ReactNode; recent: HomeEntry[]; playing: HomeEntry[] }) {
   const t = useMessages();
   const { access, profile } = usePortfolio();
   if (access?.canEdit) return (
@@ -23,20 +44,15 @@ export function HomeIntro({ preview, recent }: { preview: ReactNode; recent: Pic
           <Link href="/tiers" className="ui-action text-primary hover:bg-surface-container">{t("Tier List")}<span aria-hidden="true" className="material-symbols-outlined text-[18px]">arrow_forward</span></Link>
         </div>
       </div>
-      <section aria-label={t("Recently logged")} className="pt-7 space-y-5">
-        <h2 className="font-headline-md text-headline-md font-semibold">{t("Recently logged")}</h2>
-        {recent.length ? <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-8">
-          {recent.map(game => <div key={game.slug} className="group/game min-w-0 flex flex-col xl:flex-row gap-3 xl:gap-4">
-            <div className="relative w-full max-w-40 xl:w-28 xl:shrink-0">
-              <Link href={`/game/${game.slug}`} aria-label={game.title} className="block rounded-xl"><img src={game.cover} alt="" width={180} height={240} className="aspect-[3/4] w-full rounded-xl object-cover bg-surface-container-high transition-opacity group-hover/game:opacity-90" /></Link>
-              <GameLogAction slug={game.slug} logged />
-            </div>
-            <div className="min-w-0 xl:pt-2 space-y-2">
-              <Link href={`/game/${game.slug}`} translate="no" className="block font-headline-md text-body-lg font-semibold line-clamp-3 group-hover/game:text-primary">{game.title}</Link>
-            </div>
-          </div>)}
-        </div> : <p className="rounded-xl bg-surface-container-low p-6 text-on-surface-variant">{t("Your next game starts here. Log your first game to build your collection.")}</p>}
-      </section>
+      {playing.length > 0 && <section aria-label={t("Continue playing")} className="pt-7 space-y-5">
+        <h2 className="font-headline-lg text-headline-lg font-semibold">{t("Continue playing")}</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 sm:gap-8">{playing.map(game => <HomeGameCard key={game.slug} game={game} continuing />)}</div>
+      </section>}
+      {recent.length > 0 && <section aria-label={t("Recently updated")} className="pt-7 space-y-5">
+        <h2 className="font-headline-md text-headline-md font-semibold">{t("Recently updated")}</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 sm:gap-8">{recent.map(game => <HomeGameCard key={game.slug} game={game} />)}</div>
+      </section>}
+      {!playing.length && !recent.length && <p className="mt-7 text-on-surface-variant">{t("Your next game starts here. Log your first game to build your collection.")}</p>}
     </header>
   );
   return (

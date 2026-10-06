@@ -25,7 +25,7 @@ test("game cover actions reveal on hover and focus, edit logged games and stay a
   await edit.click();
   await expect(page).toHaveURL(/\/log\?game=elden-ring-shadow-of-the-erdtree$/);
   await page.goto("/");
-  const recent=page.getByRole("region",{name:"Recently logged"});
+  const recent=page.getByRole("region",{name:"Continue playing"});
   await recent.hover();
   await recent.getByRole("link",{name:"Edit log entry",exact:true}).focus();
   await expect(recent.getByRole("link",{name:"Edit log entry",exact:true})).toHaveCSS("opacity","1");

@@ -27,7 +27,7 @@ export async function ProfilePreview({ games }: { games: Game[] }) {
           <div className="shrink-0 text-right"><p className="font-label-lg text-primary">92 <span className="text-on-surface-variant">/ 100</span></p><p className="text-body-sm text-on-surface-variant">{t("Tier S")}</p></div>
         </div>
       </div>
-      <p className="text-body-sm text-on-surface-variant">{t("Illustrative layout. Your profile starts empty and private.")}</p>
+      <p className="text-body-sm text-on-surface-variant">{t("Illustrative layout. Your profile starts empty and public.")}</p>
     </figure>
   );
 }
