@@ -59,7 +59,7 @@ export async function startFixtureServer() {
       if (url.pathname === "/__provider-games") {
         let body=""; for await (const part of req) body+=part;
         const candidate={id:9001,name:"Unified Fixture Adventure",slug:"unified-fixture-adventure",first_release_date:1577836800,platforms:[{name:"PC"}],genres:[{name:"Adventure"}]};
-        if(body.includes("external_games.uid"))return reply(200,[{id:1,external_games:[{uid:"101",external_game_source:1}]},{id:2,external_games:[{uid:"102",external_game_source:1}]},{id:9004,external_games:[{uid:"103",external_game_source:1}]}]);
+        if(body.includes("external_games.uid"))return reply(200,[{id:1,name:"Hades",genres:[{name:"RPG"}],external_games:[{uid:"101",external_game_source:1}]},{id:2,external_games:[{uid:"102",external_game_source:1}]},{id:9004,name:"Steam Fixture Adventure",genres:[{name:"Adventure"}],external_games:[{uid:"103",external_game_source:1}]}]);
         if(body.includes("where id = 9004"))return reply(200,[{...candidate,id:9004,name:"Steam Fixture Adventure",slug:"steam-fixture-adventure"}]);
         const mobileCandidate={...candidate,id:9003,name:"Unified Mobile Adventure",slug:"unified-mobile-adventure"};
         if(body.includes("where id = 9001"))return reply(200,[candidate]);
@@ -153,7 +153,7 @@ export async function startFixtureServer() {
       if (resource === "ratings" && req.method === "PATCH") {
         if(!authenticated || url.searchParams.get("profile_id")!=="eq.2")return reply(403,{message:"Fixture ownership denied"});
         let body="";for await(const part of req)body+=part;const patch=JSON.parse(body);
-        if(Object.keys(patch).some(key=>!["hours_played","status","platform","tier","updated_at"].includes(key)))return reply(400,{message:"Unsupported entry fields"});
+        if(Object.keys(patch).some(key=>!["hours_played","status","platform","tier","score","updated_at"].includes(key)))return reply(400,{message:"Unsupported entry fields"});
         if(failSave){failSave=false;return reply(503,{message:"Controlled save failure"});}
         const matches=ratings.filter(row=>[...url.searchParams].filter(([key])=>key!=="select").every(([key,value])=>value.startsWith("eq.")?String(row[key])===value.slice(3):value.startsWith("in.(")?value.slice(4,-1).split(",").includes(String(row[key])):value==="is.null"&&row[key]===null));
         matches.forEach(row=>Object.assign(row,patch,{updated_at:new Date().toISOString()}));
@@ -166,7 +166,7 @@ export async function startFixtureServer() {
         if (failSave) { failSave = false; return reply(503, { message: "Controlled save failure" }); }
         if(req.headers.prefer?.includes("resolution=ignore-duplicates")&&ratings.some(row=>row.profile_id===rating.profile_id&&row.game_id===rating.game_id))return reply(201,[]);
         ratings = ratings.filter((row) => row.profile_id !== rating.profile_id || row.game_id !== rating.game_id);
-        ratings.push({...rating,updated_at:new Date().toISOString()}); return reply(201,url.searchParams.has("select")?[{game_id:rating.game_id}]:undefined);
+        const saved={...rating,updated_at:new Date().toISOString()}; ratings.push(saved); return reply(201,url.searchParams.has("select")?[{game_id:saved.game_id,updated_at:saved.updated_at}]:undefined);
       }
       if (resource === "profiles" && req.method === "PATCH") {
         if (!admin || url.searchParams.get("id") !== "eq.2" || url.searchParams.get("owner_user_id") !== `eq.${ownerId}`) return reply(403, {message:"Fixture ownership denied"});

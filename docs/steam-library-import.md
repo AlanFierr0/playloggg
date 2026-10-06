@@ -23,14 +23,30 @@
    Blank limits are unrestricted; zero includes unplayed games.
    Filters and sorting apply to the whole library before batches are chosen.
    Select individual matched games, or **Select available games** among loaded cards.
-6. Select **Import selected games** in the upper-right toolbar. Games are imported sequentially, with
+6. Select **Import selected games** in the upper-right toolbar, then choose
+   **Rate all games**, **Rate some games**, or **Just import**. Some games opens a
+   picker over the games selected for import: filter by genre, title and minimum/
+   maximum playtime, sort by title/playtime, then select individual or matching
+   games. Hidden selections stay selected until cleared. No writes happen until
+   you confirm an import mode or the picker.
+   Games are imported sequentially, with
    a centered modal over the library showing the current title, processed/total
    count, remaining count and progress bar. It keeps focus and disables interaction
    with the page behind it while saving. Its spinner
-   respects reduced-motion preferences. The indicator disappears on completion
+   respects reduced-motion preferences. In Just import mode, the indicator disappears on completion
    or failure, while errors remain available for retry. Successful imports stay saved if another
    game fails; retry keeps only failed selections. Changing filters, sorting or
    the amount resets the loaded set and selection; loading more preserves them.
+   In rating modes, chosen games are imported first and enter a one-at-a-time
+   editor as each import succeeds. Set an optional independent tier, 0–100 score
+   (typed or slider), and playback status; **Save and next** persists these three
+   fields, while **Skip this game** leaves them unset. Other selected games keep
+   importing while you edit. Import errors and rating errors are separate; failed
+   saves retain the draft for retry. Existing/concurrently logged entries are not
+   added to the rating queue. **Done** closes the session after the import ends.
+   Keep the page open until import finishes: this is an in-page workflow, not a
+   durable job that survives closing the tab. Import/rating skips leave the game
+   logged and editable later from the profile.
 7. **Sync Steam playtime** updates hours for existing PC / Steam entries, including
    manual PC entries with an exact Steam match. It works independently of the
    current filters or loaded amount, in requests of at most 25 games. The server
@@ -41,7 +57,7 @@
 
 Each new entry saves PC / Steam and playtime, rounded from minutes to two decimal
 hours. Zero hours remain zero. Score, tier, status, review and completion date
-stay unset; no favorites are created. Existing entries are skipped, including
+stay unset until explicitly supplied in the optional rating session; no favorites are created. Existing entries are skipped, including
 concurrent edits. Steam ownership is not treated as proof of completion.
 
 Only Steam sign-in accounts can use the first version. Connecting Steam to an
@@ -78,6 +94,12 @@ Titles are never used for automatic matching. Missing shared metadata uses the
 existing trusted catalog import action. Personal entry insertion uses the
 authenticated client and existing RLS, with ON CONFLICT DO NOTHING on
 `profile_id,game_id`; the admin client never writes personal entries.
+The import returns the saved entry slug and update timestamp only for a newly
+created log. Rating saves re-verify Steam/Auth ownership and validate all inputs,
+then update score/tier/status on that existing PC entry with a timestamp check.
+No upsert, playtime/platform/review/tag/date overwrite, schema change or new grant
+is needed. A concurrent manual edit takes precedence and the rating screen tells
+the user to skip and edit the latest version from their profile.
 
 Preview covers use existing catalog artwork or the exactly matched provider
 cover. If unavailable or broken, try Steam's library capsule and then its header.
@@ -103,6 +125,9 @@ Only explicitly selected imported entries become visible if the profile is publi
   exclusion, inaccessible libraries, failed-save retry, accessibility and mobile.
   Also verifies imported games stay hidden after reopening, sync retry, unchanged
   non-playtime fields and other profiles, and idempotent sync without date changes.
+  Rating-flow checks cover all/some/no ratings, live editing during imports, genre/
+  title/playtime selection, independent tier/status, score zero, retry without lost
+  drafts, skips and concurrent manual edit protection.
 - The fixture provider intercepts only the isolated test process. It does not
   replace Steam authentication or production RLS verification.
 

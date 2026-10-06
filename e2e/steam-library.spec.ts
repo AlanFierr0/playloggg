@@ -15,6 +15,7 @@ test("Steam import shows a visible loader while saving and removes it after a fa
   });
   await fetch("http://127.0.0.1:3101/__fail-save",{method:"POST"});
   await page.getByRole("button",{name:"Import selected games (2)",exact:true}).click();
+  await page.getByRole("button",{name:"Just import",exact:true}).click();
   const loader=page.getByRole("progressbar",{name:"Importing games",exact:true});
   const popup=page.getByRole("dialog",{name:"Importing games",exact:true});
   await expect(popup).toBeVisible();
@@ -32,6 +33,7 @@ test("Steam import shows a visible loader while saving and removes it after a fa
   await expect(page.getByText(/Some games could not be imported/)).toBeVisible();
   await expect(popup).not.toBeVisible();
   await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
+  await page.getByRole("button",{name:"Just import",exact:true}).click();
   await expect(loader).toBeVisible();
   await expect(page.getByText("Import complete. Your games are saved in your profile.")).toBeVisible();
   await expect(popup).not.toBeVisible();
@@ -44,6 +46,7 @@ test("Steam sync updates only PC playtime, preserves personal details and retrie
   await page.goto("/profile/import/steam");
   await page.getByRole("checkbox",{name:"Select game Hades",exact:true}).check();
   await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
+  await page.getByRole("button",{name:"Just import",exact:true}).click();
   await expect(page.getByText("Import complete. Your games are saved in your profile.")).toBeVisible();
   await expect(page.getByRole("checkbox",{name:"Select game Hades",exact:true})).toHaveCount(0);
   await fetch("http://127.0.0.1:3101/__steam-playtime",{method:"POST"});
@@ -97,6 +100,7 @@ test("Steam import previews, selects, saves trusted playtime and preserves exist
   await page.screenshot({path:`e2e-artifacts/steam-library-${testInfo.project.name}.png`});
   expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
   await page.getByRole("button",{name:"Import selected games (2)",exact:true}).click();
+  await page.getByRole("button",{name:"Just import",exact:true}).click();
   await expect(page.getByText("Import complete. Your games are saved in your profile.")).toBeVisible();
   state=await (await fetch("http://127.0.0.1:3101/__state")).json();
   const own=state.ratings.filter((row:{profile_id:number})=>row.profile_id===2);
@@ -127,9 +131,11 @@ test("Steam import protects guests and email accounts and handles hidden librari
   await page.getByRole("checkbox",{name:"Select game Hades",exact:true}).check();
   await fetch("http://127.0.0.1:3101/__fail-save",{method:"POST"});
   await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
+  await page.getByRole("button",{name:"Just import",exact:true}).click();
   await expect(page.getByText("Some games could not be imported. Your successful imports are saved; retry the remaining games.")).toBeVisible();
   await expect(page.getByRole("checkbox",{name:"Select game Hades",exact:true})).toBeChecked();
   await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
+  await page.getByRole("button",{name:"Just import",exact:true}).click();
   await expect(page.getByText("Import complete. Your games are saved in your profile.")).toBeVisible();
 });
 
@@ -146,6 +152,7 @@ test("Steam import does not overwrite an entry logged after preview",async({page
   await expect(editor).toHaveURL(/\/profile$/);
   await editor.close();
   await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
+  await page.getByRole("button",{name:"Just import",exact:true}).click();
   await expect(page.getByText("Import complete. Your games are saved in your profile.")).toBeVisible();
   const state=await (await fetch("http://127.0.0.1:3101/__state")).json();
   const own=state.ratings.filter((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===1);
@@ -232,4 +239,85 @@ test("Steam artwork falls back to its header and then a placeholder if images fa
   await row.locator("img").evaluate(image=>image.dispatchEvent(new Event("error")));
   await expect(row.locator("img")).toHaveCount(0);
   await expect(row.locator(".material-symbols-outlined")).toHaveText("sports_esports");
+});
+
+test("Steam rates all games while import continues and retries rating saves without losing playtime",async({page,context},info)=>{
+  await context.addCookies([authCookie]);await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
+  await page.goto("/profile/import/steam");
+  await page.getByRole("checkbox",{name:"Select game Hades",exact:true}).check();
+  await page.getByRole("checkbox",{name:"Select game Steam Fixture Adventure",exact:true}).check();
+  await page.getByRole("button",{name:"Import selected games (2)",exact:true}).click();
+  const before=await (await fetch("http://127.0.0.1:3101/__state")).json();
+  expect(before.ratings.filter((row:{profile_id:number})=>row.profile_id===2)).toHaveLength(1);
+  await page.route("**/profile/import/steam",async route=>{if(route.request().method()==="POST")await new Promise(resolve=>setTimeout(resolve,900));await route.continue();});
+  await page.getByRole("button",{name:"Rate all games",exact:true}).click();
+  const dialog=page.getByRole("dialog",{name:"Rate imported games",exact:true});
+  await expect(dialog.getByRole("heading",{name:"Hades",exact:true})).toBeVisible();
+  await expect(dialog.getByRole("progressbar")).toHaveAttribute("aria-valuenow","1");
+  await dialog.getByRole("textbox",{name:"Score",exact:true}).fill("73");
+  await expect(dialog.getByRole("textbox",{name:"Score",exact:true})).toHaveValue("73");
+  await expect(dialog.getByRole("progressbar")).toHaveAttribute("aria-valuenow","2");
+  await dialog.getByRole("button",{name:"Choose tier, currently unassigned",exact:true}).click();
+  await dialog.getByRole("menuitemradio",{name:"A Amazing",exact:true}).click();
+  await dialog.getByLabel("Playback status",{exact:true}).selectOption("completed");
+  await page.screenshot({path:`e2e-artifacts/steam-rating-${info.project.name}.png`});
+  expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
+  await fetch("http://127.0.0.1:3101/__fail-save",{method:"POST"});
+  await dialog.getByRole("button",{name:"Save and next",exact:true}).click();
+  await expect(dialog.getByRole("alert")).toContainText("Your rating could not be saved.");
+  await expect(dialog.getByRole("textbox",{name:"Score",exact:true})).toHaveValue("73");
+  await dialog.getByRole("button",{name:"Save and next",exact:true}).click();
+  await expect(dialog.getByRole("heading",{name:"Steam Fixture Adventure",exact:true})).toBeVisible();
+  await dialog.getByRole("button",{name:"Skip this game",exact:true}).click();
+  await dialog.getByRole("button",{name:"Done",exact:true}).click();
+  const after=await (await fetch("http://127.0.0.1:3101/__state")).json();
+  expect(after.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===1)).toMatchObject({score:73,tier:"A",status:"completed",platform:"pc",hours_played:1.5,review:null,tags:[],completed_on:null});
+  expect(after.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===2)).toEqual(before.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===2));
+  const adventure=after.games.find((game:{igdb_id:number})=>game.igdb_id===9004);
+  expect(after.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===adventure.id)).toMatchObject({score:null,tier:null,status:null,hours_played:0});
+});
+
+test("Steam some-games picker filters genre, hours and title while other selected games import unrated",async({page,context})=>{
+  await context.addCookies([authCookie]);await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
+  await page.goto("/profile/import/steam");
+  await page.getByRole("checkbox",{name:"Select game Hades",exact:true}).check();
+  await page.getByRole("checkbox",{name:"Select game Steam Fixture Adventure",exact:true}).check();
+  await page.getByRole("button",{name:"Import selected games (2)",exact:true}).click();
+  await page.getByRole("button",{name:"Rate some games",exact:true}).click();
+  const dialog=page.getByRole("dialog");
+  await dialog.getByLabel("Genre",{exact:true}).selectOption("Adventure");
+  await dialog.getByLabel("Maximum hours",{exact:true}).fill("0");
+  await dialog.getByLabel("Search games",{exact:true}).fill("Fixture");
+  await expect(dialog.getByRole("checkbox")).toHaveCount(1);
+  await dialog.getByRole("button",{name:"Select matching games",exact:true}).click();
+  await dialog.getByRole("button",{name:"Import and rate selected games (1)",exact:true}).click();
+  await expect(dialog.getByRole("heading",{name:"Steam Fixture Adventure",exact:true})).toBeVisible();
+  await dialog.getByRole("textbox",{name:"Score",exact:true}).fill("0");
+  await dialog.getByLabel("Playback status",{exact:true}).selectOption("backlog");
+  await dialog.getByRole("button",{name:"Save and next",exact:true}).click();
+  await dialog.getByRole("button",{name:"Done",exact:true}).click();
+  const state=await (await fetch("http://127.0.0.1:3101/__state")).json();
+  expect(state.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===1)).toMatchObject({score:null,tier:null,status:null,platform:"pc",hours_played:1.5});
+  const adventure=state.games.find((game:{igdb_id:number})=>game.igdb_id===9004);
+  expect(state.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===adventure.id)).toMatchObject({score:0,tier:null,status:"backlog",platform:"pc",hours_played:0});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+
+test("Steam rating never overwrites a concurrent manual log edit",async({page,context})=>{
+  await context.addCookies([authCookie]);await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
+  await page.goto("/profile/import/steam");
+  await page.getByRole("checkbox",{name:"Select game Hades",exact:true}).check();
+  await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
+  await page.getByRole("button",{name:"Rate all games",exact:true}).click();
+  const dialog=page.getByRole("dialog",{name:"Rate imported games",exact:true});
+  await expect(dialog.getByRole("heading",{name:"Hades",exact:true})).toBeVisible();
+  const other=await context.newPage();await other.goto("/log?game=hades");
+  await other.locator("#score-display").fill("91");await other.locator("#commit-rating").click();await expect(other).toHaveURL(/\/profile$/);await other.close();
+  await dialog.getByRole("textbox",{name:"Score",exact:true}).fill("20");
+  await dialog.getByRole("button",{name:"Save and next",exact:true}).click();
+  await expect(dialog.getByRole("alert")).toContainText("This entry changed elsewhere.");
+  await dialog.getByRole("button",{name:"Skip this game",exact:true}).click();
+  await dialog.getByRole("button",{name:"Done",exact:true}).click();
+  const state=await (await fetch("http://127.0.0.1:3101/__state")).json();
+  expect(state.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===1)).toMatchObject({score:91,platform:"pc",hours_played:1.5});
 });

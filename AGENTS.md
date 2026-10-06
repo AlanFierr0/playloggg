@@ -262,3 +262,9 @@ The user approved live friend search across all public profiles, even without
 discovery opt-in. Blank-query browsing, following and community feeds still use
 discovery consent; private and blocked profiles stay hidden. See
 docs/friends-and-comparison.md.
+
+Steam imports now offer rating all/some/no selected games. Some uses genre,
+playtime and title filters to pick the rating subset; all selected games still
+import. Rate newly created entries one at a time while the remaining imports run
+on the open page. Save only score/tier/status, preserve Steam hours and all other
+entry fields, and let concurrent manual edits win. See docs/steam-library-import.md.

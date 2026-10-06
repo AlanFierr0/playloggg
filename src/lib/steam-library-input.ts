@@ -10,7 +10,7 @@ export function parseSteamBrowse(value: unknown): SteamBrowse | null {
   return {offset,sort:sort as SteamBrowse["sort"],minHours:minHours as number|null,maxHours:maxHours as number|null};
 }
 
-export function browseSteamLibrary(games: SteamGame[], query: SteamBrowse) {
+export function browseSteamLibrary<T extends SteamGame>(games: T[], query: SteamBrowse) {
   return games.filter(game=>(query.minHours===null||game.hours>=query.minHours)&&(query.maxHours===null||game.hours<=query.maxHours))
     .sort((a,b)=>(query.sort==="hours_desc" ? b.hours-a.hours : query.sort==="hours_asc" ? a.hours-b.hours : 0)||a.title.localeCompare(b.title)||a.appId-b.appId);
 }
@@ -55,5 +55,5 @@ export function matchSteamGames(records: unknown[], appIds: number[]): Map<numbe
 
 export function steamMatchBody(appIds: number[]) {
   if (!appIds.length || appIds.length > 25 || appIds.some(id => !steamAppId(id))) throw new Error("Invalid library selection.");
-  return `fields id,name,cover.image_id,external_games.uid,external_games.external_game_source; where external_games.uid = (${appIds.map(id=>JSON.stringify(String(id))).join(",")}) & external_games.external_game_source = 1; limit 500;`;
+  return `fields id,name,genres.name,cover.image_id,external_games.uid,external_games.external_game_source; where external_games.uid = (${appIds.map(id=>JSON.stringify(String(id))).join(",")}) & external_games.external_game_source = 1; limit 500;`;
 }
