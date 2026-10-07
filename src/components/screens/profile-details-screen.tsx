@@ -12,7 +12,7 @@ export function ProfileDetailsScreen({ section }: { section: "reviews" | "stats"
   const rated = ratedGames(games);
   const entries = loggedGames(games);
   const reviews = entries.filter(game => game.review?.trim()).sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "") || a.slug.localeCompare(b.slug));
-  const bands = [[0, 49], [50, 59], [60, 69], [70, 79], [80, 89], [90, 100]];
+  const bands = [[90, 100], [80, 89], [70, 79], [60, 69], [50, 59], [0, 49]];
   return <section className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 space-y-8">
     {!publicBase && <ProfileNavigation />}<h1 className="font-headline-xl text-headline-xl">{t(section === "reviews" ? "Reviews" : "Stats")}</h1>
     {section === "reviews" ? <div className="max-w-4xl space-y-8">{reviews.map(game => <article key={game.slug} className="flex items-start gap-4 sm:gap-6"><Link href={publicBase ? `${publicBase}/game/${game.slug}` : `/game/${game.slug}`} className="shrink-0 w-16 sm:w-24"><img src={game.cover} alt={game.title} loading="lazy" className="w-full aspect-[2/3] rounded object-cover" /></Link><div className="min-w-0 space-y-3"><h2 translate="no" className="font-headline-lg text-headline-lg">{game.title}</h2><p className="text-primary">{t("Score")}: {game.score ?? t("Unrated")}</p><p translate="no" className="whitespace-pre-wrap break-words text-on-surface-variant">{game.review}</p></div></article>)}{!reviews.length && <p className="text-on-surface-variant">{t("No reviews yet.")}</p>}</div> : <div className="w-full min-w-0 space-y-8">
