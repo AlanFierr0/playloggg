@@ -17,13 +17,14 @@ import type { Game, Portfolio } from "@/types/domain";
 const control = "catalog-control";
 const button = "inline-flex items-center justify-center rounded px-4 py-2.5 font-body-md text-body-md bg-surface-container-high text-on-surface disabled:opacity-40";
 
-export function GamesScreen({ data, profile, access }: { data: GamesPageData; profile: Portfolio["profile"]; access: Portfolio["access"] }) {
+export function GamesScreen({ data, access }: { data: GamesPageData; profile: Portfolio["profile"]; access: Portfolio["access"] }) {
   const t = useMessages();
   const router = useRouter();
   const [filters, updateFilters] = useOptimistic(data.filters);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const sentinel = useRef<HTMLDivElement>(null);
-  const activeFilters = Object.entries(filters).filter(([key, value]) => key !== "query" && value !== defaultGamesFilters[key as keyof GamesFilters]).length;
+  const activeKeys = (Object.keys(filters) as (keyof GamesFilters)[]).filter(key => key !== "query" && filters[key] !== defaultGamesFilters[key]);
+  const activeFilters = activeKeys.length;
   const [pending, startTransition] = useTransition();
   const { games: visible, total, matched, genres, tags, platforms, years, page: currentPage, pageCount, offset } = data;
   function navigate(next: GamesFilters, page = 1) {
@@ -63,22 +64,26 @@ export function GamesScreen({ data, profile, access }: { data: GamesPageData; pr
           <span aria-hidden="true" className="material-symbols-outlined text-[20px]">{filtersOpen ? "expand_less" : "expand_more"}</span>
         </button>
       </div>
+      {activeKeys.length > 0 && <div aria-label={t("Active filters")} className="flex flex-wrap gap-2">{activeKeys.map(key => <button key={key} type="button" aria-label={`${t("Remove filter")}: ${t(filterLabels[key])}`} onClick={()=>change(key,defaultGamesFilters[key])} className="inline-flex min-h-11 max-w-full items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 text-body-sm text-primary hover:bg-primary/20">
+        <span className="break-words">{t(filterLabels[key])}: {t(["library","status","tier","rating","year","sort"].includes(key) ? filterValues[filters[key]] ?? filters[key] : filters[key])}</span><span aria-hidden="true" className="material-symbols-outlined shrink-0 text-[18px]">close</span>
+      </button>)}</div>}
       <div id="catalog-filter-fields" hidden={!filtersOpen} className="rounded-2xl border border-outline-variant/30 bg-surface-container-low p-4 sm:p-5 space-y-5">
-      <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-4 gap-4">
+      <fieldset className="min-w-0"><legend className="mb-3 font-semibold text-body-md text-on-surface">{t("Game details")}</legend><div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-4 gap-4">
         <Field label={t("Genre")}><select id="games-genre" className={control} value={filters.genre} onChange={(event) => change("genre", event.target.value)}><option value="">{t("All genres")}</option>{genres.map((genre) => <option key={genre} value={genre}>{genre}</option>)}</select></Field>
-        {access?.canEdit && <Field label={t("Tag")}><select id="games-tag" className={control} value={tags.find(tag => tag.toLowerCase() === filters.tag.toLowerCase()) ?? filters.tag} onChange={event => change("tag",event.target.value)}><option value="">{t("All tags")}</option>{tags.map(tag => <option key={tag.toLowerCase()} value={tag}>{tag}</option>)}</select></Field>}
         <Field label={t("Platform")}><select id="games-platform" className={control} value={filters.platform} onChange={(event) => change("platform", event.target.value)}><option value="">{t("All platforms")}</option>{filters.platform && !platforms.some(platform => platform === filters.platform) && <option value={filters.platform} hidden>{filters.platform}</option>}{platforms.map((platform) => <option key={platform} value={platform}>{t(platform)}</option>)}</select></Field>
         <Field label={t("Release year")}><select id="games-year" className={control} value={filters.year} onChange={(event) => change("year", event.target.value)}><option value="">{t("All years")}</option>{years.map((year) => <option key={year} value={year}>{year}</option>)}<option value="unknown">{t("Unknown year")}</option></select></Field>
         <Field label={t("Sort by")}><select id="games-sort" className={control} value={filters.sort} onChange={(event) => change("sort", event.target.value as GamesFilters["sort"])}><option value="title">{t("Title A–Z")}</option><option value="newest">{t("Newest release")}</option><option value="oldest">{t("Oldest release")}</option><option value="score-desc">{t("Profile score: highest")}</option><option value="score-asc">{t("Profile score: lowest")}</option></select></Field>
       </div>
-      {access?.canEdit && <details className="rounded bg-surface-container/40 p-3 sm:p-4"><summary className="cursor-pointer break-words font-label-md text-label-md text-primary">{t("Profile filters · ")}{profile.displayName}{profile.isSample ? t(" (sample)") : ""}</summary><p className="my-3 text-on-surface-variant font-body-sm text-body-sm">{t("Status, scores and tiers come from this profile’s saved entries.")}</p><div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 gap-4">
+      </fieldset>
+      {access?.canEdit && <fieldset className="min-w-0 border-t border-outline-variant/30 pt-4"><legend className="px-1 font-semibold text-body-md text-on-surface">{t("Your log")}</legend><div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 gap-4">
         <Field label={t("Log entries")}><select id="games-library" className={control} value={filters.library} onChange={(event) => change("library", event.target.value as GamesFilters["library"])}><option value="all">{t("All catalog games")}</option><option value="logged">{t("Logged games")}</option><option value="unlogged">{t("Not logged")}</option></select></Field>
         <Field label={t("Playback status")}><select id="games-status" className={control} value={filters.status} onChange={(event) => change("status", event.target.value as GamesFilters["status"])}><option value="all">{t("Any status")}</option><option value="backlog">{t("Backlog")}</option><option value="playing">{t("In Progress")}</option><option value="completed">{t("Completed")}</option><option value="shelved">{t("Shelved")}</option><option value="unset">{t("Logged with no status")}</option></select></Field>
         <Field label={t("Tier")}><select id="games-tier" className={control} value={filters.tier} onChange={(event) => change("tier", event.target.value as GamesFilters["tier"])}><option value="all">{t("Any tier")}</option>{["S", "A", "B", "C", "D", "F"].map((tier) => <option key={tier} value={tier}>{tier}</option>)}<option value="unset">{t("No assigned tier")}</option></select></Field>
         <Field label={t("Rating")}><select id="games-rating" className={control} value={filters.rating} onChange={(event) => change("rating", event.target.value as GamesFilters["rating"])}><option value="all">{t("Rated and unrated")}</option><option value="rated">{t("Rated")}</option><option value="unrated">{t("Unrated")}</option></select></Field>
         <Field label={t("Minimum score")}><input id="games-min-score" className={control} type="number" min={0} max={100} step={1} placeholder={"0"} value={filters.minScore} onChange={(event) => change("minScore", event.target.value)} /></Field>
         <Field label={t("Maximum score")}><input id="games-max-score" className={control} type="number" min={0} max={100} step={1} placeholder={"100"} value={filters.maxScore} onChange={(event) => change("maxScore", event.target.value)} /></Field>
-      </div></details>}
+        <Field label={t("Tag")}><select id="games-tag" className={control} value={tags.find(tag => tag.toLowerCase() === filters.tag.toLowerCase()) ?? filters.tag} onChange={event => change("tag",event.target.value)}><option value="">{t("All tags")}</option>{tags.map(tag => <option key={tag.toLowerCase()} value={tag}>{tag}</option>)}</select></Field>
+      </div></fieldset>}
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3"><p role="status" aria-live="polite" className="text-on-surface-variant font-body-sm text-body-sm">{validScoreRange(filters) ? t(`${matched} of ${total} games${matched ? ` · Showing ${offset + 1}–${offset + visible.length}` : ""}`) : t("Use whole-number scores from 0 to 100, with minimum no greater than maximum.")}</p><button type="button" className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors" onClick={clear}><span aria-hidden="true" className="material-symbols-outlined text-[18px]">restart_alt</span>{t("Clear filters")}</button></div>
     </section>
@@ -89,6 +94,9 @@ export function GamesScreen({ data, profile, access }: { data: GamesPageData; pr
     </div>}
   </div>;
 }
+
+const filterLabels: Record<keyof GamesFilters,string> = {query:"Search titles",genre:"Genre",tag:"Tag",platform:"Platform",year:"Release year",library:"Log entries",status:"Playback status",tier:"Tier",rating:"Rating",minScore:"Minimum score",maxScore:"Maximum score",sort:"Sort by"};
+const filterValues: Record<string,string> = {logged:"Logged games",unlogged:"Not logged",completed:"Completed",playing:"In Progress",backlog:"Backlog",shelved:"Shelved",unset:"Not set",rated:"Rated",unrated:"Unrated",unknown:"Unknown year",newest:"Newest release",oldest:"Oldest release","score-desc":"Profile score: highest","score-asc":"Profile score: lowest"};
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   const t = useMessages(); return <label className="block min-w-0 space-y-2"><span className="block font-body-md text-body-md text-on-surface-variant">{t(label)}</span>{children}</label>; }

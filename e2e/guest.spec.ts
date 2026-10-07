@@ -295,3 +295,31 @@ test("genres on cards and details open Games with the selected genre filter",asy
   await expect(page.getByRole("combobox",{name:"Genre",exact:true})).toHaveValue("Roguelike");
   expect(await page.locator("a a").count()).toBe(0);
 });
+
+
+test("catalog active filters can be removed independently and log filters need no extra disclosure",async({page,context},info)=>{
+  await context.addCookies([authCookie]);
+  await page.goto("/games?q=Elden&genre=Adventure&library=logged&sort=score-desc");
+  await expect(page.getByRole("button",{name:"Remove filter: Genre",exact:true})).toContainText("Adventure");
+  await expect(page.locator("[data-active-filter-count]")).toHaveText("(3)");
+  await openFilters(page);
+  await expect(page.getByRole("group",{name:"Game details",exact:true})).toBeVisible();
+  await expect(page.getByRole("group",{name:"Your log",exact:true})).toBeVisible();
+  await expect(page.getByRole("combobox",{name:"Playback status",exact:true})).toBeVisible();
+  await expect(page.getByRole("combobox",{name:"Tag",exact:true})).toBeVisible();
+  await page.getByRole("button",{name:"Remove filter: Genre",exact:true}).click();
+  await expect(page).not.toHaveURL(/genre=/);
+  await expect(page).toHaveURL(/q=Elden/);
+  await expect(page).toHaveURL(/library=logged/);
+  await expect(page).toHaveURL(/sort=score-desc/);
+  await expect(page.locator("[data-active-filter-count]")).toHaveText("(2)");
+  await page.reload();
+  await expect(page.getByRole("button",{name:"Remove filter: Log entries",exact:true})).toContainText("Logged games");
+  await openFilters(page);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
+  await page.screenshot({path:`e2e-artifacts/catalog-simple-filters-${info.project.name}.png`,fullPage:true});
+  await page.getByRole("button",{name:"Clear filters",exact:true}).click();
+  await expect(page).toHaveURL(/\/games$/);
+  await expect(page.getByRole("button",{name:/Remove filter:/})).toHaveCount(0);
+});

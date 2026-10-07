@@ -16,7 +16,10 @@ Other matches games with at least one platform outside those four families;
 games without platform metadata remain available under All platforms. Existing
 exact-platform URLs still work without adding legacy choices to the menu.
 
-The expandable profile filters include logged/unlogged games, playback status,
+The filter panel separates Game details from Your log, without a nested disclosure.
+Active filters appear as removable chips even while the panel is closed; removing
+one preserves the other filters and title search. Clear filters resets everything.
+Your log includes saved tags, logged/unlogged games, playback status,
 independent tier, rated/unrated entries and inclusive integer score bounds from
 0 to 100. Blank bounds are unrestricted; zero remains a real score. A reversed
 or invalid range shows an explanation. Unlogged games never acquire fabricated
