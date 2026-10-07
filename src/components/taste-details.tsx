@@ -8,11 +8,6 @@ export function TasteDetails({ games }: { games: Game[] }) {
     stats = tasteStats(games);
   return (
     <div className="space-y-10">
-      <p className="text-on-surface-variant text-body-sm">
-        {t(
-          "Group averages use scored entries only. Multi-genre games count once in each genre. Unknown metadata is excluded. Preferences need at least 3 scored games per group.",
-        )}
-      </p>
       {[
         { label: "Genre statistics", groups: stats.genres },
         { label: "Studio statistics", groups: stats.studios },
@@ -109,9 +104,6 @@ export function TasteDetails({ games }: { games: Game[] }) {
         <h2 className="font-headline-lg text-headline-lg">
           {t("Release eras")}
         </h2>
-        <p className="text-body-sm text-on-surface-variant">
-          {t("Release years describe your games, not when you played them.")}
-        </p>
         {stats.eras.map(([era, count]) => (
           <div key={era} className="flex justify-between gap-4">
             <span>{era}</span>
