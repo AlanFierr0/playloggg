@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { ReviewHelpfulnessSummary } from "@/components/review-helpfulness-summary";
 import Link from "next/link";
 import { GameLogAction } from "@/components/game-actions";
 import { getCommunity, getTasteDiscovery } from "@/lib/community";
@@ -171,6 +173,7 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
                 >
                   {review.review}
                 </p>
+                <Suspense fallback={null}><ReviewHelpfulnessSummary profileId={review.profile_id} slug={game.slug} /></Suspense>
               </article>
             )
           );

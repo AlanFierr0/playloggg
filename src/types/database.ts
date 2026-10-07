@@ -456,15 +456,47 @@ export type Database = {
           },
         ]
       }
+      review_votes: {
+        Row: {
+          game_id: number
+          reviewer_profile_id: number
+          value: number
+          voter_profile_id: number
+        }
+        Insert: {
+          game_id: number
+          reviewer_profile_id: number
+          value: number
+          voter_profile_id: number
+        }
+        Update: {
+          game_id?: number
+          reviewer_profile_id?: number
+          value?: number
+          voter_profile_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_votes_reviewer_profile_id_game_id_fkey"
+            columns: ["reviewer_profile_id", "game_id"]
+            isOneToOne: false
+            referencedRelation: "ratings"
+            referencedColumns: ["profile_id", "game_id"]
+          },
+          {
+            foreignKeyName: "review_votes_voter_profile_id_fkey"
+            columns: ["voter_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      platform_game_scores: {
-        Args: never
-        Returns: { slug: string; average: number; sample_count: number }[]
-      }
       account_deletion_objects: {
         Args: { p_owner: string }
         Returns: {
@@ -492,10 +524,6 @@ export type Database = {
           sample_count: number
         }[]
       }
-      consume_operation_limit_batch: {
-        Args: {p_actor:string;p_operation:string;p_count:number;p_minute_limit:number;p_daily_limit:number}
-        Returns: {allowed_count:number;retry_after:number}[]
-      }
       consume_operation_limit: {
         Args: {
           p_actor: string
@@ -505,15 +533,45 @@ export type Database = {
         }
         Returns: number
       }
+      consume_operation_limit_batch: {
+        Args: {
+          p_actor: string
+          p_count: number
+          p_daily_limit: number
+          p_minute_limit: number
+          p_operation: string
+        }
+        Returns: {
+          allowed_count: number
+          retry_after: number
+        }[]
+      }
       delete_owned_profile: {
         Args: { p_handle: string; p_owner: string }
         Returns: Json
+      }
+      platform_game_scores: {
+        Args: never
+        Returns: {
+          average: number
+          sample_count: number
+          slug: string
+        }[]
       }
       public_list_like_counts: {
         Args: never
         Returns: {
           likes: number
           list_id: number
+        }[]
+      }
+      review_helpfulness: {
+        Args: { p_profile_id: number }
+        Returns: {
+          downvotes: number
+          game_slug: string
+          upvotes: number
+          viewer_vote: number
         }[]
       }
       save_curated_list: {

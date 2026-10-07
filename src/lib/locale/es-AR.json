@@ -26,7 +26,7 @@
   "Game info": "Información del juego",
   "Opens in a new tab": "Se abre en una pestaña nueva",
   "Steam overall reviews": "Reseñas generales de Steam",
-  "Loading Steam reviews\u2026": "Cargando reseñas de Steam…",
+  "Loading Steam reviews…": "Cargando reseñas de Steam…",
   "Steam reviews unavailable": "Reseñas de Steam no disponibles",
   "No user reviews": "Sin reseñas de usuarios",
   "All languages": "Todos los idiomas",
@@ -1246,5 +1246,13 @@
   "Drag games or edit their position. Changes save automatically.": "Arrastrá los juegos o editá su posición. Los cambios se guardan automáticamente.",
   "Retry saving ranking": "Reintentar guardar el ranking",
   "No logged games match these filters.": "Ningún juego registrado coincide con estos filtros.",
-  "Profile search could not be loaded.": "No se pudo cargar la búsqueda de perfiles."
+  "Profile search could not be loaded.": "No se pudo cargar la búsqueda de perfiles.",
+  "Review helpfulness": "Utilidad de la reseña",
+  "Helpful": "Útil",
+  "Not helpful": "No es útil",
+  "Sign in to vote on reviews.": "Iniciá sesión para votar reseñas.",
+  "You cannot vote on your own review.": "No podés votar tu propia reseña.",
+  "Your vote could not be saved. Please retry.": "No se pudo guardar tu voto. Intentá de nuevo.",
+  "This review is unavailable.": "Esta reseña no está disponible.",
+  "Vote saved.": "Voto guardado."
 }

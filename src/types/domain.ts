@@ -47,7 +47,14 @@ export interface Profile {
   isDiscoverable?: boolean;
 }
 
+export interface ReviewHelpfulnessData {
+  signedIn: boolean;
+  canVote: boolean;
+  reviews: Record<string, { upvotes: number; downvotes: number; vote: number }>;
+}
+
 export interface Portfolio {
+  reviewHelpfulness?: ReviewHelpfulnessData;
   games: Game[];
   profile: Profile;
   publicBase?: string;

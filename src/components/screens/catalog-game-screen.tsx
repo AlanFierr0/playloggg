@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { ReviewHelpfulnessSummary } from "@/components/review-helpfulness-summary";
 import { GameGenres } from "@/components/game-genres";
 import {GameTags} from "@/components/game-tags";
 import {GameFavorite} from "@/components/game-favorite";
@@ -38,6 +40,7 @@ export async function CatalogGameScreen({ game, isSample, publicProfile }: { gam
             {game.logged ? <>
               <div className="flex flex-wrap items-center gap-3 font-label-md text-label-md"><span className="text-primary">{game.score === null ? t("Unrated") : t(`${game.score} / 100`)}</span><span>{game.tier ? t(`Tier ${game.tier}`) : t("Tier unassigned")}</span>{game.status && <span>{t(playbackLabels[game.status])}</span>}{game.hoursPlayed != null && <span>{game.hoursPlayed} {t("hrs")}</span>}{game.completedOn && <span>{t("Completed ")}{game.completedOn}</span>}</div>
               {game.review && <p translate="no" className="whitespace-pre-wrap break-words text-on-surface-variant font-body-md text-body-md">{game.review}</p>}
+              {publicProfile && game.review?.trim() && <Suspense fallback={null}><ReviewHelpfulnessSummary profileId={Number(publicProfile.id)} slug={game.slug} /></Suspense>}
               <GameTags tags={game.tags} />
             </> : <p className="text-on-surface-variant">{publicProfile || isSample ? t("This profile has not logged this game.") : t("This game is in the catalog. Add a log entry to save your status, rating or review.")}</p>}
             {!publicProfile && <>
