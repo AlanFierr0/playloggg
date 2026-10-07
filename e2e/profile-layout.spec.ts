@@ -12,7 +12,8 @@ test("profile tools, section tabs and content stay separate and usable", async (
   await expect(page).toHaveURL(/\/profile$/);
   const tools = page.getByRole("navigation", { name: "Profile tools" });
   const tabs = page.getByRole("navigation", { name: "Profile sections" });
-  await expect(tools.getByRole("link")).toHaveCount(5);
+  await expect(tools.getByRole("link")).toHaveCount(4);
+  await expect(tools.getByRole("link", { name: "Activity feed", exact: true })).toHaveCount(0);
   await expect(tools.getByRole("link", { name: "Year in Gaming", exact: true })).toHaveCount(0);
   await expect(tools.getByRole("link", { name: "Quick rating", exact: true })).toHaveCount(0);
   await expect(tools.getByRole("link", { name: "Import from Steam", exact: true })).toHaveAttribute("href", "/profile/import/steam");
@@ -45,6 +46,14 @@ test("profile tools, section tabs and content stay separate and usable", async (
   await tabs.getByRole("link", { name: "Stats", exact: true }).click();
   await expect(page).toHaveURL(/\/profile\/stats$/);
   await expect(page.getByRole("navigation", { name: "Profile sections" }).getByRole("link", { name: "Stats", exact: true })).toHaveAttribute("aria-current", "page");
+  if (testInfo.project.name === "desktop") await page.setViewportSize({ width: 1440, height: 1000 });
+  const distribution = page.getByRole("heading", { name: "Rating distribution", exact: true }).locator("..");
+  const distributionBox = (await distribution.boundingBox())!;
+  const statsTabsBox = (await page.getByRole("navigation", { name: "Profile sections" }).boundingBox())!;
+  expect(distributionBox.x).toBeCloseTo(statsTabsBox.x, 0);
+  expect(distributionBox.width).toBeCloseTo(statsTabsBox.width, 0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: `e2e-artifacts/stats-layout-${testInfo.project.name}.png`, fullPage: true });
   const menu = page.getByRole("button", { name: "Navigation menu" });
   if (await menu.isVisible()) await menu.click();
   const tierLink=page.getByRole("navigation",{name:"Main navigation"}).filter({visible:true}).getByRole("link",{name:"Tier List",exact:true});

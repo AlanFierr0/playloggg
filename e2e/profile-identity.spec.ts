@@ -83,6 +83,12 @@ test("public profile sections use real zero scores, review text and independent 
   await navigation.getByRole("link", { name: "Stats", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Rating distribution" })).toBeVisible();
   await expect(page.getByText("1 (4.2%)", { exact: true })).toBeVisible();
+  const distributionBox = (await page.getByRole("heading", { name: "Rating distribution", exact: true }).locator("..").boundingBox())!;
+  const statsTabsBox = (await navigation.boundingBox())!;
+  expect(distributionBox.x).toBeCloseTo(statsTabsBox.x, 0);
+  expect(distributionBox.width).toBeCloseTo(statsTabsBox.width, 0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: `e2e-artifacts/public-stats-layout-${testInfo.project.name}.png`, fullPage: true });
   await navigation.getByRole("link", { name: "Reviews", exact: true }).click();
   await expect(page.getByText("Public fixture review", { exact: true })).toBeVisible();
 });
