@@ -5,19 +5,36 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SearchResults, type SearchScope } from "@/components/search-results";
 
-import { getSearchMatches } from "@/lib/portfolio-view";
-import { usePortfolio } from "@/components/portfolio-provider";
+import type { Profile } from "@/types/domain";
+
 
 export function SearchScreen({ initialQuery, returnPath, mode }: { initialQuery: string; returnPath: string; mode: "browse" | "log" }) {
   const t = useMessages();
 
-const portfolio = usePortfolio();
+
 const [query, setQuery] = useState(initialQuery);
 const [scope, setScope] = useState<SearchScope>("all");
 const dialog = useRef<HTMLDialogElement>(null);
 const input = useRef<HTMLInputElement>(null);
 const router = useRouter();
-const matchCounts = getSearchMatches(query, portfolio);
+const [profileSearch, setProfileSearch] = useState<{ query: string; profiles: Profile[]; error?: boolean } | null>(null);
+const profiles = profileSearch?.query === query ? profileSearch.profiles : [];
+const profilesLoading = mode !== "log" && profileSearch?.query !== query;
+useEffect(() => {
+  if (mode === "log") return;
+  const controller = new AbortController();
+  const timer = setTimeout(async () => {
+    try {
+      const response = await fetch(`/api/profiles/search?q=${encodeURIComponent(query)}`, { signal: controller.signal, cache: "no-store" });
+      if (!response.ok) throw new Error("Profile search failed.");
+      const data: { profiles: Profile[] } = await response.json();
+      if (!controller.signal.aborted) setProfileSearch({ query, profiles: data.profiles });
+    } catch {
+      if (!controller.signal.aborted) setProfileSearch({ query, profiles: [], error: true });
+    }
+  }, 250);
+  return () => { clearTimeout(timer); controller.abort(); };
+}, [query, mode]);
 const categories: { scope: SearchScope; label: string }[] = [{ scope: "all", label: "All Results" }, { scope: "games", label: "Games" }, { scope: "curators", label: "Profiles" }, { scope: "actions", label: "Actions" }];
 
 function close() { router.push(returnPath); }
@@ -61,10 +78,10 @@ return (
           <input ref={input} id="command-input" type="text" value={query} onChange={event => setQuery(event.target.value)} placeholder={t("Search games…")} aria-label={t("Search titles, profiles and commands")} className="min-w-0 flex-1 bg-transparent py-4 text-body-lg text-on-surface placeholder:text-on-surface-variant caret-primary focus:outline-none" />
         </div>
         {mode !== "log" && <nav aria-label={t("Search categories")} className="mt-4 flex flex-wrap gap-1 border-b border-outline-variant/20 pb-4">
-          {categories.map(category => <button key={category.scope} type="button" onClick={() => setScope(category.scope)} aria-pressed={scope === category.scope} className={`min-h-11 rounded-lg px-3 sm:px-4 text-body-sm font-medium transition-colors ${scope === category.scope ? "bg-primary/10 text-primary" : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"}`}>{t(category.label)}{category.scope === "curators" && <span className="ml-1.5 text-label-sm">({matchCounts.profiles.length})</span>}</button>)}
+          {categories.map(category => <button key={category.scope} type="button" onClick={() => setScope(category.scope)} aria-pressed={scope === category.scope} className={`min-h-11 rounded-lg px-3 sm:px-4 text-body-sm font-medium transition-colors ${scope === category.scope ? "bg-primary/10 text-primary" : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"}`}>{t(category.label)}{category.scope === "curators" && <span className="ml-1.5 text-label-sm">({profilesLoading ? "…" : profiles.length})</span>}</button>)}
         </nav>}
       </header>
-      <SearchResults query={query} scope={mode === "log" ? "games" : scope} mode={mode} />
+      <SearchResults query={query} scope={mode === "log" ? "games" : scope} mode={mode} profiles={profiles} profilesLoading={profilesLoading} profilesError={profileSearch?.query === query && profileSearch.error} />
       <footer className="search-help hidden sm:flex shrink-0 items-center justify-between gap-4 border-t border-outline-variant/20 px-6 py-3 text-body-sm text-on-surface-variant">
         <div className="flex items-center gap-4"><span><kbd className="mr-1.5 rounded bg-surface-container px-1.5 py-0.5">↑↓</kbd>{t("Navigate")}</span><span><kbd className="mr-1.5 rounded bg-surface-container px-1.5 py-0.5">↵</kbd>{t("Select title")}</span></div>
         <span><kbd className="mr-1.5 rounded bg-surface-container px-1.5 py-0.5">Esc</kbd>{t("Dismiss")}</span>

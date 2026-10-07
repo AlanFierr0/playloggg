@@ -167,8 +167,8 @@ export function ReferenceGame2({ game, query, mode }: { game: Game; query: strin
 </Link>
 ); }
 
-export function ReferenceProfile0({ profile, count, average }: { profile: Profile; count: number; average: string }) {
-  const t = useMessages(); return (<Link data-search-result className="group flex items-center gap-3 p-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors" href="/profile">
+export function ReferenceProfile0({ profile }: { profile: Profile }) {
+  const t = useMessages(); return (<Link data-search-result className="group flex items-center gap-3 p-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors" href={`/u/${profile.handle}`}>
 <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-surface-container-highest shadow">
 <ProfileAvatar className="w-full h-full object-cover" src={profile.avatarUrl} name={profile.displayName} />
 
@@ -182,7 +182,7 @@ export function ReferenceProfile0({ profile, count, average }: { profile: Profil
 
 </div>
 
-<div className="font-body-sm text-body-sm text-on-surface-variant truncate">{"@" + profile.handle + " · " + count + " " + t("rated titles") + " · " + average + " " + t("avg score")}</div>
+<div className="font-body-sm text-body-sm text-on-surface-variant truncate">{"@" + profile.handle}</div>
 
 </div>
 

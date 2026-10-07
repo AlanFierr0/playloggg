@@ -1245,5 +1245,6 @@
   "Choose games to import with Steam playtime, then rate all, some or none of them. Existing entries are kept unchanged.": "Elegí juegos para importar con las horas de Steam y valorá todos, algunos o ninguno. Las entradas existentes se conservan.",
   "Drag games or edit their position. Changes save automatically.": "Arrastrá los juegos o editá su posición. Los cambios se guardan automáticamente.",
   "Retry saving ranking": "Reintentar guardar el ranking",
-  "No logged games match these filters.": "Ningún juego registrado coincide con estos filtros."
+  "No logged games match these filters.": "Ningún juego registrado coincide con estos filtros.",
+  "Profile search could not be loaded.": "No se pudo cargar la búsqueda de perfiles."
 }
