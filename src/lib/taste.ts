@@ -83,7 +83,7 @@ export function tasteStats(games: Game[]) {
     paused: entries.filter(game => game.status === "paused").length,
     stopped: entries.filter(game => game.status === "stopped").length,
     highScores: rated.filter((game) => game.score >= 90).length,
-    eras: [...eras].sort(([a], [b]) => a.localeCompare(b)),
+    eras: [...eras].sort(([a], [b]) => b.localeCompare(a)),
     platforms: [...platforms].sort(
       (a, b) => b[1] - a[1] || a[0].localeCompare(b[0]),
     ),
