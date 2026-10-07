@@ -488,6 +488,10 @@ export type Database = {
           sample_count: number
         }[]
       }
+      consume_operation_limit_batch: {
+        Args: {p_actor:string;p_operation:string;p_count:number;p_minute_limit:number;p_daily_limit:number}
+        Returns: {allowed_count:number;retry_after:number}[]
+      }
       consume_operation_limit: {
         Args: {
           p_actor: string

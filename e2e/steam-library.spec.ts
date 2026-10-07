@@ -75,6 +75,7 @@ test("Steam import previews, selects, saves trusted playtime and preserves exist
   await context.addCookies([authCookie]);
   await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
   await page.goto("/profile");
+  await fetch("http://127.0.0.1:3101/__reset-request-counts",{method:"POST"});
   await page.getByRole("link",{name:"Import from Steam",exact:true}).click();
   await expect(page.getByRole("button",{name:"Preview Steam library"})).toHaveCount(0);
   await expect(page.getByText("127 Steam games",{exact:false})).toBeVisible();
@@ -83,6 +84,10 @@ test("Steam import previews, selects, saves trusted playtime and preserves exist
   let state=await (await fetch("http://127.0.0.1:3101/__state")).json();
   expect(state.ratings.filter((row:{profile_id:number})=>row.profile_id===2)).toHaveLength(1);
   await expect(page.getByRole("checkbox")).toHaveCount(127);
+  const previewState=await (await fetch("http://127.0.0.1:3101/__state")).json();
+  console.log("Steam preview request counts",JSON.stringify(previewState.requestCounts));
+  expect(previewState.requestCounts["GET /rest/v1/ratings"]).toBe(1);
+  expect(previewState.requestCounts["POST /__provider-games"]).toBeLessThanOrEqual(7);
   await expect(page.getByLabel("Games to show",{exact:true})).toHaveValue("all");
   await expect(page.getByRole("button",{name:"Load more",exact:true})).toHaveCount(0);
   const importButton=page.getByRole("button",{name:"Import selected games (0)",exact:true});
@@ -423,4 +428,28 @@ test("Steam batch actions reject forged selections and quotas while keeping vali
   expect(await invoke([101,103])).toContain("Existing entry kept unchanged.");
   state=await (await fetch("http://127.0.0.1:3101/__state")).json();
   expect(state.ratings.filter((row:{profile_id:number})=>row.profile_id===2)).toEqual(saved);
+});
+
+
+test("Steam batch quotas import the allowed prefix and retry only remaining games",async({page,context})=>{
+  await context.addCookies([authCookie]);
+  await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
+  await fetch("http://127.0.0.1:3101/__quota-partial-imports",{method:"POST"});
+  await page.goto("/profile/import/steam");
+  for(const title of ["Hades","ZZZ Fixture 0","ZZZ Fixture 1"])await page.getByRole("checkbox",{name:`Select game ${title}`,exact:true}).check();
+  await fetch("http://127.0.0.1:3101/__reset-request-counts",{method:"POST"});
+  await page.getByRole("button",{name:"Import selected games (3)",exact:true}).click();
+  await page.getByRole("button",{name:"Just import",exact:true}).click();
+  await expect(page.getByText(/Some games could not be imported/)).toBeVisible();
+  await expect(page.getByRole("checkbox",{name:"Select game ZZZ Fixture 1",exact:true})).toBeChecked();
+  await expect(page.getByRole("checkbox",{name:"Select game Hades",exact:true})).toHaveCount(0);
+  let state=await (await fetch("http://127.0.0.1:3101/__state")).json();
+  expect(state.requestCounts["POST /rest/v1/rpc/consume_operation_limit_batch"]).toBe(1);
+  expect(state.ratings.filter((row:{profile_id:number})=>row.profile_id===2)).toHaveLength(3);
+  await fetch("http://127.0.0.1:3101/__quota-allow",{method:"POST"});
+  await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
+  await page.getByRole("button",{name:"Just import",exact:true}).click();
+  await expect(page.getByText("Import complete. Your games are saved in your profile.",{exact:true})).toBeVisible();
+  state=await (await fetch("http://127.0.0.1:3101/__state")).json();
+  expect(state.ratings.filter((row:{profile_id:number})=>row.profile_id===2)).toHaveLength(4);
 });

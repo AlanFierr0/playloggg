@@ -1,12 +1,13 @@
 "use server";
 import { revalidatePath, updateTag } from "next/cache";
-import { checkOperationLimit, operationFailure } from "@/lib/operation-limits";
+import { checkOperationLimit, operationFailure, reserveImportQuota } from "@/lib/operation-limits";
 import { getAccount } from "@/lib/owner";
 import { readSteamLibrary, readSteamImportContext, readSteamCatalogMatches } from "@/lib/steam-library";
 import { browseSteamLibrary, parseSteamBrowse, matchSteamGames, steamAppId, steamIdentity, type SteamGame } from "@/lib/steam-library-input";
 import { queryIgdb } from "@/lib/igdb";
 import { createCatalogAdmin } from "@/lib/supabase/catalog-admin";
 import { validateRating } from "@/lib/rating-input";
+import { recentRead } from "@/lib/recent-read";
 import { readProfileRatings } from "@/lib/profile-ratings";
 
 export type LibraryRow = SteamGame & { matched: boolean; logged: boolean; cover: string | null; genres: string[] };
@@ -37,12 +38,24 @@ async function loggedSteamGames(account: NonNullable<Awaited<ReturnType<typeof g
     }
   }
   const matches = matchSteamGames(records,library.map(game=>game.appId));
+  const byIgdb=new Map(catalog.map(game=>[game.igdb_id,game.id]));
+  const byGame=new Map(ratings.map(rating=>[rating.game_id,rating]));
   return new Map([...matches].flatMap(([appId,igdbId])=>{
-    const stored=catalog.find(game=>game.igdb_id===igdbId);
-    const rating=ratings.find(row=>row.game_id===stored?.id);
+    const rating=byGame.get(byIgdb.get(igdbId)!);
     return rating ? [[appId,rating] as const] : [];
   }));
 }
+
+const previewKey=(actor:string,profileId:number,steamId:string)=>JSON.stringify([actor,profileId,steamId]);
+// Cache only app IDs, never sessions or reviews. Every preview still re-verifies Auth/ownership.
+// ponytail: 30-second warm-instance snapshot; a cache miss on another instance resolves it afresh.
+const loggedPreviews=recentRead(async(key:string)=>{
+  const account=await getAccount();
+  const steamId=account?.user.app_metadata.playlogg_steam_id;
+  if(!account?.profile||!steamIdentity(steamId)||previewKey(account.user.id,account.profile.id,steamId)!==key)throw new Error("Profile required");
+  const logged=await loggedSteamGames(account,await readSteamImportContext(account.user.id,steamId));
+  return {appIds:[...logged.keys()],syncAppIds:[...logged].filter(([,rating])=>rating.platform==="pc").map(([id])=>id)};
+},30_000,50);
 
 export async function previewSteamLibrary(input: unknown): Promise<LibraryPreview> {
   const empty: LibraryPreview = {ok:false,message:"",games:[],total:0,nextOffset:0,syncAppIds:[]};
@@ -54,8 +67,9 @@ export async function previewSteamLibrary(input: unknown): Promise<LibraryPrevie
     if (!account?.profile || !steamIdentity(steamId)) return {...empty,message:"Sign in with Steam to import your library."};
     await checkOperationLimit(account.user.id,"steam");
     const owned = await readSteamImportContext(account.user.id,steamId,Boolean(input && typeof input==="object" && "refresh" in input && input.refresh===true));
-    const logged = await loggedSteamGames(account,owned);
-    const syncAppIds = [...logged].filter(([,rating])=>rating.platform==="pc").map(([id])=>id);
+    const snapshot=await loggedPreviews(previewKey(account.user.id,account.profile.id,steamId),query.offset===0);
+    const logged=new Set(snapshot.appIds);
+    const syncAppIds=snapshot.syncAppIds;
     const library = browseSteamLibrary(owned.filter(game=>!logged.has(game.appId)),query);
     const entries = library.slice(query.offset,query.offset+25);
     if (!entries.length) return {ok:true,message:library.length ? "" : "No Steam games match these filters.",games:[],total:library.length,nextOffset:query.offset,syncAppIds};
@@ -108,10 +122,12 @@ export async function importSteamGames(input: unknown): Promise<{ok:boolean;mess
   const results=new Map<number,SteamImportResult>();
   const fail=(appId:number,message:string)=>results.set(appId,{appId,ok:false,message});
   let catalogChanged=false,profileChanged=false;
+  let snapshotKey:string|undefined;
   try {
     const account=await getAccount();
     const steamId=account?.user.app_metadata.playlogg_steam_id;
     if(!account?.profile || !steamIdentity(steamId))return {ok:false,message:"Sign in with Steam to import your library.",results:[]};
+    snapshotKey=previewKey(account.user.id,account.profile.id,steamId);
     // Authorize each bounded action; trust only server-owned library and provider metadata.
     await checkOperationLimit(account.user.id,"steam");
     const library=new Map((await readSteamImportContext(account.user.id,steamId)).map(game=>[game.appId,game]));
@@ -124,10 +140,16 @@ export async function importSteamGames(input: unknown): Promise<{ok:boolean;mess
     if(readError)throw new Error("Catalog read failed");
     const catalog=new Map(existing.map(game=>[game.igdb_id,game]));
     const missing=[...new Map([...matches.values()].filter(match=>!catalog.has(match.id)).map(match=>[match.id,match.game])).values()];
-    const allowed:typeof missing=[];
-    for(const game of missing){
-      try {await checkOperationLimit(account.user.id,"import");allowed.push(game);}
-      catch(error){for(const [appId,match] of matches)if(match.id===game.igdb_id)fail(appId,failure(error));}
+    let allowed=missing;
+    if(missing.length){
+      try {
+        const quota=await reserveImportQuota(account.user.id,missing.length);
+        allowed=missing.slice(0,quota.allowed);
+        for(const game of missing.slice(quota.allowed))for(const [appId,match] of matches)if(match.id===game.igdb_id)fail(appId,quota.message);
+      }catch(error){
+        allowed=[];
+        for(const game of missing)for(const [appId,match] of matches)if(match.id===game.igdb_id)fail(appId,failure(error));
+      }
     }
     if(allowed.length){
       const admin=createCatalogAdmin();
@@ -169,6 +191,7 @@ export async function importSteamGames(input: unknown): Promise<{ok:boolean;mess
     return {ok:true,message:"",results:ids.map(appId=>results.get(appId)??{appId,ok:false,message:"This game could not be imported. Please retry."})};
   } catch(error){return {ok:false,message:failure(error),results:[]};}
   finally {
+    if(snapshotKey)loggedPreviews.invalidate(snapshotKey);
     if(catalogChanged){updateTag("game-catalog");revalidatePath("/","layout");}
     else if(profileChanged)revalidatePath("/profile","layout");
   }

@@ -22,3 +22,14 @@ test("bulk updates accept only bounded game selections and status/platform field
  for(const platform of ["pc_battlenet","pc_gog","pc_epic","pc_ea","pc_ubisoft","pc_xbox","pc_other"]) assert.equal(validateBulkRating({slugs:["hades"],platform}).platform,platform);
  for(const platform of ["toString","__proto__","steam"]) assert.equal(validateBulkRating({slugs:["hades"],platform}),null);
 });
+
+
+test("invalidating a server snapshot forces a fresh read only for that owner",async()=>{
+ let calls=0;
+ const read=recentRead(async()=>++calls,30_000,50);
+ const first=await read("a");const other=await read("b");
+ read.invalidate("a");
+ assert.notEqual(await read("a"),first);
+ assert.equal(await read("b"),other);
+ assert.equal(calls,3);
+});

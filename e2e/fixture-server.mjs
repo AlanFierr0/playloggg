@@ -47,6 +47,7 @@ export async function startFixtureServer() {
     try {
       if(url.pathname==="/__reset-request-counts"){requestCounts={};return reply(200,{ok:true});}
       if(!url.pathname.startsWith("/__") || ["/__provider-games","/__steam-library"].includes(url.pathname)){const key=`${req.method} ${url.pathname}`;requestCounts[key]=(requestCounts[key]??0)+1;}
+      if(url.pathname==="/__quota-partial-imports"&&req.method==="POST"){quotaMode="partial";games=games.filter(game=>![9005,9006].includes(game.igdb_id));return reply(200,{ok:true});}
       if (url.pathname === "/__quota-denied" && req.method === "POST") {quotaMode="deny";return reply(200,{ok:true});}
       if (url.pathname === "/__quota-unavailable" && req.method === "POST") {quotaMode="unavailable";return reply(200,{ok:true});}
       if (url.pathname === "/__quota-allow" && req.method === "POST") {quotaMode="allow";return reply(200,{ok:true});}
@@ -66,7 +67,7 @@ export async function startFixtureServer() {
       if (url.pathname === "/__provider-games") {
         let body=""; for await (const part of req) body+=part;
         const candidate={id:9001,name:"Unified Fixture Adventure",slug:"unified-fixture-adventure",first_release_date:1577836800,platforms:[{name:"PC"}],genres:[{name:"Adventure"}]};
-        if(body.includes("external_games.uid"))return reply(200,[{...candidate,id:1,name:"Hades",slug:"hades",genres:[{name:"RPG"}],external_games:[{uid:"101",external_game_source:1}]},{id:2,external_games:[{uid:"102",external_game_source:1}]},{...candidate,id:9004,name:"Steam Fixture Adventure",slug:"steam-fixture-adventure",genres:[{name:"Adventure"}],external_games:[{uid:"103",external_game_source:1}]}]);
+        if(body.includes("external_games.uid"))return reply(200,[{...candidate,id:1,name:"Hades",slug:"hades",genres:[{name:"RPG"}],external_games:[{uid:"101",external_game_source:1}]},{id:2,external_games:[{uid:"102",external_game_source:1}]},{...candidate,id:9004,name:"Steam Fixture Adventure",slug:"steam-fixture-adventure",genres:[{name:"Adventure"}],external_games:[{uid:"103",external_game_source:1}]},...Array.from({length:2},(_,index)=>({...candidate,id:9005+index,name:"ZZZ Fixture "+index,slug:"zzz-fixture-"+index,external_games:[{uid:String(200+index),external_game_source:1}]}))]);
         if(body.includes("where id = 9004"))return reply(200,[{...candidate,id:9004,name:"Steam Fixture Adventure",slug:"steam-fixture-adventure"}]);
         const mobileCandidate={...candidate,id:9003,name:"Unified Mobile Adventure",slug:"unified-mobile-adventure"};
         if(body.includes("where id = 9001"))return reply(200,[candidate]);
@@ -134,6 +135,12 @@ export async function startFixtureServer() {
         const groups=new Map();
         for(const row of ratings){const profile=profiles.find(p=>p.id===row.profile_id);if(!profile?.is_public||!profile.is_discoverable||row.score==null||(input.p_ids&&!input.p_ids.includes(row.game_id)))continue;const values=groups.get(row.game_id)??[];values.push(row.score);groups.set(row.game_id,values);}
         return reply(200,[...groups].filter(([,values])=>values.length>=5).map(([game_id,values])=>{const average=values.reduce((a,b)=>a+b,0)/values.length;return {game_id,sample_count:values.length,average:Math.round(average*10)/10,deviation:Math.sqrt(values.reduce((sum,value)=>sum+(value-average)**2,0)/values.length)};}));
+      }
+      if(resource==="rpc/consume_operation_limit_batch"&&req.method==="POST"){
+        if(!admin)return reply(403,{message:"Server only"});
+        let body="";for await(const part of req)body+=part;const input=JSON.parse(body);
+        if(!Number.isInteger(input.p_count)||input.p_count<1||input.p_count>25)return reply(400,{message:"Invalid quota"});
+        return quotaMode==="unavailable" ? reply(503,{message:"Unavailable"}) : reply(200,[{allowed_count:quotaMode==="deny" ? 0 : quotaMode==="partial" ? Math.min(1,input.p_count) : input.p_count,retry_after:quotaMode==="deny" || quotaMode==="partial"&&input.p_count>1 ? 60 : 0}]);
       }
       if(resource==="rpc/consume_operation_limit"&&req.method==="POST") {
         if(req.headers.authorization!==`Bearer ${fixtureAdminKey}`)return reply(403,{message:"Server only"});

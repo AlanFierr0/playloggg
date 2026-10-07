@@ -191,3 +191,28 @@ The isolated two-game check originally made three extra IGDB requests, five
 catalog reads and two rating writes after preview. It now requires zero extra
 IGDB requests on a warm cache, one catalog read and one rating write. These are
 request-count measurements, not a production wall-clock speed guarantee.
+
+
+Further speed optimization (2026-10-06): logged-game resolution uses a 30-second,
+50-entry preview snapshot keyed by verified Auth ID, profile ID and Steam identity.
+Only app IDs and PC sync IDs are cached. Every preview still re-verifies ownership;
+the first page of each load/filter refresh resolves a fresh snapshot, and imports
+invalidate it. Subsequent pages reuse it while warm. Sync always reads fresh entry
+data. A cold/expired snapshot resolves normally; no browser snapshot is trusted.
+The 127-game fixture now reads logged ratings once across six pages, instead of six
+times. Logged-game matching also uses maps instead of repeated linear searches.
+
+New-game import quotas use consume_operation_limit_batch, restricted to service_role,
+with SECURITY INVOKER and an empty search_path. The additive migration is
+supabase/migrations/20261007001817_steam_import_batch_quota.sql. It reuses the existing
+atomic minute/day counters once for each admitted game, returning the allowed
+prefix and retry delay without increasing either limit. Up to 25 new games now
+require one quota RPC rather than 50. Existing catalog entries can still import
+when the new-game quota is exhausted; only the remainder is kept for retry.
+No profile/catalog write grants or Auth/RLS policies change.
+
+Supabase boundary checks are runnable via supabase/verify_steam_import_batch_quota.sql.
+They cover both windows, shared counters with individual imports, 25-game charging,
+invalid batches and server-only privileges; synthetic counters roll back. Security
+advisors reported the existing intentional no-policy private counter table and
+existing [disabled leaked-password protection](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection), with no new function/grant finding.
