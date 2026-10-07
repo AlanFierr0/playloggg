@@ -1,4 +1,5 @@
 import { test, expect } from "./test";
+import AxeBuilder from "@axe-core/playwright";
 // @ts-expect-error Test-only fixture exports a fake session.
 import { authCookie } from "./fixture-server.mjs";
 
@@ -38,6 +39,17 @@ test("profile tools, section tabs and content stay separate and usable", async (
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: `e2e-artifacts/profile-layout-${testInfo.project.name}.png`, fullPage: true });
+  const recent = page.getByRole("heading", { name: "Recently updated entries", exact: true }).locator("..");
+  for (const image of await recent.locator("img").all()) expect((await image.boundingBox())!.width).toBeLessThanOrEqual(96);
+  for (const theme of ["dark", "light"]) {
+    await context.addCookies([{ name: "playlogg_theme", value: theme, url: "http://127.0.0.1:3100" }]);
+    await page.reload();
+    expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `e2e-artifacts/profile-redesign-${theme}-${testInfo.project.name}.png`, fullPage: true });
+  }
+  await context.addCookies([{ name: "playlogg_theme", value: "dark", url: "http://127.0.0.1:3100" }]);
+  await page.reload();
   if (testInfo.project.name === "desktop") {
     await page.setViewportSize({ width: 768, height: 1024 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

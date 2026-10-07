@@ -61,6 +61,7 @@ test("public profile sections use real zero scores, review text and independent 
   await page.goto("/u/fixture_public");
   await expect(page.getByRole("heading", { name: "Published Fixture", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Featured favorites" })).toBeVisible();
+  await page.screenshot({ path: `e2e-artifacts/public-profile-redesign-${testInfo.project.name}.png`, fullPage: true });
   const viewedProfile = page.getByRole("link", { name: "Viewing profile Published Fixture", exact: true });
   await expect(viewedProfile).toContainText("@fixture_public");
   await expect(viewedProfile).toHaveAttribute("href", "/u/fixture_public");
