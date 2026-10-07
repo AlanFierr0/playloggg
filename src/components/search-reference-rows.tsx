@@ -178,7 +178,7 @@ export function ReferenceProfile0({ profile }: { profile: Profile }) {
 <div className="flex items-center gap-1.5">
 <span className="font-headline-md text-body-lg font-bold text-on-surface truncate group-hover:text-primary transition-colors">{profile.displayName}</span>
 
-<span className="font-label-sm text-label-sm text-primary bg-primary/10 px-1 rounded uppercase font-semibold">{profile.isSample ? t("Sample") : profile.isPublic ? t("Public") : t("Private")}</span>
+{(profile.isSample || !profile.isPublic) && <span className="font-label-sm text-label-sm text-primary bg-primary/10 px-1 rounded uppercase font-semibold">{t(profile.isSample ? "Sample" : "Private")}</span>}
 
 </div>
 

@@ -30,7 +30,7 @@ export function ProfileOverviewScreen() {
             <div className="flex items-center gap-4 sm:gap-5">
               <ProfileAvatar src={profile.avatarUrl} name={profile.displayName} className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl text-headline-xl" />
               <div className="min-w-0 space-y-1.5">
-                <p className="text-label-sm font-label-sm uppercase tracking-wider text-primary">{t(profile.isSample ? "Sample profile" : profile.isPublic ? "Public profile" : "Private profile")}</p>
+                {(profile.isSample || !profile.isPublic) && <p className="text-label-sm font-label-sm uppercase tracking-wider text-primary">{t(profile.isSample ? "Sample profile" : "Private profile")}</p>}
                 <h1 translate="no" className="font-headline-xl text-[32px] sm:text-[42px] font-semibold leading-tight tracking-tight break-words">{profile.displayName}</h1>
                 <p translate="no" className="text-body-md text-on-surface-variant break-all">@{profile.handle}</p>
               </div>

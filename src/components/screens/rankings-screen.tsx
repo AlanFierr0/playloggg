@@ -61,7 +61,7 @@ return (<>
 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
 <h1 translate="no" className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-semibold break-words">{profile.displayName}</h1>
 
-<span className="font-label-sm text-label-sm uppercase tracking-wider px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-medium">{profile.isSample ? t("Sample profile") : profile.isPublic ? t("Public profile") : t("Private profile")}</span>
+{(profile.isSample || !profile.isPublic) && <span className="font-label-sm text-label-sm uppercase tracking-wider px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-medium">{t(profile.isSample ? "Sample profile" : "Private profile")}</span>}
 
 </div>
 
