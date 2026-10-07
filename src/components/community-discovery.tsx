@@ -24,7 +24,7 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
     {
       title: "Trending games",
       description:
-        "Distinct people who changed a score in the last 30 days. Only discoverable public profiles are included.",
+        "Distinct people who changed a score in the last 30 days.",
       rows: community.trending.slice(0, 5).map((row) => ({
         gameId: row.gameId,
         value: `${row.count} ${t("people")}`,
