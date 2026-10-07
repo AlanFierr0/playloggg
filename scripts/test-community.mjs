@@ -6,7 +6,7 @@ import {
   tasteNeighbors,
 } from "../src/lib/community-stats.ts";
 const row = (profile_id, game_id, score) => ({ profile_id, game_id, score });
-test("community averages require five distinct scored profiles, include zero and measure spread", () => {
+test("community averages include one score, exclude null, deduplicate profiles and include zero", () => {
   const ratings = [
     ...Array.from({ length: 5 }, (_, i) => row(i, 1, i * 25)),
     row(0, 2, 100),
@@ -14,7 +14,11 @@ test("community averages require five distinct scored profiles, include zero and
     row(0, 1, 0),
   ];
   const stats = communityStats(ratings, []);
-  assert.equal(stats.scores.length, 1);
+  assert.equal(stats.scores.length, 2);
+  assert.equal(stats.scores[1].average, 100);
+  assert.equal(stats.scores[1].count, 1);
+  assert.equal(communityStats([row(0, 3, 0)], []).scores[0].average, 0);
+  assert.equal(communityStats([row(0, 3, null)], []).scores.length, 0);
   assert.equal(stats.scores[0].count, 5);
   assert.equal(stats.scores[0].average, 50);
   assert.ok(Math.abs(stats.scores[0].deviation - Math.sqrt(1250)) < 1e-9);

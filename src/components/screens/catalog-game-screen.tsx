@@ -46,7 +46,7 @@ export async function CatalogGameScreen({ game, isSample, publicProfile }: { gam
           </section>
           <div className="text-body-sm text-on-surface-variant flex flex-wrap gap-x-3 gap-y-1">
             <span>{t("Community score")}</span>
-            <span>{communityScore ? `${communityScore.average} / 100` : t("Not enough ratings")}</span>
+            <span>{communityScore ? `${communityScore.average} / 100` : t("No ratings yet")}</span>
             {communityScore && <span>{communityScore.count} {t("ratings")}</span>}
           </div>
         </div>

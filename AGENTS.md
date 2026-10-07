@@ -28,7 +28,7 @@ See docs/profile-v2.md for migrations, routes and verification.
 The document implementation decisions are recorded in docs/product-ui-review.md.
 Taste preferences require three scored games per genre/studio; Taste Match remains
 100 minus mean absolute score difference with five shared scored games. Community
-scores/spread require five distinct scored profiles, trends use score changes over
+scores have no minimum rating count; spread requires five distinct scored profiles, trends use score changes over
 30 days, and recommendations use 85%+ matches across five shared scored games and
 source scores of 90+. Scores, tiers, favorites and saved logged-game preference
 order are independent. Pairwise choices move the winner immediately above the

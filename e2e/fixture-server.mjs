@@ -142,7 +142,7 @@ export async function startFixtureServer() {
         for(const row of ratings) if(row.score!==null) {
           const group=groups.get(row.game_id)??[];group.push(row.score);groups.set(row.game_id,group);
         }
-        const rows=[...groups].flatMap(([id,scores])=>scores.length>=5 ? [{slug:games.find(game=>game.id===id).slug,average:scores.reduce((sum,value)=>sum+value,0)/scores.length,sample_count:scores.length}] : []).sort((a,b)=>a.slug.localeCompare(b.slug));
+        const rows=[...groups].flatMap(([id,scores])=>scores.length>0 ? [{slug:games.find(game=>game.id===id).slug,average:scores.reduce((sum,value)=>sum+value,0)/scores.length,sample_count:scores.length}] : []).sort((a,b)=>a.slug.localeCompare(b.slug));
         return reply(200,rows.slice(Number(url.searchParams.get("offset")??0),Number(url.searchParams.get("offset")??0)+Number(url.searchParams.get("limit")??1000)));
       }
       if(resource==="rpc/community_trending_games")return reply(200,[]);
@@ -150,7 +150,7 @@ export async function startFixtureServer() {
         let body="";for await(const part of req)body+=part;const input=body ? JSON.parse(body) : {};
         const groups=new Map();
         for(const row of ratings){const profile=profiles.find(p=>p.id===row.profile_id);if(!profile?.is_public||!profile.is_discoverable||row.score==null||(input.p_ids&&!input.p_ids.includes(row.game_id)))continue;const values=groups.get(row.game_id)??[];values.push(row.score);groups.set(row.game_id,values);}
-        return reply(200,[...groups].filter(([,values])=>values.length>=5).map(([game_id,values])=>{const average=values.reduce((a,b)=>a+b,0)/values.length;return {game_id,sample_count:values.length,average:Math.round(average*10)/10,deviation:Math.sqrt(values.reduce((sum,value)=>sum+(value-average)**2,0)/values.length)};}));
+        return reply(200,[...groups].filter(([,values])=>values.length>=Number(url.searchParams.get("sample_count")?.replace("gte.","")??1)).map(([game_id,values])=>{const average=values.reduce((a,b)=>a+b,0)/values.length;return {game_id,sample_count:values.length,average:Math.round(average*10)/10,deviation:Math.sqrt(values.reduce((sum,value)=>sum+(value-average)**2,0)/values.length)};}));
       }
       if(resource==="rpc/consume_operation_limit_batch"&&req.method==="POST"){
         if(!admin)return reply(403,{message:"Server only"});

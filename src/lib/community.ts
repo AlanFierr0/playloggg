@@ -14,7 +14,7 @@ const toScore=(row:{game_id:number;sample_count:number;average:number;deviation:
 export const getCommunity = cache(async () => {
   const client=createPublicClient();
   const [scoreResult,trendResult,reviewResult]=await Promise.all([
-    client.rpc("community_game_scores").order("deviation",{ascending:false}).order("sample_count",{ascending:false}).order("game_id").limit(5),
+    client.rpc("community_game_scores").gte("sample_count",5).order("deviation",{ascending:false}).order("sample_count",{ascending:false}).order("game_id").limit(5),
     client.rpc("community_trending_games"),
     client.from("ratings").select("profile_id,game_id,review,updated_at,profiles!inner(handle,display_name,is_public,is_discoverable)")
       .eq("profiles.is_public",true).eq("profiles.is_discoverable",true).not("review","is",null).order("updated_at",{ascending:false}).limit(6),
