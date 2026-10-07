@@ -23,7 +23,8 @@ export default async function PublicProfileLayout({ params, children }: { params
   const t = await getMessages();
   return <PortfolioProvider portfolio={portfolio}>
     <div className="site-container mx-auto px-4 sm:px-6 lg:px-12 pt-6">
-      <div className="flex justify-end pb-4">
+      <ProfileNavigation />
+      <div className="flex justify-end pt-4">
         <Link href={portfolio.publicBase!} aria-label={`${t("Viewing profile")} ${portfolio.profile.displayName}`} className="flex min-w-0 max-w-full items-center gap-3 rounded-xl bg-surface-container-low px-4 py-3">
           <div className="min-w-0 text-right">
             <p className="text-label-sm font-label-sm uppercase tracking-wider text-on-surface-variant">{t("Viewing profile")}</p>
@@ -33,7 +34,7 @@ export default async function PublicProfileLayout({ params, children }: { params
           <ProfileAvatar name={portfolio.profile.displayName} src={portfolio.profile.avatarUrl} className="h-11 w-11 rounded-xl" />
         </Link>
       </div>
-      <ProfileNavigation />{portfolio.profile.isDiscoverable&&<div className="pt-4"><ProfileSocial target={Number(portfolio.profile.id)}/></div>}</div>
+      {portfolio.profile.isDiscoverable&&<div className="pt-4"><ProfileSocial target={Number(portfolio.profile.id)}/></div>}</div>
     {children}
   </PortfolioProvider>;
 }
