@@ -39,23 +39,28 @@ test("profile preview, responsive menu and catalog disclosure work in both theme
   await page.setViewportSize(testInfo.project.use.viewport!);
   await page.goto("/games");
   const filters = page.getByRole("button", {name:/Filtros y orden/});
-  if (testInfo.project.use.viewport!.width < 1024) {
-    await expect(filters).toBeVisible();
-    await expect(page.locator("#games-genre")).toBeHidden();
-    await filters.click();
-  }
+  await expect(filters).toBeVisible();
+  await expect(filters).toHaveAttribute("aria-expanded", "false");
+  await expect(page.locator("#games-genre")).toBeHidden();
+  await filters.click();
+  await expect(filters).toHaveAttribute("aria-expanded", "true");
   await page.locator("#games-genre").selectOption("Roguelike");
   await expect(page).toHaveURL(/genre=Roguelike/);
   await expect(page.getByRole("heading",{name:"Hades",exact:true})).toBeVisible();
   await page.reload();
-  if (testInfo.project.use.viewport!.width < 1024) {
-    await expect(filters).toBeVisible();
-    await expect(filters).toContainText("(1)");
-    await filters.click();
-  }
+  await expect(filters).toBeVisible();
+  await expect(filters).toContainText("(1)");
+  await page.screenshot({path: `e2e-artifacts/catalog-filter-button-${testInfo.project.name}.png`});
+  await filters.click();
   await expect(page.locator("#games-genre")).toHaveValue("Roguelike");
   await expect(page.locator("[data-catalog-game]").getByText("No registrado",{exact:true})).toHaveCount(0);
   await page.screenshot({path: `e2e-artifacts/ui-catalog-${testInfo.project.name}.png`, fullPage: true});
+  const themeMenu = page.locator("header summary");
+  if (await themeMenu.isVisible()) await themeMenu.click();
+  await page.getByRole("button", {name:"Cambiar a modo oscuro"}).click();
+  if (await themeMenu.isVisible()) await themeMenu.press("Escape");
+  await expect(page.locator("html")).toHaveClass(/dark/);
+  await page.screenshot({path: `e2e-artifacts/ui-catalog-dark-${testInfo.project.name}.png`, fullPage: true});
   expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
 });
 

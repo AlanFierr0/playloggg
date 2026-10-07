@@ -45,11 +45,9 @@ async function openNavigation(page: import("@playwright/test").Page) {
 }
 async function openFilters(page: import("@playwright/test").Page) {
   const button = page.getByRole("button", { name: /Filters and sorting/ });
-  if (page.viewportSize()!.width < 1024) {
-    await expect(button).toBeVisible();
-    if (await button.getAttribute("aria-expanded") !== "true") await button.click();
-    await expect(button).toHaveAttribute("aria-expanded", "true");
-  }
+  await expect(button).toBeVisible();
+  if (await button.getAttribute("aria-expanded") !== "true") await button.click();
+  await expect(button).toHaveAttribute("aria-expanded", "true");
 }
 // Stable named fixture games, independent of production catalog contents.
 test("catalog combines filters, loads more, clears and handles empty results", async ({ page }) => {
