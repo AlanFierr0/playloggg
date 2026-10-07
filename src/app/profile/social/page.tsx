@@ -49,7 +49,7 @@ export default async function Page() {
       <h1 className="font-headline-xl text-headline-xl">
         {t("Following")}
       </h1>
-      <nav aria-label={t("Friends navigation")} className="flex flex-wrap gap-3"><Link href="/people" className="rounded bg-primary/10 text-primary px-4 py-3">{t("Find friends")}</Link><Link href="/profile/activity" className="rounded bg-surface-container text-primary px-4 py-3">{t("Activity feed")}</Link></nav>
+      <nav aria-label={t("Friends navigation")} className="flex flex-wrap gap-3"><Link href="/people" className="rounded bg-primary/10 text-primary px-4 py-3">{t("Find friends")}</Link></nav>
       {[
         { label: "Following", rows: follows.map((row) => row.followed_id) },
       ].map(({ label, rows }) => (
