@@ -22,7 +22,7 @@ export function TasteDetails({ games }: { games: Game[] }) {
           <h2 className="font-headline-lg text-headline-lg">{t(label)}</h2>
           {groups.length ? (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-body-sm">
+              <table className="w-full text-left font-body-md text-body-md leading-relaxed">
                 <caption className="sr-only">{t(label)}</caption>
                 <thead>
                   <tr>
@@ -32,7 +32,7 @@ export function TasteDetails({ games }: { games: Game[] }) {
                       "Average score",
                       "Above/below your average",
                     ].map((label) => (
-                      <th key={label} scope="col" className="p-3">
+                      <th key={label} scope="col" className="p-3 text-body-sm font-medium text-on-surface-variant">
                         {t(label)}
                       </th>
                     ))}
@@ -47,13 +47,13 @@ export function TasteDetails({ games }: { games: Game[] }) {
                       <th
                         translate="no"
                         scope="row"
-                        className="p-3 font-normal"
+                        className="p-3 font-semibold text-on-surface"
                       >
                         {group.name}
                       </th>
-                      <td className="p-3">{group.count}</td>
-                      <td className="p-3 text-primary">{group.average}</td>
-                      <td className="p-3">
+                      <td className="p-3 font-medium tabular-nums">{group.count}</td>
+                      <td className="p-3 font-bold tabular-nums text-primary">{group.average}</td>
+                      <td className="p-3 font-medium tabular-nums">
                         {group.delta > 0 ? "+" : ""}
                         {group.delta}
                       </td>
