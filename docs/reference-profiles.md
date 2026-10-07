@@ -12,7 +12,8 @@ Approved archive: https://emiliorankings.com/
 
 Snapshot: 2026-10-07. Imported 206 entries from 373 archive entries.
 Numeric ranges use the rounded midpoint: 80–81 becomes 81.
-Each entry retains the original score and timestamped YouTube links in its review.
+The profile description and reference-rating text are in Spanish.
+Reviews contain only the reference attribution and timestamped YouTube source links.
 No tiers, playback statuses, hours or completion dates are inferred.
 
 Only unambiguous title-and-release-year matches with numeric scores and source videos are imported.
