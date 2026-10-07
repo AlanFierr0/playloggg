@@ -14,16 +14,20 @@ export function SearchScreen({ initialQuery, returnPath, mode }: { initialQuery:
 const portfolio = usePortfolio();
 const [query, setQuery] = useState(initialQuery);
 const [scope, setScope] = useState<SearchScope>("all");
-const dialog = useRef<HTMLDivElement>(null);
+const dialog = useRef<HTMLDialogElement>(null);
 const input = useRef<HTMLInputElement>(null);
 const router = useRouter();
 const matchCounts = getSearchMatches(query, portfolio);
 const categories: { scope: SearchScope; label: string }[] = [{ scope: "all", label: "All Results" }, { scope: "games", label: "Games" }, { scope: "curators", label: "Profiles" }, { scope: "actions", label: "Actions" }];
 
 function close() { router.push(returnPath); }
+useEffect(() => {
+  const element = dialog.current;
+  element?.showModal();
+  return () => element?.close();
+}, []);
 useEffect(() => { input.current?.focus(); input.current?.setSelectionRange(initialQuery.length, initialQuery.length); }, [initialQuery]);
-function onKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-  if (event.key === "Escape") { event.preventDefault(); close(); }
+function onKeyDown(event: React.KeyboardEvent<HTMLDialogElement>) {
   const links = Array.from(dialog.current?.querySelectorAll<HTMLElement>("[data-search-result]:not([disabled])") ?? []);
   if ((event.key === "ArrowDown" || event.key === "ArrowUp") && links.length) {
     event.preventDefault();
@@ -42,8 +46,8 @@ function onKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
   }
 }
 return (
-  <div onKeyDown={onKeyDown} className="fixed inset-x-0 bottom-0 top-[var(--site-header-height)] z-40 flex items-center justify-center bg-surface/90 backdrop-blur-sm p-3 sm:p-6" onClick={event => { if (event.target === event.currentTarget) close(); }}>
-    <div ref={dialog} id="palette-dialog" role="dialog" aria-modal="true" aria-label={t("Search the game catalog")} className="search-dialog flex w-full max-w-3xl min-w-0 min-h-0 flex-col overflow-hidden rounded-2xl border border-outline-variant/30 bg-surface-container-low shadow-2xl">
+  <dialog ref={dialog} onKeyDown={onKeyDown} onCancel={event => { event.preventDefault(); close(); }} aria-label={t("Search the game catalog")} className="fixed inset-x-0 bottom-0 top-[var(--site-header-height)] m-0 h-[calc(100dvh-var(--site-header-height))] w-full max-w-none max-h-none border-0 open:flex items-center justify-center bg-surface/90 text-on-surface backdrop-blur-sm backdrop:bg-transparent p-3 sm:p-6" onClick={event => { if (event.target === event.currentTarget) close(); }}>
+    <div id="palette-dialog" className="search-dialog flex w-full max-w-3xl min-w-0 min-h-0 flex-col overflow-hidden rounded-2xl border border-outline-variant/30 bg-surface-container-low shadow-2xl">
       <header className="shrink-0 px-4 pt-5 sm:px-6 sm:pt-6">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 space-y-1">
@@ -66,6 +70,6 @@ return (
         <span><kbd className="mr-1.5 rounded bg-surface-container px-1.5 py-0.5">Esc</kbd>{t("Dismiss")}</span>
       </footer>
     </div>
-  </div>
+  </dialog>
 );
 }

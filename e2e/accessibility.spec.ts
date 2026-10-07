@@ -83,7 +83,14 @@ test("keyboard focus, search trapping and reduced motion remain usable", async (
   const last = dialog.locator('button:not([disabled]), a[href], input, [tabindex="0"]').last();
   await first.focus(); await first.press("Shift+Tab"); await expect(last).toBeFocused();
   await last.press("Tab"); await expect(first).toBeFocused();
-  await expect(page.locator("[inert]")).toHaveCount(1);
+  await expect(dialog).toHaveJSProperty("open", true);
+  const backgroundLink = page.locator("body > header a").first();
+  await backgroundLink.evaluate((node: HTMLElement) => node.focus());
+  await expect(first).toBeFocused();
+  await page.getByRole("button", { name: "Close search" }).click();
+  await expect(page).toHaveURL(/\/games$/);
+  await backgroundLink.focus();
+  await expect(backgroundLink).toBeFocused();
   await context.addCookies([authCookie]);
   await page.goto("/log?game=hades");
   const hours = page.locator("#hours-input"); await hours.focus();
