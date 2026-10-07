@@ -1,8 +1,10 @@
 import {test,expect} from "./test";
+import AxeBuilder from "@axe-core/playwright";
 // @ts-expect-error Node-only local fake session.
 import {authCookie} from "./fixture-server.mjs";
-test("published comparisons show real affinity, independent tiers and reloadable handles",async ({page})=>{
+test("published comparisons show real affinity, independent tiers and reloadable handles",async ({page,context},info)=>{
  await page.goto("/compare");
+ await page.screenshot({path:`e2e-artifacts/compare-picker-${info.project.name}.png`,fullPage:true});
  await page.getByLabel("First profile handle").fill("fixture_public");
  await page.getByLabel("Second profile handle").fill("fixture_peer");
  await page.getByRole("button",{name:"Compare profiles"}).click();
@@ -10,6 +12,19 @@ test("published comparisons show real affinity, independent tiers and reloadable
  await expect(page.getByRole("table")).toContainText("Score: 0");
  await expect(page.getByRole("table")).toContainText("Score: Unrated");
  await expect(page.getByRole("table")).toContainText("Tier: Unassigned");
+ const explanation=page.getByText("Affinity is 100 minus the average absolute score difference across games both profiles scored, rounded to one decimal. Tiers are independent and do not affect affinity.",{exact:true});
+ await expect(explanation).toBeHidden();
+ await page.getByText("How Taste Match works",{exact:true}).click();
+ await expect(explanation).toBeVisible();
+ for(const theme of ["dark","light"]){
+   await context.addCookies([{name:"playlogg_theme",value:theme,url:"http://127.0.0.1:3100"}]);
+   await page.reload();
+   await expect(page.locator("[data-affinity]")).toHaveText("90%");
+   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+   expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
+   await page.screenshot({path:`e2e-artifacts/compare-results-${theme}-${info.project.name}.png`,fullPage:true});
+ }
+
  await page.reload(); await expect(page.getByLabel("First profile handle")).toHaveValue("fixture_public");
  await expect(page.getByRole("table").locator("tbody tr")).toHaveCount(20);
  await page.getByRole("link",{name:"Next",exact:true}).click();
@@ -23,6 +38,7 @@ test("published comparisons show real affinity, independent tiers and reloadable
  await expect(page.getByText("Comparison unavailable. Check both handles and make sure both profiles are published.")).toBeVisible();
  await page.goto("/compare?left=fixture_public&right=fixture_empty");
  await expect(page.getByText("These profiles have no shared logged games yet.")).toBeVisible();
+ await expect(page.getByRole("button",{name:"Download share card",exact:true})).toBeVisible();
 });
 test("other users private and missing profiles stay unavailable even to a signed-in owner",async ({page,context})=>{
  await context.addCookies([authCookie]);

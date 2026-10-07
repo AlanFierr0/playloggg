@@ -47,3 +47,19 @@ Fixtures test application behavior; they do not replace database RLS audits.
 
 No schema or RLS migration is required: existing owner read access, follow/block
 policies and public profile reads are reused.
+
+
+## Compare presentation
+
+Compare keeps the existing dark/gold palette, type, routes, handle fields and
+privacy rules. The picker offers direct shortcuts to up to six followed public
+profiles, using the same authorized friend list as its input suggestions.
+The summary groups identities, Taste Match, shared count, score difference and
+correlation; missing metrics say Not enough data. Compact cards place agreements
+and disagreements together. Genre averages name each profile, and the chart and
+genre analysis sit side by side on desktop. The formula lives in a keyboard
+accessible disclosure. Public comparisons keep the existing share export after
+the results, including when no games overlap. Calculations are unchanged.
+
+Design direction: preserve, variance 4, motion 1, density 5. Keep controls familiar,
+use spacing and smaller covers for scanning, and avoid decorative animation.
