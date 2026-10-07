@@ -5,7 +5,7 @@ Public URL: https://playloggg.vercel.app/u/tiempo_de_videojuegos
 This is an independently maintained reference, not an official account.
 There is no Auth account; owner_user_id stays null.
 Existing ownership checks and RLS prevent application users from editing it.
-Database administrators maintain the ratings. The profile is public; discovery opt-in remains off.
+Database administrators maintain the ratings. The profile is public and discoverable, appearing in the Profiles directory and profile search.
 
 Source: https://www.youtube.com/@TiempodeVideojuegos
 Approved archive: https://emiliorankings.com/

@@ -1,12 +1,14 @@
 -- Database-managed reference; no Auth account is created or assigned.
 begin;
 insert into public.profiles(handle,display_name,is_public,is_discoverable,owner_user_id,bio)
-values ('tiempo_de_videojuegos','Tiempo de Videojuegos',true,false,null,'Perfil de referencia mantenido de forma independiente; no es una cuenta oficial. Las puntuaciones provienen de los videos de Tiempo de Videojuegos a través de EmilioRankings.')
+values ('tiempo_de_videojuegos','Tiempo de Videojuegos',true,true,null,'Perfil de referencia mantenido de forma independiente; no es una cuenta oficial. Las puntuaciones provienen de los videos de Tiempo de Videojuegos a través de EmilioRankings.')
 on conflict(handle) do nothing;
 do $$ begin
   if not exists(select 1 from public.profiles where handle='tiempo_de_videojuegos' and owner_user_id is null and is_public)
   then raise exception 'Expected unowned public reference profile'; end if;
 end $$;
+update public.profiles set is_discoverable=true
+where handle='tiempo_de_videojuegos' and owner_user_id is null and is_public;
 insert into public.ratings(profile_id,game_id,score,review,status)
 select p.id,g.id,v.score,v.review,'completed' from (values
 ('007-first-light-igdb-141114', 86, 'https://www.youtube.com/watch?v=dqgz3j4ks7U&t=1960s'),
