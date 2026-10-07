@@ -15,10 +15,10 @@ test("find a friend, follow persistently and compare saved games with your own p
   await page.locator("#commit-rating").click();
   await expect(page).toHaveURL(/\/profile$/);
   await openNavigation(page);
-  await page.getByRole("navigation", { name: "Main navigation" }).filter({ visible: true }).getByRole("link", { name: "Friends", exact: true }).click();
-  await page.getByLabel("Find friends", { exact: true }).fill("@FIXTURE_PUBLIC");
+  await page.getByRole("navigation", { name: "Main navigation" }).filter({ visible: true }).getByRole("link", { name: "Profiles", exact: true }).click();
+  await page.getByLabel("Find profiles", { exact: true }).fill("@FIXTURE_PUBLIC");
   await expect(page).toHaveURL(/q=%40FIXTURE_PUBLIC/);
-  await expect(page.getByLabel("Find friends", { exact: true })).toBeFocused();
+  await expect(page.getByLabel("Find profiles", { exact: true })).toBeFocused();
   const friend = page.getByRole("article").filter({ hasText: "Published Fixture" });
   await expect(friend).toHaveCount(1);
   await friend.getByRole("button", { name: "Follow", exact: true }).click();
@@ -29,7 +29,7 @@ test("find a friend, follow persistently and compare saved games with your own p
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: `e2e-artifacts/friends-${testInfo.project.name}.png`, fullPage: true });
-  await page.getByRole("navigation", { name: "Friends navigation" }).getByRole("link", { name: "Following", exact: true }).click();
+  await page.getByRole("navigation", { name: "Profile navigation" }).getByRole("link", { name: "Following", exact: true }).click();
   await expect(page.getByRole("link", { name: "Compare games Published Fixture", exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Compare games Published Fixture", exact: true }).click();
   await expect(page.getByLabel("First profile handle")).toHaveValue("fixture_owner");
@@ -55,7 +55,7 @@ test("friend search finds public link-only profiles, keeps private profiles hidd
   await page.goto("/people?q=fixture_owner");
   await expect(page.getByRole("article")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Follow", exact: true })).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "Sign in to follow friends", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Sign in to follow profiles", exact: true })).toBeVisible();
   await page.goto("/people?q=fixture_peer");
   await expect(page.getByRole("article")).toHaveCount(1);
   await expect(page.getByRole("article")).toContainText("Published Peer");
@@ -77,9 +77,9 @@ test("friend search finds public link-only profiles, keeps private profiles hidd
 test("live friend search uses the latest text, clears and reloads without exposing private profiles", async ({ page, context }) => {
   await context.addCookies([authCookie]);
   await page.goto("/people?page=2");
-  const search = page.getByLabel("Find friends", { exact: true });
+  const search = page.getByLabel("Find profiles", { exact: true });
   await search.fill("no match");
-  await expect(page.getByText("No friends match this search.", { exact: true })).toBeVisible();
+  await expect(page.getByText("No profiles match this search.", { exact: true })).toBeVisible();
   await search.fill("fixture_owner");
   await search.fill("fixture_peer");
   await expect(page).toHaveURL(/\/people\?q=fixture_peer$/);

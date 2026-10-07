@@ -9,7 +9,7 @@ import { ProfileAvatar } from "@/components/profile-avatar";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { useSitePreferences } from "@/components/site-preferences";
 
-const navigation = [{ href: "/games", label: "Games" }, { href: "/tiers", label: "Tier List" }, { href: "/people", label: "Friends" }, { href: "/compare", label: "Compare" }];
+const navigation = [{ href: "/games", label: "Games" }, { href: "/tiers", label: "Tier List" }, { href: "/people", label: "Profiles" }, { href: "/compare", label: "Compare" }];
 
 export function SiteHeader() {
   const t = useMessages();

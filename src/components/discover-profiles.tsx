@@ -45,9 +45,9 @@ export async function DiscoverProfiles({
         )}
       </div>
       {full && <div className="space-y-5">
-        <p className="text-on-surface-variant">{t("Find a friend, follow their updates and compare your games.")}</p>
-        <nav aria-label={t("Friends navigation")} className="flex flex-wrap gap-3">
-          {account?.profile ? <Link href="/profile/social" className="rounded bg-primary/10 text-primary px-4 py-3">{t("Following")}</Link> : <Link href="/login" className="rounded bg-primary-container text-on-primary-container px-4 py-3">{t("Sign in to follow friends")}</Link>}
+        <p className="text-on-surface-variant">{t("Explore public profiles, follow their updates and compare your games.")}</p>
+        <nav aria-label={t("Profile navigation")} className="flex flex-wrap gap-3">
+          {account?.profile ? <Link href="/profile/social" className="rounded bg-primary/10 text-primary px-4 py-3">{t("Following")}</Link> : <Link href="/login" className="rounded bg-primary-container text-on-primary-container px-4 py-3">{t("Sign in to follow profiles")}</Link>}
         </nav>
         <FriendSearch query={search} />
         <p className="text-body-sm text-on-surface-variant">{t("Search any public profile by name or handle. Private profiles stay hidden.")}</p>
@@ -88,7 +88,7 @@ export async function DiscoverProfiles({
         </div>
       ) : (
         <div className="rounded-xl border border-outline-variant/40 p-6 sm:p-8 space-y-4">
-          <h3 className="font-headline-lg text-headline-lg">{t(search ? "No friends match this search." : "No profiles have opted into discovery yet.")}</h3>
+          <h3 className="font-headline-lg text-headline-lg">{t(search ? "No profiles match this search." : "No profiles have opted into discovery yet.")}</h3>
           <p className="max-w-[55ch] text-on-surface-variant">{t(search ? "Try another name or handle." : "Invite a friend to create a profile, publish it and enable discovery. Then search their handle here.")}</p>
           {!search && <Link href={account?.profile ? "/settings" : "/profile"} className="ui-action bg-surface-container text-primary">{t(account?.profile ? "Manage profile visibility" : "Create your profile")}</Link>}
         </div>
