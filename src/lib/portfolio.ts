@@ -56,6 +56,10 @@ const selectedRatings = cache(async () => {
   const { owner, profile } = await selectedAccount();
   return owner?.profile && profile ? readProfileRatings(owner.supabase, profile.id) : [];
 });
+export const getSearchPortfolio = cache(async (): Promise<Portfolio> => {
+  const [shell, rows, ratings] = await Promise.all([getPortfolioShell(), getCatalog(), selectedRatings()]);
+  return { ...shell, games: portfolioGames(rows, ratings) };
+});
 export const getPortfolio = cache(async (): Promise<Portfolio> => {
   const [shell, rows, ratings] = await Promise.all([getPortfolioShell(), getCatalog(), selectedRatings()]);
   const favorites = shell.profile.id ? await readFavorites(await createClient(), Number(shell.profile.id)) : [];

@@ -1,14 +1,15 @@
 "use client";
 import { useMessages } from "@/components/site-preferences";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, use, useEffect, useRef, useState, type ComponentProps } from "react";
 import { useRouter } from "next/navigation";
 import { SearchResults, type SearchScope } from "@/components/search-results";
 
-import type { Profile } from "@/types/domain";
+import { PortfolioProvider } from "@/components/portfolio-provider";
+import type { Portfolio, Profile } from "@/types/domain";
 
 
-export function SearchScreen({ initialQuery, returnPath, mode }: { initialQuery: string; returnPath: string; mode: "browse" | "log" }) {
+export function SearchScreen({ initialQuery, returnPath, mode, portfolio }: { initialQuery: string; returnPath: string; mode: "browse" | "log"; portfolio: Promise<Portfolio> }) {
   const t = useMessages();
 
 
@@ -81,7 +82,9 @@ return (
           {categories.map(category => <button key={category.scope} type="button" onClick={() => setScope(category.scope)} aria-pressed={scope === category.scope} className={`min-h-11 rounded-lg px-3 sm:px-4 text-body-sm font-medium transition-colors ${scope === category.scope ? "bg-primary/10 text-primary" : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"}`}>{t(category.label)}{category.scope === "curators" && <span className="ml-1.5 text-label-sm">({profilesLoading ? "…" : profiles.length})</span>}</button>)}
         </nav>}
       </header>
-      <SearchResults query={query} scope={mode === "log" ? "games" : scope} mode={mode} profiles={profiles} profilesLoading={profilesLoading} profilesError={profileSearch?.query === query && profileSearch.error} />
+      <Suspense fallback={<p role="status" className="px-6 py-8 text-on-surface-variant">{t("Loading…")}</p>}>
+      <SearchData portfolio={portfolio} query={query} scope={mode === "log" ? "games" : scope} mode={mode} profiles={profiles} profilesLoading={profilesLoading} profilesError={profileSearch?.query === query && profileSearch.error} />
+      </Suspense>
       <footer className="search-help hidden sm:flex shrink-0 items-center justify-between gap-4 border-t border-outline-variant/20 px-6 py-3 text-body-sm text-on-surface-variant">
         <div className="flex items-center gap-4"><span><kbd className="mr-1.5 rounded bg-surface-container px-1.5 py-0.5">↑↓</kbd>{t("Navigate")}</span><span><kbd className="mr-1.5 rounded bg-surface-container px-1.5 py-0.5">↵</kbd>{t("Select title")}</span></div>
         <span><kbd className="mr-1.5 rounded bg-surface-container px-1.5 py-0.5">Esc</kbd>{t("Dismiss")}</span>
@@ -89,4 +92,9 @@ return (
     </div>
   </dialog>
 );
+}
+
+function SearchData({ portfolio, ...props }: ComponentProps<typeof SearchResults> & { portfolio: Promise<Portfolio> }) {
+  const data = use(portfolio);
+  return <PortfolioProvider portfolio={data}><SearchResults {...props} /></PortfolioProvider>;
 }
