@@ -43,7 +43,6 @@ export function ProfileOverviewScreen() {
           </div>
           {!publicBase && access?.canEdit && <nav aria-label={t("Profile tools")} className="grid grid-cols-2 gap-2">
             {tools.map(([label, href, icon]) => <Link key={href} href={href} className={`flex min-h-12 items-center gap-2 rounded-xl px-3 py-3 text-body-sm font-medium transition-colors ${href === "/settings" ? "bg-primary/10 text-primary hover:bg-primary/20" : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface"}`}><span aria-hidden="true" className="material-symbols-outlined text-[18px] shrink-0">{icon}</span><span>{t(label)}</span></Link>)}
-            {profile.isPublic && <Link href={`/u/${profile.handle}`} className="col-span-2 flex min-h-11 items-center justify-end gap-2 px-3 text-body-sm text-primary hover:underline">{t("Open public profile")}<span aria-hidden="true" className="material-symbols-outlined text-[18px]">arrow_outward</span></Link>}
           </nav>}
         </div>
         <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-5 border-y border-outline-variant/20 py-6">
