@@ -15,9 +15,6 @@ test("independent ranking saves a pairwise choice without changing scores", asyn
   await page.getByText("Which game do you prefer?", { exact: true }).click();
   await page.getByRole("button", { name: "Skip", exact: true }).click();
   await page.getByRole("button", { name: "Hades", exact: true }).click();
-  await page
-    .getByRole("button", { name: "Save personal ranking", exact: true })
-    .click();
   await expect(
     page.getByRole("status").filter({ hasText: "Personal ranking saved" }),
   ).toBeVisible();
@@ -25,6 +22,8 @@ test("independent ranking saves a pairwise choice without changing scores", asyn
   await expect(page.locator("ol").first().locator("li").first()).toContainText(
     "Hades",
   );
+  await expect(page.getByText("Manage your games", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Save personal ranking", exact: true })).toHaveCount(0);
   const rows = page.locator("[data-ranking-game]");
   const hades = page.locator('[data-ranking-game="hades"]');
   const elden = page.locator('[data-ranking-game="elden-ring-shadow-of-the-erdtree"]');
@@ -33,8 +32,10 @@ test("independent ranking saves a pairwise choice without changing scores", asyn
   await position.press("Enter");
   await expect(rows.first()).toContainText("Elden Ring");
   await expect(position).toHaveValue("2");
+  await expect(position).toBeEnabled();
   await hades.dragTo(elden);
   await expect(rows.first()).toContainText("Hades");
+  await expect(position).toBeEnabled();
   const handle = hades.getByRole("button", { name: "Drag to reorder: Hades", exact: true });
   const handleBox = (await handle.boundingBox())!;
   const targetBox = (await elden.boundingBox())!;
@@ -52,22 +53,43 @@ test("independent ranking saves a pairwise choice without changing scores", asyn
   }
   await expect(rows.first()).toContainText("Elden Ring");
   await expect(position).not.toBeFocused();
-  await page.getByRole("button", { name: "Save personal ranking", exact: true }).click();
   await expect(page.getByRole("status").filter({ hasText: "Personal ranking saved" })).toBeVisible();
   await page.reload();
   await expect(rows.first()).toContainText("Elden Ring");
   await expect(position).toHaveValue("2");
   await page.getByRole("button", { name: "Move Hades up", exact: true }).click();
   await expect(rows.first()).toContainText("Hades");
+  await expect(position).toBeEnabled();
   await position.fill("");
   await position.press("Enter");
   await expect(position).toHaveValue("1");
   await position.fill("999");
   await position.press("Enter");
   await expect(position).toHaveValue("2");
+  await expect(position).toBeEnabled();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: `e2e-artifacts/ranking-edit-${testInfo.project.name}.png`, fullPage: true });
+  await fetch("http://127.0.0.1:3101/__fail-save", { method: "POST" });
+  await page.getByRole("button", { name: "Move Hades up", exact: true }).click();
+  await expect(rows.first()).toContainText("Hades");
+  await expect(page.getByRole("status").filter({ hasText: "Ranking could not be saved. Your draft has been kept." })).toBeVisible();
+  await page.getByRole("button", { name: "Retry saving ranking", exact: true }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Personal ranking saved" })).toBeVisible();
+  await page.reload();
+  await expect(rows.first()).toContainText("Hades");
+  await page.getByRole("textbox", { name: "Search your games", exact: true }).fill("Elden");
+  await expect(rows).toHaveCount(1);
+  const eldenPosition = page.getByRole("textbox", { name: /^Position for Elden Ring/ });
+  await expect(eldenPosition).toHaveValue("2");
+  await eldenPosition.fill("1");
+  await eldenPosition.press("Enter");
+  await expect(eldenPosition).toBeEnabled();
+  await page.getByRole("textbox", { name: "Search your games", exact: true }).fill("");
+  await expect(rows).toHaveCount(2);
+  await expect(rows.first()).toContainText("Elden Ring");
+  await page.reload();
+  await expect(rows.first()).toContainText("Elden Ring");
   const state = await (await fetch("http://127.0.0.1:3101/__state")).json();
   expect(
     state.ratings.find(

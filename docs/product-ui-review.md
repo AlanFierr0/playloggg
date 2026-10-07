@@ -126,3 +126,5 @@ Guest preview covers and catalog suggestions use disjoint samples. Public-defaul
 copy matches signup. Empty personal shelves and unavailable taste summaries stay
 quiet. Browser checks cover selection thresholds, zero playtime, filters, editing,
 guest isolation, both languages/themes, and desktop/mobile including 320px.
+
+Personal ranking now saves each position edit, drag/drop, arrow move or pairwise choice immediately through the existing revision-checked owner action. Failed saves retain the local order and offer Retry saving ranking. The game-management subsection and bulk controls are removed from Ranking; its search, played-platform and hours filters now narrow the personal order without changing hidden games or absolute positions. The separate score-sorted cards and their existing category/tag filters remain unchanged.

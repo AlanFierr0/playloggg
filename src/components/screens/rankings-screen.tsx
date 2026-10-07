@@ -1,7 +1,6 @@
 "use client";
 import { useMessages } from "@/components/site-preferences";
 
-import {ManageGames} from "@/components/manage-games";
 import {PreferenceRanking} from "@/components/preference-ranking";
 import Link from "next/link";
 import { useState } from "react";
@@ -35,7 +34,7 @@ return (<>
 <div className="absolute top-48 right-10 w-80 h-80 bg-secondary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
 {!publicBase && <div className="mb-8"><ProfileNavigation /></div>}
-<ManageGames/><div className="mb-10"><PreferenceRanking/></div>
+<div className="mb-10"><PreferenceRanking/></div>
 <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-12">
 <div className="flex min-w-0 items-center gap-4 sm:gap-6">
 <div className="relative shrink-0 group">

@@ -1232,5 +1232,8 @@
   "Choose a valid score, tier and playback status.": "Elegí un puntaje, tier y estado válidos.",
   "This entry changed elsewhere. Skip it and edit the latest entry from your profile.": "Esta entrada cambió en otro lugar. Omitila y editá la versión actual desde tu perfil.",
   "Your rating could not be saved. Please retry or skip this game.": "No se pudo guardar tu valoración. Reintentá u omití este juego.",
-  "Choose games to import with Steam playtime, then rate all, some or none of them. Existing entries are kept unchanged.": "Elegí juegos para importar con las horas de Steam y valorá todos, algunos o ninguno. Las entradas existentes se conservan."
+  "Choose games to import with Steam playtime, then rate all, some or none of them. Existing entries are kept unchanged.": "Elegí juegos para importar con las horas de Steam y valorá todos, algunos o ninguno. Las entradas existentes se conservan.",
+  "Drag games or edit their position. Changes save automatically.": "Arrastrá los juegos o editá su posición. Los cambios se guardan automáticamente.",
+  "Retry saving ranking": "Reintentar guardar el ranking",
+  "No logged games match these filters.": "Ningún juego registrado coincide con estos filtros."
 }

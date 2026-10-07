@@ -22,29 +22,26 @@ test("security headers are present on pages and exports",async({request})=>{
  }
 });
 
-test("bulk organization changes only selected owned status and platform",async({page,context},testInfo)=>{
+test("ranking keeps its filters without the game management subsection",async({page,context},testInfo)=>{
  await context.addCookies([authCookie]);
  await page.goto("/profile/ranking");
- await page.getByText("Manage your games",{exact:true}).click();
- const manager=page.locator("details").filter({has:page.getByText("Manage your games",{exact:true})});
- await manager.getByLabel("Search your games",{exact:true}).fill("Elden");
- await expect(manager.getByRole("checkbox")).toHaveCount(1);
- const before=await (await fetch("http://127.0.0.1:3101/__state")).json();
- await manager.getByRole("checkbox").check();
- await manager.getByRole("group",{name:"Edit selected games",exact:true}).getByRole("combobox",{name:"Status",exact:true}).selectOption("completed");
- await manager.getByRole("group",{name:"Edit selected games",exact:true}).getByRole("combobox",{name:"Platform",exact:true}).selectOption("pc");
- await manager.getByRole("button",{name:"Update selected games",exact:true}).click();
- await expect(manager.getByText("Selected games updated. (1)",{exact:true})).toBeVisible();
- const after=await (await fetch("http://127.0.0.1:3101/__state")).json();
- for(const rating of before.ratings){
-  const saved=after.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===rating.profile_id&&row.game_id===rating.game_id);
-  if(rating.profile_id===2&&rating.game_id===2){const {status,platform,updated_at,...untouched}=rating;void status;void platform;void updated_at;expect(saved).toMatchObject({...untouched,status:"completed",platform:"pc"});}
-  else expect(saved).toEqual(rating);
- }
- await page.screenshot({path:`e2e-artifacts/manage-games-${testInfo.project.name}.png`,fullPage:true});
- await manager.getByLabel("Search your games",{exact:true}).fill("");
- await manager.getByLabel("Minimum hours",{exact:true}).fill("0");
- await expect(manager.getByRole("checkbox")).toHaveCount(0); // Unknown hours are not zero.
+ await expect(page.getByText("Manage your games",{exact:true})).toHaveCount(0);
+ await page.getByLabel("Search your games",{exact:true}).fill("Elden");
+ await expect(page.locator("[data-ranking-game]")).toHaveCount(1);
+ await page.getByLabel("Search your games",{exact:true}).fill("Hades");
+ await expect(page.locator("[data-ranking-game]")).toHaveCount(0);
+ await page.getByLabel("Search your games",{exact:true}).fill("");
+ await page.getByRole("combobox",{name:"Platform",exact:true}).selectOption("pc");
+ await expect(page.locator("[data-ranking-game]")).toHaveCount(0);
+ await page.getByRole("combobox",{name:"Platform",exact:true}).selectOption("unset");
+ await expect(page.locator("[data-ranking-game]")).toHaveCount(1);
+ await page.getByLabel("Minimum hours",{exact:true}).fill("0");
+ await expect(page.locator("[data-ranking-game]")).toHaveCount(0);
+ await page.getByLabel("Minimum hours",{exact:true}).fill("");
+ await page.getByLabel("Maximum hours",{exact:true}).fill("0");
+ await expect(page.locator("[data-ranking-game]")).toHaveCount(0);
+ await page.getByLabel("Maximum hours",{exact:true}).fill("");
+ await page.screenshot({path:`e2e-artifacts/ranking-filters-${testInfo.project.name}.png`,fullPage:true});
  expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
 });
 

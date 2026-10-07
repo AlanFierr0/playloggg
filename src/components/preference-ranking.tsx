@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { useMessages } from "@/components/site-preferences";
 import { saveRanking } from "@/app/actions/ranking";
+import { parseHours } from "@/lib/rating-input";
+import { playedPlatformLabels } from "@/lib/played-platforms";
 const button =
   "inline-flex items-center justify-center rounded bg-surface-container px-4 py-3 text-primary disabled:opacity-40";
 export function PreferenceRanking() {
@@ -22,7 +24,11 @@ export function PreferenceRanking() {
       .map((game) => game.slug),
   ];
   const [order, setOrder] = useState(initial);
-  const [revision, setRevision] = useState(ranking?.revision ?? null);
+  const revision = useRef(ranking?.revision ?? null);
+  const saving = useRef(false);
+  const [failed, setFailed] = useState(false);
+  const [query, setQuery] = useState(""), [platform, setPlatform] = useState("");
+  const [minimum, setMinimum] = useState(""), [maximum, setMaximum] = useState("");
   const [message, setMessage] = useState("");
   const [pair, setPair] = useState(0);
   const [dragged, setDragged] = useState<string | null>(null);
@@ -34,34 +40,52 @@ export function PreferenceRanking() {
   const canEdit = Boolean(access?.canEdit);
   const left = order.length > 1 ? order[pair % order.length] : null;
   const right = order.length > 1 ? order[(pair + 1) % order.length] : null;
+  const minHours = parseHours(minimum), maxHours = parseHours(maximum);
+  const validBounds = minHours !== undefined && maxHours !== undefined &&
+    (minHours === null || maxHours === null || minHours <= maxHours);
+  const visible = (canEdit ? order : savedOrder).filter(slug => {
+    const game = bySlug.get(slug);
+    return game && validBounds && game.title.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()) &&
+      (!platform || (platform === "unset" ? !game.platform : game.platform === platform)) &&
+      (minHours === null || (game.hoursPlayed != null && game.hoursPlayed >= minHours)) &&
+      (maxHours === null || (game.hoursPlayed != null && game.hoursPlayed <= maxHours));
+  });
   function move(slug: string, position: number) {
-    if (!canEdit || pending || !Number.isInteger(position) || position < 0 || position >= order.length) return;
-    setOrder(current => {
-      if (!current.includes(slug)) return current;
-      const next = current.filter(value => value !== slug);
-      next.splice(position, 0, slug);
-      return next;
-    });
-    setMessage("Save your ranking to keep these choices.");
+    if (!canEdit || saving.current || !order.includes(slug) || !Number.isInteger(position) || position < 0 || position >= order.length || order.indexOf(slug) === position) return;
+    const next = order.filter(value => value !== slug);
+    next.splice(position, 0, slug);
+    setOrder(next);
+    save(next);
   }
   function endDrag() { pointer.current = null; setDragged(null); setOver(null); }
   function targetAt(x: number, y: number) {
     return document.elementFromPoint(x, y)?.closest<HTMLElement>("[data-ranking-game]")?.dataset.rankingGame;
   }
   function prefer(winner: string, loser: string) {
-    setOrder((current) => {
-      const next = current.filter((slug) => slug !== winner);
-      next.splice(next.indexOf(loser), 0, winner);
-      return next;
-    });
-    setPair((current) => current + 1);
-    setMessage("Save your ranking to keep these choices.");
+    if (saving.current) return;
+    const next = order.filter(slug => slug !== winner);
+    next.splice(next.indexOf(loser), 0, winner);
+    setOrder(next);
+    setPair(current => current + 1);
+    save(next);
   }
-  function save() {
+  function save(next: string[]) {
+    if (saving.current) return;
+    saving.current = true;
+    setFailed(false);
+    setMessage("Saving…");
     startTransition(async () => {
-      const result = await saveRanking(order, revision);
-      setMessage(result.message);
-      if (result.ok && result.revision) setRevision(result.revision);
+      try {
+        const result = await saveRanking(next, revision.current);
+        setMessage(result.message);
+        setFailed(!result.ok);
+        if (result.ok && result.revision) revision.current = result.revision;
+      } catch {
+        setMessage("Ranking could not be saved. Your draft has been kept.");
+        setFailed(true);
+      } finally {
+        saving.current = false;
+      }
     });
   }
   return (
@@ -69,7 +93,7 @@ export function PreferenceRanking() {
       <h2 className="font-headline-xl text-headline-xl">
         {t("Personal ranking")}
       </h2>
-      {canEdit && order.length > 0 && <p className="text-body-sm text-on-surface-variant">{t("Drag games or edit their position. Save your ranking to keep the order.")}</p>}
+      {canEdit && order.length > 0 && <p className="text-body-sm text-on-surface-variant">{t("Drag games or edit their position. Changes save automatically.")}</p>}
       {canEdit && left && right && (
         <details className="space-y-5">
           <summary className="cursor-pointer text-primary">
@@ -106,8 +130,17 @@ export function PreferenceRanking() {
           </button>
         </details>
       )}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <label>{t("Search your games")}<input className="mt-2 min-h-11 w-full rounded-xl bg-surface-container p-3" value={query} onChange={event => setQuery(event.target.value)} /></label>
+        <label>{t("Platform")}<select className="mt-2 min-h-11 w-full rounded-xl bg-surface-container p-3" value={platform} onChange={event => setPlatform(event.target.value)}><option value="">{t("All platforms")}</option><option value="unset">{t("Unassigned")}</option>{Object.entries(playedPlatformLabels).map(([id, label]) => <option key={id} value={id}>{t(label)}</option>)}</select></label>
+        <label>{t("Minimum hours")}<input className="mt-2 min-h-11 w-full rounded-xl bg-surface-container p-3" type="number" min="0" step="any" value={minimum} onChange={event => setMinimum(event.target.value)} /></label>
+        <label>{t("Maximum hours")}<input className="mt-2 min-h-11 w-full rounded-xl bg-surface-container p-3" type="number" min="0" step="any" value={maximum} onChange={event => setMaximum(event.target.value)} /></label>
+      </div>
+      {!validBounds && <p role="alert">{t("Use nonnegative hours and a minimum no greater than the maximum.")}</p>}
+      {validBounds && !visible.length && <p className="text-on-surface-variant">{t("No logged games match these filters.")}</p>}
       <ol className="space-y-3">
-        {(canEdit ? order : savedOrder).map((slug, index) => {
+        {visible.map((slug) => {
+          const index = (canEdit ? order : savedOrder).indexOf(slug);
           const game = bySlug.get(slug);
           return game ? (
             <li
@@ -176,12 +209,12 @@ export function PreferenceRanking() {
           ) : null;
         })}
       </ol>
-      {canEdit && order.length > 0 && (
-        <button className={button} disabled={pending} onClick={save}>
-          {t(pending ? "Saving…" : "Save personal ranking")}
+      {canEdit && failed && (
+        <button className={button} disabled={pending} onClick={() => save(order)}>
+          {t("Retry saving ranking")}
         </button>
       )}
-      <p role="status" className="text-primary">
+      <p role="status" aria-live="polite" className="text-primary">
         {t(message)}
       </p>
     </section>
