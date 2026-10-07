@@ -19,7 +19,7 @@ export function gamesPage(games: Game[], filters: GamesFilters, requestedPage: n
   if (filters.genre && !genres.includes(filters.genre)) genres.unshift(filters.genre);
   const years = [...new Set(games.flatMap((game) => game.year === null ? [] : [game.year]))].sort((a, b) => b - a);
   if (filters.year && filters.year !== "unknown" && !years.includes(Number(filters.year))) years.unshift(Number(filters.year));
-  const visible = filtered.slice(0, limit).map(({ slug, title, cover, year, score, tier, status, logged, genres, tags }) => ({ slug, title, cover, year, score, tier, status, logged, genres, tags: logged ? tags ?? [] : [], keywords: "" }));
+  const visible = filtered.slice(0, limit).map(({ slug, title, cover, year, score, platformScore, platformRatingCount, tier, status, logged, genres, tags }) => ({ slug, title, cover, year, score, platformScore, platformRatingCount, tier, status, logged, genres, tags: logged ? tags ?? [] : [], keywords: "" }));
   return { games: visible, filters, total: games.length, matched: filtered.length, page, pageCount, pageSize, offset, genres, tags, platforms, years };
 }
 export type GamesPageData = ReturnType<typeof gamesPage>;

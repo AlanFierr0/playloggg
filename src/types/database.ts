@@ -461,6 +461,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      platform_game_scores: {
+        Args: never
+        Returns: { slug: string; average: number; sample_count: number }[]
+      }
       account_deletion_objects: {
         Args: { p_owner: string }
         Returns: {

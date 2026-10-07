@@ -51,6 +51,13 @@ export async function startFixtureServer() {
       if (url.pathname === "/__quota-denied" && req.method === "POST") {quotaMode="deny";return reply(200,{ok:true});}
       if (url.pathname === "/__quota-unavailable" && req.method === "POST") {quotaMode="unavailable";return reply(200,{ok:true});}
       if (url.pathname === "/__quota-allow" && req.method === "POST") {quotaMode="allow";return reply(200,{ok:true});}
+      if (url.pathname === "/__platform-scores" && req.method === "POST") {
+        ratings = ratings.filter(row => ![1,2,3,4].includes(row.game_id));
+        for (let profile_id = 1; profile_id <= 5; profile_id++) for (const game_id of [1,2,3,4]) {
+          ratings.push({profile_id, game_id, score: game_id === 1 ? (profile_id-1)*25 : game_id === 2 ? 80 : game_id === 3 ? (profile_id === 5 ? null : 100) : 0, tier:null,status:null,review:null,tags:[],platform:null,hours_played:null,completed_on:null});
+        }
+        return reply(200,{ok:true});
+      }
       if (url.pathname === "/__health") return reply(200, { fixture: true });
       if (url.pathname === "/__steam-user" && req.method === "POST") {user.app_metadata={playlogg_steam_id:"76561198000000000"};return reply(200,{ok:true});}
       if (url.pathname === "/__steam-private" && req.method === "POST") {steamMode="private";return reply(200,{ok:true});}
@@ -129,6 +136,15 @@ export async function startFixtureServer() {
         return reply(201,url.searchParams.has("select")?created:null);
       }
       const visibleProfiles = profiles.filter(profile=>(!profileDeleted||profile.id!==2)&&(admin || profile.is_public || (authenticated && profile.owner_user_id === ownerId)));
+      if(resource==="rpc/platform_game_scores") {
+        if(!admin)return reply(403,{message:"Server only"});
+        const groups=new Map();
+        for(const row of ratings) if(row.score!==null) {
+          const group=groups.get(row.game_id)??[];group.push(row.score);groups.set(row.game_id,group);
+        }
+        const rows=[...groups].flatMap(([id,scores])=>scores.length>=5 ? [{slug:games.find(game=>game.id===id).slug,average:scores.reduce((sum,value)=>sum+value,0)/scores.length,sample_count:scores.length}] : []).sort((a,b)=>a.slug.localeCompare(b.slug));
+        return reply(200,rows.slice(Number(url.searchParams.get("offset")??0),Number(url.searchParams.get("offset")??0)+Number(url.searchParams.get("limit")??1000)));
+      }
       if(resource==="rpc/community_trending_games")return reply(200,[]);
       if(resource==="rpc/community_game_scores"){
         let body="";for await(const part of req)body+=part;const input=body ? JSON.parse(body) : {};

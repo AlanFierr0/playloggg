@@ -6,7 +6,7 @@ const choices = {
   status: ["all", ...Object.keys(playbackLabels), "unset"],
   tier: ["all", "S", "A", "B", "C", "D", "F", "unset"],
   rating: ["all", "rated", "unrated"],
-  sort: ["title", "newest", "oldest", "score-desc", "score-asc"],
+  sort: ["title", "newest", "oldest", "score-desc", "score-asc", "platform-desc", "platform-asc"],
 } as const;
 export function parseGamesQuery(params: Pick<URLSearchParams, "get">): { filters: GamesFilters; page: number; pageSize: GamesPageSize } {
   const filters = { ...defaultGamesFilters };

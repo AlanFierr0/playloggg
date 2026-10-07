@@ -9,6 +9,8 @@ export interface Game {
   cover: string;
   year: number | null;
   score: number | null;
+  platformScore?: number | null;
+  platformRatingCount?: number;
   review?: string | null;
   status?: PlaybackStatus | null;
   logged?: boolean;

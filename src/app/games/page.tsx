@@ -1,3 +1,4 @@
+import { getPlatformScores } from "@/lib/platform-scores";
 import { getPortfolio } from "@/lib/portfolio";
 import { gamesPage } from "@/lib/games-page";
 import { parseGamesQuery } from "@/lib/games-query";
@@ -15,6 +16,10 @@ export default async function GamesPage({ searchParams }: { searchParams: Promis
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(await searchParams)) if (value !== undefined) params.set(key, Array.isArray(value) ? value[0] : value);
   const { filters, page } = parseGamesQuery(params);
-  const portfolio = await getPortfolio();
-  return <GamesScreen data={gamesPage(portfolio.games, filters, page, 25)} profile={portfolio.profile} access={portfolio.access} />;
+  const [portfolio, scores] = await Promise.all([getPortfolio(), getPlatformScores()]);
+  const games = portfolio.games.map(game => {
+    const score = scores.get(game.slug);
+    return { ...game, platformScore: score?.average ?? null, platformRatingCount: score?.count ?? 0 };
+  });
+  return <GamesScreen data={gamesPage(games, filters, page, 25)} profile={portfolio.profile} access={portfolio.access} />;
 }
