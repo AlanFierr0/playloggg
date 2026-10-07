@@ -1,12 +1,11 @@
 "use server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { checkOperationLimit, operationFailure } from "@/lib/operation-limits";
 import { getAccount } from "@/lib/owner";
-import { readSteamLibrary, readSteamImportContext } from "@/lib/steam-library";
-import { browseSteamLibrary, parseSteamBrowse, matchSteamGames, steamAppId, steamIdentity, steamMatchBody, type SteamGame } from "@/lib/steam-library-input";
-import { normalizeMatch, normalizeImport } from "@/lib/catalog-input";
+import { readSteamLibrary, readSteamImportContext, readSteamCatalogMatches } from "@/lib/steam-library";
+import { browseSteamLibrary, parseSteamBrowse, matchSteamGames, steamAppId, steamIdentity, type SteamGame } from "@/lib/steam-library-input";
 import { queryIgdb } from "@/lib/igdb";
-import { importIgdb } from "@/app/actions/catalog";
+import { createCatalogAdmin } from "@/lib/supabase/catalog-admin";
 import { validateRating } from "@/lib/rating-input";
 import { readProfileRatings } from "@/lib/profile-ratings";
 
@@ -60,16 +59,14 @@ export async function previewSteamLibrary(input: unknown): Promise<LibraryPrevie
     const library = browseSteamLibrary(owned.filter(game=>!logged.has(game.appId)),query);
     const entries = library.slice(query.offset,query.offset+25);
     if (!entries.length) return {ok:true,message:library.length ? "" : "No Steam games match these filters.",games:[],total:library.length,nextOffset:query.offset,syncAppIds};
-    const records = await queryIgdb(steamMatchBody(entries.map(game=>game.appId)));
-    const matches = matchSteamGames(records, entries.map(game=>game.appId));
-    const genres = new Map(records.map(normalizeImport).flatMap(game=>game ? [[game.igdb_id,game.genres ?? []] as const] : []));
-    const covers = new Map(records.map(normalizeMatch).flatMap(game=>game?.cover ? [[game.id,game.cover] as const] : []));
-    const ids = [...new Set(matches.values())];
+    const matches = await readSteamCatalogMatches(entries.map(game=>game.appId),Boolean(input && typeof input==="object" && "refresh" in input && input.refresh===true));
+    const ids = [...new Set([...matches.values()].map(match=>match.id))];
     const {data:catalog,error} = ids.length ? await account.supabase.from("games").select("id,igdb_id,cover_url,genres").in("igdb_id",ids) : {data:[],error:null};
     if (error) throw new Error("Catalog read failed");
     return {ok:true,message:"",total:library.length,nextOffset:query.offset+entries.length,syncAppIds,games:entries.map(game=>{
-      const stored = catalog.find(row=>row.igdb_id===matches.get(game.appId));
-      return {...game,genres:stored?.genres?.length ? stored.genres : genres.get(matches.get(game.appId)!) ?? [],matched:matches.has(game.appId),logged:false,cover:stored?.cover_url && !["/icon.svg","/images/missing-cover.svg"].includes(stored.cover_url) ? stored.cover_url : covers.get(matches.get(game.appId)!) ?? null};
+      const stored = catalog.find(row=>row.igdb_id===matches.get(game.appId)?.id);
+      const cover=[stored?.cover_url,matches.get(game.appId)?.game.cover_url].find(url=>url&&!["/icon.svg","/images/missing-cover.svg"].includes(url));
+      return {...game,genres:stored?.genres?.length ? stored.genres : matches.get(game.appId)?.game.genres ?? [],matched:matches.has(game.appId),logged:false,cover:cover ?? null};
     })};
   } catch(error) { return {...empty,message:failure(error)}; }
 }
@@ -103,28 +100,78 @@ export async function syncSteamPlaytime(input: unknown): Promise<{ok:boolean;mes
   }
 }
 
-export async function importSteamGame(input: unknown): Promise<{ok:boolean;message:string;skipped?:boolean;rating?:ImportedSteamRating}> {
-  if (!steamAppId(input)) return {ok:false,message:"Choose a valid Steam game."};
+export type SteamImportResult = {appId:number;ok:boolean;message:string;skipped?:boolean;rating?:ImportedSteamRating};
+export async function importSteamGames(input: unknown): Promise<{ok:boolean;message:string;results:SteamImportResult[]}> {
+  if (!Array.isArray(input) || !input.length || input.length>25 || input.some(id=>!steamAppId(id)) || new Set(input).size!==input.length)
+    return {ok:false,message:"Choose a valid Steam game.",results:[]};
+  const ids=input as number[];
+  const results=new Map<number,SteamImportResult>();
+  const fail=(appId:number,message:string)=>results.set(appId,{appId,ok:false,message});
+  let catalogChanged=false,profileChanged=false;
   try {
-    const account = await getAccount();
-    const steamId = account?.user.app_metadata.playlogg_steam_id;
-    if (!account?.profile || !steamIdentity(steamId)) return {ok:false,message:"Sign in with Steam to import your library."};
-    // Re-authorize each game; reuse a server library for at most 30 seconds, never browser playtime/IDs.
+    const account=await getAccount();
+    const steamId=account?.user.app_metadata.playlogg_steam_id;
+    if(!account?.profile || !steamIdentity(steamId))return {ok:false,message:"Sign in with Steam to import your library.",results:[]};
+    // Authorize each bounded action; trust only server-owned library and provider metadata.
     await checkOperationLimit(account.user.id,"steam");
-    const game = (await readSteamImportContext(account.user.id,steamId)).find(game=>game.appId===input);
-    if (!game) return {ok:false,message:"This game is not in your Steam library."};
-    const id = matchSteamGames(await queryIgdb(steamMatchBody([input])),[input]).get(input);
-    if (!id) return {ok:false,message:"No exact catalog match. This game was not imported."};
-    const imported = await importIgdb(id);
-    if (!imported.ok || !imported.game) return {ok:false,message:"This game could not be imported. Please retry."};
-    const {data:catalog,error} = await account.supabase.from("games").select("id").eq("igdb_id",id).single();
-    if (error) throw new Error("Catalog read failed");
-    // DO NOTHING also preserves a concurrent manual log edit or repeated import.
-    const {data:saved,error:saveError} = await account.supabase.from("ratings").upsert({profile_id:account.profile.id,game_id:catalog.id,platform:"pc",hours_played:game.hours,score:null,tier:null,status:null,review:null,tags:[],completed_on:null},{onConflict:"profile_id,game_id",ignoreDuplicates:true}).select("game_id,updated_at");
-    if (saveError) return {ok:false,message:"This entry could not be saved. Please retry."};
-    revalidatePath("/profile","layout");
-    return {ok:true,skipped:!saved.length,rating:saved.length ? {slug:imported.game.slug,updatedAt:saved[0].updated_at} : undefined,message:saved.length ? "Steam game imported." : "Existing entry kept unchanged."};
-  } catch(error) {return {ok:false,message:failure(error)};}
+    const library=new Map((await readSteamImportContext(account.user.id,steamId)).map(game=>[game.appId,game]));
+    const owned=ids.filter(id=>library.has(id));
+    for(const id of ids)if(!library.has(id))fail(id,"This game is not in your Steam library.");
+    const matches=owned.length ? await readSteamCatalogMatches(owned) : new Map();
+    for(const id of owned)if(!matches.has(id))fail(id,"No exact catalog match. This game was not imported.");
+    const igdbIds=[...new Set([...matches.values()].map(match=>match.id))];
+    const {data:existing,error:readError}=igdbIds.length ? await account.supabase.from("games").select("id,igdb_id,slug").in("igdb_id",igdbIds) : {data:[],error:null};
+    if(readError)throw new Error("Catalog read failed");
+    const catalog=new Map(existing.map(game=>[game.igdb_id,game]));
+    const missing=[...new Map([...matches.values()].filter(match=>!catalog.has(match.id)).map(match=>[match.id,match.game])).values()];
+    const allowed:typeof missing=[];
+    for(const game of missing){
+      try {await checkOperationLimit(account.user.id,"import");allowed.push(game);}
+      catch(error){for(const [appId,match] of matches)if(match.id===game.igdb_id)fail(appId,failure(error));}
+    }
+    if(allowed.length){
+      const admin=createCatalogAdmin();
+      // Unique IGDB IDs + DO NOTHING preserve reviewed metadata and concurrent imports.
+      const {data:created,error}=await admin.from("games").upsert(allowed,{onConflict:"igdb_id",ignoreDuplicates:true}).select("id,igdb_id,slug");
+      catalogChanged=true;
+      if(!error){
+        for(const game of created)catalog.set(game.igdb_id,game);
+        const raced=allowed.filter(game=>!catalog.has(game.igdb_id));
+        if(raced.length){
+          const {data,error}=await account.supabase.from("games").select("id,igdb_id,slug").in("igdb_id",raced.map(game=>game.igdb_id!));
+          if(!error)for(const game of data)catalog.set(game.igdb_id,game);
+        }
+      }
+      for(const [appId,match] of matches)if(!results.has(appId)&&!catalog.has(match.id))fail(appId,"This game could not be imported. Please retry.");
+    }
+    const aliases=new Map<number,number[]>();
+    const entries=new Map<number,{appId:number;slug:string;hours:number}>();
+    for(const appId of owned){
+      if(results.has(appId))continue;
+      const match=matches.get(appId);
+      const game=match ? catalog.get(match.id) : null;
+      if(!game)continue;
+      if(entries.has(game.id))aliases.set(game.id,[...(aliases.get(game.id)??[]),appId]);
+      else entries.set(game.id,{appId,slug:game.slug,hours:library.get(appId)!.hours});
+    }
+    if(entries.size){
+      // One atomic batch insert; conflicts never overwrite a manual entry or retry.
+      const {data:saved,error}=await account.supabase.from("ratings").upsert([...entries].map(([game_id,game])=>({profile_id:account.profile!.id,game_id,platform:"pc" as const,hours_played:game.hours,score:null,tier:null,status:null,review:null,tags:[],completed_on:null})),{onConflict:"profile_id,game_id",ignoreDuplicates:true}).select("game_id,updated_at");
+      profileChanged=!error&&saved.length>0;
+      const inserted=new Map((saved??[]).map(row=>[row.game_id,row]));
+      for(const [id,game] of entries){
+        if(error){for(const appId of [game.appId,...(aliases.get(id)??[])])fail(appId,"This entry could not be saved. Please retry.");continue;}
+        for(const appId of aliases.get(id)??[])results.set(appId,{appId,ok:true,skipped:true,message:"Existing entry kept unchanged."});
+        const row=inserted.get(id);
+        results.set(game.appId,{appId:game.appId,ok:true,skipped:!row,rating:row ? {slug:game.slug,updatedAt:row.updated_at} : undefined,message:row ? "Steam game imported." : "Existing entry kept unchanged."});
+      }
+    }
+    return {ok:true,message:"",results:ids.map(appId=>results.get(appId)??{appId,ok:false,message:"This game could not be imported. Please retry."})};
+  } catch(error){return {ok:false,message:failure(error),results:[]};}
+  finally {
+    if(catalogChanged){updateTag("game-catalog");revalidatePath("/","layout");}
+    else if(profileChanged)revalidatePath("/profile","layout");
+  }
 }
 
 // Patch only the three fields offered during import. Concurrent edits take precedence.

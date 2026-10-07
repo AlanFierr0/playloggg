@@ -20,6 +20,7 @@ let games = structuredClone(initialGames);
 let ratings;
 let failSave;
 let steamMode="public";
+let requestCounts={};
 let quotaMode="allow";
 let accountDeleted=false;let failAuthDelete=false;let failStorageDelete=false;
 let profileDeleted=false;
@@ -44,6 +45,8 @@ export async function startFixtureServer() {
     const url = new URL(req.url, fixtureOrigin);
     function reply(status, data) { res.writeHead(status, { "Content-Type": "application/json" }); res.end(data === undefined ? undefined : JSON.stringify(data)); }
     try {
+      if(url.pathname==="/__reset-request-counts"){requestCounts={};return reply(200,{ok:true});}
+      if(!url.pathname.startsWith("/__") || ["/__provider-games","/__steam-library"].includes(url.pathname)){const key=`${req.method} ${url.pathname}`;requestCounts[key]=(requestCounts[key]??0)+1;}
       if (url.pathname === "/__quota-denied" && req.method === "POST") {quotaMode="deny";return reply(200,{ok:true});}
       if (url.pathname === "/__quota-unavailable" && req.method === "POST") {quotaMode="unavailable";return reply(200,{ok:true});}
       if (url.pathname === "/__quota-allow" && req.method === "POST") {quotaMode="allow";return reply(200,{ok:true});}
@@ -63,7 +66,7 @@ export async function startFixtureServer() {
       if (url.pathname === "/__provider-games") {
         let body=""; for await (const part of req) body+=part;
         const candidate={id:9001,name:"Unified Fixture Adventure",slug:"unified-fixture-adventure",first_release_date:1577836800,platforms:[{name:"PC"}],genres:[{name:"Adventure"}]};
-        if(body.includes("external_games.uid"))return reply(200,[{id:1,name:"Hades",genres:[{name:"RPG"}],external_games:[{uid:"101",external_game_source:1}]},{id:2,external_games:[{uid:"102",external_game_source:1}]},{id:9004,name:"Steam Fixture Adventure",genres:[{name:"Adventure"}],external_games:[{uid:"103",external_game_source:1}]}]);
+        if(body.includes("external_games.uid"))return reply(200,[{...candidate,id:1,name:"Hades",slug:"hades",genres:[{name:"RPG"}],external_games:[{uid:"101",external_game_source:1}]},{id:2,external_games:[{uid:"102",external_game_source:1}]},{...candidate,id:9004,name:"Steam Fixture Adventure",slug:"steam-fixture-adventure",genres:[{name:"Adventure"}],external_games:[{uid:"103",external_game_source:1}]}]);
         if(body.includes("where id = 9004"))return reply(200,[{...candidate,id:9004,name:"Steam Fixture Adventure",slug:"steam-fixture-adventure"}]);
         const mobileCandidate={...candidate,id:9003,name:"Unified Mobile Adventure",slug:"unified-mobile-adventure"};
         if(body.includes("where id = 9001"))return reply(200,[candidate]);
@@ -77,7 +80,7 @@ export async function startFixtureServer() {
       }
       if (url.pathname === "/__reset" && req.method === "POST") { reset(); return reply(200, { ok: true }); }
       if (url.pathname === "/__fail-save" && req.method === "POST") { failSave = true; return reply(200, { ok: true }); }
-      if (url.pathname === "/__state") return reply(200, { accountDeleted, pictures:[...pictures.keys()], ratings, favorites, games, profiles:profiles.filter(row=>!profileDeleted||row.id!==2) });
+      if (url.pathname === "/__state") return reply(200, { requestCounts, accountDeleted, pictures:[...pictures.keys()], ratings, favorites, games, profiles:profiles.filter(row=>!profileDeleted||row.id!==2) });
       if(url.pathname==="/__fail-auth-delete"&&req.method==="POST"){failAuthDelete=true;return reply(200,{ok:true});}
       if(url.pathname==="/__fail-storage-delete"&&req.method==="POST"){failStorageDelete=true;return reply(200,{ok:true});}
       if(url.pathname==="/__profileless"&&req.method==="POST"){profileDeleted=true;return reply(200,{ok:true});}
@@ -120,8 +123,9 @@ export async function startFixtureServer() {
       if(resource==="games"&&req.method==="POST"){
         if(!admin)return reply(403,{message:"Trusted imports only"});
         let body="";for await(const part of req)body+=part;const input=JSON.parse(body);
-        if(!games.some(game=>game.igdb_id===input.igdb_id))games.push({...input,id:Math.max(...games.map(game=>game.id))+1});
-        return reply(201,null);
+        const created=[];
+        for(const game of Array.isArray(input)?input:[input])if(!games.some(row=>row.igdb_id===game.igdb_id)){const row={...game,id:Math.max(...games.map(game=>game.id))+1};games.push(row);created.push(row);}
+        return reply(201,url.searchParams.has("select")?created:null);
       }
       const visibleProfiles = profiles.filter(profile=>(!profileDeleted||profile.id!==2)&&(admin || profile.is_public || (authenticated && profile.owner_user_id === ownerId)));
       if(resource==="rpc/community_trending_games")return reply(200,[]);
@@ -165,12 +169,17 @@ export async function startFixtureServer() {
       }
       if (resource === "ratings" && req.method === "POST") {
         let body = ""; for await (const part of req) body += part;
-        const rating = JSON.parse(body);
-        if (!authenticated || rating.profile_id !== 2 || !games.some((game) => game.id === rating.game_id)) return reply(403, { message: "Fixture ownership denied" });
+        const input = JSON.parse(body);
+        const rows=Array.isArray(input)?input:[input];
+        if (!authenticated || rows.some(rating=>rating.profile_id !== 2 || !games.some(game=>game.id===rating.game_id))) return reply(403, { message: "Fixture ownership denied" });
         if (failSave) { failSave = false; return reply(503, { message: "Controlled save failure" }); }
-        if(req.headers.prefer?.includes("resolution=ignore-duplicates")&&ratings.some(row=>row.profile_id===rating.profile_id&&row.game_id===rating.game_id))return reply(201,[]);
-        ratings = ratings.filter((row) => row.profile_id !== rating.profile_id || row.game_id !== rating.game_id);
-        const saved={...rating,updated_at:new Date().toISOString()}; ratings.push(saved); return reply(201,url.searchParams.has("select")?[{game_id:saved.game_id,updated_at:saved.updated_at}]:undefined);
+        const saved=[];
+        for(const rating of rows){
+          if(req.headers.prefer?.includes("resolution=ignore-duplicates")&&ratings.some(row=>row.profile_id===rating.profile_id&&row.game_id===rating.game_id))continue;
+          ratings=ratings.filter(row=>row.profile_id!==rating.profile_id||row.game_id!==rating.game_id);
+          const row={...rating,updated_at:new Date().toISOString()};ratings.push(row);saved.push(row);
+        }
+        return reply(201,url.searchParams.has("select")?saved.map(row=>({game_id:row.game_id,updated_at:row.updated_at})):undefined);
       }
       if (resource === "profiles" && req.method === "PATCH") {
         if (!admin || url.searchParams.get("id") !== "eq.2" || url.searchParams.get("owner_user_id") !== `eq.${ownerId}`) return reply(403, {message:"Fixture ownership denied"});

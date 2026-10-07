@@ -25,14 +25,11 @@ test("Steam import shows a visible loader while saving and removes it after a fa
   await expect(popup.getByText("Hades",{exact:true})).toBeVisible();
   await expect(page.getByRole("button",{name:"Import selected games (2)",exact:true,includeHidden:true})).toBeDisabled();
   expect(await loader.evaluate(element=>{const box=element.getBoundingClientRect();return box.top>=0&&box.bottom<=innerHeight;})).toBe(true);
-  await expect(loader).toHaveAttribute("aria-valuenow","1");
-  await expect(popup.getByText("Steam Fixture Adventure",{exact:true})).toBeVisible();
-  await expect(popup.getByText("Games remaining").locator("..")).toHaveText("Games remaining1");
   await page.keyboard.press("Escape");
   await expect(popup).toBeVisible();
   await expect(page.getByText(/Some games could not be imported/)).toBeVisible();
   await expect(popup).not.toBeVisible();
-  await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
+  await page.getByRole("button",{name:"Import selected games (2)",exact:true}).click();
   await page.getByRole("button",{name:"Just import",exact:true}).click();
   await expect(loader).toBeVisible();
   await expect(page.getByText("Import complete. Your games are saved in your profile.")).toBeVisible();
@@ -99,10 +96,15 @@ test("Steam import previews, selects, saves trusted playtime and preserves exist
   await page.evaluate(()=>window.scrollTo(0,0));
   await page.screenshot({path:`e2e-artifacts/steam-library-${testInfo.project.name}.png`});
   expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
+  await fetch("http://127.0.0.1:3101/__reset-request-counts",{method:"POST"});
   await page.getByRole("button",{name:"Import selected games (2)",exact:true}).click();
   await page.getByRole("button",{name:"Just import",exact:true}).click();
   await expect(page.getByText("Import complete. Your games are saved in your profile.")).toBeVisible();
   state=await (await fetch("http://127.0.0.1:3101/__state")).json();
+  console.log("Steam import request counts",JSON.stringify(state.requestCounts));
+  expect(state.requestCounts["POST /__provider-games"]??0).toBe(0);
+  expect(state.requestCounts["POST /rest/v1/ratings"]).toBe(1);
+  expect(state.requestCounts["GET /rest/v1/games"]).toBe(1);
   const own=state.ratings.filter((row:{profile_id:number})=>row.profile_id===2);
   expect(own).toHaveLength(3);
   expect(own.find((row:{game_id:number})=>row.game_id===1)).toMatchObject({hours_played:1.5,platform:"pc",score:null,tier:null,status:null,review:null,tags:[]});
@@ -388,4 +390,37 @@ test("Steam rating never overwrites a concurrent manual log edit",async({page,co
   await dialog.getByRole("button",{name:"Done",exact:true}).click();
   const state=await (await fetch("http://127.0.0.1:3101/__state")).json();
   expect(state.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===1)).toMatchObject({score:91,platform:"pc",hours_played:1.5});
+});
+
+
+test("Steam batch actions reject forged selections and quotas while keeping valid imports idempotent",async({page,context})=>{
+  await context.addCookies([authCookie]);
+  await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
+  await page.goto("/profile/import/steam");
+  await page.getByRole("checkbox",{name:"Select game Hades",exact:true}).check();
+  await fetch("http://127.0.0.1:3101/__quota-denied",{method:"POST"});
+  await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
+  const actionRequest=page.waitForRequest(request=>request.method()==="POST"&&Boolean(request.headers()["next-action"]));
+  await page.getByRole("button",{name:"Just import",exact:true}).click();
+  const request=await actionRequest;
+  await expect(page.getByText(/Too many requests\. Try again in 60 seconds\./)).toBeVisible();
+  const invoke=async(ids:unknown)=>{
+    const response=await page.request.post("/profile/import/steam",{headers:{"next-action":request.headers()["next-action"],"content-type":"text/plain;charset=UTF-8"},data:JSON.stringify([ids])});
+    expect(response.ok()).toBe(true);
+    return response.text();
+  };
+  await fetch("http://127.0.0.1:3101/__quota-allow",{method:"POST"});
+  for(const ids of [[101,101],Array.from({length:26},(_,index)=>index+1),["101"],[]])expect(await invoke(ids)).toContain("Choose a valid Steam game.");
+  expect(await invoke([999999])).toContain("This game is not in your Steam library.");
+  let state=await (await fetch("http://127.0.0.1:3101/__state")).json();
+  expect(state.ratings.filter((row:{profile_id:number})=>row.profile_id===2)).toHaveLength(1);
+  const result=await invoke([101,104,999999,103]);
+  expect(result).toContain("No exact catalog match. This game was not imported.");
+  expect(result).toContain("This game is not in your Steam library.");
+  state=await (await fetch("http://127.0.0.1:3101/__state")).json();
+  const saved=state.ratings.filter((row:{profile_id:number})=>row.profile_id===2);
+  expect(saved).toHaveLength(3);
+  expect(await invoke([101,103])).toContain("Existing entry kept unchanged.");
+  state=await (await fetch("http://127.0.0.1:3101/__state")).json();
+  expect(state.ratings.filter((row:{profile_id:number})=>row.profile_id===2)).toEqual(saved);
 });

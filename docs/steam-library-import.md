@@ -29,16 +29,16 @@
    maximum playtime, sort by title/playtime, then select individual or matching
    games. Hidden selections stay selected until cleared. No writes happen until
    you confirm an import mode or the picker.
-   Games are imported sequentially, with
+   Games are imported in batches of up to 25, with
    a centered modal over the library showing the current title, processed/total
    count, remaining count and progress bar. It keeps focus and disables interaction
    with the page behind it while saving. Its spinner
    respects reduced-motion preferences. In Just import mode, the indicator disappears on completion
    or failure, while errors remain available for retry. Successful imports stay saved if another
-   game fails; retry keeps only failed selections. Changing filters, sorting or
+   batch fails; retry keeps only failed selections. A rating write is atomic within its batch. Changing filters, sorting or
    the amount resets the loaded set and selection; loading more preserves them.
    In rating modes, chosen games are imported first and enter a one-at-a-time
-   editor as each import succeeds. Set an optional independent tier, 0–100 score
+   editor as each batch succeeds; the first rated game is imported separately so rating can begin promptly. Set an optional independent tier, 0–100 score
    (typed or slider), and playback status; **Save and next** persists these three
    fields, while **Skip this game** leaves them unset. Other selected games keep
    importing while you edit. Import errors and rating errors are separate; failed
@@ -85,13 +85,13 @@ Steam failures and provider failures allow retries without exposing credentials.
 
 Every server action verifies Supabase Auth and database profile ownership. The
 Steam ID comes only from trusted `app_metadata.playlogg_steam_id` written by the
-existing verified OpenID bridge. The browser supplies an app ID only; the server
-fetches the owned library again to validate ownership and obtain trusted playtime.
+existing verified OpenID bridge. The browser supplies bounded app ID batches only; the server
+reads the owner-bound library to validate ownership and obtain trusted playtime.
 
 Game matches use Steam app IDs from the provider's external-game records,
 restricted to the Steam source. Ambiguous/missing matches are not selectable.
-Titles are never used for automatic matching. Missing shared metadata uses the
-existing trusted catalog import action. Personal entry insertion uses the
+Titles are never used for automatic matching. Missing shared metadata is normalized from verified provider matches and inserted
+by the same server-only catalog admin used for individual catalog imports. Personal entry insertion uses the
 authenticated client and existing RLS, with ON CONFLICT DO NOTHING on
 `profile_id,game_id`; the admin client never writes personal entries.
 The import returns the saved entry slug and update timestamp only for a newly
@@ -165,3 +165,29 @@ scope for Steam purchases, using the default off-topic filtering. Review labels
 link to the Steam store reviews. Missing/failed reviews do not block ratings.
 No user score is inferred and no review text or reviewer identities are returned.
 Provider reference: https://partner.steamgames.com/doc/store/getreviews
+
+
+Import speed optimization (2026-10-06): the browser sends at most 25 Steam app
+IDs per server action. Each action validates the batch, verifies the current
+account and trusted Steam identity, checks the Steam request quota, and reads
+owner-bound Steam playtime. Browser metadata and hours are never accepted.
+The preview's exact, unambiguous provider matches and normalized public metadata
+are reused in a five-minute, 1,000-entry warm-instance cache. Provider failures
+are not cached; cold/expired/evicted matches are resolved in one bounded IGDB
+query, with the existing HTTP throttle intact. This cache contains no ownership
+or playtime data and cannot authorize an import.
+
+Catalog IDs/slugs are read together. Missing metadata is inserted together under
+the existing per-new-game import quota, with DO NOTHING and a read fallback for
+concurrent catalog imports. Ratings are inserted in one atomic batch under the
+owner's RLS, also with DO NOTHING. Existing entries retain every field and their
+timestamps. Results preserve request order and identify individual unmatched,
+unowned, skipped and imported entries. Successful earlier batches survive a
+later failure; failed rating batches can be retried safely. Catalog invalidation
+and page refresh happen once per batch, with no global catalog refresh for batches
+that only reuse stored games. Rating queues retain descending playtime order.
+
+The isolated two-game check originally made three extra IGDB requests, five
+catalog reads and two rating writes after preview. It now requires zero extra
+IGDB requests on a warm cache, one catalog read and one rating write. These are
+request-count measurements, not a production wall-clock speed guarantee.

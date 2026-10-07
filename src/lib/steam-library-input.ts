@@ -55,5 +55,5 @@ export function matchSteamGames(records: unknown[], appIds: number[]): Map<numbe
 
 export function steamMatchBody(appIds: number[]) {
   if (!appIds.length || appIds.length > 25 || appIds.some(id => !steamAppId(id))) throw new Error("Invalid library selection.");
-  return `fields id,name,genres.name,cover.image_id,external_games.uid,external_games.external_game_source; where external_games.uid = (${appIds.map(id=>JSON.stringify(String(id))).join(",")}) & external_games.external_game_source = 1; limit 500;`;
+  return `fields id,name,slug,first_release_date,cover.image_id,genres.name,platforms.name,artworks.image_id,screenshots.image_id,url,summary,game_type.type,involved_companies.company.name,involved_companies.developer,involved_companies.publisher,external_games.uid,external_games.external_game_source; where external_games.uid = (${appIds.map(id=>JSON.stringify(String(id))).join(",")}) & external_games.external_game_source = 1; limit 500;`;
 }

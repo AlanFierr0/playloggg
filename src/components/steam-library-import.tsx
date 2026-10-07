@@ -2,7 +2,7 @@
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import Link from "next/link";
 import { useMessages } from "@/components/site-preferences";
-import { importSteamGame, previewSteamLibrary, syncSteamPlaytime, type LibraryPreview } from "@/app/actions/steam-library";
+import { importSteamGames, previewSteamLibrary, syncSteamPlaytime, type LibraryPreview } from "@/app/actions/steam-library";
 import { parseSteamBrowse, type SteamBrowse } from "@/lib/steam-library-input";
 import { parseHours } from "@/lib/rating-input";
 import { SteamRatingPicker, SteamRatingEditor, emptySteamRatingDraft, readSteamRatingSession, type SteamRatingDraft, type SteamRatingGame } from "@/components/steam-import-ratings";
@@ -136,20 +136,23 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
     const failed:{appId:number;title:string;message:string}[]=[];
     let imported=0,skipped=0;
     try {
-      for (let index=0;index<queue.length;index++) {
-        const appId=queue[index];
-        setImportTitle(preview?.games.find(game=>game.appId===appId)?.title ?? "");
-        let result;
-        try {result=await importSteamGame(appId);}
-        catch {result={ok:false,message:"Library import is unavailable right now. Please retry."};}
-        if(result.ok){
-          if(result.skipped)skipped++;else imported++;
+      for (let offset=0;offset<queue.length;) {
+        // Return the first rated game promptly, then amortize work in bounded batches.
+        const batch=queue.slice(offset,offset+(offset===0&&rated.length ? 1 : 25));
+        setImportTitle(preview?.games.find(game=>game.appId===batch[0])?.title??"");
+        let response;
+        try {response=await importSteamGames(batch);}
+        catch {response={ok:false,message:"Library import is unavailable right now. Please retry.",results:[]};}
+        for(const appId of batch){
+          const result=response.results.find(result=>result.appId===appId)??{ok:false,message:response.message};
           const row=preview?.games.find(game=>game.appId===appId);
-          if(wanted.has(appId)&&result.rating&&row)setRatingGames(current=>[...current,{...row,...result.rating!}]);
+          if(result.ok){
+            if(result.skipped)skipped++;else imported++;
+            if(wanted.has(appId)&&result.rating&&row)setRatingGames(current=>[...current,{...row,...result.rating!}]);
+            setPreview(current=>current ? {...current,games:current.games.filter(game=>game.appId!==appId),total:Math.max(0,current.total-1),nextOffset:Math.max(0,current.nextOffset-1),syncAppIds:[...new Set([...current.syncAppIds,appId])]} : current);
+          }else{remaining.push(appId);failed.push({appId,title:row?.title??String(appId),message:result.message});}
         }
-        if (result.ok) setPreview(current=>current ? {...current,games:current.games.filter(game=>game.appId!==appId),total:Math.max(0,current.total-1),nextOffset:Math.max(0,current.nextOffset-1),syncAppIds:[...new Set([...current.syncAppIds,appId])]} : current);
-        else {remaining.push(appId);failed.push({appId,title:preview?.games.find(game=>game.appId===appId)?.title ?? String(appId),message:result.message});}
-        setProgress(index+1);
+        offset+=batch.length;setProgress(offset);
       }
       setSelected(remaining);setFailures(failed);setSummary({imported,skipped,failed:failed.length});
       setMessage(failed.length ? "Some games could not be imported. Your successful imports are saved; retry the remaining games." : "Import complete. Your games are saved in your profile.");
