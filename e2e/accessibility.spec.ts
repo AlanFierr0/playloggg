@@ -89,6 +89,7 @@ test("keyboard focus, search trapping and reduced motion remain usable", async (
   await expect(first).toBeFocused();
   await page.getByRole("button", { name: "Close search" }).click();
   await expect(page).toHaveURL(/\/games$/);
+  await expect(dialog).toHaveCount(0);
   await backgroundLink.focus();
   await expect(backgroundLink).toBeFocused();
   await context.addCookies([authCookie]);

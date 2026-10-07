@@ -91,7 +91,7 @@ test("search supports keyboard selection and returns to its originating route", 
     await page.goto("/search?q=Hades&from=/games");
     const dialog = page.getByRole("dialog", { name: "Search the game catalog" });
     await expect(dialog.locator('[data-search-result][href="/game/hades"]')).toHaveCount(1);
-    const box = (await dialog.boundingBox())!;
+    const box = (await dialog.locator("#palette-dialog").boundingBox())!;
     expect(box.width).toBeLessThanOrEqual(768);
     expect(box.x + box.width / 2).toBeCloseTo(page.viewportSize()!.width / 2, 0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
