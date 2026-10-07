@@ -309,14 +309,14 @@ test("Steam rates all games while import continues and retries rating saves with
   await dialog.getByRole("menuitemradio",{name:"A Amazing",exact:true}).click();
   const statuses=dialog.getByRole("group",{name:"Playback status",exact:true});
   const statusButtons=statuses.getByRole("button");
-  await expect(statusButtons).toHaveCount(4);
+  await expect(statusButtons).toHaveCount(7);
   const boxes=await statusButtons.evaluateAll(buttons=>buttons.map(button=>button.getBoundingClientRect().top));
   expect(new Set(boxes).size).toBe(1);
-  await statuses.getByRole("button",{name:"Completed",exact:true}).click();
-  await expect(statuses.getByRole("button",{name:"Completed",exact:true})).toHaveAttribute("aria-pressed","true");
-  await statuses.getByRole("button",{name:"Completed",exact:true}).click();
+  await statuses.getByRole("button",{name:"Currently playing",exact:true}).click();
+  await expect(statuses.getByRole("button",{name:"Currently playing",exact:true})).toHaveAttribute("aria-pressed","true");
+  await statuses.getByRole("button",{name:"Currently playing",exact:true}).click();
   await expect(statuses.getByText("Not set",{exact:true})).toBeVisible();
-  await statuses.getByRole("button",{name:"Completed",exact:true}).click();
+  await statuses.getByRole("button",{name:"Currently playing",exact:true}).click();
   await dialog.getByRole("button",{name:"Close rating session",exact:true}).click();
   await expect(dialog).not.toBeVisible();
   await page.getByRole("button",{name:"Resume rating games (2)",exact:true}).click();
@@ -326,7 +326,7 @@ test("Steam rates all games while import continues and retries rating saves with
   await page.getByRole("button",{name:"Resume rating games (2)",exact:true}).click();
   await expect(dialog.getByRole("heading",{name:"Hades",exact:true})).toBeVisible();
   await expect(dialog.getByRole("textbox",{name:"Score",exact:true})).toHaveValue("73");
-  await expect(dialog.getByRole("button",{name:"Completed",exact:true})).toHaveAttribute("aria-pressed","true");
+  await expect(dialog.getByRole("button",{name:"Currently playing",exact:true})).toHaveAttribute("aria-pressed","true");
   await expect(dialog.getByRole("button",{name:"Choose tier, currently A",exact:true})).toBeVisible();
   await page.screenshot({path:`e2e-artifacts/steam-rating-${info.project.name}.png`});
   expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
@@ -346,7 +346,7 @@ test("Steam rates all games while import continues and retries rating saves with
   await dialog.getByRole("button",{name:"Done",exact:true}).click();
   await expect.poll(()=>page.evaluate(()=>localStorage.getItem("playlogg-steam-ratings:2"))).toBeNull();
   const after=await (await fetch("http://127.0.0.1:3101/__state")).json();
-  expect(after.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===1)).toMatchObject({score:73,tier:"A",status:"completed",platform:"pc",hours_played:1.5,review:null,tags:[],completed_on:null});
+  expect(after.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===1)).toMatchObject({score:73,tier:"A",status:"active",platform:"pc",hours_played:1.5,review:null,tags:[],completed_on:null});
   expect(after.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===2)).toEqual(before.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===2));
   const adventure=after.games.find((game:{igdb_id:number})=>game.igdb_id===9004);
   expect(after.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===adventure.id)).toMatchObject({score:null,tier:null,status:null,hours_played:0});

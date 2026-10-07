@@ -87,6 +87,9 @@ export function TasteDetails({ games }: { games: Game[] }) {
                   : `${stats.completionRate}%`,
             },
             { label: "Shelved games", value: stats.shelved },
+            { label: "Currently playing", value: stats.active },
+            { label: "Paused", value: stats.paused },
+            { label: "Stopped playing", value: stats.stopped },
           ].map(({ label, value }) => (
             <div key={label}>
               <dt className="text-on-surface-variant">{t(label)}</dt>

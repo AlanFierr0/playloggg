@@ -1,4 +1,4 @@
-import type { Game } from "../types/domain.ts";
+import type { Game, PlaybackStatus } from "../types/domain.ts";
 import { matchesCatalogPlatform } from "./catalog-platforms.ts";
 import { loggedGames } from "./portfolio-view.ts";
 
@@ -9,7 +9,7 @@ export interface GamesFilters {
   platform: string;
   year: string;
   library: "all" | "logged" | "unlogged";
-  status: "all" | "completed" | "playing" | "backlog" | "shelved" | "unset";
+  status: "all" | PlaybackStatus | "unset";
   tier: "all" | "S" | "A" | "B" | "C" | "D" | "F" | "unset";
   rating: "all" | "rated" | "unrated";
   minScore: string;

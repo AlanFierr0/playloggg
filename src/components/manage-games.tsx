@@ -10,7 +10,7 @@ import type { PlaybackStatus, PlayedPlatform } from "@/types/domain";
 import { playedPlatformLabels as platforms } from "@/lib/played-platforms";
 
 const control="min-h-11 w-full rounded-xl bg-surface-container p-3";
-const statuses={completed:"Completed",playing:"In Progress",backlog:"Backlog",shelved:"Shelved"};
+import { playbackLabels as statuses } from "@/lib/playback-status";
 export function ManageGames() {
   const { games, access }=usePortfolio(),t=useMessages(),router=useRouter();
   const [query,setQuery]=useState(""),[platformFilter,setPlatformFilter]=useState(""),[minimum,setMinimum]=useState(""),[maximum,setMaximum]=useState("");

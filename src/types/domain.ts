@@ -1,6 +1,6 @@
 export type Tier = "S" | "A" | "B" | "C" | "D" | "F";
 export type PlayedPlatform = "pc" | "pc_battlenet" | "pc_gog" | "pc_epic" | "pc_ea" | "pc_ubisoft" | "pc_xbox" | "pc_other" | "ps5" | "xbox_series_x" | "steam_deck";
-export type PlaybackStatus = "completed" | "playing" | "backlog" | "shelved";
+export type PlaybackStatus = "completed" | "playing" | "backlog" | "shelved" | "active" | "paused" | "stopped";
 
 // Screen shape: shared game metadata plus the selected profile's sample rating.
 export interface Game {

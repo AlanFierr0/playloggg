@@ -1,3 +1,4 @@
+import { isPlaybackStatus } from "./playback-status.ts";
 import { normalizeTags } from "./collection-input.ts";
 import { isPlayedPlatform } from "./played-platforms.ts";
 import type { PlaybackStatus, PlayedPlatform, Tier } from "../types/domain.ts";
@@ -28,7 +29,7 @@ export function validateRating(input: unknown): RatingInput | null {
   if (typeof slug !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 200) return null;
   if (score !== null && (typeof score !== "number" || !Number.isInteger(score) || score < 0 || score > 100)) return null;
   if (tier !== null && !["S", "A", "B", "C", "D", "F"].includes(tier as string)) return null;
-  if (status !== null && !["completed", "playing", "backlog", "shelved"].includes(status as string)) return null;
+  if (status !== null && !isPlaybackStatus(status)) return null;
   if (platform !== null && !isPlayedPlatform(platform)) return null;
   if (hoursPlayed !== null && (typeof hoursPlayed !== "number" || !Number.isFinite(hoursPlayed) || hoursPlayed < 0)) return null;
   if (completedOn !== null && !isCalendarDate(completedOn)) return null;

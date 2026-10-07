@@ -56,3 +56,26 @@ test("private and unknown nested profiles return 404; published entries are read
   await expect(page.getByRole("heading", { name: "Public fixture list", exact: true })).toHaveCount(0);
   await expect(page.getByText("Fixture-only saved review", { exact: true })).toHaveCount(0);
 });
+
+
+test("live-service statuses save, reload and filter without changing scores or tiers",async({page,context,request},info)=>{
+ await context.addCookies([authCookie]);
+ for(const [status,label] of [["active","Currently playing"],["paused","Paused"],["stopped","Stopped playing"]]){
+   await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");
+   await page.getByRole("group",{name:"Playback status",exact:true}).getByRole("button",{name:label,exact:true}).click();
+   await page.locator("#commit-rating").click();
+   await expect(page).toHaveURL(/\/profile$/);
+   const state=await (await request.get("http://127.0.0.1:3101/__state")).json();
+   expect(state.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===2)).toMatchObject({status,score:80,tier:"B"});
+   await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");
+   await page.reload();
+   await expect(page.getByRole("group",{name:"Playback status",exact:true}).getByRole("button",{name:label,exact:true})).toHaveAttribute("aria-pressed","true");
+   await page.goto(`/games?status=${status}`);
+   await expect(page.locator('[data-catalog-game="elden-ring-shadow-of-the-erdtree"]')).toBeVisible();
+   await expect(page.getByRole("button",{name:"Remove filter: Playback status",exact:true})).toContainText(label);
+ }
+ await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");
+ await page.getByRole("group",{name:"Playback status",exact:true}).scrollIntoViewIfNeeded();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.screenshot({path:`e2e-artifacts/live-service-status-${info.project.name}.png`});
+});

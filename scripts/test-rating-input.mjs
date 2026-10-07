@@ -20,7 +20,7 @@ test("client-supplied identity fields cannot select a different profile or game 
   assert.deepEqual(Object.keys(parsed).sort(), ["completedOn", "hoursPlayed", "platform", "review", "score", "slug", "status", "tags", "tier"]);
 });
 test("unrated backlog/playing entries preserve null instead of inserting score zero", () => {
-  for (const status of ["backlog", "playing", "completed", "shelved", null]) {
+  for (const status of ["backlog", "playing", "completed", "shelved", "active", "paused", "stopped", null]) {
     const parsed = validateRating({ ...draft, score: null, status });
     assert.equal(parsed.score, null);
     assert.equal(parsed.status, status);
@@ -44,4 +44,21 @@ test("parse playtime explicitly so blanks and invalid text never silently become
   for (const text of ["", "   "]) assert.equal(parseHours(text), null);
   for (const [text,value] of [["0",0],["78.45",78.45],[" .5 ",0.5],["1.",1],["1e3",1000],["1e-7",0.0000001]]) assert.equal(parseHours(text), value);
   for (const text of ["-1", "NaN", "Infinity", "45 hrs", "1,5", "1e309", "9".repeat(400)]) assert.equal(parseHours(text), undefined);
+});
+
+
+test("live-service statuses are shared by full saves, bulk saves and catalog URLs", async()=>{
+  const {validateBulkRating}=await import("../src/lib/bulk-rating-input.ts");
+  const {parseGamesQuery}=await import("../src/lib/games-query.ts");
+  const {filterGames}=await import("../src/lib/games-view.ts");
+  for(const status of ["active","paused","stopped"]){
+    assert.equal(validateBulkRating({slugs:["hades"],status}).status,status);
+    const {filters}=parseGamesQuery(new URLSearchParams({status}));
+    assert.equal(filters.status,status);
+    assert.equal(filterGames([{...draft,logged:true,title:"Hades",keywords:"",genres:[],status}],filters).length,1);
+  }
+  for(const status of ["toString","__proto__",{},"unknown"]){
+    assert.equal(validateRating({...draft,status}),null);
+    assert.equal(validateBulkRating({slugs:["hades"],status}),null);
+  }
 });

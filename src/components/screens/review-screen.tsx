@@ -9,6 +9,7 @@ import { usePortfolio } from "@/components/portfolio-provider";
 import { saveRating } from "@/app/actions/ratings";
 import { normalizeTags } from "@/lib/collection-input";
 import { parseHours } from "@/lib/rating-input";
+import { playbackLabels } from "@/lib/playback-status";
 import { playedPlatformLabels } from "@/lib/played-platforms";
 import type { Game, PlaybackStatus, PlayedPlatform, Tier } from "@/types/domain";
 import { TierBadge, ScoreStars } from "@/components/rating-controls";
@@ -199,22 +200,7 @@ return (<><fieldset disabled={pending} className="contents">
 <div className="flex flex-wrap items-center justify-between gap-2"><span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{t("Playback status")}</span><button id="clear-status" type="button" className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary" onClick={() => setStatus(null)}>{status === null ? t("Not set") : t("Clear status")}</button></div>
 
 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" id="status-group" role="group" aria-label={t("Playback status")}>
-<button type="button" onClick={() => setStatus("completed")} aria-pressed={status === "completed"} className={status === "completed" ? "status-btn px-4 py-2.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" : "status-btn px-4 py-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-all flex items-center justify-center gap-2"}>
-<span aria-hidden="true" className="material-symbols-outlined text-[16px]" style={{"fontVariationSettings": "'FILL' 1"}}>{"check_circle"}</span>
-{t(" Completed\n              ")}</button>
-
-<button type="button" onClick={() => setStatus("playing")} aria-pressed={status === "playing"} className={status === "playing" ? "status-btn px-4 py-2.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" : "status-btn px-4 py-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-all flex items-center justify-center gap-2"}>
-<span aria-hidden="true" className="material-symbols-outlined text-[16px]">{"hourglass_top"}</span>
-{t(" In Progress\n              ")}</button>
-
-<button type="button" onClick={() => setStatus("backlog")} aria-pressed={status === "backlog"} className={status === "backlog" ? "status-btn px-4 py-2.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" : "status-btn px-4 py-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-all flex items-center justify-center gap-2"}>
-<span aria-hidden="true" className="material-symbols-outlined text-[16px]">{"bookmark"}</span>
-{t(" Backlog\n              ")}</button>
-
-<button type="button" onClick={() => setStatus("shelved")} aria-pressed={status === "shelved"} className={status === "shelved" ? "status-btn px-4 py-2.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" : "status-btn px-4 py-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-all flex items-center justify-center gap-2"}>
-<span aria-hidden="true" className="material-symbols-outlined text-[16px]">{"cancel"}</span>
-{t(" Shelved\n              ")}</button>
-
+{Object.entries(playbackLabels).map(([value,label])=><button key={value} type="button" onClick={()=>setStatus(value as PlaybackStatus)} aria-pressed={status===value} className={`status-btn min-h-11 min-w-0 px-3 py-2.5 rounded font-label-md text-label-md font-semibold transition-colors ${status===value ? "bg-primary-container text-on-primary-container" : "bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high"}`}>{t(label)}</button>)}
 </div>
 
 </div>

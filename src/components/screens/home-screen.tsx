@@ -16,7 +16,7 @@ export async function HomeScreen() {
   const entries = personal ? portfolio.games.filter(game => game.logged).sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "") || a.slug.localeCompare(b.slug)) : [];
   const loggedSlugs = new Set(entries.map(game => game.slug));
   const previewCount = personal ? 0 : Math.min(4, Math.floor(sampled.length / 2));
-  const playing = entries.filter(game => game.status === "playing").slice(0, 4);
+  const playing = entries.filter(game => (game.status === "playing" || game.status === "active")).slice(0, 4);
   const playingSlugs = new Set(playing.map(game => game.slug));
   const recent = entries.filter(game => !playingSlugs.has(game.slug)).slice(0, 4);
   // Only card fields cross into the client; reviews and other entry data stay on the server.

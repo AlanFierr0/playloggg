@@ -79,6 +79,9 @@ export function tasteStats(games: Game[]) {
       ? round((completed / entries.length) * 100)
       : null,
     shelved: entries.filter((game) => game.status === "shelved").length,
+    active: entries.filter(game => game.status === "active").length,
+    paused: entries.filter(game => game.status === "paused").length,
+    stopped: entries.filter(game => game.status === "stopped").length,
     highScores: rated.filter((game) => game.score >= 90).length,
     eras: [...eras].sort(([a], [b]) => a.localeCompare(b)),
     platforms: [...platforms].sort(
