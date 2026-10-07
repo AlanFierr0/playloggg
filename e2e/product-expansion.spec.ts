@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 test("independent ranking saves a pairwise choice without changing scores", async ({
   page,
   context,
-}) => {
+}, testInfo) => {
   await context.addCookies([authCookie]);
   await page.goto("/log?game=hades");
   await page.locator("#score-slider").fill("90");
@@ -25,6 +25,49 @@ test("independent ranking saves a pairwise choice without changing scores", asyn
   await expect(page.locator("ol").first().locator("li").first()).toContainText(
     "Hades",
   );
+  const rows = page.locator("[data-ranking-game]");
+  const hades = page.locator('[data-ranking-game="hades"]');
+  const elden = page.locator('[data-ranking-game="elden-ring-shadow-of-the-erdtree"]');
+  const position = page.getByRole("textbox", { name: "Position for Hades", exact: true });
+  await position.fill("2");
+  await position.press("Enter");
+  await expect(rows.first()).toContainText("Elden Ring");
+  await expect(position).toHaveValue("2");
+  await hades.dragTo(elden);
+  await expect(rows.first()).toContainText("Hades");
+  const handle = hades.getByRole("button", { name: "Drag to reorder: Hades", exact: true });
+  const handleBox = (await handle.boundingBox())!;
+  const targetBox = (await elden.boundingBox())!;
+  if (testInfo.project.name === "mobile") {
+    const session = await context.newCDPSession(page);
+    await session.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: handleBox.x + handleBox.width / 2, y: handleBox.y + handleBox.height / 2, id: 1 }] });
+    await session.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: targetBox.x + targetBox.width / 2, y: targetBox.y + targetBox.height / 2, id: 1 }] });
+    await session.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await session.detach();
+  } else {
+    await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(targetBox.x + targetBox.width / 2, targetBox.y + targetBox.height / 2, { steps: 6 });
+    await page.mouse.up();
+  }
+  await expect(rows.first()).toContainText("Elden Ring");
+  await expect(position).not.toBeFocused();
+  await page.getByRole("button", { name: "Save personal ranking", exact: true }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Personal ranking saved" })).toBeVisible();
+  await page.reload();
+  await expect(rows.first()).toContainText("Elden Ring");
+  await expect(position).toHaveValue("2");
+  await page.getByRole("button", { name: "Move Hades up", exact: true }).click();
+  await expect(rows.first()).toContainText("Hades");
+  await position.fill("");
+  await position.press("Enter");
+  await expect(position).toHaveValue("1");
+  await position.fill("999");
+  await position.press("Enter");
+  await expect(position).toHaveValue("2");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: `e2e-artifacts/ranking-edit-${testInfo.project.name}.png`, fullPage: true });
   const state = await (await fetch("http://127.0.0.1:3101/__state")).json();
   expect(
     state.ratings.find(
@@ -32,6 +75,10 @@ test("independent ranking saves a pairwise choice without changing scores", asyn
         row.profile_id === 2 && row.game_id === 1,
     ).score,
   ).toBe(90);
+  expect(state.ratings.find((row: { profile_id: number; game_id: number }) => row.profile_id === 2 && row.game_id === 2)).toMatchObject({ score: 80, tier: "B" });
+  await page.goto("/u/fixture_public/ranking");
+  await expect(page.getByRole("textbox", { name: /^Position for/ })).toHaveCount(0);
+  await expect(page.locator('[data-ranking-game][draggable="true"]')).toHaveCount(0);
 });
 test("discovery is separate from publishing and unpublishing clears consent", async ({
   page,
