@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { GameLogAction } from "@/components/game-actions";
 import { getCommunity, getTasteDiscovery } from "@/lib/community";
 import { getCatalog } from "@/lib/portfolio";
 import { getMessages } from "@/lib/locale/server";
-export async function CommunityDiscovery() {
+export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<string> }) {
   const [community, discovery, catalog, t] = await Promise.all([
     getCommunity(),
     getTasteDiscovery(),
@@ -95,6 +96,20 @@ export async function CommunityDiscovery() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {section.rows.map((row) => {
               const game = games.get(row.gameId);
+              if (game && section.title === "Trending games") return (
+                <article key={game.id} className="group/game flex min-w-0 flex-col">
+                  <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low">
+                    <Link href={`/game/${game.slug}`} aria-label={game.title} className="block h-full">
+                      <img src={game.cover_url} alt="" loading="lazy" className="w-full h-full object-cover transition-opacity group-hover/game:opacity-90" />
+                    </Link>
+                    <GameLogAction slug={game.slug} logged={loggedSlugs.has(game.slug)} />
+                  </div>
+                  <div className="mt-3 flex flex-col gap-1">
+                    <h3 translate="no" className="font-headline-md text-headline-md group-hover/game:text-primary line-clamp-2"><Link href={`/game/${game.slug}`}>{game.title}</Link></h3>
+                    <p className="text-body-sm text-primary break-words">{row.value}</p>
+                  </div>
+                </article>
+              );
               return (
                 game && (
                   <Link

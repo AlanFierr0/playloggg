@@ -19,6 +19,7 @@ const initialGames = titles.map(([slug, title, genre], index) => ({ id: index + 
 let games = structuredClone(initialGames);
 let ratings;
 let failSave;
+let showTrending=false;
 let steamMode="public";
 let requestCounts={};
 let quotaMode="allow";
@@ -29,7 +30,7 @@ let favorites;
 let rankings=[];let curated=[];let listItems=[];let follows=[];let blocks=[];let likes=[];
 let pictures = new Map();
 // Shared catalog imports persist between tests, like the application cache; personal data resets.
-function reset() { accountDeleted=false;failAuthDelete=false;failStorageDelete=false; quotaMode="allow";user.app_metadata={};steamMode="public";rankings=[];follows=[];blocks=[];likes=[];curated=[{id:10,profile_id:3,name:"Public fixture list",revision:1,description:"Fixture description",is_public:true,is_ranked:true}];listItems=[{list_id:10,game_id:1,position:0}];pictures.clear(); Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false,is_discoverable:false,bio:null,location:null,platform_preference:null,avatar_url:null}); favorites=[{profile_id:3,game_id:1,featured_slot:1,created_at:"2026-09-29T12:00:00Z"}]; ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
+function reset() { showTrending=false; accountDeleted=false;failAuthDelete=false;failStorageDelete=false; quotaMode="allow";user.app_metadata={};steamMode="public";rankings=[];follows=[];blocks=[];likes=[];curated=[{id:10,profile_id:3,name:"Public fixture list",revision:1,description:"Fixture description",is_public:true,is_ranked:true}];listItems=[{list_id:10,game_id:1,position:0}];pictures.clear(); Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false,is_discoverable:false,bio:null,location:null,platform_preference:null,avatar_url:null}); favorites=[{profile_id:3,game_id:1,featured_slot:1,created_at:"2026-09-29T12:00:00Z"}]; ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
  for (const game_id of [3,4,5,6]) ratings.push({profile_id:3,game_id,score:50,tier:null,status:"playing",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  for (const game_id of [1,3,4,5,6]) ratings.push({profile_id:4,game_id,score:game_id===1 ? 10 : 40,tier:"A",status:"completed",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  ratings.push({profile_id:3,game_id:7,score:null,tier:"S",status:"backlog",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
@@ -63,6 +64,7 @@ export async function startFixtureServer() {
         ratings.push(...games.slice(0, 20).map((game, index) => ({profile_id:3,game_id:game.id,score:100-index,tier:null,status:null,review:null,tags:[],hours_played:null,platform:null,completed_on:null})));
         return reply(200,{ok:true});
       }
+      if (url.pathname === "/__trending" && req.method === "POST") {showTrending=true;return reply(200,{ok:true});}
       if (url.pathname === "/__health") return reply(200, { fixture: true });
       if (url.pathname === "/__steam-user" && req.method === "POST") {user.app_metadata={playlogg_steam_id:"76561198000000000"};return reply(200,{ok:true});}
       if (url.pathname === "/__steam-private" && req.method === "POST") {steamMode="private";return reply(200,{ok:true});}
@@ -150,7 +152,7 @@ export async function startFixtureServer() {
         const rows=[...groups].flatMap(([id,scores])=>scores.length>0 ? [{slug:games.find(game=>game.id===id).slug,average:scores.reduce((sum,value)=>sum+value,0)/scores.length,sample_count:scores.length}] : []).sort((a,b)=>a.slug.localeCompare(b.slug));
         return reply(200,rows.slice(Number(url.searchParams.get("offset")??0),Number(url.searchParams.get("offset")??0)+Number(url.searchParams.get("limit")??1000)));
       }
-      if(resource==="rpc/community_trending_games")return reply(200,[]);
+      if(resource==="rpc/community_trending_games")return reply(200,showTrending?[{game_id:1,sample_count:2},{game_id:2,sample_count:1}]:[]);
       if(resource==="rpc/community_game_scores"){
         let body="";for await(const part of req)body+=part;const input=body ? JSON.parse(body) : {};
         const groups=new Map();
