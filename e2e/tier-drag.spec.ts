@@ -110,3 +110,27 @@ test("touch dragging scrolls to an offscreen tier and saves it",async({page,cont
   await expect(page.locator('#tier-a [data-tier-game="elden-ring-shadow-of-the-erdtree"]')).toBeVisible();
   await expect(page.getByRole("status")).toHaveText("Tier saved.");
 });
+
+
+test("tier selection filters the colored board instead of jumping to an anchor",async({page,context},info)=>{
+  await context.addCookies([authCookie]);
+  for(const route of ["/tiers","/u/fixture_public/tiers"]){
+    await page.goto(route);
+    await page.getByRole("button",{name:"Tier B",exact:true}).click();
+    await expect(page.locator("[data-tier-drop]")).toHaveCount(1);
+    await expect(page.locator("#tier-b")).toBeVisible();
+    await expect(page.locator("#tier-b")).toHaveCSS("background-color","rgb(255, 223, 127)");
+    await expect(page.getByRole("button",{name:"Tier B",exact:true})).toHaveAttribute("aria-pressed","true");
+    await expect(page).toHaveURL(new RegExp(route+"$"));
+    await page.getByRole("button",{name:"Tier S",exact:true}).click();
+    await expect(page.locator("[data-tier-drop]")).toHaveCount(1);
+    await expect(page.locator("#tier-s")).toHaveCSS("background-color","rgb(255, 127, 127)");
+    await expect(page.locator("#tier-b")).toHaveCount(0);
+    await page.screenshot({path:`e2e-artifacts/tier-filter-${route==="/tiers"?"owner":"public"}-${info.project.name}.png`});
+    await page.getByRole("button",{name:"Unassigned",exact:true}).click();
+    await expect(page.locator("[data-tier-drop]")).toHaveCount(1);
+    await expect(page.locator("#tier-unassigned")).toBeVisible();
+    await page.getByRole("button",{name:"All tiers",exact:true}).click();
+    await expect(page.locator("[data-tier-drop]")).toHaveCount(7);
+  }
+});
