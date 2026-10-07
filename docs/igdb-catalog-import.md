@@ -120,3 +120,7 @@ viewport scenarios passed at 320, 390, 768, 1440 and 1920px. A 1,038-game fixtur
 verified a game beyond the first 1,000 rows stays reachable after import/cache
 invalidation. The production client bundles contain no admin-client or secret
 configuration markers.
+
+## Catalog expansion (2026-10-07)
+
+The user approved expanding the existing catalog to 3,000 total games, in batches of up to 500. The production bootstrap now selects released main games with covers, excludes alternate editions using version_parent, and orders by total rating count with at least ten ratings. The previous 75-point minimum is removed so recognizable games with mixed reviews can qualify. Rating count is a visibility proxy, not a guarantee of popularity. Existing metadata and all personal entries are preserved. Missing niche titles still use the authenticated search/import flow. Local and preview builds continue to skip catalog writes.
