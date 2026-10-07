@@ -1,0 +1,33 @@
+import { test, expect } from "./test";
+
+test("public ranking appends games on scroll and resets filters", async ({ page }) => {
+  expect((await fetch("http://127.0.0.1:3101/__ranking-scroll", {method:"POST"})).ok).toBe(true);
+  await page.goto("/u/fixture_public/ranking");
+  const cards = page.locator("article[data-rank]");
+  await expect(cards).toHaveCount(8);
+  await expect(page.getByRole("button", {name:"Next Page", exact:true})).toHaveCount(0);
+  const first = await cards.first().getAttribute("data-rank");
+  await page.locator("[data-ranking-scroll]").scrollIntoViewIfNeeded();
+  await expect(cards).toHaveCount(16);
+  expect(await cards.first().getAttribute("data-rank")).toBe(first);
+  await page.locator("[data-ranking-scroll]").scrollIntoViewIfNeeded();
+  await expect(cards).toHaveCount(20);
+  await expect(page.getByRole("button", {name:"Load more", exact:true})).toHaveCount(0);
+  await page.locator('[data-filter="backlog"]').click();
+  await expect(cards).toHaveCount(0);
+  await expect(page.getByText("This profile's backlog is empty.")).toBeVisible();
+  await page.locator('[data-filter="masterpieces"]').click();
+  await expect(cards).toHaveCount(8);
+  await page.locator("[data-ranking-scroll]").scrollIntoViewIfNeeded();
+  await expect(cards).toHaveCount(11);
+  expect(await cards.evaluateAll(nodes=>nodes.map(node=>Number(node.getAttribute("data-score"))))).toEqual(Array.from({length:11},(_,i)=>100-i));
+  await page.addInitScript(() => { Object.defineProperty(window,"IntersectionObserver",{value:undefined,configurable:true}); });
+  await page.reload();
+  await expect(cards).toHaveCount(8);
+  await page.getByRole("button", {name:"Load more", exact:true}).click();
+  await expect(cards).toHaveCount(16);
+  await page.getByRole("button", {name:"Load more", exact:true}).click();
+  await expect(cards).toHaveCount(20);
+  await expect(page.getByRole("button", {name:"Load more", exact:true})).toHaveCount(0);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});

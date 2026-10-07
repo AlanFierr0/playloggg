@@ -3,7 +3,7 @@ import { useMessages } from "@/components/site-preferences";
 
 import {PreferenceRanking} from "@/components/preference-ranking";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { averageScore, filterRankings, loggedGames, ratedGames, type RankingFilter } from "@/lib/portfolio-view";
 import { ProfileNavigation } from "@/components/profile-navigation";
@@ -18,12 +18,25 @@ const [filter, setFilter] = useState<RankingFilter>("all");
 const [tag, setTag] = useState("");
 const tags = [...new Map(loggedGames(games).flatMap((game) => game.tags ?? []).map((value) => [value.toLowerCase(), value])).values()].sort();
 const [page, setPage] = useState(1);
+const sentinel = useRef<HTMLDivElement>(null);
 const rated = ratedGames(games);
 const filtered = filterRankings(games, filter, tag);
 const pageCount = Math.max(1, Math.ceil(filtered.length / 8));
 const currentPage = Math.min(page, pageCount);
-const offset = (currentPage - 1) * 8;
-const visible = filtered.slice(offset, offset + 8);
+const offset = publicBase ? 0 : (currentPage - 1) * 8;
+const visible = filtered.slice(offset, currentPage * 8);
+useEffect(() => {
+  const target = sentinel.current;
+  if (!publicBase || !target || currentPage >= pageCount || typeof IntersectionObserver === "undefined") return;
+  const observer = new IntersectionObserver(entries => {
+    if (entries.some(entry => entry.isIntersecting)) {
+      observer.disconnect();
+      setPage(currentPage + 1);
+    }
+  }, { rootMargin: "300px 0px" });
+  observer.observe(target);
+  return () => observer.disconnect();
+}, [publicBase, currentPage, pageCount, filter, tag]);
 const ranksBySlug = new Map(rated.map((game, index) => [game.slug, index + 1]));
 return (<>
 <div className="w-full  bg-surface"><div className="flex flex-col w-full">
@@ -112,14 +125,17 @@ return (<>
 {visible.map((game) => <RankingCard key={game.slug} game={game} rank={ranksBySlug.get(game.slug)} publicBase={publicBase} />)}
 </div>
 
-<footer className="pt-16 pb-6 flex items-center justify-between text-on-surface-variant">
+{publicBase ? <footer className="pt-10 pb-6 space-y-4 text-center text-on-surface-variant">
+<p role="status" className="font-label-md text-label-md">{t("Displaying entries ")}{visible.length ? 1 : 0}–{visible.length} {t("of ")}{filtered.length}</p>
+{currentPage < pageCount && <div ref={sentinel} data-ranking-scroll><button type="button" onClick={() => setPage(currentPage + 1)} className="min-h-11 rounded-xl bg-surface-container-high px-5 py-3 text-on-surface hover:bg-surface-container-highest">{t("Load more")}</button></div>}
+</footer> : <footer className="pt-16 pb-6 flex items-center justify-between text-on-surface-variant">
 <div className="flex items-center gap-3">
 <button type="button" aria-label={t("Previous Page")} className="p-2 rounded hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-30 disabled:pointer-events-none" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}><span className="material-symbols-outlined text-[20px]" aria-hidden="true">west</span></button>
 <span className="font-label-md text-label-md text-on-surface font-medium tracking-widest">{currentPage} <span className="text-on-surface-variant font-normal">{t("of")}</span> {pageCount}</span>
 <button type="button" aria-label={t("Next Page")} className="p-2 rounded hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-30 disabled:pointer-events-none" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}><span className="material-symbols-outlined text-[20px]" aria-hidden="true">east</span></button>
 </div>
 <div className="hidden sm:flex items-center gap-4 font-label-sm text-label-sm"><span className="text-on-surface-variant">{t("Displaying entries ")}{filtered.length ? offset + 1 : 0}–{offset + visible.length} {t("of ")}{filtered.length}</span><span className="w-1 h-1 rounded-full bg-surface-container-highest"></span><span className="text-on-surface-variant">{profile.isSample ? t("Sample ratings") : t("Saved ratings")}</span></div>
-</footer>
+</footer>}
 
 </div>
 
@@ -133,7 +149,7 @@ function RankingCard({ game, rank, publicBase }: { game: Game; rank?: number; pu
 
 return <article className="relative group flex flex-col cursor-pointer transition-transform duration-300" data-rank={rank} data-score={game.score}>
 <div className="relative w-full aspect-[3/4] rounded bg-surface-container-low overflow-hidden shadow-xl">
-<img className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" src={game.cover} alt={game.title} />
+<img loading="lazy" className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" src={game.cover} alt={game.title} />
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-surface-container-lowest/10 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
 <div className="absolute top-3 left-3 flex items-center"><span className="font-label-md text-label-md font-bold px-2 py-1 rounded bg-surface-container-lowest/80 text-on-surface backdrop-blur-md shadow-md">{rank ? "#" + String(rank).padStart(2, "0") : game.status === "backlog" ? t("Backlog") : t("Unrated")}</span></div>
 <div className="absolute top-3 right-3 flex items-center"><span className="font-label-md text-label-md font-bold px-2.5 py-1 rounded bg-surface-container-lowest/90 text-primary backdrop-blur-md shadow-md">{game.score ?? "—"}</span></div>

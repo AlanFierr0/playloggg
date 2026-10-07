@@ -58,6 +58,11 @@ export async function startFixtureServer() {
         }
         return reply(200,{ok:true});
       }
+      if (url.pathname === "/__ranking-scroll" && req.method === "POST") {
+        ratings = ratings.filter(row => row.profile_id !== 3);
+        ratings.push(...games.slice(0, 20).map((game, index) => ({profile_id:3,game_id:game.id,score:100-index,tier:null,status:null,review:null,tags:[],hours_played:null,platform:null,completed_on:null})));
+        return reply(200,{ok:true});
+      }
       if (url.pathname === "/__health") return reply(200, { fixture: true });
       if (url.pathname === "/__steam-user" && req.method === "POST") {user.app_metadata={playlogg_steam_id:"76561198000000000"};return reply(200,{ok:true});}
       if (url.pathname === "/__steam-private" && req.method === "POST") {steamMode="private";return reply(200,{ok:true});}
