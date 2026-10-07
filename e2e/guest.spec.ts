@@ -1,4 +1,5 @@
 import { test, expect } from "./test";
+import AxeBuilder from "@axe-core/playwright";
 // @ts-expect-error Local fixture session only.
 import { authCookie } from "./fixture-server.mjs";
 
@@ -70,7 +71,7 @@ test("catalog combines filters, loads more, clears and handles empty results", a
   await expect(page.locator("[data-infinite-scroll]")).toHaveCount(1);
 });
 
-test("search supports keyboard selection and returns to its originating route", async ({ page }) => {
+test("search supports keyboard selection and returns to its originating route", async ({ page, context }, testInfo) => {
   await page.goto("/games");
   await expect(page.getByText("⌘K", {exact:true})).toHaveCount(0);
   await page.keyboard.press("Control+k");
@@ -87,6 +88,23 @@ test("search supports keyboard selection and returns to its originating route", 
   await page.goto("/search?q=&from=/games");
   await page.getByRole("dialog").press("Escape");
   await expect(page).toHaveURL(/\/games$/);
+  for (const theme of ["dark", "light"]) {
+    await context.addCookies([{ name: "playlogg_theme", value: theme, url: "http://127.0.0.1:3100" }]);
+    await page.goto("/search?q=Hades&from=/games");
+    const dialog = page.getByRole("dialog", { name: "Search the game catalog" });
+    await expect(dialog.locator('[data-search-result][href="/game/hades"]')).toHaveCount(1);
+    const box = (await dialog.boundingBox())!;
+    expect(box.width).toBeLessThanOrEqual(768);
+    expect(box.x + box.width / 2).toBeCloseTo(page.viewportSize()!.width / 2, 0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await dialog.getByRole("button", { name: "Actions", exact: true }).click();
+    await expect(dialog.getByRole("link", { name: "Compare games", exact: true })).toBeVisible();
+    await dialog.getByRole("button", { name: "All Results", exact: true }).click();
+    expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
+    await page.screenshot({ path: `e2e-artifacts/search-redesign-${theme}-${testInfo.project.name}.png` });
+    await dialog.getByRole("button", { name: "Close search", exact: true }).click();
+    await expect(page).toHaveURL(/\/games$/);
+  }
 });
 
 test("theme and Argentine Spanish persist across navigation and reload", async ({ page, context }) => {
