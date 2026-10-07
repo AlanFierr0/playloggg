@@ -34,15 +34,14 @@ test("empty portfolios have no fabricated average or results", () => {
   assert.ok(groupTiers([]).every(({ games }) => games.length === 0));
 });
 
-test("search uses the supplied catalog and profile, including unrated titles", () => {
+test("local search uses the catalog without substituting the selected profile for public results", () => {
   const portfolio = {
     profile: { id: "1", displayName: "Alex Vance", handle: "alexvance" },
     games: [{ ...game("catalog-only", null), title: "New Adventure", keywords: "space", genres: ["RPG"] }],
   };
   assert.equal(getSearchMatches(" ADVENTURE rpg ", portfolio).titles.length, 1);
   assert.equal(getSearchMatches("space", portfolio).titles[0].score, null);
-  assert.equal(getSearchMatches("alexvance", portfolio).profiles.length, 1);
-  assert.equal(getSearchMatches("kojima", portfolio).profiles.length, 0);
+  assert.equal("profiles" in getSearchMatches("alexvance", portfolio), false);
   assert.equal(getSearchMatches("Cyberpunk", portfolio).titles.length, 0);
   assert.equal(getSearchMatches("", portfolio).listMatches, false);
 });
