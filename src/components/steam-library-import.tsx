@@ -156,7 +156,7 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
       }
       setSelected(remaining);setFailures(failed);setSummary({imported,skipped,failed:failed.length});
       setMessage(failed.length ? "Some games could not be imported. Your successful imports are saved; retry the remaining games." : "Import complete. Your games are saved in your profile.");
-    } finally {active.current=false;setBusy(false);setImporting(false);setImportTitle("");}
+    } finally {active.current=false;setBusy(false);setImporting(false);setDetailsOpen(false);setImportTitle("");}
   }
   async function syncPlaytime() {
     if(active.current || !preview?.syncAppIds.length)return;
@@ -193,7 +193,7 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
     <div role="progressbar" aria-label={t("Importing games")} aria-valuemin={0} aria-valuemax={Math.max(1,importTotal)} aria-valuenow={progress} className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-container-highest"><div className="h-full rounded-full bg-primary" style={{width:`${importTotal ? progress/importTotal*100 : 0}%`}}/></div>
   </aside> : null;
   return <div className="space-y-6">
-    {ratingSession&&ratingHidden&&<div className="flex flex-wrap items-center gap-3 rounded-xl bg-surface-container-low p-4"><button className={button} onClick={()=>{setRatingHidden(false);setDetailsOpen(true);}}>{t("Resume rating games")} ({Math.max(0,ratingGames.length-ratingIndex)})</button><p className="text-body-sm text-on-surface-variant">{t("Your unfinished ratings are kept in this browser.")}</p></div>}
+    {ratingSession&&ratingHidden&&<div className="flex flex-wrap items-center gap-3 rounded-xl bg-surface-container-low p-4"><button className={button} onClick={()=>{setRatingHidden(false);setDetailsOpen(importing);}}>{t("Resume rating games")} ({Math.max(0,ratingGames.length-ratingIndex)})</button><p className="text-body-sm text-on-surface-variant">{t("Your unfinished ratings are kept in this browser.")}</p></div>}
     <p className="text-body-sm text-on-surface-variant">{t("Steam Game details must be Public, including playtime. Your Playlogg profile visibility does not change.")}</p>
     <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex flex-wrap gap-3"><button className={button} disabled={busy} onClick={()=>load(filters,amount,false,true)}>{t(loading ? "Loading…" : "Refresh library")}</button><button className={button} disabled={busy||!preview?.syncAppIds.length} onClick={syncPlaytime}>{t(syncing ? "Syncing playtime…" : "Sync Steam playtime")}</button><Link href="/profile" className="inline-flex min-h-11 items-center rounded-xl bg-surface-container text-primary px-5 py-3">{t("View profile")}</Link></div><button className={`${button} ml-auto`} disabled={busy||ratingSession||!selected.length} onClick={()=>setChoice("ask")}>{t("Import selected games")} ({selected.length})</button></div>
     <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end rounded-xl bg-surface-container-low p-5">

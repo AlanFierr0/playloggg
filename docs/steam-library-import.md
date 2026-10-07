@@ -138,9 +138,9 @@ The review implementation reuses an owner-bound server library for at most 30 se
 
 
 The rating screen focuses on one game. Import progress and reviewed counts are
-automatically shown as a compact bottom-right toast when rating imports starts or resumes. There is no Import details button. The native manual
+automatically shown as a compact bottom-right toast when rating imports starts or resumes while importing. There is no Import details button. The native manual
 popover stays above the rating modal without a second backdrop or focus trap;
-users can continue scoring or dismiss it. Resuming the rating session shows it again. Close rating session hides the editor
+users can continue scoring or dismiss it. The toast closes automatically when importing finishes; resuming a completed import does not reopen it. Close rating session hides the editor
 without stopping imports; Resume rating games reopens it. The queue, position and
 current score/tier/status draft are kept in localStorage scoped to the verified
 profile ID. Refreshing or leaving the page restores a closed session in the same
