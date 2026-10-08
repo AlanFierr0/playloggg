@@ -15,7 +15,7 @@ function load(relative, dependencies) {
   return context.exports;
 }
 
-test("new profiles are public and owned by the verified account", async () => {
+test("new profiles are public, discoverable and owned by the verified account", async () => {
   let account = null, inserted;
   const { createProfile } = load("../src/app/actions/profile.ts", {
     "next/navigation": { redirect(path) { assert.equal(path, "/profile"); } },
@@ -24,12 +24,12 @@ test("new profiles are public and owned by the verified account", async () => {
     "@/lib/steam-openid": { profileNames }, "@/lib/profile-settings": { profileSettings },
     "@/lib/supabase/auth-admin": { createAuthAdmin: () => ({ from(table) { assert.equal(table, "profiles"); return { async insert(value) { inserted = value; return { error: null }; } }; } }) },
   });
-  const input = form({ handle: "new_player", displayName: "New Player", owner_user_id: "forged", is_public: "false", is_discoverable: "true" });
+  const input = form({ handle: "new_player", displayName: "New Player", owner_user_id: "forged", is_public: "false", is_discoverable: "false" });
   assert.match((await createProfile({}, input)).message, /Sign in/);
   assert.equal(inserted, undefined);
   account = { user: { id: "verified-user" }, profile: null };
   await createProfile({}, input);
-  assert.deepEqual(JSON.parse(JSON.stringify(inserted)), { handle: "new_player", display_name: "New Player", owner_user_id: "verified-user", is_public: true });
+  assert.deepEqual(JSON.parse(JSON.stringify(inserted)), { handle: "new_player", display_name: "New Player", owner_user_id: "verified-user", is_public: true, is_discoverable: true });
 });
 
 test("settings require explicit operations and whitelist names or visibility independently", () => {

@@ -7,7 +7,7 @@ begin
  or has_function_privilege('authenticated','public.clear_account_operation_limits(uuid)','EXECUTE')
  then raise exception 'Deletion RPC exposed'; end if;
  insert into auth.users(id,aud,role,email) values(owner_a,'authenticated','authenticated',object_prefix||'@deletion-test.invalid'),(owner_b,'authenticated','authenticated',object_prefix||'b@deletion-test.invalid');
- insert into public.profiles(owner_user_id,handle,display_name,is_public) values(owner_a,'del_'||substr(replace(object_prefix,'-',''),1,15),'Rollback verification',false) returning id into profile_a;
+ insert into public.profiles(owner_user_id,handle,display_name,is_public,is_discoverable) values(owner_a,'del_'||substr(replace(object_prefix,'-',''),1,15),'Rollback verification',false,false) returning id into profile_a;
  insert into storage.objects(bucket_id,name,owner_id) values('profile-pictures',object_prefix||'/a.webp',owner_a::text),('profile-pictures',object_prefix||'/b.webp',owner_b::text),('profile-pictures',profile_a::text||'/legacy.webp',null);
  select count(*) into result_count from public.account_deletion_objects(owner_a);
  if result_count<>2 then raise exception 'File ownership mismatch'; end if;

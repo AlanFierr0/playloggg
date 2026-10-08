@@ -7,10 +7,10 @@ alter table vote_context add column author_id bigint;
 grant select on vote_context to anon,authenticated;
 insert into auth.users(id,aud,role,email) select voter_user,'authenticated','authenticated','vote-fixture@example.invalid' from vote_context;
 insert into auth.users(id,aud,role,email) select author_user,'authenticated','authenticated','review-fixture@example.invalid' from vote_context;
-insert into public.profiles(handle,display_name,owner_user_id,is_public)
-select 'vote_'||left(replace(voter_user::text,'-',''),16),'Private voter',voter_user,false from vote_context;
-insert into public.profiles(handle,display_name,owner_user_id,is_public)
-select 'review_'||left(replace(author_user::text,'-',''),16),'Public author',author_user,true from vote_context;
+insert into public.profiles(handle,display_name,owner_user_id,is_public,is_discoverable)
+select 'vote_'||left(replace(voter_user::text,'-',''),16),'Private voter',voter_user,false,false from vote_context;
+insert into public.profiles(handle,display_name,owner_user_id,is_public,is_discoverable)
+select 'review_'||left(replace(author_user::text,'-',''),16),'Public author',author_user,true,true from vote_context;
 update vote_context set voter_id=(select id from public.profiles where owner_user_id=voter_user), author_id=(select id from public.profiles where owner_user_id=author_user);
 insert into public.ratings(profile_id,game_id,score,review) select author_id,game_id,80,'Review fixture' from vote_context;
 set local role authenticated;

@@ -123,6 +123,10 @@ test("discovery is separate from publishing and unpublishing clears consent", as
   await expect(
     page.getByRole("button", { name: "Leave discovery", exact: true }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Leave discovery", exact: true }).click();
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Join discovery", exact: true })).toBeEnabled();
+  await page.getByRole("button", { name: "Join discovery", exact: true }).click();
   await page.goto("/people");
   await expect(page.getByRole("link", { name: /Fixture Owner/ })).toBeVisible();
   await page.goto("/settings");

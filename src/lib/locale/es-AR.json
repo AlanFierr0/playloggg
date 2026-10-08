@@ -964,7 +964,7 @@
   "Full editor": "Editor completo",
   "Choose a game to start rating.": "Elegí un juego para empezar a puntuar.",
   "Profile discovery": "Descubrimiento de perfiles",
-  "Publishing shares your link. Discovery is a separate opt-in that shows your public profile in Explore profiles and lets others follow your activity.": "Publicar permite compartir tu enlace. El descubrimiento es una opción aparte que muestra tu perfil público en Explorar perfiles y permite que otras personas sigan tu actividad.",
+  "Profiles are discoverable by default. You can turn discovery off here to hide yours from Explore profiles and prevent new followers.": "Los perfiles se pueden descubrir de forma predeterminada. Podés desactivar el descubrimiento acá para ocultar el tuyo de Explorar perfiles y evitar nuevos seguidores.",
   "Discoverable": "Visible en descubrimiento",
   "Link-only": "Solo por enlace",
   "Leave discovery": "Salir de descubrimiento",
