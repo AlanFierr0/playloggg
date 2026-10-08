@@ -11,7 +11,7 @@ test("published comparisons show real affinity, independent tiers and reloadable
  await expect(page.locator("[data-affinity]")).toHaveText("90%");
  await expect(page.getByRole("table")).toContainText("Score: 0");
  await expect(page.getByRole("table")).toContainText("Score: Unrated");
- await expect(page.getByRole("table")).toContainText("Tier: Unassigned");
+ await expect(page.getByRole("table")).toContainText("Tier: D");
  const explanation=page.getByText("Affinity is 100 minus the average absolute score difference across games both profiles scored, rounded to one decimal. Tiers are independent and do not affect affinity.",{exact:true});
  await expect(explanation).toBeHidden();
  await page.getByText("How Taste Match works",{exact:true}).click();
