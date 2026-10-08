@@ -492,6 +492,21 @@ export type Database = {
           },
         ]
       }
+      steam_accounts: {
+        Row: {
+          steam_id: string
+          user_id: string
+        }
+        Insert: {
+          steam_id: string
+          user_id: string
+        }
+        Update: {
+          steam_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

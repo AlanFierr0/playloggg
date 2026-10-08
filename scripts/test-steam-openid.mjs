@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { verifySteam, steamLoginUrl, steamSite, profileNames, steamEndpoint } from "../src/lib/steam-openid.ts";
+import { verifySteam, steamLoginUrl, steamSite, profileNames, steamEndpoint, steamLinkCookie, steamLinkActor } from "../src/lib/steam-openid.ts";
 const site = "https://playloggg.vercel.app", state = "a".repeat(64), id = "76561198000000001";
 function assertion() {
   return new URLSearchParams({ state, "openid.ns": "http://specs.openid.net/auth/2.0", "openid.mode": "id_res", "openid.op_endpoint": steamEndpoint, "openid.return_to": `${site}/auth/steam/callback?state=${state}`, "openid.claimed_id": `https://steamcommunity.com/openid/id/${id}`, "openid.identity": `https://steamcommunity.com/openid/id/${id}`, "openid.response_nonce": `${new Date().toISOString().replace(/\.\d{3}Z/, "Z")}random`, "openid.assoc_handle": "association", "openid.signed": "op_endpoint,claimed_id,identity,return_to,response_nonce,assoc_handle", "openid.sig": "signature" });
@@ -33,4 +33,15 @@ test("login URLs use configured origin, not browser input; onboarding whitelists
   assert.deepEqual(profileNames({ handle: " Player_1 ", displayName: " Player One ", owner_user_id: "forged", is_public: true }), { handle: "player_1", display_name: "Player One" });
   for (const handle of ["a", "../owner", "player name", "a".repeat(31)]) assert.equal(profileNames({ handle, displayName: "Name" }), null);
   assert.equal(profileNames({ handle: "player", displayName: "\n" }), null);
+});
+
+test("Steam linking callbacks are signed for one initiating account and one state", () => {
+  const actor="11111111-1111-4111-8111-111111111111", secret="fixture-secret";
+  const cookie=steamLinkCookie(state,actor,secret);
+  assert.equal(steamLinkActor(cookie,state,secret),actor);
+  assert.equal(steamLinkActor(cookie,"b".repeat(64),secret),null);
+  assert.equal(steamLinkActor(cookie,state,"wrong-secret"),null);
+  assert.equal(steamLinkActor(cookie.replace(actor,"22222222-2222-4222-8222-222222222222"),state,secret),null);
+  assert.equal(steamLinkActor(cookie+".extra",state,secret),null);
+  assert.equal(steamLinkActor(cookie,undefined,secret),null);
 });

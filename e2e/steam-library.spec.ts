@@ -453,3 +453,38 @@ test("Steam batch quotas import the allowed prefix and retry only remaining game
   state=await (await fetch("http://127.0.0.1:3101/__state")).json();
   expect(state.ratings.filter((row:{profile_id:number})=>row.profile_id===2)).toHaveLength(4);
 });
+
+
+test("email accounts can start Steam linking without losing their profile, and rejected callbacks preserve the account",async({page,context,request})=>{
+ await context.addCookies([authCookie]);
+ await page.goto("/profile/import/steam");
+ const button=page.getByRole("button",{name:"Connect Steam",exact:true});
+ await expect(button).toBeVisible();
+ await expect(page.getByText(/Email accounts cannot connect Steam yet/)).toHaveCount(0);
+ const current=(await request.get("http://127.0.0.1:3101/__state")).json();
+ await page.route("https://steamcommunity.com/openid/login**",route=>route.fulfill({contentType:"text/html",body:"Steam verification"}));
+ // The configured origin is checked before sending the user to Steam.
+ await context.addCookies([{...authCookie,url:"http://localhost:3100"}]);
+ await page.goto("http://localhost:3100/profile/import/steam");
+ await page.getByRole("button",{name:"Connect Steam",exact:true}).click();
+ await expect(page).toHaveURL(/^https:\/\/steamcommunity\.com\/openid\/login/);
+ const cookies=await context.cookies("http://localhost:3100/auth/steam/callback");
+ const state=cookies.find(cookie=>cookie.name==="playlogg-steam-state");
+ const link=cookies.find(cookie=>cookie.name==="playlogg-steam-link");
+ if(!state || !link)throw new Error("Steam linking cookies missing");
+ expect(state.value).toMatch(/^[a-f0-9]{64}$/);
+ expect(link.value).toMatch(/^11111111-1111-4111-8111-111111111111\.[a-f0-9]{64}$/);
+ expect(link.httpOnly).toBe(true);
+ await page.goto(`http://localhost:3100/auth/steam/callback?state=${state.value}&openid.mode=cancel`);
+ await expect(page).toHaveURL(/\/profile\/import\/steam\?error=steam$/);
+ await expect(page.getByRole("main").getByRole("alert")).toContainText("Steam could not be connected");
+ await expect(page.getByRole("button",{name:"Connect Steam",exact:true})).toBeVisible();
+ const after=await (await request.get("http://127.0.0.1:3101/__state")).json();
+ expect(after.ratings).toEqual((await current).ratings);
+ expect(after.profiles).toEqual((await current).profiles);
+ expect((await context.cookies("http://localhost:3100/auth/steam/callback")).some(cookie=>cookie.name==="playlogg-steam-link")).toBe(false);
+ const guest=await request.post("http://localhost:3100/auth/steam",{headers:{origin:"http://localhost:3100"},form:{mode:"link"},maxRedirects:0});
+ expect(guest.headers().location).toMatch(/\/login$/);
+ const invalid=await request.post("http://localhost:3100/auth/steam",{headers:{origin:"https://evil.test"},form:{mode:"link"},maxRedirects:0});
+ expect(invalid.status()).toBe(403);
+});
