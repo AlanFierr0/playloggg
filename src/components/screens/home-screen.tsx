@@ -1,4 +1,5 @@
 import { getMessages } from "@/lib/locale/server";
+import { DiscoveryRefresh } from "@/components/discovery-refresh";
 import { getDiscover } from "@/lib/discover";
 import { CommunityDiscovery } from "@/components/community-discovery";
 import { HomeIntro, type HomeEntry } from "@/components/home-intro";
@@ -11,7 +12,7 @@ import { tasteStats } from "@/lib/taste";
 import type { Game } from "@/types/domain";
 
 export async function HomeScreen() {
-  const [t, { games: sampled }, portfolio] = await Promise.all([getMessages(), getDiscover(9), getPortfolio()]);
+  const [t, { games: sampled, expiresAt }, portfolio] = await Promise.all([getMessages(), getDiscover(9), getPortfolio()]);
   const personal = Boolean(portfolio.access?.canEdit);
   const entries = personal ? portfolio.games.filter(game => game.logged).sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "") || a.slug.localeCompare(b.slug)) : [];
   const loggedSlugs = new Set(entries.map(game => game.slug));
@@ -37,6 +38,7 @@ export async function HomeScreen() {
     for (const game of fallback) if (suggestions.size < 5 && !suggestions.has(game.slug)) suggestions.set(game.slug, { game });
   }
   return <div className="w-full bg-surface">
+    <DiscoveryRefresh expiresAt={expiresAt} />
     <HomeIntro recent={recent.map(card)} playing={playing.map(card)} preview={<ProfilePreview games={sampled.slice(0, previewCount)} />} />
     {personal && preferred.length > 0 && <section aria-label={t("Your taste")} className="site-container mx-auto px-4 sm:px-6 lg:px-12 pb-8">
       <div className="border-y border-outline-variant/30 py-6 space-y-5">

@@ -111,3 +111,39 @@ test("home review carousel ranks net helpfulness and supports navigation", async
   await cards.first().getByRole("link",{name:"Read review"}).click();
   await expect(page).toHaveURL(/\/u\/fixture_public\/game\/fixture-game-7$/);
 });
+
+
+test("explore games remain stable until selection expiry and then refresh automatically", async ({ page, context }) => {
+  await page.goto("/");
+  const section=page.getByRole("region",{name:"Games worth exploring",exact:true});
+  const links=section.locator("article h3 a");
+  const titles=await links.allTextContents();
+  const getSelection=async()=> (await context.cookies()).find(cookie=>cookie.name==="playlogg_discovery")!;
+  const original=await getSelection();
+  expect(original.httpOnly).toBe(true);
+  expect(Number(original.value.split(".")[1])-Date.now()).toBeLessThanOrEqual(600_000);
+  await page.reload();
+  expect(await links.allTextContents()).toEqual(titles);
+  expect((await getSelection()).value).toBe(original.value);
+  await page.goto("/games");
+  await page.goto("/");
+  expect(await links.allTextContents()).toEqual(titles);
+  const [seed]=original.value.split(".");
+  await context.addCookies([{name:"playlogg_discovery",value:`${seed}.${Date.now()+3000}`,url:"http://127.0.0.1:3100",httpOnly:true}]);
+  await page.reload();
+  expect(await links.allTextContents()).toEqual(titles);
+  await expect.poll(async()=> (await getSelection()).value.split(".")[0]).not.toBe(seed);
+  expect(await links.allTextContents()).not.toEqual(titles);
+});
+
+test("explore selection expires no later than the current login token", async ({ page, context, request }) => {
+  const expires=Math.floor(Date.now()/1000)+300;
+  const payload=Buffer.from(JSON.stringify({sub:"11111111-1111-4111-8111-111111111111",aud:"authenticated",role:"authenticated",exp:expires,iat:Math.floor(Date.now()/1000)})).toString("base64url");
+  const token=`${Buffer.from(JSON.stringify({alg:"HS256",typ:"JWT"})).toString("base64url")}.${payload}.${Buffer.from("only-valid-in-local-fixture").toString("base64url")}`;
+  await request.post("http://127.0.0.1:3101/__test-token",{data:{token}});
+  const session={...JSON.parse(Buffer.from(authCookie.value.slice(7),"base64url").toString()),access_token:token,refresh_token:"local-fixture-refresh",token_type:"bearer",expires_in:300,expires_at:expires};
+  await context.addCookies([{...authCookie,value:`base64-${Buffer.from(JSON.stringify(session)).toString("base64url")}`}]);
+  await page.goto("/");
+  const selection=(await context.cookies()).find(cookie=>cookie.name==="playlogg_discovery")!;
+  expect(Number(selection.value.split(".")[1])).toBe(expires*1000);
+});

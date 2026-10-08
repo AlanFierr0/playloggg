@@ -16,6 +16,7 @@ profiles.push({id:4,handle:"fixture_peer",display_name:"Published Peer",is_publi
 profiles.push({id:5,handle:"fixture_empty",display_name:"Empty Profile",is_public:true,owner_user_id:null});
 const titles = [["hades", "Hades", "Roguelike"], ["elden-ring-shadow-of-the-erdtree", "Elden Ring: Shadow of the Erdtree", "Action RPG"], ...Array.from({ length: 120 }, (_, i) => [`fixture-game-${i}`, `Fixture Game ${String(i).padStart(2, "0")}`, "Adventure"])];
 const initialGames = titles.map(([slug, title, genre], index) => ({ id: index + 1, igdb_id: index + 1, slug, title, cover_url: "/icon.svg", release_year: 2020, released_on: "2020-01-01", genres: [genre], artwork_image_ids: [], screenshot_image_ids: [], search_keywords: title.toLowerCase(), igdb_metadata: { publishers: index === 0 ? ["Fixture Publisher"] : [], developers: index === 0 ? [{ name: "Fixture Studio" }, null, 7] : [], platforms: index === 0 ? ["PC (Microsoft Windows)", "Android"] : index === 1 ? ["PlayStation 5", "Xbox Series X|S", "Nintendo Switch 2"] : index === 2 ? ["Dreamcast"] : ["PC"], summary: "Deterministic test catalog entry." }, igdb_url: null }));
+let alternateToken;
 let games = structuredClone(initialGames);
 let ratings;
 let reviewVotes;
@@ -32,7 +33,7 @@ let favorites;
 let rankings=[];let curated=[];let listItems=[];let follows=[];let blocks=[];let likes=[];
 let pictures = new Map();
 // Shared catalog imports persist between tests, like the application cache; personal data resets.
-function reset() { reviewVotes=[]; ratingsDelay=0; showTrending=false; accountDeleted=false;failAuthDelete=false;failStorageDelete=false; quotaMode="allow";user.app_metadata={};steamMode="public";rankings=[];follows=[];blocks=[];likes=[];curated=[{id:10,profile_id:3,name:"Public fixture list",revision:1,description:"Fixture description",is_public:true,is_ranked:true}];listItems=[{list_id:10,game_id:1,position:0}];pictures.clear(); Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false,is_discoverable:false,bio:null,location:null,platform_preference:null,avatar_url:null}); favorites=[{profile_id:3,game_id:1,featured_slot:1,created_at:"2026-09-29T12:00:00Z"}]; ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
+function reset() { alternateToken=undefined; reviewVotes=[]; ratingsDelay=0; showTrending=false; accountDeleted=false;failAuthDelete=false;failStorageDelete=false; quotaMode="allow";user.app_metadata={};steamMode="public";rankings=[];follows=[];blocks=[];likes=[];curated=[{id:10,profile_id:3,name:"Public fixture list",revision:1,description:"Fixture description",is_public:true,is_ranked:true}];listItems=[{list_id:10,game_id:1,position:0}];pictures.clear(); Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false,is_discoverable:false,bio:null,location:null,platform_preference:null,avatar_url:null}); favorites=[{profile_id:3,game_id:1,featured_slot:1,created_at:"2026-09-29T12:00:00Z"}]; ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
  for (const game_id of [3,4,5,6]) ratings.push({profile_id:3,game_id,score:50,tier:null,status:"playing",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  for (const game_id of [1,3,4,5,6]) ratings.push({profile_id:4,game_id,score:game_id===1 ? 10 : 40,tier:"A",status:"completed",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  ratings.push({profile_id:3,game_id:7,score:null,tier:"S",status:"backlog",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
@@ -77,6 +78,11 @@ export async function startFixtureServer() {
         return reply(200,{ok:true});
       }
       if (url.pathname === "/__trending" && req.method === "POST") {showTrending=true;return reply(200,{ok:true});}
+      if (url.pathname === "/__test-token" && req.method === "POST") {
+        let body="";for await(const part of req)body+=part;
+        alternateToken=JSON.parse(body).token;
+        return reply(200,{ok:true});
+      }
       if (url.pathname === "/__health") return reply(200, { fixture: true });
       if (url.pathname === "/__steam-user" && req.method === "POST") {user.app_metadata={playlogg_steam_id:"76561198000000000"};return reply(200,{ok:true});}
       if (url.pathname === "/__steam-private" && req.method === "POST") {steamMode="private";return reply(200,{ok:true});}
@@ -113,7 +119,7 @@ export async function startFixtureServer() {
       if(url.pathname==="/__profileless"&&req.method==="POST"){profileDeleted=true;return reply(200,{ok:true});}
       if(url.pathname==="/__deletion-pictures"&&req.method==="POST"){pictures.set("2/11111111-1111-4111-8111-111111111111.webp",Buffer.from("own"));pictures.set("3/22222222-2222-4222-8222-222222222222.webp",Buffer.from("other"));return reply(200,{ok:true});}
       const admin = req.headers.authorization === `Bearer ${fixtureAdminKey}`;
-      const authenticated = !accountDeleted && req.headers.authorization === `Bearer ${token}`;
+      const authenticated = !accountDeleted && (req.headers.authorization === `Bearer ${token}` || alternateToken && req.headers.authorization === `Bearer ${alternateToken}`);
       if(url.pathname===`/auth/v1/admin/users/${ownerId}`&&req.method==="DELETE"){if(!admin)return reply(403,{message:"Server only"});if(failAuthDelete){failAuthDelete=false;return reply(503,{message:"Controlled auth failure"});}if(!profileDeleted||[...pictures.keys()].some(path=>path.startsWith("2/")))return reply(409,{message:"Owned data remains"});accountDeleted=true;return reply(200,user);}
       if (url.pathname === "/auth/v1/user" && req.method === "GET") return authenticated ? reply(200, user) : reply(401, { message: "Fixture session required" });
       if (url.pathname === "/auth/v1/logout" && req.method === "POST") return authenticated ? reply(200,{}) : reply(401,{message:"Unauthorized"});
