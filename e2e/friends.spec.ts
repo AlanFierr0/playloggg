@@ -33,7 +33,7 @@ test("find a friend, follow persistently and compare saved games with your own p
   await expect(page.getByRole("link", { name: "Compare games Published Fixture", exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Compare games Published Fixture", exact: true }).click();
   await expect(page.getByLabel("First profile handle")).toHaveValue("fixture_owner");
-  await expect(page.getByLabel("First profile handle")).toHaveAttribute("readonly", "");
+  await expect(page.getByLabel("First profile handle")).toBeEditable();
   await expect(page.getByLabel("Second profile handle")).toHaveValue("fixture_public");
   await expect(page.getByRole("table")).toContainText("Hades");
   await expect(page.getByRole("table")).toContainText("Score: 100");
