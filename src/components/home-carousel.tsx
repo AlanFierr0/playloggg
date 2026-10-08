@@ -5,41 +5,53 @@ import { useMessages } from "@/components/site-preferences";
 export function HomeCarousel({ children, kind = "reviews" }: { children: ReactNode[]; kind?: "reviews" | "games" }) {
   const games = kind === "games";
   const t = useMessages(), track = useRef<HTMLDivElement>(null);
-  const transition = useRef<Animation | null>(null);
-  useEffect(() => () => transition.current?.cancel(), []);
+  const transition = useRef<Animation[]>([]);
+  useEffect(() => () => transition.current.forEach(animation => animation.cancel()), []);
   async function move(direction: number) {
     const element = track.current;
     if (!element) return;
+    transition.current.forEach(animation => animation.cancel());
+    transition.current = [];
+    element.style.scrollSnapType = "";
     const end = element.scrollWidth - element.clientWidth;
     const left = direction > 0 && element.scrollLeft >= end - 1 ? 0
       : direction < 0 && element.scrollLeft <= 1 ? end
       : element.scrollLeft + direction * element.clientWidth;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reducedMotion) {
-      transition.current?.cancel();
       element.scrollTo({ left, behavior: "instant" });
       return;
     }
-    if (transition.current) return;
     const looping = end > 1 && (direction > 0 ? element.scrollLeft >= end - 1 : element.scrollLeft <= 1);
-    if (!looping) {
-      element.scrollTo({ left, behavior: "smooth" });
-      return;
-    }
-    let animation = element.animate({ opacity: [1, 0] }, { duration: 100, easing: "ease-out", fill: "forwards" });
-    transition.current = animation;
+    let animations: Animation[] = [];
     try {
-      await animation.finished;
-      element.scrollTo({ left, behavior: "instant" });
-      animation.cancel();
-      animation = element.animate({ opacity: [0, 1] }, { duration: 180, easing: "ease-out" });
-      transition.current = animation;
-      await animation.finished;
+      if (looping) {
+        animations = [element.animate({ opacity: [1, 0] }, { duration: 100, easing: "ease-out", fill: "forwards" })];
+        transition.current = animations;
+        await animations[0].finished;
+        element.scrollTo({ left, behavior: "instant" });
+        animations[0].cancel();
+        animations = [element.animate({ opacity: [0, 1] }, { duration: 220, easing: "ease-out" })];
+      } else {
+        element.style.scrollSnapType = "none";
+        const previousLeft = element.scrollLeft;
+        element.scrollTo({ left, behavior: "instant" });
+        const distance = element.scrollLeft - previousLeft;
+        animations = Array.from(element.children, child => child.animate(
+          { transform: [`translateX(${distance}px)`, "translateX(0)"] },
+          { duration: 380, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
+        ));
+      }
+      transition.current = animations;
+      await Promise.all(animations.map(animation => animation.finished));
     } catch {
       // Cancellation on unmount or a reduced-motion request ends the transition.
     } finally {
-      animation.cancel();
-      if (transition.current === animation) transition.current = null;
+      animations.forEach(animation => animation.cancel());
+      if (transition.current === animations) {
+        transition.current = [];
+        element.style.scrollSnapType = "";
+      }
     }
   }
   return <section aria-label={t(games ? "Trending games" : "Best reviews")} className="space-y-5">

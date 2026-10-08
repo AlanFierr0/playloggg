@@ -102,10 +102,14 @@ test("home review carousel ranks net helpfulness and supports navigation", async
   expect(previousBox.x+previousBox.width).toBeLessThanOrEqual(trackBox.x);
   expect(nextBox.x).toBeGreaterThanOrEqual(trackBox.x+trackBox.width);
   for(const box of [previousBox,nextBox]) expect(box.y+box.height/2).toBeCloseTo(trackBox.y+trackBox.height/2,0);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   await carousel.getByRole("button",{name:"Next reviews"}).click();
+  expect(await track.evaluate(element=>element.getAnimations({subtree:true}).length)).toBeGreaterThan(0);
+  await expect.poll(()=>track.evaluate(element=>element.getAnimations({subtree:true}).length)).toBe(0);
   await expect.poll(()=>track.evaluate(element=>element.scrollLeft)).toBeGreaterThan(0);
   await carousel.getByRole("button",{name:"Previous reviews"}).click();
   await expect.poll(()=>track.evaluate(element=>element.scrollLeft)).toBe(0);
+  await expect.poll(()=>track.evaluate(element=>element.getAnimations({subtree:true}).length)).toBe(0);
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await track.evaluate(element=>element.scrollTo({left:element.scrollWidth,behavior:"instant"}));
   await carousel.getByRole("button",{name:"Next reviews"}).click();
