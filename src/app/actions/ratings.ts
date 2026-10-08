@@ -10,8 +10,9 @@ export async function saveRating(input: unknown): Promise<{ ok: boolean; message
   try {
     const owner = await getAccount();
     if (!owner?.profile) return { ok: false, message: "Sign in to your account before saving." };
-    const { data: game, error: gameError } = await owner.supabase.from("games").select("id").eq("slug", rating.slug).single();
+    const { data: game, error: gameError } = await owner.supabase.from("games").select("id,released_on").eq("slug", rating.slug).single();
     if (gameError || !game) return { ok: false, message: "This game is unavailable. Your draft has been kept." };
+    if (rating.completedOn && game.released_on && rating.completedOn < game.released_on) return { ok: false, message: "Completion date cannot be before the game’s release date. Your draft has been kept." };
     const { error } = await owner.supabase.from("ratings").upsert({
       profile_id: owner.profile.id, game_id: game.id, score: rating.score,
       tier: rating.tier, status: rating.status, platform: rating.platform,

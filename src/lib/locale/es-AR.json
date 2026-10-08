@@ -1283,5 +1283,6 @@
   "Xbox console": "Consola Xbox",
   "Console": "Consola",
   "Friends’ ratings": "Puntuaciones de tus amigos",
-  "Friends’ ratings could not be loaded. Please retry.": "No se pudieron cargar las puntuaciones de tus amigos. Intentá de nuevo."
+  "Friends’ ratings could not be loaded. Please retry.": "No se pudieron cargar las puntuaciones de tus amigos. Intentá de nuevo.",
+  "Completion date cannot be before the game’s release date. Your draft has been kept.": "La fecha de finalización no puede ser anterior al lanzamiento del juego. Tu borrador se conserva."
 }

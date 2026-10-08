@@ -223,7 +223,7 @@ return (<><fieldset disabled={pending} className="contents">
 <div className="md:col-span-6 flex flex-col gap-2">
 <label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" htmlFor="date-input">{t("Completion date")}</label>
 
-<CompletionDate value={date} onChange={setDate} inputRef={dateInput} />
+<CompletionDate minDate={game.releasedOn ?? undefined} value={date} onChange={setDate} inputRef={dateInput} />
 
 </div>
 

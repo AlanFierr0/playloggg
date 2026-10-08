@@ -326,3 +326,25 @@ test("console platform popups save specific consoles and preserve existing entry
   await expect(page.locator("#platform-selector [aria-pressed=true]")).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
+
+
+test("completion calendar blocks dates before launch and accepts launch day", async ({ page, context }) => {
+  await context.addCookies([authCookie]);
+  await page.goto("/log?game=hades");
+  const input = page.locator("#date-input");
+  await expect(input).toHaveAttribute("min", "2020-01-01");
+  await input.fill("2019-12-31");
+  await page.getByRole("button", { name: "Choose completion date", exact: true }).click();
+  await expect(input).toHaveValue("2020-01-01");
+  const calendar = page.getByRole("dialog", { name: "Completion date", exact: true });
+  await expect(calendar.locator('[data-date="2019-12-31"]')).toBeDisabled();
+  await expect(calendar.getByRole("button", { name: "Previous month", exact: true })).toBeDisabled();
+  const launch = calendar.locator('[data-date="2020-01-01"]');
+  await launch.press("ArrowLeft");
+  await expect(launch).toBeFocused();
+  await launch.click();
+  await page.locator("#commit-rating").click();
+  await expect(page).toHaveURL(/\/profile$/);
+  await page.goto("/log?game=hades");
+  await expect(input).toHaveValue("2020-01-01");
+});
