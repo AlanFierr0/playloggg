@@ -241,3 +241,20 @@ test("game details show followed profiles ratings, preserve zero and hide them a
   await page.reload();
   await expect(section).toHaveCount(0);
 });
+
+test("profile hot take shows the largest personal and public score gap", async ({ page, context }, testInfo) => {
+  await context.addCookies([authCookie]);
+  await page.goto("/log?game=hades");
+  await page.locator("#score-slider").fill("100");
+  await page.locator("#commit-rating").click();
+  await expect(page).toHaveURL(/\/profile$/);
+  const take = page.getByRole("region", {name:"Hot take",exact:true});
+  await expect(take.getByRole("link", {name:"Hades",exact:true})).toBeVisible();
+  await expect(take).toContainText("50.0 points higher than the community");
+  await expect(take).toContainText("50.0 / 100");
+  await page.goto("/u/fixture_public");
+  await expect(take).toContainText("50.0 points lower than the community");
+  await take.screenshot({path:`e2e-artifacts/profile-hot-take-${testInfo.project.name}.png`});
+  await expect(take.getByRole("link", {name:"Hades",exact:true})).toHaveAttribute("href","/u/fixture_public/game/hades");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});

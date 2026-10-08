@@ -9,7 +9,7 @@ import { ProfileNavigation } from "@/components/profile-navigation";
 import { averageScore, ratedGames, loggedGames } from "@/lib/portfolio-view";
 import type { Game } from "@/types/domain";
 
-export function ProfileOverviewScreen() {
+export function ProfileOverviewScreen({ hotTake }: { hotTake?: React.ReactNode }) {
   const t = useMessages();
   const { profile, games, favorites = [], access, publicBase } = usePortfolio();
   const base = publicBase ?? "/profile";
@@ -62,6 +62,7 @@ export function ProfileOverviewScreen() {
             </Link> : null;
           })}</div> : <p className="rounded-xl bg-surface-container/50 px-4 py-6 text-body-sm text-on-surface-variant">{t("No featured favorites yet.")}</p>}
         </section>
+        {hotTake}
         <div className={panel}><TasteSummary games={games} href={`${base}/stats`} /></div>
         </div>
         <section className={panel}>

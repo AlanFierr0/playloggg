@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { averageScore, filterRankings, getSearchMatches, groupTiers, loggedGames, ratedGames } from "../src/lib/portfolio-view.ts";
+import { largestScoreGap, averageScore, filterRankings, getSearchMatches, groupTiers, loggedGames, ratedGames } from "../src/lib/portfolio-view.ts";
 
 const game = (slug, score, tier = null) => ({ slug, title: slug, score, tier, cover: "/cover.jpg", year: null, keywords: "" });
 
@@ -64,4 +64,13 @@ test("tier board includes logged unrated games without pulling unlogged catalog 
   assert.deepEqual(groups.find(g => g.tier === null).games.map(g => g.slug), ["unassigned-backlog"]);
   assert.equal(groups.reduce((total,g) => total + g.games.length, 0), 2);
   assert.equal(averageScore(ratedGames([logged,backlog])), "—");
+});
+
+test("hot take selects the largest absolute gap, includes zero and single ratings, and breaks ties by slug", () => {
+  const scores = new Map([["a", {average:80,count:1}], ["b", {average:20,count:2}], ["same", {average:50,count:1}]]);
+  const games = [game("b",100),game("a",0),game("same",50),game("unrated",null),game("unknown",100)];
+  assert.equal(largestScoreGap(games,scores).game.slug,"a");
+  assert.equal(largestScoreGap(games,scores).difference,-80);
+  assert.equal(largestScoreGap([game("b",100)],scores).difference,80);
+  assert.equal(largestScoreGap([game("same",50),game("a",null),game("unknown",100)],scores),undefined);
 });

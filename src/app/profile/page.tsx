@@ -5,9 +5,10 @@ import { RouteLoading } from "@/components/route-loading";
 import { PortfolioProvider } from "@/components/portfolio-provider";
 import { getPersonalPortfolio } from "@/lib/portfolio";
 import { localizeMetadata } from "@/lib/locale/server";
+import { ProfileHotTake } from "@/components/profile-hot-take";
 import { ProfileOverviewScreen } from "@/components/screens/profile-overview-screen";
 export async function generateMetadata() { return localizeMetadata({ title: "My gaming identity", description: "Your gaming profile, independent favorites and saved entries.", robots: {index:false,follow:false} }); }
-async function ProfileContent() { return <PortfolioProvider portfolio={await getPersonalPortfolio()}><ProfileOverviewScreen /></PortfolioProvider>; }
+async function ProfileContent() { const portfolio = await getPersonalPortfolio(); return <PortfolioProvider portfolio={portfolio}><ProfileOverviewScreen hotTake={<Suspense fallback={null}><ProfileHotTake portfolio={portfolio} /></Suspense>} /></PortfolioProvider>; }
 
 export default async function ProfilePage(){
  const account=await getAccount();
