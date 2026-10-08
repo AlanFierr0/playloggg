@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useMessages } from "@/components/site-preferences";
+import { useMessages, useSitePreferences } from "@/components/site-preferences";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { TasteSummary } from "@/components/taste-summary";
 import { ProfileAvatar } from "@/components/profile-avatar";
@@ -11,10 +11,12 @@ import type { Game } from "@/types/domain";
 
 export function ProfileOverviewScreen({ hotTake }: { hotTake?: React.ReactNode }) {
   const t = useMessages();
+  const { locale } = useSitePreferences();
   const { profile, games, favorites = [], access, publicBase } = usePortfolio();
   const base = publicBase ?? "/profile";
   const rated = ratedGames(games);
   const entries = loggedGames(games);
+  const totalHours = entries.reduce((sum, game) => sum + (game.hoursPlayed ?? 0), 0);
   const bySlug = new Map(games.map(game => [game.slug, game]));
   const featured = favorites.filter(f => f.featuredSlot !== null).sort((a, b) => a.featuredSlot! - b.featuredSlot!);
   const recent = entries.filter(g => g.updatedAt && Number.isFinite(Date.parse(g.updatedAt))).sort((a, b) => b.updatedAt!.localeCompare(a.updatedAt!) || a.slug.localeCompare(b.slug)).slice(0, 6);
@@ -45,8 +47,8 @@ export function ProfileOverviewScreen({ hotTake }: { hotTake?: React.ReactNode }
             {tools.map(([label, href, icon]) => <Link key={href} href={href} className={`flex min-h-12 items-center gap-2 rounded-xl px-3 py-3 text-body-sm font-medium transition-colors ${href === "/settings" ? "bg-primary/10 text-primary hover:bg-primary/20" : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface"}`}><span aria-hidden="true" className="material-symbols-outlined text-[18px] shrink-0">{icon}</span><span>{t(label)}</span></Link>)}
           </nav>}
         </div>
-        <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-5 border-y border-outline-variant/20 py-6">
-          {[[t("Games rated"), rated.length], [t("Completed games"), entries.filter(g => g.status === "completed").length], [t("Average score"), averageScore(rated)], [t("Favorites"), favorites.length]].map(([label, value]) => <div key={label} className="min-w-0 space-y-1"><dt className="text-body-sm text-on-surface-variant">{label}</dt><dd className="font-headline-xl text-headline-xl text-primary tabular-nums">{value}</dd></div>)}
+        <dl className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-5 border-y border-outline-variant/20 py-6">
+          {[[t("Games rated"), rated.length], [t("Completed games"), entries.filter(g => g.status === "completed").length], [t("Average score"), averageScore(rated)], [t("Favorites"), favorites.length], [t("Total hours played"), totalHours.toLocaleString(locale, { maximumFractionDigits: 2 })]].map(([label, value]) => <div key={label} className="min-w-0 space-y-1"><dt className="text-body-sm text-on-surface-variant">{label}</dt><dd className="font-headline-xl text-headline-xl text-primary tabular-nums">{value}</dd></div>)}
         </dl>
       </header>
       <div className="grid lg:grid-cols-3 items-start gap-6">

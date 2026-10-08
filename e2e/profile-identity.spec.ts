@@ -98,3 +98,19 @@ test("public profile sections use real zero scores, review text and independent 
   await navigation.getByRole("link", { name: "Reviews", exact: true }).click();
   await expect(page.getByText("Public fixture review", { exact: true })).toBeVisible();
 });
+
+
+test("profile total hours includes unscored games and updates after saving playtime",async({page,context},info)=>{
+ await context.addCookies([authCookie]);await page.goto("/profile");
+ const stat=page.locator("dl > div").filter({has:page.locator("dt").filter({hasText:/^Total hours played$/})});
+ await expect(stat.locator("dd")).toHaveText("0");
+ for(const [slug,hours,total] of [["hades","12.5","12.5"],["elden-ring-shadow-of-the-erdtree","3.25","15.75"]]){
+  await page.goto(`/log?game=${slug}`);await page.getByLabel("Hours played",{exact:true}).fill(hours);
+  await page.locator("#commit-rating").click();await expect(page).toHaveURL(/\/profile$/);
+  await expect(stat.locator("dd")).toHaveText(total);
+ }
+ await page.reload();await expect(stat.locator("dd")).toHaveText("15.75");
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.locator("header dl").screenshot({path:`e2e-artifacts/profile-hours-${info.project.name}.png`});
+ await page.goto("/u/fixture_public");await expect(stat.locator("dd")).toHaveText("0");
+});

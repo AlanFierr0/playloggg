@@ -1305,5 +1305,6 @@
   "Minimum": "Mínimo",
   "Maximum": "Máximo",
   "Set the minimum and maximum score for each tier. Manually assigned games stay in their chosen tier.": "Definí la puntuación mínima y máxima de cada tier. Los juegos asignados manualmente conservan su tier.",
-  "Scores from 0 to 100. Ranges cannot overlap.": "Puntuaciones de 0 a 100. Los rangos no pueden superponerse."
+  "Scores from 0 to 100. Ranges cannot overlap.": "Puntuaciones de 0 a 100. Los rangos no pueden superponerse.",
+  "Total hours played": "Horas jugadas en total"
 }
