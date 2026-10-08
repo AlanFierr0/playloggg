@@ -16,7 +16,7 @@ export const getCommunity = cache(async () => {
   const [scoreResult,trendResult,reviewResult]=await Promise.all([
     client.rpc("community_game_scores").gte("sample_count",5).order("deviation",{ascending:false}).order("sample_count",{ascending:false}).order("game_id").limit(5),
     client.rpc("community_trending_games"),
-    client.from("ratings").select("profile_id,game_id,review,updated_at,profiles!inner(handle,display_name,is_public,is_discoverable)")
+    client.from("ratings").select("profile_id,game_id,review,updated_at,profiles!ratings_profile_id_fkey!inner(handle,display_name,is_public,is_discoverable)")
       .eq("profiles.is_public",true).eq("profiles.is_discoverable",true).not("review","is",null).order("updated_at",{ascending:false}).limit(6),
   ]);
   if(scoreResult.error||trendResult.error||reviewResult.error)throw new Error("Community results could not be loaded.");
@@ -48,7 +48,7 @@ export const getCommunityGameScore=cache(async (gameId:number)=>(await getCommun
 const readDiscoveryRatings=cache(async()=>{
   const client=createPublicClient(),all=[];
   for(let offset=0;;offset+=500){
-    const {data,error}=await client.from("ratings").select("profile_id,game_id,score,profiles!inner(handle,display_name,is_public,is_discoverable)")
+    const {data,error}=await client.from("ratings").select("profile_id,game_id,score,profiles!ratings_profile_id_fkey!inner(handle,display_name,is_public,is_discoverable)")
       .eq("profiles.is_public",true).eq("profiles.is_discoverable",true).order("profile_id").order("game_id").range(offset,offset+499);
     if(error)throw new Error("Recommendations could not be loaded.");
     all.push(...data);

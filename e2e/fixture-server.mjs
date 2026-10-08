@@ -275,7 +275,8 @@ export async function startFixtureServer() {
       else if(resource==="list_likes")rows=authenticated?likes:[];
       else if(resource==="profile_activity")rows=[];
       else return reply(404, { message: `Unsupported fixture endpoint ${url.pathname}` });
-      if(url.searchParams.get("select")?.includes("profiles!inner"))rows=rows.map(row=>({...row,profiles:profiles.find(profile=>profile.id===row.profile_id),curated_list_items:listItems.filter(item=>item.list_id===row.id)}));
+      if(resource==="ratings" && url.searchParams.get("select")?.includes("profiles!inner"))return reply(300,{code:"PGRST201",message:"Specify ratings_profile_id_fkey; review_votes creates a second relationship"});
+      if(url.searchParams.get("select")?.includes("profiles!ratings_profile_id_fkey!inner"))rows=rows.map(row=>({...row,profiles:profiles.find(profile=>profile.id===row.profile_id),curated_list_items:listItems.filter(item=>item.list_id===row.id)}));
       for (const [key, value] of url.searchParams) {
         if (key === "or") {
           const alternatives = value.slice(1,-1).split(",");
