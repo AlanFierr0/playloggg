@@ -22,6 +22,10 @@ test("published comparisons show real affinity, independent tiers and reloadable
    await expect(page.locator("[data-affinity]")).toHaveText("90%");
    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
    expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
+   await expect(page.getByText("X · Published Fixture", {exact:true})).toBeVisible();
+   await expect(page.getByText("Y · Published Peer", {exact:true})).toBeVisible();
+   await expect(page.getByRole("img", {name:"Shared score comparison: X — Published Fixture; Y — Published Peer",exact:true})).toBeVisible();
+   await page.getByRole("heading", {name:"Score correlation",exact:true}).locator("..").screenshot({path:`e2e-artifacts/compare-axes-${theme}-${info.project.name}.png`});
    await page.screenshot({path:`e2e-artifacts/compare-results-${theme}-${info.project.name}.png`,fullPage:true});
  }
 
