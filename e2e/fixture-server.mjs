@@ -67,6 +67,15 @@ export async function startFixtureServer() {
         ratings.push(...games.slice(0, 20).map((game, index) => ({profile_id:3,game_id:game.id,score:100-index,tier:null,status:null,review:null,tags:[],hours_played:null,platform:null,completed_on:null})));
         return reply(200,{ok:true});
       }
+      if (url.pathname === "/__best-reviews" && req.method === "POST") {
+        for (let game_id = 1; game_id <= 10; game_id++) {
+          let rating=ratings.find(row=>row.profile_id===3&&row.game_id===game_id);
+          if(!rating){rating={profile_id:3,game_id,score:80};ratings.push(rating);}
+          Object.assign(rating,{review:`Carousel review ${game_id}`,updated_at:game_id===10 ? "2020-01-01T00:00:00Z" : "2026-09-29T12:00:00Z"});
+        }
+        reviewVotes=[...Array.from({length:5},(_,i)=>({reviewer_profile_id:3,game_id:10,voter_profile_id:100+i,value:1})),{reviewer_profile_id:3,game_id:10,voter_profile_id:105,value:-1},...Array.from({length:6},(_,i)=>({reviewer_profile_id:3,game_id:1,voter_profile_id:110+i,value:1})),...Array.from({length:5},(_,i)=>({reviewer_profile_id:3,game_id:1,voter_profile_id:120+i,value:-1}))];
+        return reply(200,{ok:true});
+      }
       if (url.pathname === "/__trending" && req.method === "POST") {showTrending=true;return reply(200,{ok:true});}
       if (url.pathname === "/__health") return reply(200, { fixture: true });
       if (url.pathname === "/__steam-user" && req.method === "POST") {user.app_metadata={playlogg_steam_id:"76561198000000000"};return reply(200,{ok:true});}

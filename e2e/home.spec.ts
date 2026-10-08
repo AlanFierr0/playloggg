@@ -82,3 +82,32 @@ test("home uses owned entries, qualifying genre ratings and working filters", as
   await expect(page.getByRole("region", { name: "Your taste", exact: true })).toHaveCount(0);
   await expect(page.getByText("Co-op & friends", { exact: true })).toHaveCount(0);
 });
+
+
+test("home review carousel ranks net helpfulness and supports navigation", async ({ page, context, request }, testInfo) => {
+  await request.post("http://127.0.0.1:3101/__best-reviews");
+  await page.goto("/");
+  const carousel = page.getByRole("region", { name: "Best reviews", exact: true });
+  const cards = carousel.locator("article");
+  await expect(cards).toHaveCount(10);
+  await expect(cards.first()).toContainText("Carousel review 10");
+  await expect(cards.nth(1)).toContainText("Carousel review 1");
+  await expect(carousel).not.toContainText("Private fixture review");
+  await expect(cards.first().getByRole("button", { name: /^Helpful/ })).toBeDisabled();
+  const track=carousel.getByRole("group", {name:"Review carousel"});
+  await carousel.getByRole("button",{name:"Next reviews"}).click();
+  await expect.poll(()=>track.evaluate(element=>element.scrollLeft)).toBeGreaterThan(0);
+  await carousel.getByRole("button",{name:"Previous reviews"}).click();
+  await expect.poll(()=>track.evaluate(element=>element.scrollLeft)).toBe(0);
+  await context.addCookies([authCookie]);
+  await page.reload();
+  const up=cards.first().getByRole("button",{name:/^Helpful/});
+  await up.click();
+  await expect(up).toHaveAttribute("aria-pressed","true");
+  await expect(up).toHaveText(/Helpful6/);
+  expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await carousel.screenshot({path:`e2e-artifacts/review-carousel-${testInfo.project.name}.png`});
+  await cards.first().getByRole("link",{name:"Read review"}).click();
+  await expect(page).toHaveURL(/\/u\/fixture_public\/game\/fixture-game-7$/);
+});

@@ -1,5 +1,6 @@
-import { Suspense } from "react";
-import { ReviewHelpfulnessSummary } from "@/components/review-helpfulness-summary";
+import { ReviewHelpfulness } from "@/components/review-helpfulness";
+import { ReviewCarousel } from "@/components/review-carousel";
+import { getReviewHelpfulness } from "@/lib/review-helpfulness";
 import Link from "next/link";
 import { GameLogAction } from "@/components/game-actions";
 import { getCommunity, getTasteDiscovery } from "@/lib/community";
@@ -22,6 +23,15 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
     !community.reviews.length
   )
     return null;
+  // ponytail: one aggregate request per reviewing profile; use a ranked database RPC if this becomes a measured bottleneck.
+  const helpfulness = new Map(await Promise.all(
+    [...new Set(community.reviews.map(review => review.profile_id))].map(async id => [id, await getReviewHelpfulness(id)] as const),
+  ));
+  const reviews = community.reviews.flatMap(review => {
+    const game = games.get(review.game_id), data = helpfulness.get(review.profile_id);
+    const counts = game && data?.reviews[game.slug];
+    return game && data && counts ? [{ ...review, game, data, net: counts.upvotes - counts.downvotes }] : [];
+  }).sort((a, b) => b.net - a.net || (b.updated_at ?? "").localeCompare(a.updated_at ?? "") || a.profile_id - b.profile_id || a.game_id - b.game_id).slice(0, 12);
   const sections = [
     {
       title: "Trending games",
@@ -148,42 +158,21 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
           )}
         </section>
       ))}
-      <section className="space-y-4">
-        <h2 className="font-headline-lg text-headline-lg">
-          {t("Recent reviews")}
-        </h2>
-        {community.reviews.map((review) => {
-          const game = games.get(review.game_id);
-          return (
-            game && (
-              <article
-                key={`${review.profile_id}-${review.game_id}`}
-                className="space-y-2 py-3"
-              >
-                <Link
-                  translate="no"
-                  className="text-primary"
-                  href={`/u/${review.profiles.handle}/game/${game.slug}`}
-                >
-                  {review.profiles.display_name} · {game.title}
-                </Link>
-                <p
-                  translate="no"
-                  className="whitespace-pre-wrap break-words text-on-surface-variant line-clamp-4"
-                >
-                  {review.review}
-                </p>
-                <Suspense fallback={null}><ReviewHelpfulnessSummary profileId={review.profile_id} slug={game.slug} /></Suspense>
-              </article>
-            )
-          );
-        })}
-        {!community.reviews.length && (
-          <p className="text-on-surface-variant">
-            {t("No discoverable public reviews yet.")}
-          </p>
-        )}
-      </section>
+      {reviews.length > 0 && <ReviewCarousel>
+        {reviews.map(review => <article key={`${review.profile_id}-${review.game_id}`} className="flex h-full flex-col gap-5 rounded-xl border border-outline-variant/30 bg-surface-container-low p-5 sm:p-6">
+          <div className="flex items-start gap-4">
+            <Link href={`/game/${review.game.slug}`} className="shrink-0"><img src={review.game.cover_url} alt={review.game.title} loading="lazy" className="h-24 w-16 rounded-md object-cover" /></Link>
+            <div className="min-w-0 space-y-2">
+              <h3 translate="no" className="font-headline-md text-headline-md line-clamp-2"><Link href={`/u/${review.profiles.handle}/game/${review.game.slug}`} className="hover:text-primary">{review.game.title}</Link></h3>
+              <Link translate="no" href={`/u/${review.profiles.handle}`} className="text-body-sm text-primary hover:underline">{review.profiles.display_name}</Link>
+            </div>
+          </div>
+          <p translate="no" className="line-clamp-5 whitespace-pre-wrap break-words text-body-md text-on-surface-variant">{review.review}</p>
+          <Link href={`/u/${review.profiles.handle}/game/${review.game.slug}`} className="mt-auto inline-flex min-h-11 items-center gap-2 text-primary text-body-sm hover:underline">{t("Read review")}<span aria-hidden="true" className="material-symbols-outlined text-[18px]">arrow_forward</span></Link>
+          <ReviewHelpfulness profileId={String(review.profile_id)} slug={review.game.slug} data={{ ...review.data, reviews: { [review.game.slug]: review.data.reviews[review.game.slug] } }} />
+        </article>)}
+      </ReviewCarousel>}
+
     </div>
   );
 }

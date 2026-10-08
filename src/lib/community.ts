@@ -11,25 +11,38 @@ const toScore=(row:{game_id:number;sample_count:number;average:number;deviation:
   gameId:row.game_id,count:row.sample_count,average:row.average,deviation:row.deviation,
 });
 
+const readCommunityReviews = cache(async () => {
+  const client = createPublicClient(), reviews = [];
+  for (let offset = 0; ; offset += 500) {
+    const { data, error } = await client.from("ratings")
+      .select("profile_id,game_id,review,updated_at,profiles!ratings_profile_id_fkey!inner(handle,display_name,is_public,is_discoverable)")
+      .eq("profiles.is_public", true).eq("profiles.is_discoverable", true).not("review", "is", null)
+      .order("profile_id").order("game_id").range(offset, offset + 499);
+    if (error) throw new Error("Community reviews could not be loaded.");
+    reviews.push(...data);
+    if (data.length < 500) break;
+  }
+  return reviews;
+});
+
 export const getCommunity = cache(async () => {
   const client=createPublicClient();
-  const [scoreResult,trendResult,reviewResult]=await Promise.all([
+  const [scoreResult,trendResult,reviews]=await Promise.all([
     client.rpc("community_game_scores").gte("sample_count",5).order("deviation",{ascending:false}).order("sample_count",{ascending:false}).order("game_id").limit(5),
     client.rpc("community_trending_games"),
-    client.from("ratings").select("profile_id,game_id,review,updated_at,profiles!ratings_profile_id_fkey!inner(handle,display_name,is_public,is_discoverable)")
-      .eq("profiles.is_public",true).eq("profiles.is_discoverable",true).not("review","is",null).order("updated_at",{ascending:false}).limit(6),
+    readCommunityReviews(),
   ]);
-  if(scoreResult.error||trendResult.error||reviewResult.error)throw new Error("Community results could not be loaded.");
-  const ids=[...new Set(reviewResult.data.map(row=>row.profile_id))];
-  const {data:profiles,error}=ids.length
-    ? await client.from("profiles").select("id").in("id",ids).eq("is_public",true).eq("is_discoverable",true)
-    : {data:[],error:null};
-  if(error)throw new Error("Discovery consent could not be checked.");
-  const eligible=new Set(profiles.map(row=>row.id));
+  if(scoreResult.error||trendResult.error)throw new Error("Community results could not be loaded.");
+  const ids=[...new Set(reviews.map(row=>row.profile_id))], eligible=new Set<number>();
+  for (let offset = 0; offset < ids.length; offset += 100) {
+    const {data,error}=await client.from("profiles").select("id").in("id",ids.slice(offset,offset+100)).eq("is_public",true).eq("is_discoverable",true);
+    if(error)throw new Error("Discovery consent could not be checked.");
+    data.forEach(row=>eligible.add(row.id));
+  }
   return {
     controversial:scoreResult.data.map(toScore),
     trending:trendResult.data.map(row=>({gameId:row.game_id,count:row.sample_count})),
-    reviews:reviewResult.data.filter(row=>eligible.has(row.profile_id)&&row.review?.trim()),
+    reviews:reviews.filter(row=>eligible.has(row.profile_id)&&row.review?.trim()),
   };
 });
 
