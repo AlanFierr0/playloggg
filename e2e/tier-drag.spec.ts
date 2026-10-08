@@ -139,6 +139,7 @@ test("tier selection filters the colored board instead of jumping to an anchor",
 test("score ranges persist, preserve manual games and support opting back into automation",async({page,context,request},info)=>{
  await context.addCookies([authCookie]);await page.goto("/tiers");
  const card='[data-tier-game="elden-ring-shadow-of-the-erdtree"]';
+ await page.getByText("Edit score ranges",{exact:true}).click();
  const min=page.getByRole("spinbutton",{name:"Minimum score for tier B",exact:true});
  await min.fill("81");await page.getByRole("button",{name:"Save score ranges",exact:true}).click();
  await expect(page.getByRole("status")).toHaveText("Score ranges saved. Manual tiers were kept.");
@@ -150,7 +151,7 @@ test("score ranges persist, preserve manual games and support opting back into a
  await min.fill("80");await page.getByRole("button",{name:"Save score ranges",exact:true}).click();
  await expect(page.getByRole("status")).toHaveText("Score ranges saved. Manual tiers were kept.");
  await expect(page.locator('#tier-a '+card)).toBeVisible();
- await page.reload();await expect(min).toHaveValue("80");
+ await page.reload();await page.getByText("Edit score ranges",{exact:true}).click();await expect(min).toHaveValue("80");
  await page.getByRole("button",{name:"Use score range for Elden Ring: Shadow of the Erdtree",exact:true}).click();
  await expect(page.locator('#tier-b '+card)).toBeVisible();
  await page.getByRole("spinbutton",{name:"Minimum score for tier S",exact:true}).fill("90");
@@ -160,6 +161,12 @@ test("score ranges persist, preserve manual games and support opting back into a
  expect(state.ratings.find((r:{profile_id:number;game_id:number})=>r.profile_id===2&&r.game_id===2)).toMatchObject({score:80,tier:"B",tier_manual:false});
  await page.getByRole("spinbutton",{name:"Minimum score for tier S",exact:true}).fill("95");
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ for(const theme of ["dark","light"]){
+  await context.addCookies([{name:"playlogg_theme",value:theme,url:"http://127.0.0.1:3100"}]);
+  await page.reload();await page.getByText("Edit score ranges",{exact:true}).click();
+  expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
+  await page.locator("details:has(#tier-range-form)").screenshot({path:`e2e-artifacts/tier-range-editor-${theme}-${info.project.name}.png`});
+ }
  await page.screenshot({path:`e2e-artifacts/tier-ranges-${info.project.name}.png`,fullPage:true});
 });
 

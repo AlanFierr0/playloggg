@@ -1300,5 +1300,10 @@
   "Score ranges could not be saved. Please retry.": "No se pudieron guardar los rangos. Intentá de nuevo.",
   "Use non-overlapping whole-number ranges from 0 to 100.": "Usá rangos de números enteros de 0 a 100 que no se superpongan.",
   "Scores assign tiers automatically. Dragging or selecting a tier keeps that game manual.": "Las puntuaciones asignan tiers automáticamente. Arrastrar un juego o elegir su tier lo deja en modo manual.",
-  "logged titles grouped by score ranges and manual tiers.": "juegos registrados agrupados por rangos de puntuación y tiers manuales."
+  "logged titles grouped by score ranges and manual tiers.": "juegos registrados agrupados por rangos de puntuación y tiers manuales.",
+  "Edit score ranges": "Editar rangos de puntuación",
+  "Minimum": "Mínimo",
+  "Maximum": "Máximo",
+  "Set the minimum and maximum score for each tier. Manually assigned games stay in their chosen tier.": "Definí la puntuación mínima y máxima de cada tier. Los juegos asignados manualmente conservan su tier.",
+  "Scores from 0 to 100. Ranges cannot overlap.": "Puntuaciones de 0 a 100. Los rangos no pueden superponerse."
 }
