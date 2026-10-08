@@ -95,6 +95,13 @@ test("home review carousel ranks net helpfulness and supports navigation", async
   await expect(carousel).not.toContainText("Private fixture review");
   await expect(cards.first().getByRole("button", { name: /^Helpful/ })).toBeDisabled();
   const track=carousel.getByRole("group", {name:"Review carousel"});
+  await expect(track).toHaveCSS("scrollbar-width", "none");
+  const trackBox=(await track.boundingBox())!;
+  const previousBox=(await carousel.getByRole("button",{name:"Previous reviews"}).boundingBox())!;
+  const nextBox=(await carousel.getByRole("button",{name:"Next reviews"}).boundingBox())!;
+  expect(previousBox.x+previousBox.width).toBeLessThanOrEqual(trackBox.x);
+  expect(nextBox.x).toBeGreaterThanOrEqual(trackBox.x+trackBox.width);
+  for(const box of [previousBox,nextBox]) expect(box.y+box.height/2).toBeCloseTo(trackBox.y+trackBox.height/2,0);
   await carousel.getByRole("button",{name:"Next reviews"}).click();
   await expect.poll(()=>track.evaluate(element=>element.scrollLeft)).toBeGreaterThan(0);
   await carousel.getByRole("button",{name:"Previous reviews"}).click();
