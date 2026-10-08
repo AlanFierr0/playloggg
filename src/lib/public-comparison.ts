@@ -3,10 +3,10 @@ import { avatarSource } from "@/lib/avatar-input";
 import { createPublicClient } from "@/lib/supabase/public";
 import { publicProfilePath } from "@/lib/profile-settings";
 import { readFavorites } from "@/lib/favorites";
-import { getCatalog } from "@/lib/portfolio";
+import { getCatalog, portfolioGames } from "@/lib/portfolio";
 import { getAccount } from "@/lib/owner";
 import type { Database } from "@/types/database";
-import type { Game, Profile } from "@/types/domain";
+import type { Profile } from "@/types/domain";
 
 type Entry = Pick<Database["public"]["Tables"]["ratings"]["Row"], "game_id" | "score" | "tier" | "status">;
 export async function getPublicComparison(left: string, right: string) {
@@ -55,10 +55,10 @@ async function readComparison(left: string, right: string, account: Awaited<Retu
   if (current.some(profile => !profile)) return null;
   function portfolio(side: NonNullable<typeof a>) {
     const entries = new Map(side.entries.map(entry => [entry.game_id,entry]));
-    const games: Game[] = rows.filter(row => entries.has(row.id) || side.favorites.some(favorite=>favorite.slug===row.slug)).map(row => {
-      const entry = entries.get(row.id)!;
-      return { slug:row.slug,title:row.title,cover:row.cover_url,year:row.release_year,keywords:"",score:entry?.score ?? null,tier:entry?.tier as Game["tier"],status:entry?.status as Game["status"],genres:row.genres,developers:Array.isArray((row.igdb_metadata as {developers?:unknown})?.developers) ? (row.igdb_metadata as {developers:string[]}).developers : [],logged:Boolean(entry) };
-    });
+    const games = portfolioGames(
+      rows.filter(row => entries.has(row.id) || side.favorites.some(favorite => favorite.slug === row.slug)),
+      side.entries.map(entry => ({ ...entry, review: null, platform: null, hours_played: null, completed_on: null, tags: [] })),
+    );
     const profile: Profile = {id:String(side.profile.id),handle:side.profile.handle,displayName:side.profile.display_name,avatarUrl:avatarSource(side.profile.id,side.profile.avatar_url),isSample:false,isPublic:side.profile.is_public};
     return {profile,games,favorites:side.favorites};
   }
