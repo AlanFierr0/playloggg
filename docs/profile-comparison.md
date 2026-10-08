@@ -52,8 +52,9 @@ Local fixture journeys cover real form submission, reload, small/empty overlap,
 private/unknown handles even while signed in, and mobile overflow. Accessibility
 checks include the populated comparison in both languages and themes.
 
-For signed-in users with an owned profile, the first handle is always their
-verified profile handle and is read-only. Submitted URL parameters cannot
-replace it. Links with the user's handle on the right swap the two handles so
-the other profile remains selected. Guests can still enter both handles.
-Comparison data continues to use fresh anonymous reads of published profiles.
+For signed-in users, the first handle defaults to their verified profile handle.
+Both fields are editable; submitted selections keep their order through reloads,
+friend shortcuts and pagination. An owned profile can appear on either side and
+uses verified authenticated reads, including when private. Every other profile
+must be published and is read anonymously, with visibility rechecked after reads.
+Editing links point only to the viewer's own profile or game entries.

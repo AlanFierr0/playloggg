@@ -13,10 +13,10 @@ export async function getPublicComparison(left: string, right: string) {
   return readComparison(left, right, null);
 }
 
-export async function getOwnerComparison(right: string) {
+export async function getOwnerComparison(left: string, right: string) {
   const account = await getAccount();
   if (!account?.profile) return null;
-  return readComparison(account.profile.handle, right, account);
+  return readComparison(left, right, account);
 }
 
 async function readComparison(left: string, right: string, account: Awaited<ReturnType<typeof getAccount>>) {
