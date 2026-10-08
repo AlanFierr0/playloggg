@@ -126,7 +126,8 @@ test("Steam import protects guests and email accounts and handles hidden librari
   await expect(page).toHaveURL(/\/login$/);
   await context.addCookies([authCookie]);
   await page.goto("/profile/import/steam");
-  await expect(page.getByText("Sign in with Steam to import your library. Email accounts cannot connect Steam yet.")).toBeVisible();
+  await expect(page.getByRole("button", {name:"Connect Steam", exact:true})).toBeVisible();
+  await expect(page.locator('form[action="/auth/steam"] input[name="mode"]')).toHaveValue("link");
   await expect(page.getByRole("button",{name:"Preview Steam library"})).toHaveCount(0);
   await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
   await fetch("http://127.0.0.1:3101/__steam-private",{method:"POST"});

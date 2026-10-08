@@ -23,7 +23,7 @@ export async function ProfileHotTake({ portfolio }: { portfolio: Portfolio }) {
     </div>
     <dl className="grid grid-cols-2 gap-4 border-t border-outline-variant/20 pt-4">
       <div className="min-w-0"><dt translate="no" className="text-body-sm text-on-surface-variant break-words">{portfolio.profile.displayName}</dt><dd className="text-headline-md font-semibold text-primary tabular-nums">{game.score}<span className="text-body-sm font-normal text-on-surface-variant"> / 100</span></dd></div>
-      <div><dt className="text-body-sm text-on-surface-variant">{t("Community score")}</dt><dd className="text-headline-md font-semibold tabular-nums">{community.average.toFixed(1)}<span className="text-body-sm font-normal text-on-surface-variant"> / 100</span></dd><p className="text-label-sm text-on-surface-variant">{community.count} {t("ratings")}</p></div>
+      <div><dt className="text-body-sm text-on-surface-variant">{t("Community score")}</dt><dd className="text-headline-md font-semibold tabular-nums">{community.average.toFixed(1)}<span className="text-body-sm font-normal text-on-surface-variant"> / 100</span><span className="block text-label-sm font-normal text-on-surface-variant">{community.count} {t("ratings")}</span></dd></div>
     </dl>
   </section>;
 }

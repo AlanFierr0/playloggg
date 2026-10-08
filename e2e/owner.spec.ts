@@ -26,7 +26,7 @@ test("authenticated unscored Backlog persists, failed saves retain the draft, an
   await page.reload();
   await expect(page.locator("#dispatch-textarea")).toHaveValue("Fixture-only saved review");
   await page.getByRole("button", { name: "Add score", exact: true }).click();
-  await page.getByRole("button", { name: "Choose tier, currently unassigned" }).click();
+  await page.getByRole("button", { name: /^Choose tier, currently / }).click();
   await page.getByRole("menuitemradio", { name: "S God", exact: true }).click();
   await page.locator("#commit-rating").click();
   await expect(page).toHaveURL(/\/profile$/);

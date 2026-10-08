@@ -17,7 +17,7 @@ test("home uses owned entries, qualifying genre ratings and working filters", as
   for (const [slug, score] of [["fixture-game-0", "90"], ["fixture-game-1", "80"], ["fixture-game-2", "70"]]) {
     await page.goto(`/log?game=${slug}`);
     await page.locator("#score-display").fill(score);
-    await page.getByRole("button", { name: "Choose tier, currently unassigned" }).click();
+    await page.getByRole("button", { name: /^Choose tier, currently / }).click();
     await page.getByRole("menuitemradio", { name: "S God", exact: true }).click();
     await page.getByRole("button", { name: /Completed$/ }).click();
     await page.locator("#add-tag").click();
