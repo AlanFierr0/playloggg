@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { useMessages } from "@/components/site-preferences";
 import { FavoriteControls } from "@/components/favorite-controls";
+import { tierForScore } from "@/lib/tier-ranges";
 import { saveRating } from "@/app/actions/ratings";
 import { playbackLabels } from "@/lib/playback-status";
 import type { Game, PlaybackStatus, Tier } from "@/types/domain";
@@ -11,7 +12,7 @@ type Draft = { score: string; tier: string; status: string; review: string };
 const control = "w-full rounded bg-surface-container p-3";
 export function QuickRating() {
   const t = useMessages(),
-    { games, favorites = [] } = usePortfolio();
+    { games, profile, favorites = [] } = usePortfolio();
   const [query, setQuery] = useState("");
   const [slug, setSlug] = useState("");
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
@@ -63,6 +64,7 @@ export function QuickRating() {
       slug,
       score,
       tier: (draft.tier || null) as Tier | null,
+      tierManual: (draft.tier || null) !== (game.tier ?? null) ? true : game.tierManual ?? Boolean(game.tier),
       status: (draft.status || null) as PlaybackStatus | null,
       review: draft.review,
       platform: game.platform ?? null,
@@ -75,9 +77,10 @@ export function QuickRating() {
         const result = await saveRating(input);
         setMessage(result.message);
         if (result.ok) {
+          setDrafts(current => { const next = {...current}; delete next[slug]; return next; });
           setSaved((current) => ({
             ...current,
-            [slug]: { ...game, ...input, logged: true },
+            [slug]: { ...game, ...input, tier: input.tierManual ? input.tier : tierForScore(score, profile.tierRanges), logged: true },
           }));
         }
       } catch {

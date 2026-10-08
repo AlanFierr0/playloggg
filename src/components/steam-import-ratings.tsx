@@ -72,7 +72,7 @@ export function SteamRatingEditor({ game, draft, onDraft, onNext }: { game: Stea
   async function save() {
     setSaving(true);setMessage("");
     try {
-      const result = await saveSteamImportRating({slug:game.slug,score:score==="" ? null : Number(score),tier,status,review:"",tags:[],platform:null,hoursPlayed:null,completedOn:null},game.updatedAt);
+      const result = await saveSteamImportRating({slug:game.slug,score:score==="" ? null : Number(score),tier,tierManual:tier!==null,status,review:"",tags:[],platform:null,hoursPlayed:null,completedOn:null},game.updatedAt);
       if (result.ok) onNext(); else setMessage(result.message);
     } catch { setMessage("Your rating could not be saved. Please retry or skip this game."); }
     finally { setSaving(false); }

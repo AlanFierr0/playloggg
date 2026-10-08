@@ -7,6 +7,7 @@ import { ConsolePlatformSelector } from "@/components/console-platform-selector"
 import { CompletionDate } from "@/components/completion-date";
 import { TagEditor } from "@/components/tag-editor";
 import { useRef, useState, useTransition } from "react";
+import { tierForScore } from "@/lib/tier-ranges";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { saveRating } from "@/app/actions/ratings";
 import { normalizeTags } from "@/lib/collection-input";
@@ -19,7 +20,7 @@ import { TierBadge, ScoreStars } from "@/components/rating-controls";
 export function ReviewScreen({ game }: { game: Game }) {
   const t = useMessages();
   const router = useRouter();
-const { access } = usePortfolio();
+const { access, profile } = usePortfolio();
 const canEdit = access?.canEdit ?? false;
 const [pending, startTransition] = useTransition();
 const [saveMessage, setSaveMessage] = useState("");
@@ -29,6 +30,7 @@ const scoreInput = useRef<HTMLInputElement>(null);
 const invalidScore = score !== null && (!Number.isInteger(score) || score < 0 || score > 100);
 const scoreDescription = score === null || invalidScore ? null : score < 25 ? "Terrible" : score < 50 ? "Poor" : score < 75 ? "Average" : score < 100 ? "Great" : "Masterpiece";
 const [tier, setTier] = useState<Tier | null>(game.tier ?? null);
+const [tierManual,setTierManual] = useState(game.tierManual ?? Boolean(game.tier));
 const [platform, setPlatform] = useState<PlayedPlatform | null>(game.platform ?? null);
 const isPC = platform?.startsWith("pc") ?? false;
 const [status, setStatus] = useState<PlaybackStatus | null>(game.status ?? null);
@@ -47,7 +49,7 @@ function commit() {
   const maxHours = maximumPlaytime(game.releasedOn);
   if (hoursPlayed !== null && maxHours !== null && hoursPlayed > maxHours) { setSaveMessage("Playtime cannot exceed the hours elapsed since the game’s release. Your draft has been kept."); return; }
   const completedOn = date || null;
-  const draft = { slug: game.slug, score, tier, status, review, platform, hoursPlayed, completedOn, tags };
+  const draft = { slug: game.slug, score, tier, tierManual, status, review, platform, hoursPlayed, completedOn, tags };
   startTransition(async () => {
     try {
       const result = await saveRating(draft);
@@ -158,7 +160,7 @@ return (<><fieldset disabled={pending} className="contents">
 <div className="w-full flex flex-wrap gap-2 items-center justify-between">
 <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{t("Score")}</span>
 
-<TierBadge value={tier} onChange={setTier} />
+<TierBadge value={tierManual ? tier : tierForScore(score, profile.tierRanges)} onChange={value=>{setTier(value);setTierManual(true);}} />
 </div>
 
 <div className="flex flex-col items-center justify-center gap-1 my-2">

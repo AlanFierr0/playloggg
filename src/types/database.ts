@@ -364,6 +364,7 @@ export type Database = {
           location: string | null
           owner_user_id: string | null
           platform_preference: string | null
+          tier_ranges: Json
           updated_at: string
         }
         Insert: {
@@ -378,6 +379,7 @@ export type Database = {
           location?: string | null
           owner_user_id?: string | null
           platform_preference?: string | null
+          tier_ranges?: Json
           updated_at?: string
         }
         Update: {
@@ -392,6 +394,7 @@ export type Database = {
           location?: string | null
           owner_user_id?: string | null
           platform_preference?: string | null
+          tier_ranges?: Json
           updated_at?: string
         }
         Relationships: []
@@ -409,6 +412,7 @@ export type Database = {
           status: string | null
           tags: string[]
           tier: string | null
+          tier_manual: boolean
           updated_at: string
         }
         Insert: {
@@ -423,6 +427,7 @@ export type Database = {
           status?: string | null
           tags?: string[]
           tier?: string | null
+          tier_manual?: boolean
           updated_at?: string
         }
         Update: {
@@ -437,6 +442,7 @@ export type Database = {
           status?: string | null
           tags?: string[]
           tier?: string | null
+          tier_manual?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -625,6 +631,7 @@ export type Database = {
         Returns: undefined
       }
       valid_rating_tags: { Args: { value: string[] }; Returns: boolean }
+      valid_tier_ranges: { Args: { ranges: Json }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

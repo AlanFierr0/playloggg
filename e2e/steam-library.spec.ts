@@ -404,7 +404,7 @@ test("Steam some-games picker filters genre, hours and title while other selecte
   const state=await (await fetch("http://127.0.0.1:3101/__state")).json();
   expect(state.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===1)).toMatchObject({score:null,tier:null,status:null,platform:"pc",hours_played:1.5});
   const adventure=state.games.find((game:{igdb_id:number})=>game.igdb_id===9004);
-  expect(state.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===adventure.id)).toMatchObject({score:0,tier:null,status:"backlog",platform:"pc",hours_played:0});
+  expect(state.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===adventure.id)).toMatchObject({score:0,tier:"F",status:"backlog",platform:"pc",hours_played:0});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
 

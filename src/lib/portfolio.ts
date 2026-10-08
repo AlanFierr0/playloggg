@@ -1,3 +1,4 @@
+import { parseTierRanges, defaultTierRanges } from "@/lib/tier-ranges";
 import { avatarSource } from "@/lib/avatar-input";
 import "server-only";
 import { cache } from "react";
@@ -50,7 +51,7 @@ const selectedAccount = cache(async () => {
 });
 export const getPortfolioShell = cache(async (): Promise<Portfolio> => {
   const { owner, profile } = await selectedAccount();
-  return { games: [], lists: [], profile: profile ? { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: false, avatarUrl: avatarSource(profile.id, profile.avatar_url), bio: profile.bio, location: profile.location, platformPreference: profile.platform_preference, isPublic: profile.is_public, isDiscoverable:profile.is_discoverable } : {id: "", handle: "", displayName: "", isSample: false, isPublic: false}, access: { signedIn: Boolean(owner), canEdit: Boolean(profile), canImportCatalog: Boolean(profile) } };
+  return { games: [], lists: [], profile: profile ? { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: false, avatarUrl: avatarSource(profile.id, profile.avatar_url), bio: profile.bio, location: profile.location, platformPreference: profile.platform_preference, tierRanges: parseTierRanges(profile.tier_ranges) ?? defaultTierRanges, isPublic: profile.is_public, isDiscoverable:profile.is_discoverable } : {id: "", handle: "", displayName: "", isSample: false, isPublic: false}, access: { signedIn: Boolean(owner), canEdit: Boolean(profile), canImportCatalog: Boolean(profile) } };
 });
 const selectedRatings = cache(async () => {
   const { owner, profile } = await selectedAccount();
@@ -72,21 +73,21 @@ export const getPublicGame = cache(async (slug: string) => {
   const { owner, profile } = await selectedAccount();
   let ratings: RatingRow[];
   if (owner?.profile && profile) {
-    const { data, error } = await owner.supabase.from("ratings").select("game_id,score,tier,review,status,platform,hours_played,completed_on,tags,updated_at").eq("profile_id", profile.id).eq("game_id", row.id).limit(1);
+    const { data, error } = await owner.supabase.from("ratings").select("game_id,score,tier,tier_manual,review,status,platform,hours_played,completed_on,tags,updated_at").eq("profile_id", profile.id).eq("game_id", row.id).limit(1);
     if (error) throw new Error("Your ratings could not be loaded.");
     ratings = data as RatingRow[];
   } else ratings = [];
   return portfolioGames([row], ratings)[0];
 });
 
-export function portfolioGames(rows: GameRow[], ratings: (Pick<RatingRow, "game_id" | "score" | "tier" | "review" | "status" | "platform" | "hours_played" | "completed_on" | "tags"> & {updated_at?: string})[]): Game[] {
+export function portfolioGames(rows: GameRow[], ratings: (Pick<RatingRow, "game_id" | "score" | "tier" | "review" | "status" | "platform" | "hours_played" | "completed_on" | "tags"> & {updated_at?: string; tier_manual?: boolean})[]): Game[] {
   const byGame = new Map(ratings.map((rating) => [rating.game_id, rating]));
   const games: Game[] = rows.map((row) => {
     const rating = byGame.get(row.id);
     const metadata = row.igdb_metadata && typeof row.igdb_metadata === "object" && !Array.isArray(row.igdb_metadata) ? row.igdb_metadata : {};
     const names = (value: unknown): string[] => Array.isArray(value) ? value.slice(0, 50).flatMap((item) => typeof item === "string" ? [item.slice(0, 120)] : item && typeof item === "object" && "name" in item && typeof item.name === "string" ? [item.name.slice(0, 120)] : []) : [];
     return {
-      slug: row.slug, title: row.title, cover: row.cover_url, year: row.release_year,
+      tierManual: rating?.tier_manual ?? Boolean(rating?.tier), slug: row.slug, title: row.title, cover: row.cover_url, year: row.release_year,
       releasedOn: row.released_on, genres: row.genres, keywords: row.search_keywords,
       score: rating?.score ?? null, tier: rating?.tier as Game["tier"] ?? null,
       review: rating?.review ?? null,

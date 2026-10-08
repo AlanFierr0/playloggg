@@ -1,3 +1,4 @@
+import { defaultTierRanges, tierForScore, parseTierRanges } from "../src/lib/tier-ranges.ts";
 import { createServer } from "node:http";
 
 export const fixtureAdminKey = "loopback-only-fixture-admin";
@@ -39,7 +40,8 @@ function reset() { alternateToken=undefined; reviewVotes=[]; ratingsDelay=0; sho
  ratings.push({profile_id:3,game_id:7,score:null,tier:"S",status:"backlog",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  ratings.push({profile_id:4,game_id:7,score:0,tier:null,status:"playing",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  for (const game_id of Array.from({length:19},(_,i)=>i+8)) for (const profile_id of [3,4]) ratings.push({profile_id,game_id,score:profile_id===3 ? 50 : 40,tier:null,status:"playing",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
- ratings.forEach(row=>row.updated_at="2026-09-29T12:00:00Z");
+ profiles.forEach(p=>p.tier_ranges=structuredClone(defaultTierRanges));
+ ratings.forEach(row=>{row.updated_at="2026-09-29T12:00:00Z";row.tier_manual=Boolean(row.tier);if(!row.tier_manual)row.tier=tierForScore(row.score);});
  failSave = false;steamMinutes=90;profileDeleted=false; }
 reset();
 
@@ -231,10 +233,10 @@ export async function startFixtureServer() {
       if (resource === "ratings" && req.method === "PATCH") {
         if(!authenticated || url.searchParams.get("profile_id")!=="eq.2")return reply(403,{message:"Fixture ownership denied"});
         let body="";for await(const part of req)body+=part;const patch=JSON.parse(body);
-        if(Object.keys(patch).some(key=>!["hours_played","status","platform","tier","score","updated_at"].includes(key)))return reply(400,{message:"Unsupported entry fields"});
+        if(Object.keys(patch).some(key=>!["hours_played","status","platform","tier","tier_manual","score","updated_at"].includes(key)))return reply(400,{message:"Unsupported entry fields"});
         if(failSave){failSave=false;return reply(503,{message:"Controlled save failure"});}
         const matches=ratings.filter(row=>[...url.searchParams].filter(([key])=>key!=="select").every(([key,value])=>value.startsWith("eq.")?String(row[key])===value.slice(3):value.startsWith("in.(")?value.slice(4,-1).split(",").includes(String(row[key])):value==="is.null"&&row[key]===null));
-        matches.forEach(row=>Object.assign(row,patch,{updated_at:new Date().toISOString()}));
+        matches.forEach(row=>{Object.assign(row,patch,{updated_at:new Date().toISOString()});if(!row.tier_manual)row.tier=tierForScore(row.score,profiles[1].tier_ranges);});
         return reply(200,matches.map(row=>({game_id:row.game_id})));
       }
       if (resource === "ratings" && req.method === "POST") {
@@ -247,7 +249,7 @@ export async function startFixtureServer() {
         for(const rating of rows){
           if(req.headers.prefer?.includes("resolution=ignore-duplicates")&&ratings.some(row=>row.profile_id===rating.profile_id&&row.game_id===rating.game_id))continue;
           ratings=ratings.filter(row=>row.profile_id!==rating.profile_id||row.game_id!==rating.game_id);
-          const row={...rating,updated_at:new Date().toISOString()};ratings.push(row);saved.push(row);
+          const row={tier_manual:false,...rating,updated_at:new Date().toISOString()};if(!row.tier_manual)row.tier=tierForScore(row.score,profiles[1].tier_ranges);ratings.push(row);saved.push(row);
         }
         return reply(201,url.searchParams.has("select")?saved.map(row=>({game_id:row.game_id,updated_at:row.updated_at})):undefined);
       }
@@ -255,8 +257,10 @@ export async function startFixtureServer() {
         if (!admin || url.searchParams.get("id") !== "eq.2" || url.searchParams.get("owner_user_id") !== `eq.${ownerId}`) return reply(403, {message:"Fixture ownership denied"});
         let body=""; for await (const part of req) body+=part;
         const patch=JSON.parse(body);
-        if(Object.keys(patch).some(key=>!["handle","display_name","is_public","updated_at","bio","location","platform_preference","avatar_url","is_discoverable"].includes(key))) return reply(400,{message:"Unsupported fixture field"});
+        if(Object.keys(patch).some(key=>!["handle","display_name","is_public","updated_at","bio","location","platform_preference","avatar_url","is_discoverable","tier_ranges"].includes(key))) return reply(400,{message:"Unsupported fixture field"});
+        if(patch.tier_ranges&&!parseTierRanges(patch.tier_ranges))return reply(400,{message:"Invalid ranges"});
         Object.assign(profiles[1],patch);
+        if(patch.tier_ranges)ratings.filter(r=>r.profile_id===2&&!r.tier_manual).forEach(r=>r.tier=tierForScore(r.score,patch.tier_ranges));
         const result={id:2,handle:profiles[1].handle,is_public:profiles[1].is_public};
         return reply(200,req.headers.accept?.includes("application/vnd.pgrst.object+json") ? result : [result]);
       }

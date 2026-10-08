@@ -117,20 +117,64 @@ test("tier selection filters the colored board instead of jumping to an anchor",
   for(const route of ["/tiers","/u/fixture_public/tiers"]){
     await page.goto(route);
     await page.getByRole("button",{name:"Tier B",exact:true}).click();
-    await expect(page.locator("[data-tier-drop]")).toHaveCount(1);
+    await expect(page.locator("[data-tier-drop]:visible")).toHaveCount(1);
     await expect(page.locator("#tier-b")).toBeVisible();
     await expect(page.locator("#tier-b")).toHaveCSS("background-color","rgb(255, 223, 127)");
     await expect(page.getByRole("button",{name:"Tier B",exact:true})).toHaveAttribute("aria-pressed","true");
     await expect(page).toHaveURL(new RegExp(route+"$"));
     await page.getByRole("button",{name:"Tier S",exact:true}).click();
-    await expect(page.locator("[data-tier-drop]")).toHaveCount(1);
+    await expect(page.locator("[data-tier-drop]:visible")).toHaveCount(1);
     await expect(page.locator("#tier-s")).toHaveCSS("background-color","rgb(255, 127, 127)");
-    await expect(page.locator("#tier-b")).toHaveCount(0);
+    await expect(page.locator("#tier-b")).toBeHidden();
     await page.screenshot({path:`e2e-artifacts/tier-filter-${route==="/tiers"?"owner":"public"}-${info.project.name}.png`});
     await page.getByRole("button",{name:"Unassigned",exact:true}).click();
-    await expect(page.locator("[data-tier-drop]")).toHaveCount(1);
+    await expect(page.locator("[data-tier-drop]:visible")).toHaveCount(1);
     await expect(page.locator("#tier-unassigned")).toBeVisible();
     await page.getByRole("button",{name:"All tiers",exact:true}).click();
-    await expect(page.locator("[data-tier-drop]")).toHaveCount(7);
+    await expect(page.locator("[data-tier-drop]:visible")).toHaveCount(route==="/tiers"?7:6);
   }
+});
+
+
+test("score ranges persist, preserve manual games and support opting back into automation",async({page,context,request},info)=>{
+ await context.addCookies([authCookie]);await page.goto("/tiers");
+ const card='[data-tier-game="elden-ring-shadow-of-the-erdtree"]';
+ const min=page.getByRole("spinbutton",{name:"Minimum score for tier B",exact:true});
+ await min.fill("81");await page.getByRole("button",{name:"Save score ranges",exact:true}).click();
+ await expect(page.getByRole("status")).toHaveText("Score ranges saved. Manual tiers were kept.");
+ await expect(page.locator('#tier-b '+card)).toBeVisible();
+ await page.getByRole("button",{name:"Use score range for Elden Ring: Shadow of the Erdtree",exact:true}).click();
+ await expect(page.locator('#tier-unassigned '+card)).toBeVisible();
+ await page.getByRole("combobox",{name:"Tier for Elden Ring: Shadow of the Erdtree",exact:true}).selectOption("A");
+ await expect(page.locator('#tier-a '+card)).toBeVisible();
+ await min.fill("80");await page.getByRole("button",{name:"Save score ranges",exact:true}).click();
+ await expect(page.getByRole("status")).toHaveText("Score ranges saved. Manual tiers were kept.");
+ await expect(page.locator('#tier-a '+card)).toBeVisible();
+ await page.reload();await expect(min).toHaveValue("80");
+ await page.getByRole("button",{name:"Use score range for Elden Ring: Shadow of the Erdtree",exact:true}).click();
+ await expect(page.locator('#tier-b '+card)).toBeVisible();
+ await page.getByRole("spinbutton",{name:"Minimum score for tier S",exact:true}).fill("90");
+ await page.getByRole("button",{name:"Save score ranges",exact:true}).click();
+ await expect(page.getByRole("status")).toHaveText("Use non-overlapping whole-number ranges from 0 to 100.");
+ const state=await(await request.get("http://127.0.0.1:3101/__state")).json();
+ expect(state.ratings.find((r:{profile_id:number;game_id:number})=>r.profile_id===2&&r.game_id===2)).toMatchObject({score:80,tier:"B",tier_manual:false});
+ await page.getByRole("spinbutton",{name:"Minimum score for tier S",exact:true}).fill("95");
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.screenshot({path:`e2e-artifacts/tier-ranges-${info.project.name}.png`,fullPage:true});
+});
+
+test("saving scores automatically assigns tiers until a manual move overrides them",async({page,context,request})=>{
+ await context.addCookies([authCookie]);
+ for(const score of [96,75]){
+  await page.goto("/log?game=hades");await page.locator("#score-display").fill(String(score));
+  await page.locator("#commit-rating").click();await expect(page).toHaveURL(/\/profile$/);
+  await page.goto("/tiers");await expect(page.locator(`#tier-${score===96?'s':'c'} [data-tier-game="hades"]`)).toBeVisible();
+ }
+ await page.getByRole("combobox",{name:"Tier for Hades",exact:true}).selectOption("A");
+ await expect(page.locator('#tier-a [data-tier-game="hades"]')).toBeVisible();
+ await page.goto("/log?game=hades");await page.locator("#score-display").fill("25");
+ await page.locator("#commit-rating").click();await expect(page).toHaveURL(/\/profile$/);
+ await page.goto("/tiers");await expect(page.locator('#tier-a [data-tier-game="hades"]')).toBeVisible();
+ const state=await(await request.get("http://127.0.0.1:3101/__state")).json();
+ expect(state.ratings.find((r:{profile_id:number;game_id:number})=>r.profile_id===2&&r.game_id===1)).toMatchObject({score:25,tier:"A",tier_manual:true});
 });

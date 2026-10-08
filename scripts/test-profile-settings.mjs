@@ -1,3 +1,4 @@
+import * as tierRanges from "../src/lib/tier-ranges.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -85,7 +86,7 @@ test("public portfolios use anonymous fresh reads, paginate entries and hide unp
     return query;
   } };
   const { getPublicPortfolio } = load("../src/lib/public-portfolio.ts", {
-    "@/lib/avatar-input": {avatarSource: () => null}, "server-only": {}, "react": { cache: (fn) => fn },
+    "@/lib/tier-ranges":tierRanges, "@/lib/avatar-input": {avatarSource: () => null}, "server-only": {}, "react": { cache: (fn) => fn },
     "@/lib/supabase/public": { createPublicClient: () => client },
     "@/lib/portfolio": { getCatalog: async () => [], portfolioGames: (_rows, entries) => entries },
     "@/lib/profile-settings": { publicProfilePath },
@@ -105,4 +106,18 @@ test("public portfolios use anonymous fresh reads, paginate entries and hide unp
   assert.equal(await getPublicPortfolio("player"), null);
   assert.equal(await getPublicPortfolio("unknown"), null);
   assert.equal(await getPublicPortfolio("../../login"), null);
+});
+
+test("tier range settings require verified ownership and reject overlapping ranges before writing",async()=>{
+ let account=null,calls=0,filters=[];
+ const {saveTierRanges}=load("../src/app/actions/tiers.ts",{
+  "next/cache":{revalidatePath(){}},"@/lib/owner":{getAccount:async()=>account},"@/lib/tier-ranges":tierRanges,
+  "@/lib/portfolio-view":{tiers:["S","A","B","C","D","F"]},
+  "@/lib/supabase/auth-admin":{createAuthAdmin:()=>{calls++;return{from:()=>({update(){return this},eq(key,value){filters.push([key,value]);return this},async select(){return{data:[{id:2}],error:null}}})}}}
+ });
+ assert.equal((await saveTierRanges(tierRanges.defaultTierRanges)).ok,false);assert.equal(calls,0);
+ account={user:{id:"verified"},profile:{id:2}};
+ assert.equal((await saveTierRanges({...tierRanges.defaultTierRanges,S:[90,100]})).ok,false);assert.equal(calls,0);
+ assert.equal((await saveTierRanges(tierRanges.defaultTierRanges)).ok,true);
+ assert.deepEqual(filters,[["id",2],["owner_user_id","verified"]]);
 });

@@ -4,11 +4,12 @@ import { useMessages } from "@/components/site-preferences";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState, useTransition } from "react";
-import { updateGameTier } from "@/app/actions/tiers";
+import { useRef, useState, useTransition, type FormEvent } from "react";
+import { saveTierRanges, updateGameTier } from "@/app/actions/tiers";
 import { TierDragHandle } from "@/components/tier-drag-handle";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { groupTiers, loggedGames, tiers } from "@/lib/portfolio-view";
+import { defaultTierRanges } from "@/lib/tier-ranges";
 import type { Game, Tier } from "@/types/domain";
 
 
@@ -26,13 +27,26 @@ const [dragged,setDragged]=useState<string|null>(null);
 const [over,setOver]=useState<string|null>(null);
 const logged = loggedGames(games);
 const groups = groupTiers(logged);
-function moveGame(slug:string,tier:Tier|null){
+const ranges = profile.tierRanges ?? defaultTierRanges;
+function moveGame(slug:string,tier:Tier|null,automatic=false){
   const game=logged.find(game=>game.slug===slug);
-  if(!canEdit||saving.current||pending||!game||(game.tier??null)===tier)return;
+  if(!canEdit||saving.current||pending||!game||(!automatic&&(game.tier??null)===tier))return;
   saving.current=true;setMessage("");
   startTransition(async()=>{
-    try {const result=await updateGameTier(slug,tier);setMessage(result.message);if(result.ok)router.refresh();}
+    try {const result=await updateGameTier(slug,tier,automatic);setMessage(result.message);if(result.ok)router.refresh();}
     catch {setMessage("Tier could not be saved. Your game stayed in its previous tier. Please retry.");}
+    finally {saving.current=false;}
+  });
+}
+function saveRanges(event:FormEvent<HTMLFormElement>){
+  event.preventDefault();
+  if(!canEdit||saving.current||pending)return;
+  const form=new FormData(event.currentTarget);
+  const next=Object.fromEntries(tiers.map(tier=>[tier,[Number(form.get(`min-${tier}`)),Number(form.get(`max-${tier}`))]]));
+  saving.current=true;setMessage("");
+  startTransition(async()=>{
+    try {const result=await saveTierRanges(next);setMessage(result.message);if(result.ok)router.refresh();}
+    catch {setMessage("Score ranges could not be saved. Please retry.");}
     finally {saving.current=false;}
   });
 }
@@ -57,7 +71,7 @@ return (<>
 
 <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold">{t("\n          Personal Tier Board\n        ")}</h1>
 
-<p className="font-body-md text-body-md text-on-surface-variant">{t(logged.length + " logged titles grouped by independently selected tiers.")}</p>
+<p className="font-body-md text-body-md text-on-surface-variant">{`${logged.length} ${t("logged titles grouped by score ranges and manual tiers.")}`}</p>
 
 </div>
 
@@ -76,27 +90,29 @@ return (<>
 
 </section>
 
-{canEdit&&<p className="text-body-sm text-on-surface-variant">{t("Drag games between tiers, or use each game's tier selector. Changes save automatically.")}</p>}
-{canEdit&&<p role="status" aria-live="polite" className="text-body-sm text-primary">{t(pending ? "Saving tier…" : message)}</p>}
-<div className="flex flex-col gap-6 w-full" aria-busy={pending}>
-{groups.filter(group => (selectedTier==="all" || group.tier===selectedTier) && (canEdit || group.tier!==null || group.games.length>0 || selectedTier===null)).map((group) => {
+{canEdit&&<p className="text-body-sm text-on-surface-variant">{t("Scores assign tiers automatically. Dragging or selecting a tier keeps that game manual.")}</p>}
+{canEdit&&<p role="status" aria-live="polite" className="text-body-sm text-primary">{t(pending ? "Saving…" : message)}</p>}
+<form id="tier-range-form" onSubmit={saveRanges} className="flex flex-col gap-6 w-full" aria-busy={pending}>
+{groups.filter(group => (canEdit || group.tier!==null || group.games.length>0 || selectedTier===null)).map((group) => {
  const key = group.tier ?? "Unassigned";
  const theme = tierThemes[key];
- return <section key={key} data-tier-drop={group.tier??"unassigned"} className={`flex flex-col md:flex-row gap-4 p-4 lg:p-6 rounded-xl shadow-sm ${theme.surface} ${over===key ? "ring-2 ring-on-surface ring-offset-2 ring-offset-surface" : ""}`} id={"tier-" + key.toLowerCase()}
+ return <section hidden={selectedTier!=="all"&&group.tier!==selectedTier} key={key} data-tier-drop={group.tier??"unassigned"} className={`${selectedTier!=="all"&&group.tier!==selectedTier ? "hidden" : "flex"} flex-col md:flex-row gap-4 p-4 lg:p-6 rounded-xl shadow-sm ${theme.surface} ${over===key ? "ring-2 ring-on-surface ring-offset-2 ring-offset-surface" : ""}`} id={"tier-" + key.toLowerCase()}
  onDragOver={event=>{if(canEdit&&dragged&&!pending){event.preventDefault();event.dataTransfer.dropEffect="move";setOver(key);}}}
  onDragLeave={event=>{if(!(event.relatedTarget instanceof Node)||!event.currentTarget.contains(event.relatedTarget))setOver(null);}}
  onDrop={event=>{if(!canEdit||!dragged||pending)return;event.preventDefault();const slug=dragged;endDrag();moveGame(slug,group.tier);}}>
  <div className="flex flex-wrap gap-2 md:flex-col justify-between items-center md:items-start w-full md:w-44 flex-shrink-0 p-4 rounded-lg">
  <div className="flex items-center md:flex-col md:items-start gap-2"><span className="font-display-lg text-display-lg font-bold leading-none">{group.tier ?? "—"}</span><div className="flex flex-col"><span className="font-label-md text-label-md font-semibold uppercase tracking-wider">{t(theme.label)}</span>{!group.tier && <span className="font-label-sm text-label-sm">{t("No tier selected")}</span>}</div></div>
+ {group.tier && (canEdit ? <div className="space-y-1"><span className="block text-label-sm">{t("Score range")}</span><div className="flex items-center gap-1"><input aria-label={`${t("Minimum score for tier")} ${group.tier}`} name={`min-${group.tier}`} type="number" min={0} max={100} step={1} required disabled={pending} defaultValue={ranges[group.tier][0]} key={`min-${ranges[group.tier][0]}`} className="w-14 rounded bg-black/10 p-2 text-black text-body-sm focus-visible:outline focus-visible:outline-2"/><span aria-hidden="true">–</span><input aria-label={`${t("Maximum score for tier")} ${group.tier}`} name={`max-${group.tier}`} type="number" min={0} max={100} step={1} required disabled={pending} defaultValue={ranges[group.tier][1]} key={`max-${ranges[group.tier][1]}`} className="w-14 rounded bg-black/10 p-2 text-black text-body-sm focus-visible:outline focus-visible:outline-2"/></div></div> : <p className="text-body-sm tabular-nums">{ranges[group.tier][0]}–{ranges[group.tier][1]}</p>)}
  <div className="flex items-center gap-1.5 pt-0 md:pt-6"><span className="font-label-sm text-label-sm">{group.games.length} {group.games.length === 1 ? t("game") : t("games")}</span><span className="w-1.5 h-1.5 rounded-full bg-current"></span></div>
  </div>
  <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-2 flex-1 min-w-0">
- {group.games.map((game) => <TierCard key={game.slug} game={game} color={theme.color} publicBase={publicBase} editable={canEdit} disabled={pending} dragged={dragged===game.slug} onStart={()=>setDragged(game.slug)} onEnd={endDrag} onHover={tier=>setOver(tier===undefined ? null : tier??"Unassigned")} onMove={tier=>moveGame(game.slug,tier)} />)}
+ {group.games.map((game) => <TierCard key={game.slug} game={game} color={theme.color} publicBase={publicBase} editable={canEdit} disabled={pending} dragged={dragged===game.slug} onStart={()=>setDragged(game.slug)} onEnd={endDrag} onHover={tier=>setOver(tier===undefined ? null : tier??"Unassigned")} onMove={(tier,automatic)=>moveGame(game.slug,tier,automatic)} />)}
  {group.games.length === 0 && <p className="col-span-full py-8 font-body-sm text-body-sm">{t("No games assigned to this tier.")}</p>}
  </div>
  </section>;
 })}
-</div>
+{canEdit&&<button disabled={pending} type="submit" className="self-start min-h-11 rounded-xl bg-primary-container text-on-primary-container px-5 py-3 disabled:opacity-50">{t("Save score ranges")}</button>}
+</form>
 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-xl bg-surface-container-low text-on-surface-variant mt-4">
 <div className="flex items-center gap-3">
 <span aria-hidden="true" className="material-symbols-outlined text-primary text-xl">{"auto_awesome"}</span>
@@ -125,13 +141,14 @@ const tierThemes: Record<string, { label: string; color: string; surface: string
  F:{label:tierLabels.F,color:"text-[#7fff7f] [.light_&]:text-[#176117]",surface:"bg-[#7fff7f] text-black"},
  Unassigned:{label:"Unassigned",color:"text-on-surface-variant",surface:"bg-surface-container-low text-on-surface-variant"},
 };
-function TierCard({ game, color, publicBase, editable, disabled, dragged, onStart, onEnd, onHover, onMove }: { game: Game; color: string; publicBase?: string; editable:boolean; disabled:boolean; dragged:boolean; onStart:()=>void; onEnd:()=>void; onHover:(tier:Tier|null|undefined)=>void; onMove:(tier:Tier|null)=>void }) {
+function TierCard({ game, color, publicBase, editable, disabled, dragged, onStart, onEnd, onHover, onMove }: { game: Game; color: string; publicBase?: string; editable:boolean; disabled:boolean; dragged:boolean; onStart:()=>void; onEnd:()=>void; onHover:(tier:Tier|null|undefined)=>void; onMove:(tier:Tier|null,automatic?:boolean)=>void }) {
   const t = useMessages();
 
  return <div data-tier-game={game.slug} draggable={editable&&!disabled} onDragStart={event=>{if(!editable||disabled){event.preventDefault();return;}event.dataTransfer.effectAllowed="move";event.dataTransfer.setData("text/plain",game.slug);onStart();}} onDragEnd={onEnd} className={`group relative rounded-lg overflow-hidden bg-surface-container transition-transform duration-200 hover:-translate-y-1 ${editable ? "cursor-grab" : ""} ${dragged ? "opacity-50 ring-2 ring-primary" : ""}`}>
  <div className="relative aspect-[3/4] w-full overflow-hidden bg-surface-container-high"><img draggable={false} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src={game.cover} alt={game.title} />{editable&&game.tier&&<TierDragHandle cover title={game.title} disabled={disabled} onStart={onStart} onEnd={onEnd} onHover={onHover} onMove={onMove}/>}</div>
  <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-surface/90 backdrop-blur-md shadow"><span className={"font-label-sm text-label-sm font-bold " + color}>{game.score ?? "—"}</span></div>
  <div className="p-2.5 flex flex-col bg-surface-container"><h2 className="font-headline-md text-body-md font-semibold text-on-surface min-h-[2.5rem] line-clamp-2"><Link className="block after:absolute after:inset-0" href={(publicBase ?? "") + "/game/" + game.slug}>{game.title}</Link></h2><span className="font-label-sm text-label-sm text-on-surface-variant truncate">{game.year ?? t("Release year unavailable")}</span></div>
- {editable&&<div className={game.tier ? "" : "relative z-10 flex flex-col gap-1 px-1 pb-1"}><div className="flex items-center justify-between">{!game.tier&&<TierDragHandle title={game.title} disabled={disabled} onStart={onStart} onEnd={onEnd} onHover={onHover} onMove={onMove}/>}{game.tier&&<button type="button" disabled={disabled} onClick={()=>onMove(null)} aria-label={`${t("Clear tier for")} ${game.title}`} title={t("Clear tier; keep log entry")} className="absolute top-0 left-0 z-20 min-h-11 min-w-11 rounded bg-surface/90 text-on-surface-variant transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto hover:bg-surface-container-high hover:text-error disabled:opacity-50"><span aria-hidden="true" className="material-symbols-outlined">close</span></button>}</div><select disabled={disabled} aria-label={`${t("Tier for")} ${game.title}`} value={game.tier??""} onChange={event=>{onMove(event.target.value ? event.target.value as Tier : null);event.currentTarget.blur();}} className={(game.tier ? "sr-only focus:not-sr-only focus:relative focus:z-20 focus:min-h-11 focus:w-full focus:rounded focus:px-1 focus:text-body-sm " : "relative z-10 min-h-11 min-w-0 w-full rounded px-1 text-body-sm ") + (game.tier ? tierThemes[game.tier].surface : "bg-surface-container-high text-on-surface")}><option value="" className="bg-surface-container-high text-on-surface">{t("Unassigned")}</option>{tiers.map(tier=><option key={tier} value={tier} className={tierThemes[tier].surface}>{tier} · {t(tierLabels[tier])}</option>)}</select></div>}
+ {editable&&<div className={game.tier ? "" : "relative z-10 flex flex-col gap-1 px-1 pb-1"}><div className="flex items-center justify-between">{!game.tier&&<TierDragHandle title={game.title} disabled={disabled} onStart={onStart} onEnd={onEnd} onHover={onHover} onMove={onMove}/>}{game.tier&&<button type="button" disabled={disabled} onClick={()=>onMove(null)} aria-label={`${t("Clear tier for")} ${game.title}`} title={t("Clear tier; keep log entry")} className="absolute top-0 left-0 z-20 min-h-11 min-w-11 rounded bg-surface/90 text-on-surface-variant transition-opacity [@media(hover:hover)]:[.group:not(:hover):not(:focus-within)_&]:opacity-0 [@media(hover:hover)]:[.group:not(:hover):not(:focus-within)_&]:pointer-events-none hover:bg-surface-container-high hover:text-error disabled:opacity-50"><span aria-hidden="true" className="material-symbols-outlined">close</span></button>}</div><select disabled={disabled} aria-label={`${t("Tier for")} ${game.title}`} value={game.tier??""} onChange={event=>{onMove(event.target.value ? event.target.value as Tier : null);event.currentTarget.blur();}} className={(game.tier ? "sr-only focus:not-sr-only focus:relative focus:z-20 focus:min-h-11 focus:w-full focus:rounded focus:px-1 focus:text-body-sm " : "relative z-10 min-h-11 min-w-0 w-full rounded px-1 text-body-sm ") + (game.tier ? tierThemes[game.tier].surface : "bg-surface-container-high text-on-surface")}><option value="" className="bg-surface-container-high text-on-surface">{t("Unassigned")}</option>{tiers.map(tier=><option key={tier} value={tier} className={tierThemes[tier].surface}>{tier} · {t(tierLabels[tier])}</option>)}</select></div>}
+ {editable&&game.tierManual&&<button type="button" disabled={disabled} onClick={()=>onMove(game.tier??null,true)} aria-label={`${t("Use score range for")} ${game.title}`} className="relative z-20 w-full min-h-11 px-2 text-label-sm text-primary hover:bg-surface-container-high disabled:opacity-50">{t("Use score range")}</button>}
  </div>;
 }

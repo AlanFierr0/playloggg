@@ -23,6 +23,7 @@ export interface Game {
   releasedOn?: string | null;
   genres?: string[];
   tier?: Tier | null;
+  tierManual?: boolean;
   artwork?: string | null;
   screenshots?: string[];
   isSampleCatalog?: boolean;
@@ -43,6 +44,7 @@ export interface Profile {
   location?: string | null;
   platformPreference?: string | null;
   isSample?: boolean;
+  tierRanges?: Record<Tier, [number, number]>;
   isPublic?: boolean;
   isDiscoverable?: boolean;
 }

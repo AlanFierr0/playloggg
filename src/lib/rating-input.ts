@@ -5,6 +5,7 @@ import type { PlaybackStatus, PlayedPlatform, Tier } from "../types/domain.ts";
 
 export interface RatingInput {
   slug: string; score: number | null; tier: Tier | null; status: PlaybackStatus | null;
+  tierManual?: boolean;
   review: string; platform: PlayedPlatform | null; hoursPlayed: number | null; completedOn: string | null; tags: string[];
 }
 
@@ -31,6 +32,8 @@ function isCalendarDate(value: unknown): value is string {
 
 export function validateRating(input: unknown): RatingInput | null {
   if (!input || typeof input !== "object") return null;
+  const { tierManual } = input as Record<string,unknown>;
+  if (tierManual !== undefined && typeof tierManual !== "boolean") return null;
   const { slug, score, tier, status, review, platform, hoursPlayed, completedOn, tags: rawTags } = input as Record<string, unknown>;
   if (typeof slug !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 200) return null;
   if (score !== null && (typeof score !== "number" || !Number.isInteger(score) || score < 0 || score > 100)) return null;
@@ -42,7 +45,7 @@ export function validateRating(input: unknown): RatingInput | null {
   const tags = normalizeTags(rawTags);
   if (!tags) return null;
   if (typeof review !== "string" || review.length > 20000) return null;
-  return { slug, score, tier: tier as Tier | null, status: status as PlaybackStatus | null,
+  return { ...(tierManual === undefined ? {} : {tierManual: tierManual as boolean}), slug, score, tier: tier as Tier | null, status: status as PlaybackStatus | null,
     review: review.trim(), platform: platform as PlayedPlatform | null,
     hoursPlayed: hoursPlayed as number | null, completedOn: completedOn as string | null, tags };
 }

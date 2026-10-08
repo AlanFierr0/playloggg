@@ -2,8 +2,8 @@ import "server-only";
 import type { Database } from "@/types/database";
 import type { SupabaseClient } from "@supabase/supabase-js";
 type RatingRow = Database["public"]["Tables"]["ratings"]["Row"];
-export type ProfileRating = Pick<RatingRow, "game_id" | "score" | "tier" | "review" | "status" | "platform" | "hours_played" | "completed_on" | "tags" | "updated_at">;
-export const ratingFields = "game_id,score,tier,review,status,platform,hours_played,completed_on,tags,updated_at";
+export type ProfileRating = Pick<RatingRow, "game_id" | "score" | "tier" | "tier_manual" | "review" | "status" | "platform" | "hours_played" | "completed_on" | "tags" | "updated_at">;
+export const ratingFields = "game_id,score,tier,tier_manual,review,status,platform,hours_played,completed_on,tags,updated_at";
 
 export async function readProfileRatings(supabase: SupabaseClient<Database>, profileId: number): Promise<ProfileRating[]> {
   const all: ProfileRating[] = [];

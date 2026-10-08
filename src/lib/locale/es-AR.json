@@ -1289,5 +1289,16 @@
   "Hot take": "Opinión polémica",
   "Largest score gap with the community": "La mayor diferencia de puntaje con la comunidad",
   "points higher than the community": "puntos por encima de la comunidad",
-  "points lower than the community": "puntos por debajo de la comunidad"
+  "points lower than the community": "puntos por debajo de la comunidad",
+  "Score range": "Rango de puntuación",
+  "Save score ranges": "Guardar rangos",
+  "Use score range": "Usar rango de puntuación",
+  "Use score range for": "Usar rango de puntuación para",
+  "Minimum score for tier": "Puntuación mínima del tier",
+  "Maximum score for tier": "Puntuación máxima del tier",
+  "Score ranges saved. Manual tiers were kept.": "Rangos guardados. Se conservaron los tiers manuales.",
+  "Score ranges could not be saved. Please retry.": "No se pudieron guardar los rangos. Intentá de nuevo.",
+  "Use non-overlapping whole-number ranges from 0 to 100.": "Usá rangos de números enteros de 0 a 100 que no se superpongan.",
+  "Scores assign tiers automatically. Dragging or selecting a tier keeps that game manual.": "Las puntuaciones asignan tiers automáticamente. Arrastrar un juego o elegir su tier lo deja en modo manual.",
+  "logged titles grouped by score ranges and manual tiers.": "juegos registrados agrupados por rangos de puntuación y tiers manuales."
 }

@@ -1,3 +1,4 @@
+import * as tierRanges from "../src/lib/tier-ranges.ts";
 import {test} from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
@@ -39,7 +40,7 @@ function loader({hidden=false,unpublish=false,fail=false}={}){
  const source=readFileSync(new URL("../src/lib/public-comparison.ts",import.meta.url),"utf8");
  const dependencies={"@/lib/owner":{getAccount:async()=>null},"@/lib/favorites":{readFavorites:async()=>[]},"@/lib/avatar-input":{avatarSource:()=>null},"server-only":{},"@/lib/supabase/public":{createPublicClient:()=>{created++;return db}},"@/lib/profile-settings":{publicProfilePath:handle=>/^[a-z0-9_]{3,30}$/.test(handle)?`/u/${handle}`:null},"@/lib/portfolio":{getCatalog:async()=>rows}};
  const portfolioModule={exports:{}};
- const portfolioDependencies={...dependencies,react:{cache:fn=>fn},"@/lib/profile-ratings":{},"@/lib/preference-ranking":{},"@/lib/supabase/server":{}};
+ const portfolioDependencies={...dependencies,"@/lib/tier-ranges":tierRanges,react:{cache:fn=>fn},"@/lib/profile-ratings":{},"@/lib/preference-ranking":{},"@/lib/supabase/server":{}};
  vm.runInNewContext(ts.transpileModule(readFileSync(new URL("../src/lib/portfolio.ts",import.meta.url),"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:portfolioModule,exports:portfolioModule.exports,require:name=>{assert.ok(name in portfolioDependencies);return portfolioDependencies[name]}});
  dependencies["@/lib/portfolio"].portfolioGames=portfolioModule.exports.portfolioGames;
  const compiledModule={exports:{}};vm.runInNewContext(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:compiledModule,exports:compiledModule.exports,require:name=>{assert.ok(name in dependencies);return dependencies[name]}});

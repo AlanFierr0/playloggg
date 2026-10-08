@@ -17,7 +17,7 @@ export async function saveRating(input: unknown): Promise<{ ok: boolean; message
     if (rating.hoursPlayed !== null && maxHours !== null && rating.hoursPlayed > maxHours) return { ok: false, message: "Playtime cannot exceed the hours elapsed since the game’s release. Your draft has been kept." };
     const { error } = await owner.supabase.from("ratings").upsert({
       profile_id: owner.profile.id, game_id: game.id, score: rating.score,
-      tier: rating.tier, status: rating.status, platform: rating.platform,
+      tier: rating.tier, tier_manual: rating.tierManual ?? rating.tier !== null, status: rating.status, platform: rating.platform,
       tags: rating.tags, hours_played: rating.hoursPlayed, completed_on: rating.completedOn, review: rating.review || null, updated_at: new Date().toISOString(),
     }, { onConflict: "profile_id,game_id" });
     if (error) return { ok: false, message: "Your rating could not be saved. Your draft has been kept; please try again." };

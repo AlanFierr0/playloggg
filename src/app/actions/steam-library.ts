@@ -207,7 +207,7 @@ export async function saveSteamImportRating(input: unknown, updatedAt: unknown) 
     if (!account?.profile || !steamIdentity(account.user.app_metadata.playlogg_steam_id)) return {ok:false,message:"Sign in with Steam to import your library."};
     const {data:game,error:gameError} = await account.supabase.from("games").select("id").eq("slug",rating.slug).single();
     if (gameError || !game) throw new Error("Unavailable game");
-    let request = account.supabase.from("ratings").update({score:rating.score,tier:rating.tier,status:rating.status,updated_at:new Date().toISOString()})
+    let request = account.supabase.from("ratings").update({score:rating.score,tier:rating.tier,tier_manual:rating.tierManual ?? rating.tier !== null,status:rating.status,updated_at:new Date().toISOString()})
       .eq("profile_id",account.profile.id).eq("game_id",game.id).eq("platform","pc");
     request = updatedAt === null ? request.is("updated_at",null) : request.eq("updated_at",updatedAt as string);
     const {data,error} = await request.select("game_id");
