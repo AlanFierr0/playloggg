@@ -265,3 +265,26 @@ test("completion calendar selects leap days, supports keyboard navigation and sa
   await calendar.press("Escape");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
+
+
+test("playtime rejects negative typing and pasted values while saving fractional hours", async ({ page, context }) => {
+  await context.addCookies([authCookie]);
+  await page.goto("/log?game=hades");
+  const hours = page.locator("#hours-input");
+  await hours.press("-");
+  await expect(hours).toHaveValue("");
+  await hours.fill("12.5");
+  await hours.fill("-5");
+  await expect(hours).toHaveValue("12.5");
+  await hours.fill(" -0.5");
+  await expect(hours).toHaveValue("12.5");
+  await hours.fill("0");
+  await expect(hours).toHaveValue("0");
+  await hours.fill("");
+  await expect(hours).toHaveValue("");
+  await hours.fill("0.5");
+  await page.locator("#commit-rating").click();
+  await expect(page).toHaveURL(/\/profile$/);
+  await page.goto("/log?game=hades");
+  await expect(hours).toHaveValue("0.5");
+});

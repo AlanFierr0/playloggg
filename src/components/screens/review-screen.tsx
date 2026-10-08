@@ -212,7 +212,7 @@ return (<><fieldset disabled={pending} className="contents">
 <div className="relative flex items-center">
 <span aria-hidden="true" className="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">{"schedule"}</span>
 
-<input className="min-w-0 w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="hours-input" placeholder={t("Hours, e.g. 45.5")} type="text" inputMode="decimal" value={hours} onChange={(event) => setHours(event.target.value)} />
+<input className="min-w-0 w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="hours-input" placeholder={t("Hours, e.g. 45.5")} type="text" inputMode="decimal" value={hours} onChange={(event) => { if (!event.target.value.trimStart().startsWith("-")) setHours(event.target.value); }} />
 
 </div>
 
