@@ -29,7 +29,7 @@ test("ties use stable slugs and shared masterpieces require both scores, indepen
 });
 function loader({hidden=false,unpublish=false,fail=false}={}){
  let ratingReads=0,checks=0,created=0;
- const rows=Array.from({length:1001},(_,i)=>({id:i+1,slug:`g${i}`,title:`G${i}`,cover_url:"cover",release_year:null}));
+ const rows=Array.from({length:1001},(_,i)=>({id:i+1,slug:`g${i}`,title:`G${i}`,cover_url:"cover",release_year:null,genres:[],search_keywords:"",artwork_image_ids:[],screenshot_image_ids:[],igdb_metadata:{developers:[{name:"Fixture Studio"},null,7]}}));
  const entries=rows.map(row=>({game_id:row.id,score:0,tier:null,status:"backlog"}));
  const db={from(table){assert.ok(["profiles","ratings"].includes(table));let filters=[],fields="";return{
  select(value){fields=value;return this},eq(key,value){filters.push([key,value]);return this},order(key){assert.equal(key,"game_id");return this},
@@ -38,12 +38,17 @@ function loader({hidden=false,unpublish=false,fail=false}={}){
  }}};
  const source=readFileSync(new URL("../src/lib/public-comparison.ts",import.meta.url),"utf8");
  const dependencies={"@/lib/owner":{getAccount:async()=>null},"@/lib/favorites":{readFavorites:async()=>[]},"@/lib/avatar-input":{avatarSource:()=>null},"server-only":{},"@/lib/supabase/public":{createPublicClient:()=>{created++;return db}},"@/lib/profile-settings":{publicProfilePath:handle=>/^[a-z0-9_]{3,30}$/.test(handle)?`/u/${handle}`:null},"@/lib/portfolio":{getCatalog:async()=>rows}};
+ const portfolioModule={exports:{}};
+ const portfolioDependencies={...dependencies,react:{cache:fn=>fn},"@/lib/profile-ratings":{},"@/lib/preference-ranking":{},"@/lib/supabase/server":{}};
+ vm.runInNewContext(ts.transpileModule(readFileSync(new URL("../src/lib/portfolio.ts",import.meta.url),"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:portfolioModule,exports:portfolioModule.exports,require:name=>{assert.ok(name in portfolioDependencies);return portfolioDependencies[name]}});
+ dependencies["@/lib/portfolio"].portfolioGames=portfolioModule.exports.portfolioGames;
  const compiledModule={exports:{}};vm.runInNewContext(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:compiledModule,exports:compiledModule.exports,require:name=>{assert.ok(name in dependencies);return dependencies[name]}});
  return {read:compiledModule.exports.getPublicComparison,state:()=>({ratingReads,checks,created})};
 }
 test("comparison reads only anonymous scoped data, paginates above 1000 and rechecks both profiles",async()=>{
  const l=loader();const result=await l.read("left_user","right_user");assert.equal(result.left.games.length,1001);assert.equal(result.right.games.at(-1).score,0);assert.equal(l.state().ratingReads,6);assert.equal(l.state().checks,2);
- assert.ok(!("review" in result.left.games[0]));
+ assert.equal(result.left.games[0].review,null);
+ assert.equal(JSON.stringify(result.left.games[0].developers),JSON.stringify(["Fixture Studio"]));
 });
 test("invalid, private, unpublished and same-profile pairs never produce comparison data",async()=>{
  const invalid=loader();assert.equal(await invalid.read("../../login","right_user"),null);assert.equal(await invalid.read("left_user","left_user"),null);assert.equal(invalid.state().created,0);
