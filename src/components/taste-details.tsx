@@ -116,16 +116,20 @@ export function TasteDetails({ games }: { games: Game[] }) {
         <h2 className="font-headline-lg text-headline-lg">
           {t("Release eras")}
         </h2>
-        {stats.eras.map(([era, count]) => (
-          <div key={era} className="flex justify-between gap-4">
-            <span>{era}</span>
-            <span>
-              {count} (
-              {((count / (stats.logged - stats.unknownYears)) * 100).toFixed(1)}
-              %)
-            </span>
-          </div>
-        ))}
+        <ul className="space-y-4">
+          {stats.eras.map(([era, count]) => {
+            const percent = count / (stats.logged - stats.unknownYears) * 100;
+            return <li key={era} className="space-y-2">
+              <div className="flex justify-between gap-4">
+                <span>{era}</span>
+                <span>{count} ({percent.toFixed(1)}%)</span>
+              </div>
+              <div aria-hidden="true" className="h-2 rounded bg-surface-container">
+                <div className="h-full rounded bg-primary" style={{ width: `${percent}%` }} />
+              </div>
+            </li>;
+          })}
+        </ul>
         {!stats.eras.length && <p>{t("No known release years yet.")}</p>}
       </section>
       <section className="space-y-4">
