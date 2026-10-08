@@ -918,6 +918,7 @@
   "Top-rated studios": "Estudios mejor puntuados",
   "Not enough rated games yet.": "Todavía no hay suficientes juegos puntuados.",
   "Group averages use scored entries only. Multi-genre games count once in each genre. Unknown metadata is excluded. Preferences need at least 3 scored games per group.": "Los promedios usan solo juegos puntuados. Un juego de varios géneros cuenta una vez en cada género. Se excluyen los datos desconocidos. Las preferencias requieren al menos 3 juegos puntuados por grupo.",
+  "No groups with at least 5 rated games yet.": "Todavía no hay grupos con al menos 5 juegos puntuados.",
   "Genre statistics": "Estadísticas por género",
   "Studio statistics": "Estadísticas por estudio",
   "Publisher statistics": "Estadísticas por distribuidora",

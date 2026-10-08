@@ -1,9 +1,11 @@
 "use client";
+import { useState } from "react";
 import { useMessages } from "@/components/site-preferences";
 import { tasteStats } from "@/lib/taste";
 import { playedPlatformLabels } from "@/lib/played-platforms";
 import type { Game } from "@/types/domain";
 export function TasteDetails({ games }: { games: Game[] }) {
+  const [expanded, setExpanded] = useState<string[]>([]);
   const t = useMessages(),
     stats = tasteStats(games);
   return (
@@ -15,7 +17,7 @@ export function TasteDetails({ games }: { games: Game[] }) {
       ].map(({ label, groups }) => (
         <section key={label} className="space-y-4">
           <h2 className="font-headline-lg text-headline-lg">{t(label)}</h2>
-          {groups.length ? (
+          {groups.some(group => expanded.includes(label) || group.count >= 5) ? (
             <div className="overflow-x-auto">
               <table className="w-full text-left font-body-md text-body-md leading-relaxed">
                 <caption className="sr-only">{t(label)}</caption>
@@ -34,7 +36,7 @@ export function TasteDetails({ games }: { games: Game[] }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {groups.map((group) => (
+                  {groups.filter(group => expanded.includes(label) || group.count >= 5).map((group) => (
                     <tr
                       key={group.name}
                       className="border-t border-outline-variant/20"
@@ -59,8 +61,18 @@ export function TasteDetails({ games }: { games: Game[] }) {
             </div>
           ) : (
             <p className="text-on-surface-variant">
-              {t("No rated games with this metadata yet.")}
+              {t(groups.length ? "No groups with at least 5 rated games yet." : "No rated games with this metadata yet.")}
             </p>
+          )}
+          {!expanded.includes(label) && groups.some(group => group.count < 5) && (
+            <button
+              type="button"
+              className="min-h-11 rounded-xl bg-surface-container-high px-5 py-3 text-on-surface hover:bg-surface-container-highest"
+              onClick={() => setExpanded(current => [...current, label])}
+              aria-label={`${t("Load more")} — ${t(label)}`}
+            >
+              {t("Load more")}
+            </button>
           )}
         </section>
       ))}

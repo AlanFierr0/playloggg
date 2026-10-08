@@ -75,3 +75,21 @@ test("profile tools, section tabs and content stay separate and usable", async (
   await expect(tierLink).toHaveAttribute("aria-current","page");
   await expect(page.getByRole("navigation",{name:"Profile sections"})).toHaveCount(0);
 });
+
+
+test("stats hide small groups until each section loads more", async ({ page }) => {
+  await page.goto("/u/fixture_public/stats");
+  for (const label of ["Genre statistics", "Studio statistics", "Publisher statistics"]) {
+    const section = page.getByRole("heading", { name: label, exact: true }).locator("..");
+    const rows = section.locator("tbody tr");
+    for (const row of await rows.all()) {
+      expect(Number(await row.locator("td").first().innerText())).toBeGreaterThanOrEqual(5);
+    }
+    const before = await rows.count();
+    await section.getByRole("button", { name: `Load more — ${label}`, exact: true }).click();
+    expect(await rows.count()).toBeGreaterThan(before);
+    const counts = await rows.locator("td:first-of-type").allTextContents();
+    expect(counts.some(count => Number(count) < 5)).toBe(true);
+    await expect(section.getByRole("button")).toHaveCount(0);
+  }
+});
