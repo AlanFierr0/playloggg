@@ -165,7 +165,7 @@ export async function startFixtureServer() {
         const rows=[...groups].flatMap(([id,scores])=>scores.length>0 ? [{slug:games.find(game=>game.id===id).slug,average:scores.reduce((sum,value)=>sum+value,0)/scores.length,sample_count:scores.length}] : []).sort((a,b)=>a.slug.localeCompare(b.slug));
         return reply(200,rows.slice(Number(url.searchParams.get("offset")??0),Number(url.searchParams.get("offset")??0)+Number(url.searchParams.get("limit")??1000)));
       }
-      if(resource==="rpc/community_trending_games")return reply(200,showTrending?[{game_id:1,sample_count:2},{game_id:2,sample_count:1}]:[]);
+      if(resource==="rpc/community_trending_games")return reply(200,showTrending?Array.from({length:5},(_,index)=>({game_id:index+1,sample_count:5-index})):[]);
       if(resource==="rpc/community_game_scores"){
         let body="";for await(const part of req)body+=part;const input=body ? JSON.parse(body) : {};
         const groups=new Map();

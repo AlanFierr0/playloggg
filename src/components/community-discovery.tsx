@@ -1,5 +1,5 @@
 import { ReviewHelpfulness } from "@/components/review-helpfulness";
-import { ReviewCarousel } from "@/components/review-carousel";
+import { HomeCarousel } from "@/components/home-carousel";
 import { getReviewHelpfulness } from "@/lib/review-helpfulness";
 import Link from "next/link";
 import { GameLogAction } from "@/components/game-actions";
@@ -33,15 +33,6 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
     return game && data && counts ? [{ ...review, game, data, net: counts.upvotes - counts.downvotes }] : [];
   }).sort((a, b) => b.net - a.net || (b.updated_at ?? "").localeCompare(a.updated_at ?? "") || a.profile_id - b.profile_id || a.game_id - b.game_id).slice(0, 12);
   const sections = [
-    {
-      title: "Trending games",
-      description:
-        "Distinct people who changed a score in the last 30 days.",
-      rows: community.trending.slice(0, 5).map((row) => ({
-        gameId: row.gameId,
-        value: `${row.count} ${t("people")}`,
-      })),
-    },
     {
       title: "Most controversial games",
       description:
@@ -97,6 +88,25 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
           </div>
         </section>
       )}
+      {community.trending.length > 0 && <HomeCarousel kind="games">
+        {community.trending.flatMap(row => {
+          const game = games.get(row.gameId);
+          return game ? [(
+                <article key={game.id} className="group/game flex min-w-0 flex-col">
+                  <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low">
+                    <Link href={`/game/${game.slug}`} aria-label={game.title} className="block h-full">
+                      <img src={game.cover_url} alt="" loading="lazy" className="w-full h-full object-cover transition-opacity group-hover/game:opacity-90" />
+                    </Link>
+                    <GameLogAction slug={game.slug} logged={loggedSlugs.has(game.slug)} />
+                  </div>
+                  <div className="mt-3 flex flex-col gap-1">
+                    <h3 translate="no" className="font-headline-md text-headline-md group-hover/game:text-primary line-clamp-2"><Link href={`/game/${game.slug}`}>{game.title}</Link></h3>
+                    <p className="text-body-sm text-primary break-words">{row.count} {t("people")}</p>
+                  </div>
+                </article>
+          )] : [];
+        })}
+      </HomeCarousel>}
       {sections.filter(section => section.rows.length > 0).map((section) => (
         <section key={section.title} className="space-y-4">
           <h2 className="font-headline-lg text-headline-lg">
@@ -108,20 +118,6 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {section.rows.map((row) => {
               const game = games.get(row.gameId);
-              if (game && section.title === "Trending games") return (
-                <article key={game.id} className="group/game flex min-w-0 flex-col">
-                  <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low">
-                    <Link href={`/game/${game.slug}`} aria-label={game.title} className="block h-full">
-                      <img src={game.cover_url} alt="" loading="lazy" className="w-full h-full object-cover transition-opacity group-hover/game:opacity-90" />
-                    </Link>
-                    <GameLogAction slug={game.slug} logged={loggedSlugs.has(game.slug)} />
-                  </div>
-                  <div className="mt-3 flex flex-col gap-1">
-                    <h3 translate="no" className="font-headline-md text-headline-md group-hover/game:text-primary line-clamp-2"><Link href={`/game/${game.slug}`}>{game.title}</Link></h3>
-                    <p className="text-body-sm text-primary break-words">{row.value}</p>
-                  </div>
-                </article>
-              );
               return (
                 game && (
                   <Link
@@ -158,7 +154,7 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
           )}
         </section>
       ))}
-      {reviews.length > 0 && <ReviewCarousel>
+      {reviews.length > 0 && <HomeCarousel>
         {reviews.map(review => <article key={`${review.profile_id}-${review.game_id}`} className="flex h-full flex-col gap-5 rounded-xl border border-outline-variant/30 bg-surface-container-low p-5 sm:p-6">
           <div className="flex items-start gap-4">
             <Link href={`/game/${review.game.slug}`} className="shrink-0"><img src={review.game.cover_url} alt={review.game.title} loading="lazy" className="h-24 w-16 rounded-md object-cover" /></Link>
@@ -171,7 +167,7 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
           <Link href={`/u/${review.profiles.handle}/game/${review.game.slug}`} className="mt-auto inline-flex min-h-11 items-center gap-2 text-primary text-body-sm hover:underline">{t("Read review")}<span aria-hidden="true" className="material-symbols-outlined text-[18px]">arrow_forward</span></Link>
           <ReviewHelpfulness profileId={String(review.profile_id)} slug={review.game.slug} data={{ ...review.data, reviews: { [review.game.slug]: review.data.reviews[review.game.slug] } }} />
         </article>)}
-      </ReviewCarousel>}
+      </HomeCarousel>}
 
     </div>
   );
