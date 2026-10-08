@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseHours, validateRating } from "../src/lib/rating-input.ts";
+import { maximumPlaytime, parseHours, validateRating } from "../src/lib/rating-input.ts";
 
 const draft = { slug: "cyberpunk-2077", score: 95, tier: "B", status: null, tags: [], platform: null, hoursPlayed: null, completedOn: null, review: "  Independent tier.  " };
 test("zero, null tier, and empty review are valid; scores do not dictate tiers", () => {
@@ -61,4 +61,12 @@ test("live-service statuses are shared by full saves, bulk saves and catalog URL
     assert.equal(validateRating({...draft,status}),null);
     assert.equal(validateBulkRating({slugs:["hades"],status}),null);
   }
+});
+
+ test("playtime ceiling uses elapsed hours, preserves fractions and clamps unreleased games to zero", () => {
+  const now = Date.parse("2026-10-08T12:30:00Z");
+  assert.equal(maximumPlaytime("2026-10-07", now), 36.5);
+  assert.equal(maximumPlaytime("2026-10-08", now), 12.5);
+  assert.equal(maximumPlaytime("2026-10-09", now), 0);
+  assert.equal(maximumPlaytime(null, now), null);
 });

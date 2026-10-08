@@ -277,6 +277,10 @@ test("playtime rejects negative typing and pasted values while saving fractional
   await hours.fill("12.5");
   await hours.fill("-5");
   await expect(hours).toHaveValue("12.5");
+  await hours.fill("999999999");
+  await expect(hours).toHaveValue("12.5");
+  await hours.fill("1e12");
+  await expect(hours).toHaveValue("12.5");
   await hours.fill(" -0.5");
   await expect(hours).toHaveValue("12.5");
   await hours.fill("0");

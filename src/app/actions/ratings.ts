@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getAccount } from "@/lib/owner";
-import { validateRating } from "@/lib/rating-input";
+import { maximumPlaytime, validateRating } from "@/lib/rating-input";
 
 export async function saveRating(input: unknown): Promise<{ ok: boolean; message: string }> {
   const rating = validateRating(input);
@@ -13,6 +13,8 @@ export async function saveRating(input: unknown): Promise<{ ok: boolean; message
     const { data: game, error: gameError } = await owner.supabase.from("games").select("id,released_on").eq("slug", rating.slug).single();
     if (gameError || !game) return { ok: false, message: "This game is unavailable. Your draft has been kept." };
     if (rating.completedOn && game.released_on && rating.completedOn < game.released_on) return { ok: false, message: "Completion date cannot be before the game’s release date. Your draft has been kept." };
+    const maxHours = maximumPlaytime(game.released_on);
+    if (rating.hoursPlayed !== null && maxHours !== null && rating.hoursPlayed > maxHours) return { ok: false, message: "Playtime cannot exceed the hours elapsed since the game’s release. Your draft has been kept." };
     const { error } = await owner.supabase.from("ratings").upsert({
       profile_id: owner.profile.id, game_id: game.id, score: rating.score,
       tier: rating.tier, status: rating.status, platform: rating.platform,

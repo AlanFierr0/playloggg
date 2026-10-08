@@ -10,7 +10,7 @@ import { useRef, useState, useTransition } from "react";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { saveRating } from "@/app/actions/ratings";
 import { normalizeTags } from "@/lib/collection-input";
-import { parseHours } from "@/lib/rating-input";
+import { maximumPlaytime, parseHours } from "@/lib/rating-input";
 import { playbackLabels } from "@/lib/playback-status";
 import { playedPlatformLabels } from "@/lib/played-platforms";
 import type { Game, PlaybackStatus, PlayedPlatform, Tier } from "@/types/domain";
@@ -44,6 +44,8 @@ function commit() {
   if (dateInput.current && !dateInput.current.validity.valid) { setSaveMessage("Complete a valid calendar date, or clear it. Your draft has been kept."); return; }
   const hoursPlayed = parseHours(hours);
   if (hoursPlayed === undefined) { setSaveMessage("Enter nonnegative decimal hours, or leave playtime blank. Your draft has been kept."); return; }
+  const maxHours = maximumPlaytime(game.releasedOn);
+  if (hoursPlayed !== null && maxHours !== null && hoursPlayed > maxHours) { setSaveMessage("Playtime cannot exceed the hours elapsed since the game’s release. Your draft has been kept."); return; }
   const completedOn = date || null;
   const draft = { slug: game.slug, score, tier, status, review, platform, hoursPlayed, completedOn, tags };
   startTransition(async () => {
@@ -214,7 +216,7 @@ return (<><fieldset disabled={pending} className="contents">
 <div className="relative flex items-center">
 <span aria-hidden="true" className="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">{"schedule"}</span>
 
-<input className="min-w-0 w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="hours-input" placeholder={t("Hours, e.g. 45.5")} type="text" inputMode="decimal" value={hours} onChange={(event) => { if (!event.target.value.trimStart().startsWith("-")) setHours(event.target.value); }} />
+<input className="min-w-0 w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="hours-input" placeholder={t("Hours, e.g. 45.5")} type="text" inputMode="decimal" value={hours} onChange={(event) => { const value = event.target.value; const maxHours = maximumPlaytime(game.releasedOn); if (!value.trimStart().startsWith("-") && (maxHours === null || !value.trim() || Number.isNaN(Number(value)) || Number(value) <= maxHours)) setHours(value); }} />
 
 </div>
 
