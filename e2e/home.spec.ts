@@ -106,6 +106,13 @@ test("home review carousel ranks net helpfulness and supports navigation", async
   await expect.poll(()=>track.evaluate(element=>element.scrollLeft)).toBeGreaterThan(0);
   await carousel.getByRole("button",{name:"Previous reviews"}).click();
   await expect.poll(()=>track.evaluate(element=>element.scrollLeft)).toBe(0);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await track.evaluate(element=>element.scrollTo({left:element.scrollWidth,behavior:"instant"}));
+  await carousel.getByRole("button",{name:"Next reviews"}).click();
+  expect(await track.evaluate(element=>element.getAnimations().length)).toBeGreaterThan(0);
+  await expect.poll(()=>track.evaluate(element=>element.scrollLeft)).toBe(0);
+  await expect.poll(()=>track.evaluate(element=>element.getAnimations().length)).toBe(0);
+  await expect(track).toHaveCSS("opacity", "1");
   await page.emulateMedia({ reducedMotion: "reduce" });
   const end=await track.evaluate(element=>element.scrollWidth-element.clientWidth);
   await track.evaluate(element=>element.scrollTo({left:element.scrollWidth,behavior:"instant"}));
