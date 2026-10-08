@@ -3,6 +3,7 @@ import { useMessages } from "@/components/site-preferences";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ConsolePlatformSelector } from "@/components/console-platform-selector";
 import { CompletionDate } from "@/components/completion-date";
 import { TagEditor } from "@/components/tag-editor";
 import { useRef, useState, useTransition } from "react";
@@ -133,10 +134,11 @@ return (<><fieldset disabled={pending} className="contents">
 
 <div className="flex flex-wrap gap-2" id="platform-selector">
 <button type="button" onClick={() => setPlatform(isPC ? null : "pc")} title={t("Select platform; click again to clear")} aria-pressed={isPC} aria-expanded={isPC} aria-controls="pc-store-selector" className={`platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider flex items-center gap-1.5 ${isPC ? "bg-primary/15 text-primary shadow-sm" : "bg-surface-container-highest text-on-surface-variant hover:bg-surface-bright hover:text-on-surface"}`}><span aria-hidden="true" className="material-symbols-outlined text-[14px]">desktop_windows</span>PC</button>
-{(Object.entries(playedPlatformLabels) as [PlayedPlatform, string][]).filter(([value]) => !value.startsWith("pc")).map(([value, label]) => <button key={value} type="button" onClick={() => setPlatform(platform === value ? null : value)} title={t("Select platform; click again to clear")} aria-pressed={platform === value} className={`platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider flex items-center gap-1.5 ${platform === value ? "bg-primary/15 text-primary shadow-sm" : "bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface"}`}>
-<span aria-hidden="true" className="material-symbols-outlined text-[14px]">{value.startsWith("pc") ? "desktop_windows" : value === "steam_deck" ? "tablet" : "sports_esports"}</span>
-{t(label)}</button>)}
+<ConsolePlatformSelector family="PlayStation" value={platform} onChange={setPlatform} />
+<ConsolePlatformSelector family="Xbox" value={platform} onChange={setPlatform} />
+<button type="button" onClick={() => setPlatform(platform === "steam_deck" ? null : "steam_deck")} aria-pressed={platform === "steam_deck"} title={t("Select platform; click again to clear")} className={`platform-btn flex items-center gap-1.5 rounded px-3 py-1 font-label-sm text-label-sm uppercase tracking-wider ${platform === "steam_deck" ? "bg-primary/15 text-primary" : "bg-surface-container-highest text-on-surface-variant hover:bg-surface-bright hover:text-on-surface"}`}><span aria-hidden="true" className="material-symbols-outlined text-[14px]">tablet</span>Steam Deck</button>
 </div>
+{platform && (platform.startsWith("ps") || platform.startsWith("xbox")) && <p className="font-body-sm text-body-sm text-primary">{t("Console")}: {t(playedPlatformLabels[platform])}</p>}
 <div id="pc-store-selector" hidden={!isPC}>
   {isPC && <div className="ml-3 border-l-2 border-primary/30 pl-3 space-y-2" role="group" aria-label={t("PC store")}>
     <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{t("PC store")}</span>

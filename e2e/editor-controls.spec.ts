@@ -40,10 +40,11 @@ test("PC stores appear below main platforms and collapse for console selection",
   await page.locator("#pc-store-selector").screenshot({path:`e2e-artifacts/pc-stores-${testInfo.project.name}.png`});
   await page.getByRole("button",{name:"PC / GOG",exact:true}).click();
   await expect(pc).toHaveAttribute("aria-pressed","true");
-  await page.getByRole("button",{name:"PlayStation 5",exact:true}).click();
+  await page.getByRole("button",{name:"PlayStation",exact:true}).click();
+  await page.getByRole("menuitemradio",{name:"PlayStation 5",exact:true}).click();
   await expect(stores).toBeHidden();
   await expect(pc).toHaveAttribute("aria-expanded","false");
-  await expect(page.getByRole("button",{name:"PlayStation 5",exact:true})).toHaveAttribute("aria-pressed","true");
+  await expect(page.getByRole("button",{name:"PlayStation",exact:true})).toHaveAttribute("aria-pressed","true");
 });
 
 test("score slider works on an unrated game and discard returns to profile without saving", async ({ page, context, request }) => {
@@ -287,4 +288,41 @@ test("playtime rejects negative typing and pasted values while saving fractional
   await expect(page).toHaveURL(/\/profile$/);
   await page.goto("/log?game=hades");
   await expect(hours).toHaveValue("0.5");
+});
+
+
+test("console platform popups save specific consoles and preserve existing entry data", async ({ page, context }, testInfo) => {
+  await context.addCookies([authCookie]);
+  await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");
+  for (const [family, consoleName] of [["PlayStation", "PlayStation 4"], ["Xbox", "Xbox Series S"]]) {
+    const trigger = page.getByRole("button", { name: family, exact: true });
+    await trigger.click();
+    const menu = page.getByRole("menu", { name: `${family} console`, exact: true });
+    await expect(menu).toBeVisible();
+    await menu.getByRole("menuitemradio", { name: consoleName, exact: true }).click();
+    await expect(menu).toBeHidden();
+    await expect(trigger).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator("#score-display")).toHaveValue("80");
+    await page.locator("#commit-rating").click();
+    await expect(page).toHaveURL(/\/profile$/);
+    await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");
+    await trigger.click();
+    await expect(menu.getByRole("menuitemradio", { name: consoleName, exact: true })).toHaveAttribute("aria-checked", "true");
+    await menu.screenshot({ path: `e2e-artifacts/console-${family}-${testInfo.project.name}.png` });
+    expect((await new AxeBuilder({ page }).include('[popover]:popover-open').analyze()).violations).toEqual([]);
+    await menu.press("Escape");
+    await expect(menu).toBeHidden();
+    await expect(trigger).toBeFocused();
+  }
+  await page.getByRole("button", { name: "Xbox", exact: true }).click();
+  await page.getByRole("menuitemradio", { name: "Xbox Series S", exact: true }).press("Home");
+  await expect(page.getByRole("menuitemradio", { name: "Xbox", exact: true })).toBeFocused();
+  await page.keyboard.press("ArrowDown");
+  await expect(page.getByRole("menuitemradio", { name: "Xbox 360", exact: true })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.getByText("Console: Xbox 360", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Xbox", exact: true }).click();
+  await page.getByRole("menuitemradio", { name: "Xbox 360", exact: true }).click();
+  await expect(page.locator("#platform-selector [aria-pressed=true]")).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
