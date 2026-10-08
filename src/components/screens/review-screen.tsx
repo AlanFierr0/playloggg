@@ -3,6 +3,7 @@ import { useMessages } from "@/components/site-preferences";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { CompletionDate } from "@/components/completion-date";
 import { TagEditor } from "@/components/tag-editor";
 import { useRef, useState, useTransition } from "react";
 import { usePortfolio } from "@/components/portfolio-provider";
@@ -220,12 +221,7 @@ return (<><fieldset disabled={pending} className="contents">
 <div className="md:col-span-6 flex flex-col gap-2">
 <label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" htmlFor="date-input">{t("Completion date")}</label>
 
-<div className="relative flex items-center">
-<span aria-hidden="true" className="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">{"calendar_today"}</span>
-
-<input key={tagVersion} className="min-w-0 w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="date-input" ref={dateInput} type="date" min="0001-01-01" max="9999-12-31" value={date} onChange={(event) => setDate(event.target.value)} />
-
-</div>
+<CompletionDate value={date} onChange={setDate} inputRef={dateInput} />
 
 </div>
 

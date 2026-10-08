@@ -1270,5 +1270,12 @@
   "Connect Steam to import your library and playtime into this profile. Your existing games and ratings stay saved.": "Conectá Steam para importar tu biblioteca y horas de juego a este perfil. Tus juegos y puntuaciones existentes se conservan.",
   "Steam connected. Your library is ready to import.": "Steam conectado. Tu biblioteca está lista para importar.",
   "Steam could not be connected. Please try again while signed into the same Playlogg account.": "No se pudo conectar Steam. Intentá de nuevo sin cambiar de cuenta de Playlogg.",
-  "This Steam account is already connected to another Playlogg account. Sign in to that account instead.": "Esta cuenta de Steam ya está conectada a otra cuenta de Playlogg. Iniciá sesión en esa cuenta."
+  "This Steam account is already connected to another Playlogg account. Sign in to that account instead.": "Esta cuenta de Steam ya está conectada a otra cuenta de Playlogg. Iniciá sesión en esa cuenta.",
+  "Choose completion date": "Elegir fecha de finalización",
+  "Close calendar": "Cerrar calendario",
+  "Previous month": "Mes anterior",
+  "Next month": "Mes siguiente",
+  "Month": "Mes",
+  "Clear date": "Borrar fecha",
+  "Today": "Hoy"
 }
