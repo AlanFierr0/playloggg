@@ -1,3 +1,4 @@
+import { FriendsGameRatings } from "@/components/friends-game-ratings";
 import { Suspense } from "react";
 import { ReviewHelpfulnessSummary } from "@/components/review-helpfulness-summary";
 import { GameGenres } from "@/components/game-genres";
@@ -47,6 +48,7 @@ export async function CatalogGameScreen({ game, isSample, publicProfile }: { gam
             <Link href={isSample ? "/login" : `/log?game=${encodeURIComponent(game.slug)}`} className="inline-flex rounded px-5 py-2.5 bg-primary-container text-on-primary-container font-body-md text-body-md">{isSample ? t("Sign in") : game.logged ? t("Edit log entry") : t("Log this game")}</Link>
             </>}
           </section>
+          {row && <Suspense fallback={null}><FriendsGameRatings gameId={row.id} slug={game.slug} /></Suspense>}
           <div className="text-body-sm text-on-surface-variant flex flex-wrap gap-x-3 gap-y-1">
             <span>{t("Community score")}</span>
             <span>{communityScore ? `${communityScore.average} / 100` : t("No ratings yet")}</span>

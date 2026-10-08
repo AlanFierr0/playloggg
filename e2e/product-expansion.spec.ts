@@ -202,3 +202,42 @@ test("taste neighbors show real match and overlap after five shared scored games
  }
  await page.goto("/");const section=page.locator("section").filter({has:page.getByRole("heading",{name:"Taste neighbors",exact:true})});await expect(section).toContainText("100% Taste Match");await expect(section).toContainText("5 Shared scored games");
 });
+
+
+test("game details show followed profiles ratings, preserve zero and hide them after unfollow", async ({ page, context }, testInfo) => {
+  await context.addCookies([authCookie]);
+  const headers = { Authorization: `Bearer ${JSON.parse(Buffer.from(authCookie.value.slice(7), "base64url").toString()).access_token}` };
+  expect((await page.request.post("http://127.0.0.1:3101/rest/v1/profile_follows", { headers, data: { follower_id: 2, followed_id: 1 } })).ok()).toBe(true);
+  await page.goto("/game/hades");
+  await expect(page.getByRole("heading", { name: "Friends’ ratings", exact: true })).toHaveCount(0);
+  await page.goto("/u/fixture_public");
+  await page.getByRole("button", { name: "Follow", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Unfollow", exact: true })).toBeVisible();
+  await page.goto("/game/hades");
+  const section = page.getByRole("region", { name: "Friends’ ratings", exact: true });
+  await expect(section.getByRole("link", { name: /Published Fixture/ })).toHaveAttribute("href", "/u/fixture_public/game/hades");
+  await expect(section.getByText("0 / 100", { exact: true })).toBeVisible();
+  await expect(section.getByText("Tier S", { exact: true })).toBeVisible();
+  await section.screenshot({ path: `e2e-artifacts/friends-game-ratings-${testInfo.project.name}.png` });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await expect(section.getByText("Unavailable Fixture", { exact: true })).toHaveCount(0);
+  await expect(section.getByText("Published Peer", { exact: true })).toHaveCount(0);
+  expect((await page.request.post("http://127.0.0.1:3101/rest/v1/profile_blocks", { headers, data: { blocker_id: 2, blocked_id: 3 } })).ok()).toBe(true);
+  await page.reload();
+  await expect(section).toHaveCount(0);
+  expect((await page.request.delete("http://127.0.0.1:3101/rest/v1/profile_blocks?blocker_id=eq.2&blocked_id=eq.3", { headers })).ok()).toBe(true);
+  await page.reload();
+  await expect(section).toBeVisible();
+  await section.getByRole("link", { name: /Published Fixture/ }).click();
+  await expect(page.getByRole("heading", { name: "Published Fixture's log entry", exact: true })).toBeVisible();
+  await page.goto("/game/elden-ring-shadow-of-the-erdtree");
+  await expect(section).toHaveCount(0);
+  await page.goto("/u/fixture_public");
+  await page.getByRole("button", { name: "Unfollow", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Follow", exact: true })).toBeVisible();
+  await page.goto("/game/hades");
+  await expect(section).toHaveCount(0);
+  await context.clearCookies();
+  await page.reload();
+  await expect(section).toHaveCount(0);
+});
