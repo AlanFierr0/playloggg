@@ -195,12 +195,15 @@ test("profile hides share controls; comparison cards export correct PNG sizes an
   ).toBe(404);
 });
 
-test("taste neighbors show real match and overlap after five shared scored games", async({page,context})=>{
+test("taste neighbors show real match and overlap after five shared scored games", async({page,context},testInfo)=>{
  await context.addCookies([authCookie]);
  for(const [slug,score] of [["hades","0"],["fixture-game-0","50"],["fixture-game-1","50"],["fixture-game-2","50"],["fixture-game-3","50"]]) {
   await page.goto(`/log?game=${slug}`);await page.getByRole("button",{name:"Add score",exact:true}).click();await page.locator("#score-slider").fill(score);await page.locator("#commit-rating").click();await expect(page).toHaveURL(/\/profile$/);
  }
  await page.goto("/");const section=page.locator("section").filter({has:page.getByRole("heading",{name:"Taste neighbors",exact:true})});await expect(section).toContainText("100% Taste Match");await expect(section).toContainText("5 Shared scored games");
+ await expect(section.getByRole("img",{name:"Published Fixture initials",exact:true})).toHaveText("PF");
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await section.screenshot({path:`e2e-artifacts/taste-neighbors-${testInfo.project.name}.png`});
 });
 
 

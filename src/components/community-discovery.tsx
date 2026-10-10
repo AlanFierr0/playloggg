@@ -1,4 +1,5 @@
 import { ReviewHelpfulness } from "@/components/review-helpfulness";
+import { ProfileAvatar } from "@/components/profile-avatar";
 import { HomeCarousel } from "@/components/home-carousel";
 import { getReviewHelpfulness } from "@/lib/review-helpfulness";
 import Link from "next/link";
@@ -69,8 +70,10 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
               <Link
                 key={neighbor.profileId}
                 href={`/u/${neighbor.handle}`}
-                className="rounded-lg bg-surface-container-low p-5 space-y-3"
+                className="min-w-0 flex items-start gap-4 rounded-lg bg-surface-container-low p-5"
               >
+                <ProfileAvatar src={neighbor.avatarUrl} name={neighbor.displayName} className="h-12 w-12 rounded-xl" />
+                <div className="min-w-0 space-y-3">
                 <h3
                   translate="no"
                   className="font-headline-md text-headline-md break-words"
@@ -83,6 +86,7 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
                 <p className="text-body-sm text-on-surface-variant">
                   {neighbor.shared} {t("Shared scored games")}
                 </p>
+                </div>
               </Link>
             ))}
           </div>

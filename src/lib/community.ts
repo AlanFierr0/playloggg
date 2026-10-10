@@ -6,6 +6,7 @@ import {
   tasteNeighbors,
 } from "@/lib/community-stats";
 import { getAccount } from "@/lib/owner";
+import { avatarSource } from "@/lib/avatar-input";
 type CommunityScore={gameId:number;count:number;average:number;deviation:number};
 const toScore=(row:{game_id:number;sample_count:number;average:number;deviation:number}):CommunityScore=>({
   gameId:row.game_id,count:row.sample_count,average:row.average,deviation:row.deviation,
@@ -61,7 +62,7 @@ export const getCommunityGameScore=cache(async (gameId:number)=>(await getCommun
 const readDiscoveryRatings=cache(async()=>{
   const client=createPublicClient(),all=[];
   for(let offset=0;;offset+=500){
-    const {data,error}=await client.from("ratings").select("profile_id,game_id,score,profiles!ratings_profile_id_fkey!inner(handle,display_name,is_public,is_discoverable)")
+    const {data,error}=await client.from("ratings").select("profile_id,game_id,score,profiles!ratings_profile_id_fkey!inner(handle,display_name,avatar_url,is_public,is_discoverable)")
       .eq("profiles.is_public",true).eq("profiles.is_discoverable",true).order("profile_id").order("game_id").range(offset,offset+499);
     if(error)throw new Error("Recommendations could not be loaded.");
     all.push(...data);
@@ -114,6 +115,7 @@ export const getTasteDiscovery = cache(async () => {
               ...neighbor,
               handle: profile.handle,
               displayName: profile.display_name,
+              avatarUrl: avatarSource(neighbor.profileId, profile.avatar_url),
             },
           ]
         : [];
