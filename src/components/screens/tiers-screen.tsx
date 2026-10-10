@@ -90,33 +90,8 @@ return (<>
 
 </section>
 
-{canEdit&&<details className="group/ranges rounded-xl border border-outline-variant/30 bg-surface-container-low">
-<summary className="flex min-h-16 cursor-pointer list-none items-center gap-3 rounded-xl p-4 sm:px-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary [&::-webkit-details-marker]:hidden">
-<span aria-hidden="true" className="material-symbols-outlined text-primary">tune</span>
-<span className="flex-1 font-headline-md text-body-md font-semibold">{t("Edit score ranges")}</span>
-<span aria-hidden="true" className="material-symbols-outlined text-on-surface-variant transition-transform group-open/ranges:rotate-180 motion-reduce:transition-none">expand_more</span>
-</summary>
-<form id="tier-range-form" onSubmit={saveRanges} aria-busy={pending} className="space-y-5 px-4 pb-5 sm:px-5">
-<p className="max-w-2xl text-body-sm text-on-surface-variant">{t("Set the minimum and maximum score for each tier. Manually assigned games stay in their chosen tier.")}</p>
-<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-{tiers.map(tier=><div key={tier} className="flex items-center gap-3 rounded-lg border border-outline-variant/30 bg-surface-container p-3">
-<span className={`flex h-14 w-12 shrink-0 items-center justify-center rounded-lg text-2xl font-bold ${tierThemes[tier].surface}`}>{tier}</span>
-<div className="grid min-w-0 flex-1 grid-cols-2 gap-3">
-{([0,1] as const).map(bound=><label key={bound} className="min-w-0 space-y-1">
-<span className="block text-body-sm text-on-surface-variant">{t(bound===0 ? "Minimum" : "Maximum")}</span>
-<input aria-label={`${t(bound===0 ? "Minimum score for tier" : "Maximum score for tier")} ${tier}`} name={`${bound===0 ? "min" : "max"}-${tier}`} type="number" min={0} max={100} step={1} required disabled={pending} defaultValue={ranges[tier][bound]} key={ranges[tier][bound]} className="min-h-11 w-full rounded-lg border border-outline-variant bg-surface px-3 text-body-md font-semibold tabular-nums text-on-surface focus:border-primary focus:outline focus:outline-2 focus:outline-primary disabled:opacity-50"/>
-</label>)}
-</div>
-</div>)}
-</div>
-<div className="flex flex-wrap items-center justify-between gap-3">
-<span className="text-body-sm text-on-surface-variant">{t("Scores from 0 to 100. Ranges cannot overlap.")}</span>
-<button disabled={pending} type="submit" className="min-h-11 rounded-xl bg-primary-container text-on-primary-container px-5 py-3 hover:bg-primary transition-colors disabled:opacity-50">{t("Save score ranges")}</button>
-</div>
-</form>
-</details>}
 {canEdit&&<p role="status" aria-live="polite" className="text-body-sm text-primary">{t(pending ? "Saving…" : message)}</p>}
-<div className="flex flex-col gap-6 w-full" aria-busy={pending}>
+<form id="tier-range-form" onSubmit={saveRanges} className="flex flex-col gap-6 w-full" aria-busy={pending}>
 {groups.filter(group => (canEdit || group.tier!==null || group.games.length>0 || selectedTier===null)).map((group) => {
  const key = group.tier ?? "Unassigned";
  const theme = tierThemes[key];
@@ -126,7 +101,9 @@ return (<>
  onDrop={event=>{if(!canEdit||!dragged||pending)return;event.preventDefault();const slug=dragged;endDrag();moveGame(slug,group.tier);}}>
  <div className="flex flex-wrap gap-2 md:flex-col justify-between items-center md:items-start w-full md:w-44 flex-shrink-0 p-4 rounded-lg">
  <div className="flex items-center md:flex-col md:items-start gap-2"><span className="font-display-lg text-display-lg font-bold leading-none">{group.tier ?? "—"}</span><div className="flex flex-col"><span className="font-label-md text-label-md font-semibold uppercase tracking-wider">{t(theme.label)}</span>{!group.tier && <span className="font-label-sm text-label-sm">{t("No tier selected")}</span>}</div></div>
- {group.tier && <p className="inline-flex items-baseline gap-1.5 rounded-lg border border-black/20 bg-black/5 px-3 py-2 text-body-md font-semibold tabular-nums" aria-label={`${t("Score range")} ${ranges[group.tier][0]}–${ranges[group.tier][1]}`}><span>{ranges[group.tier][0]}–{ranges[group.tier][1]}</span><span className="text-body-sm font-normal">/ 100</span></p>}
+ {group.tier && (canEdit ? <div className="flex items-center gap-1.5" role="group" aria-label={`${t("Score range")} ${group.tier}`}>
+ {([0,1] as const).map(bound=><input key={`${group.tier}-${bound}-${ranges[group.tier!][bound]}`} aria-label={`${t(bound===0 ? "Minimum score for tier" : "Maximum score for tier")} ${group.tier}`} title={t(bound===0 ? "Minimum" : "Maximum")} name={`${bound===0 ? "min" : "max"}-${group.tier}`} type="number" min={0} max={100} step={1} required disabled={pending} defaultValue={ranges[group.tier!][bound]} className="min-h-11 w-14 min-w-0 rounded-lg border border-black/30 bg-white/30 px-1 text-center text-body-md font-semibold tabular-nums text-black [color-scheme:light] focus-visible:outline focus-visible:outline-2 focus-visible:outline-black disabled:opacity-50"/>)}
+ </div> : <p className="inline-flex items-baseline gap-1.5 rounded-lg border border-black/20 bg-black/5 px-3 py-2 text-body-md font-semibold tabular-nums" aria-label={`${t("Score range")} ${ranges[group.tier][0]}–${ranges[group.tier][1]}`}><span>{ranges[group.tier][0]}–{ranges[group.tier][1]}</span><span className="text-body-sm font-normal">/ 100</span></p>)}
  <div className="flex items-center gap-1.5 pt-0 md:pt-6"><span className="font-label-sm text-label-sm">{group.games.length} {group.games.length === 1 ? t("game") : t("games")}</span><span className="w-1.5 h-1.5 rounded-full bg-current"></span></div>
  </div>
  <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-2 flex-1 min-w-0">
@@ -135,7 +112,11 @@ return (<>
  </div>
  </section>;
 })}
-</div>
+{canEdit&&<div className="flex flex-wrap items-center justify-between gap-3">
+<p className="text-body-sm text-on-surface-variant">{t("Scores from 0 to 100. Ranges cannot overlap.")}</p>
+<button disabled={pending} type="submit" className="min-h-11 rounded-xl bg-primary-container px-5 py-3 text-on-primary-container hover:bg-primary disabled:opacity-50">{t("Save score ranges")}</button>
+</div>}
+</form>
 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-xl bg-surface-container-low text-on-surface-variant mt-4">
 <div className="flex items-center gap-3">
 <span aria-hidden="true" className="material-symbols-outlined text-primary text-xl">{"auto_awesome"}</span>
