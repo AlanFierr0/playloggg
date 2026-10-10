@@ -4,18 +4,18 @@ import { useMessages } from "@/components/site-preferences";
 import { playedPlatformLabels } from "@/lib/played-platforms";
 import type { PlayedPlatform } from "@/types/domain";
 
-export function ConsolePlatformSelector({ family, value, onChange }: { family: "PlayStation" | "Xbox"; value: PlayedPlatform | null; onChange: (value: PlayedPlatform | null) => void }) {
+export function ConsolePlatformSelector({ family, value, onChange }: { family: "PlayStation" | "Xbox" | "Nintendo" | "Other platforms"; value: PlayedPlatform | null; onChange: (value: PlayedPlatform | null) => void }) {
   const t = useMessages();
   const id = useId();
   const trigger = useRef<HTMLButtonElement>(null);
   const popup = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
-  const prefix = family === "PlayStation" ? "ps" : "xbox";
+  const prefix = family === "PlayStation" ? "ps" : family === "Xbox" ? "xbox" : family === "Nintendo" ? "nintendo_" : "other_";
   const selected = value?.startsWith(prefix) ?? false;
   const options = (Object.entries(playedPlatformLabels) as [PlayedPlatform, string][]).filter(([key]) => key.startsWith(prefix));
   return <>
-    <button ref={trigger} type="button" popoverTarget={id} aria-haspopup="menu" aria-expanded={open} aria-pressed={selected} className={`platform-btn flex items-center gap-1.5 rounded px-3 py-1 font-label-sm text-label-sm uppercase tracking-wider focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary ${selected ? "bg-primary/15 text-primary shadow-sm" : "bg-surface-container-highest text-on-surface-variant hover:bg-surface-bright hover:text-on-surface"}`}><span aria-hidden="true" className="material-symbols-outlined text-[14px]">sports_esports</span>{family}<span aria-hidden="true" className="material-symbols-outlined text-[14px]">expand_more</span></button>
-    <div ref={popup} id={id} popover="auto" role="menu" aria-label={t(`${family} console`)} onToggle={event => {
+    <button ref={trigger} type="button" popoverTarget={id} aria-haspopup="menu" aria-expanded={open} aria-pressed={selected} className={`platform-btn flex items-center gap-1.5 rounded px-3 py-1 font-label-sm text-label-sm uppercase tracking-wider focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary ${selected ? "bg-primary/15 text-primary shadow-sm" : "bg-surface-container-highest text-on-surface-variant hover:bg-surface-bright hover:text-on-surface"}`}><span aria-hidden="true" className="material-symbols-outlined text-[14px]">sports_esports</span>{t(family)}<span aria-hidden="true" className="material-symbols-outlined text-[14px]">expand_more</span></button>
+    <div ref={popup} id={id} popover="auto" role="menu" aria-label={t(family === "Other platforms" ? "Other platforms" : `${family} console`)} onToggle={event => {
       const expanded = event.newState === "open";
       setOpen(expanded);
       if (!expanded || !trigger.current || !popup.current) return;

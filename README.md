@@ -20,7 +20,7 @@ in Supabase; the production site is https://playloggg.vercel.app.
 | `/profile/ranking` | Personal order or score order, shown one view at a time |
 | `/profile/reviews`, `/profile/stats` | Reviews/voting and rating/taste statistics |
 | `/profile/favorites`, `/profile/social` | Manage favorites and following |
-| `/profile/import/steam` | Link Steam, preview/import games, sync hours and resume ratings |
+| `/profile/import/steam` | Link Steam, preview/import games, sync hours and resume imports/ratings |
 | `/settings` | Names, picture, optional identity details, privacy/discovery and account deletion |
 | `/u/[handle]` | Public overview with ranking/tiers/reviews/stats/favorites and entry pages |
 | `/login`, `/signup`, `/reset-password` | Verified email/Steam authentication and profile setup |
@@ -49,8 +49,11 @@ features must not be inferred as available from historical documentation.
 - Reviews are original text with clickable HTTP/HTTPS sources. Helpful votes are
   upvotes minus downvotes. Automatic translation is pending in TODO.md.
 - Steam import offers rating all/some/none, imports selected games in batches and keeps
-  existing logs. Rating order is descending playtime. Import requires the page to stay
-  open; rating-session resume is stored in that browser.
+  existing logs. Rating order is descending playtime. Import queues and rating sessions
+  are saved per profile in this browser. Leaving pauses work; Resume import retries
+  safely when returning. Nothing runs while the browser is closed.
+- Played platforms include Nintendo consoles/handhelds, Sega, mobile and browser.
+  Completion statistics exclude ongoing statuses and show a separate ongoing summary.
 - English/Spanish (Argentina), light/dark themes, keyboard access and reduced motion
   are supported. Profile/account/search/compare pages remain noindex.
 

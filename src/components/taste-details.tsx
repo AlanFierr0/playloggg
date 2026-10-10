@@ -87,12 +87,14 @@ export function TasteDetails({ games }: { games: Game[] }) {
               value: `${stats.highScores} (${stats.rated ? ((stats.highScores / stats.rated) * 100).toFixed(1) : "0"}%)`,
             },
             {
-              label: "Completion rate",
+              label: "Finishable-game completion",
               value:
                 stats.completionRate === null
                   ? "—"
                   : `${stats.completionRate}%`,
             },
+            { label: "Finishable games", value: stats.finishable },
+            { label: "Ongoing games", value: stats.ongoing },
             { label: "Shelved games", value: stats.shelved },
             { label: "Currently playing", value: stats.active },
             { label: "Paused", value: stats.paused },
@@ -108,7 +110,7 @@ export function TasteDetails({ games }: { games: Game[] }) {
         </dl>
         <p className="text-body-sm text-on-surface-variant">
           {t(
-            "Completion rate is completed entries divided by all logged entries, including backlog. Shelved does not necessarily mean dropped.",
+            "Completion counts completed games among entries outside Currently playing, Paused and Stopped playing. Those statuses are counted as ongoing games.",
           )}
         </p>
       </section>

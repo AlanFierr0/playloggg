@@ -1,0 +1,4 @@
+-- Extend played-platform choices without changing existing entries or access policies.
+alter table public.ratings drop constraint ratings_platform_check;
+alter table public.ratings add constraint ratings_platform_check
+  check (platform in ('pc', 'pc_battlenet', 'pc_gog', 'pc_epic', 'pc_ea', 'pc_ubisoft', 'pc_xbox', 'pc_other', 'ps1', 'ps2', 'ps3', 'ps4', 'ps5', 'psp', 'ps_vita', 'xbox', 'xbox_360', 'xbox_one', 'xbox_series_x', 'xbox_series_s', 'nintendo_switch', 'nintendo_switch_2', 'nintendo_wii_u', 'nintendo_wii', 'nintendo_gamecube', 'nintendo_64', 'nintendo_snes', 'nintendo_nes', 'nintendo_3ds', 'nintendo_ds', 'nintendo_gba', 'nintendo_gbc', 'nintendo_gb', 'other_dreamcast', 'other_saturn', 'other_genesis', 'other_master_system', 'other_game_gear', 'other_android', 'other_ios', 'other_browser', 'other_platform', 'steam_deck'));

@@ -55,6 +55,8 @@ implementation decisions; they do not override this file or later user requests.
 - Playback: completed, in progress, backlog, shelved, currently playing, paused, stopped playing.
 - Hours may be blank or nonnegative decimal values, bounded by elapsed time since known launch.
   Completion dates may be blank, cannot precede known launch or exceed the current UTC day.
+- Completion excludes active/paused/stopped entries and shows an ongoing-games summary.
+- Played platforms include Nintendo consoles, Sega, mobile and browser options.
 - Use shared played-platform labels; keep legacy pc for PC / Steam imports and sync.
 - Votes allow one up/down vote per other user's current public review and no self-voting.
 - Taste Match is 100 minus mean absolute difference across at least five shared scores.
@@ -76,7 +78,8 @@ implementation decisions; they do not override this file or later user requests.
 - Steam imports offer rate all/some/none. Some supports genre, playtime and title filters.
   Import all selected games while rating new entries in descending playtime order.
   Preserve existing logs and concurrent manual edits. Import runs while the page stays open;
-  unfinished rating sessions persist in this browser. Preview loaded batches immediately.
+  unfinished import queues and rating sessions persist per profile in this browser.
+  Leaving pauses the queue; Resume import retries safely. Preview loaded batches immediately.
 - Lists, quick rate, yearly wrapped and activity-feed pages are retired and return 404.
   Keep stored list/activity/block records and their database constraints. Do not restore
   list, block/unblock or feed controls. Trending still uses trusted score-change activity.

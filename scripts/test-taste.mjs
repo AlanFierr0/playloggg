@@ -88,3 +88,17 @@ test("year game summaries do not reuse today's completion status or platform for
   assert.equal(entry.status, null);
   assert.equal(entry.platform, null);
 });
+
+test("completion excludes ongoing statuses without treating unlogged games as entries", () => {
+  const stats=tasteStats([
+    game("done",80,{status:"completed"}),game("backlog",null,{status:"backlog"}),
+    game("active",90,{status:"active"}),game("paused",85,{status:"paused"}),
+    game("stopped",70,{status:"stopped"}),game("not-logged",null,{status:"active",logged:false}),
+  ]);
+  assert.equal(stats.ongoing,3);
+  assert.equal(stats.finishable,2);
+  assert.equal(stats.completed,1);
+  assert.equal(stats.completionRate,50);
+  assert.equal(tasteStats([game("only",null,{status:"active"})]).completionRate,null);
+  assert.equal(tasteStats([game("zero",null,{status:null})]).completionRate,0);
+});

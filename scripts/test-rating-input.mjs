@@ -31,7 +31,7 @@ test("unrated backlog/playing entries preserve null instead of inserting score z
 test("optional play details preserve null and supplied zero without requiring completed status", () => {
   assert.deepEqual(validateRating({ ...draft, platform: "steam_deck", hoursPlayed: 0, completedOn: "2024-02-29", status: "playing" }),
     { ...draft, platform: "steam_deck", hoursPlayed: 0, completedOn: "2024-02-29", status: "playing", review: "Independent tier." });
-  for (const platform of ["pc", "pc_battlenet", "pc_gog", "pc_epic", "pc_ea", "pc_ubisoft", "pc_xbox", "pc_other", "ps1", "ps2", "ps3", "ps4", "ps5", "psp", "ps_vita", "xbox", "xbox_360", "xbox_one", "xbox_series_x", "xbox_series_s", "steam_deck", null]) assert.equal(validateRating({ ...draft, platform }).platform, platform);
+  for (const platform of ["pc", "pc_battlenet", "pc_gog", "pc_epic", "pc_ea", "pc_ubisoft", "pc_xbox", "pc_other", "ps1", "ps2", "ps3", "ps4", "ps5", "psp", "ps_vita", "xbox", "xbox_360", "xbox_one", "xbox_series_x", "xbox_series_s", "steam_deck", "nintendo_switch", "nintendo_switch_2", "nintendo_wii_u", "nintendo_wii", "nintendo_gamecube", "nintendo_64", "nintendo_snes", "nintendo_nes", "nintendo_3ds", "nintendo_ds", "nintendo_gba", "nintendo_gbc", "nintendo_gb", "other_dreamcast", "other_saturn", "other_genesis", "other_master_system", "other_game_gear", "other_android", "other_ios", "other_browser", "other_platform", null]) assert.equal(validateRating({ ...draft, platform }).platform, platform);
   assert.equal(validateRating({ ...draft, hoursPlayed: 78.45 }).hoursPlayed, 78.45);
 });
 test("reject invalid platforms, nonfinite/negative hours and impossible or timezone-bearing dates", () => {

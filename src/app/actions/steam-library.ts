@@ -115,8 +115,8 @@ export async function syncSteamPlaytime(input: unknown): Promise<{ok:boolean;mes
 }
 
 export type SteamImportResult = {appId:number;ok:boolean;message:string;skipped?:boolean;rating?:ImportedSteamRating};
-export async function importSteamGames(input: unknown): Promise<{ok:boolean;message:string;results:SteamImportResult[]}> {
-  if (!Array.isArray(input) || !input.length || input.length>25 || input.some(id=>!steamAppId(id)) || new Set(input).size!==input.length)
+export async function importSteamGames(input: unknown, recover=false): Promise<{ok:boolean;message:string;results:SteamImportResult[]}> {
+  if (typeof recover!=="boolean" || !Array.isArray(input) || !input.length || input.length>25 || input.some(id=>!steamAppId(id)) || new Set(input).size!==input.length)
     return {ok:false,message:"Choose a valid Steam game.",results:[]};
   const ids=input as number[];
   const results=new Map<number,SteamImportResult>();
@@ -181,11 +181,21 @@ export async function importSteamGames(input: unknown): Promise<{ok:boolean;mess
       const {data:saved,error}=await account.supabase.from("ratings").upsert([...entries].map(([game_id,game])=>({profile_id:account.profile!.id,game_id,platform:"pc" as const,hours_played:game.hours,score:null,tier:null,status:null,review:null,tags:[],completed_on:null})),{onConflict:"profile_id,game_id",ignoreDuplicates:true}).select("game_id,updated_at");
       profileChanged=!error&&saved.length>0;
       const inserted=new Map((saved??[]).map(row=>[row.game_id,row]));
+      const recovered=new Map<number,{game_id:number;updated_at:string|null}>();
+      if(recover&&!error){
+        const missing=[...entries.keys()].filter(id=>!inserted.has(id));
+        if(missing.length){
+          const {data,error:recoverError}=await account.supabase.from("ratings").select("game_id,updated_at,platform,score,tier,status,review,tags,completed_on").eq("profile_id",account.profile.id).in("game_id",missing);
+          if(recoverError)for(const id of missing)fail(entries.get(id)!.appId,"This entry could not be recovered. Please retry.");
+          else for(const row of data)if(row.platform==="pc"&&row.score===null&&row.tier===null&&row.status===null&&!row.review&&!row.tags.length&&row.completed_on===null)recovered.set(row.game_id,row);
+        }
+      }
       for(const [id,game] of entries){
+        if(results.has(game.appId))continue;
         if(error){for(const appId of [game.appId,...(aliases.get(id)??[])])fail(appId,"This entry could not be saved. Please retry.");continue;}
         for(const appId of aliases.get(id)??[])results.set(appId,{appId,ok:true,skipped:true,message:"Existing entry kept unchanged."});
-        const row=inserted.get(id);
-        results.set(game.appId,{appId:game.appId,ok:true,skipped:!row,rating:row ? {slug:game.slug,updatedAt:row.updated_at} : undefined,message:row ? "Steam game imported." : "Existing entry kept unchanged."});
+        const row=inserted.get(id)??recovered.get(id);
+        results.set(game.appId,{appId:game.appId,ok:true,skipped:!inserted.has(id),rating:row ? {slug:game.slug,updatedAt:row.updated_at} : undefined,message:row ? "Steam game imported." : "Existing entry kept unchanged."});
       }
     }
     return {ok:true,message:"",results:ids.map(appId=>results.get(appId)??{appId,ok:false,message:"This game could not be imported. Please retry."})};

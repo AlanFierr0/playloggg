@@ -6,6 +6,7 @@ import { importSteamGames, previewSteamLibrary, syncSteamPlaytime, type LibraryP
 import { browseSteamLibrary, parseSteamBrowse, type SteamBrowse } from "@/lib/steam-library-input";
 import { parseHours } from "@/lib/rating-input";
 import { SteamRatingPicker, SteamRatingEditor, emptySteamRatingDraft, readSteamRatingSession, type SteamRatingDraft, type SteamRatingGame } from "@/components/steam-import-ratings";
+import { readSteamImportWork, type SteamImportWork } from "@/lib/steam-import-work";
 import { SteamGameCover } from "@/components/steam-game-cover";
 
 const button = "inline-flex min-h-11 items-center justify-center rounded-xl bg-primary-container text-on-primary-container px-5 py-3 disabled:opacity-50";
@@ -37,9 +38,14 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
   const [ratingHidden,setRatingHidden] = useState(false);
   const [detailsOpen,setDetailsOpen] = useState(false);
   const [draft,setDraft] = useState<SteamRatingDraft>(emptySteamRatingDraft);
+  const [recoveryWarning,setRecoveryWarning] = useState("");
+  const [importWork,setImportWork] = useState<SteamImportWork|null>(null);
+  const pauseImport = useRef(false);
+  const mounted = useRef(true);
   const [storageReady,setStorageReady] = useState(false);
   // ponytail: browser-local resume; use server persistence if cross-device resume is needed.
   const storageKey = `playlogg-steam-ratings:${profileId}`;
+  const workKey = `playlogg-steam-import:${profileId}`;
   const modalOpen = choice !== null || (importing && !ratingSession) || (ratingSession && !ratingHidden);
   const detailsToast = useRef<HTMLElement>(null);
   const restoreSession = useEffectEvent(()=>{
@@ -49,6 +55,12 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
       if(saved){setRatingGames(saved.games);setRatingIndex(saved.index);setRatingTarget(saved.target);setDraft(saved.draft);setProgress(saved.progress);setImportTotal(saved.total);setRatingSession(true);setRatingHidden(true);}
       else if(raw)localStorage.removeItem(storageKey);
     } catch {setMessage("Your rating session could not be restored in this browser.");}
+    try {
+      const raw=localStorage.getItem(workKey);
+      const work=raw ? readSteamImportWork(raw) : null;
+      if(work){setImportWork(work);setImportTotal(work.total);setProgress(work.total-work.pending.length);}
+      else if(raw)localStorage.removeItem(workKey);
+    } catch {setMessage("Your unfinished import could not be restored in this browser.");}
     setStorageReady(true);
   });
   useEffect(()=>{const timer=setTimeout(()=>restoreSession(),0);return ()=>clearTimeout(timer);},[storageKey]);
@@ -67,6 +79,7 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
   const revision = useRef(0);
   const filterTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingLoad = useRef<{query:Omit<SteamBrowse,"offset">;size:string}|null>(null);
+  useEffect(()=>{mounted.current=true;return ()=>{mounted.current=false;pauseImport.current=true;};},[]);
   useEffect(()=>()=>{if(filterTimer.current)clearTimeout(filterTimer.current);revision.current++;pendingLoad.current=null;},[]);
   useEffect(()=>{
     const dialog=importDialog.current;
@@ -124,41 +137,65 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
     setFilters(next);setMessage("");
     if(hasPreview.current)filterTimer.current=setTimeout(()=>{filterTimer.current=null;void load(next,size);},delay);
   }
-  async function importSelected(retry=false,rateIds:number[]=[]) {
+  function keepImport(work:SteamImportWork|null) {
+    setImportWork(work);
+    try {if(work)localStorage.setItem(workKey,JSON.stringify(work));else localStorage.removeItem(workKey);}
+    catch {setRecoveryWarning("This browser could not save your import queue. Keep this page open until it finishes.");}
+  }
+  async function importSelected(retry=false,rateIds:number[]=[],resume:SteamImportWork|null=null) {
     const ids=retry ? failures.map(failure=>failure.appId) : selected;
-    const wanted=new Set(rateIds);
-    const hours=new Map(preview?.games.map(game=>[game.appId,game.hours]));
-    const rated=ids.filter(id=>wanted.has(id)).sort((a,b)=>(hours.get(b)??0)-(hours.get(a)??0));
-    const queue=[...rated,...ids.filter(id=>!wanted.has(id))];
+    const wanted=new Set(resume?.rateIds ?? rateIds);
+    const rows=resume?.rows ?? preview?.games.filter(game=>ids.includes(game.appId)) ?? [];
+    const byId=new Map(rows.map(game=>[game.appId,game]));
+    const rated=ids.filter(id=>wanted.has(id)).sort((a,b)=>(byId.get(b)?.hours??0)-(byId.get(a)?.hours??0));
+    const queue=resume?.pending ?? [...rated,...ids.filter(id=>!wanted.has(id))];
     if (active.current || !queue.length) return;
-    setChoice(null);setDetailsOpen(rateIds.length>0);setRatingHidden(false);setDraft(emptySteamRatingDraft);setRatingSession(rateIds.length>0);setRatingGames([]);setRatingIndex(0);setRatingTarget(rateIds.length);
+    let work:SteamImportWork=resume ? {...resume} : {version:1,rows,pending:queue,rateIds,total:queue.length,imported:0,skipped:0};
+    // Save before the first request; an interrupted batch can be safely replayed.
+    keepImport(work);pauseImport.current=false;
+    setChoice(null);setDetailsOpen(wanted.size>0);setRatingHidden(false);
+    if(!resume){setDraft(emptySteamRatingDraft);setRatingGames([]);setRatingIndex(0);setRatingTarget(rateIds.length);}
+    if(wanted.size){setRatingSession(true);setRatingTarget(work.rateIds.length);}
     setSelected(queue);
-    active.current=true;setBusy(true);setImporting(true);setMessage("");setFailures([]);setSummary(null);setImportTotal(queue.length);setProgress(0);
-    const remaining:number[]=[];
+    active.current=true;setBusy(true);setImporting(true);setMessage("");setFailures([]);setSummary(null);setImportTotal(work.total);setProgress(work.total-queue.length);
     const failed:{appId:number;title:string;message:string}[]=[];
-    let imported=0,skipped=0;
+    const failedIds:number[]=[];
     try {
-      for (let offset=0;offset<queue.length;) {
-        // Return the first rated game promptly, then amortize work in bounded batches.
-        const batch=queue.slice(offset,offset+(offset===0&&rated.length ? 1 : 25));
-        setImportTitle(preview?.games.find(game=>game.appId===batch[0])?.title??"");
+      for (let offset=0;offset<queue.length&&!pauseImport.current;) {
+        const batch=queue.slice(offset,offset+(offset===0&&wanted.size ? 1 : 25));
+        setImportTitle(byId.get(batch[0])?.title??"");
         let response;
-        try {response=await importSteamGames(batch);}
+        try {response=await importSteamGames(batch,Boolean(resume));}
         catch {response={ok:false,message:"Library import is unavailable right now. Please retry.",results:[]};}
+        // Leave the in-flight IDs saved if this component was unmounted.
+        if(!mounted.current)return;
+        const additions:SteamRatingGame[]=[];
         for(const appId of batch){
           const result=response.results.find(result=>result.appId===appId)??{ok:false,message:response.message};
-          const row=preview?.games.find(game=>game.appId===appId);
+          const row=byId.get(appId);
           if(result.ok){
-            if(result.skipped)skipped++;else imported++;
-            if(wanted.has(appId)&&result.rating&&row)setRatingGames(current=>[...current,{...row,...result.rating!}]);
+            if(result.skipped)work.skipped++;else work.imported++;
+            if(wanted.has(appId)&&result.rating&&row)additions.push({...row,...result.rating});
             setPreview(current=>current ? {...current,games:current.games.filter(game=>game.appId!==appId),total:Math.max(0,current.total-1),nextOffset:Math.max(0,current.nextOffset-1),syncAppIds:[...new Set([...current.syncAppIds,appId])]} : current);
-          }else{remaining.push(appId);failed.push({appId,title:row?.title??String(appId),message:result.message});}
+          }else{failedIds.push(appId);failed.push({appId,title:row?.title??String(appId),message:result.message});}
         }
-        offset+=batch.length;setProgress(offset);
+        if(additions.length){
+          setRatingGames(current=>[...new Map([...current,...additions].map(game=>[game.appId,game])).values()]);
+          // Checkpoint ratings synchronously before removing acknowledged import IDs.
+          try {
+            const raw=localStorage.getItem(storageKey);
+            const saved=raw ? readSteamRatingSession(raw) : null;
+            localStorage.setItem(storageKey,JSON.stringify({games:[...new Map([...(saved?.games??[]),...additions].map(game=>[game.appId,game])).values()],index:saved?.index??0,target:work.rateIds.length,draft:saved?.draft??emptySteamRatingDraft,progress:work.total-queue.length+offset+batch.length,total:work.total}));
+          } catch {setMessage("This browser could not keep your rating session. Keep this page open to avoid losing your place.");}
+        }
+        offset+=batch.length;
+        work={...work,pending:[...failedIds,...queue.slice(offset)]};
+        keepImport(work.pending.length ? work : null);
+        setProgress(work.total-queue.length+offset);
       }
-      setSelected(remaining);setFailures(failed);setSummary({imported,skipped,failed:failed.length});
-      setMessage(failed.length ? "Some games could not be imported. Your successful imports are saved; retry the remaining games." : "Import complete. Your games are saved in your profile.");
-    } finally {active.current=false;setBusy(false);setImporting(false);setDetailsOpen(false);setImportTitle("");}
+      setSelected(work.pending);setFailures(failed);setSummary({imported:work.imported,skipped:work.skipped,failed:failed.length});
+      setMessage(pauseImport.current ? "Import paused. Resume it here whenever you are ready." : failed.length ? "Some games could not be imported. Your successful imports are saved; retry the remaining games." : "Import complete. Your games are saved in your profile.");
+    } finally {if(mounted.current){active.current=false;setBusy(false);setImporting(false);setDetailsOpen(false);setImportTitle("");}}
   }
   async function syncPlaytime() {
     if(active.current || !preview?.syncAppIds.length)return;
@@ -179,26 +216,29 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
   const available=preview?.games.filter(game=>game.matched&&!game.logged) ?? [];
   const importProgress = <>
     <div role="status" aria-live="polite" className="mt-6 space-y-5">
-      <div><p className="text-body-sm text-on-surface-variant">{t(importing ? "Processing now" : progress<importTotal ? "Import interrupted. Refresh the library to import remaining games." : "Import complete")}</p>{importing&&<p translate="no" className="mt-1 font-headline-md break-words">{importTitle}</p>}</div>
+      <div><p className="text-body-sm text-on-surface-variant">{t(importing ? "Processing now" : progress<importTotal ? "Import paused. Resume it here whenever you are ready." : "Import complete")}</p>{importing&&<p translate="no" className="mt-1 font-headline-md break-words">{importTitle}</p>}</div>
       <div className="grid grid-cols-2 gap-4"><div><p className="text-body-sm text-on-surface-variant">{t("Games processed")}</p><p className="mt-1 text-2xl text-primary tabular-nums">{progress} / {importTotal}</p></div><div><p className="text-body-sm text-on-surface-variant">{t("Games remaining")}</p><p className="mt-1 text-2xl text-primary tabular-nums">{Math.max(0,importTotal-progress)}</p></div></div>
     </div>
     <div role="progressbar" aria-label={t("Importing games")} aria-valuemin={0} aria-valuemax={Math.max(1,importTotal)} aria-valuenow={progress} className="mt-4 h-2 overflow-hidden rounded-full bg-surface-container-highest"><div className="h-full rounded-full bg-primary motion-safe:transition-[width]" style={{width:`${importTotal ? progress/importTotal*100 : 0}%`}}/></div>
     {ratingSession&&<p className="mt-4 text-body-sm text-on-surface-variant">{t("Games reviewed")}: {ratingIndex} / {ratingTarget}. {t("Only successful new imports are shown here.")}</p>}
-    {importing&&<p className="mt-4 text-body-sm text-on-surface-variant">{t("Import continues while you rate. Keep this page open until it finishes.")}</p>}
+    {importing&&<button type="button" className="mt-3 min-h-11 text-primary" onClick={()=>{pauseImport.current=true;setMessage("Pausing after the current batch…");}}>{t("Pause import")}</button>}
+    {importing&&<p className="mt-4 text-body-sm text-on-surface-variant">{t("Import continues while this page is open. If you leave, resume the saved queue when you return.")}</p>}
   </>;
   const progressToast = detailsOpen ? <aside ref={detailsToast} popover="manual" role="region" aria-labelledby="steam-import-details-title" onKeyDown={event=>{if(event.key==="Escape"){event.stopPropagation();setDetailsOpen(false);}}} className="fixed inset-auto right-4 bottom-4 m-0 w-[calc(100%_-_2rem)] max-w-xs max-h-40 overflow-y-auto rounded-xl border border-primary/20 bg-surface-container-high p-4 text-on-surface shadow-2xl backdrop:bg-transparent">
     <div className="flex items-center justify-between gap-3"><h2 id="steam-import-details-title" className="font-semibold text-body-md">{t("Import details")}</h2><button aria-label={t("Close import details")} className="min-h-11 min-w-11 text-primary -my-2 -mr-2" onClick={()=>setDetailsOpen(false)}>×</button></div>
     <div role="status" className="mt-2 space-y-1 text-body-sm">
       <p className="flex justify-between gap-2"><span>{t("Games processed")}: {progress} / {importTotal}</span><span>{t("Games remaining")}: {Math.max(0,importTotal-progress)}</span></p>
-      {importing ? <p translate="no" className="truncate text-on-surface-variant">{importTitle}</p> : <p className="text-on-surface-variant">{t(progress<importTotal ? "Import interrupted. Refresh the library to import remaining games." : "Import complete")}</p>}
+      {importing ? <p translate="no" className="truncate text-on-surface-variant">{importTitle}</p> : <p className="text-on-surface-variant">{t(progress<importTotal ? "Import paused. Resume it here whenever you are ready." : "Import complete")}</p>}
       {ratingSession&&<p className="text-on-surface-variant">{t("Games reviewed")}: {ratingIndex} / {ratingTarget}</p>}
     </div>
     <div role="progressbar" aria-label={t("Importing games")} aria-valuemin={0} aria-valuemax={Math.max(1,importTotal)} aria-valuenow={progress} className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-container-highest"><div className="h-full rounded-full bg-primary" style={{width:`${importTotal ? progress/importTotal*100 : 0}%`}}/></div>
   </aside> : null;
   return <div className="space-y-6">
+    {recoveryWarning&&<p role="alert" className="text-error">{t(recoveryWarning)}</p>}
+    {importWork&&!importing&&<div className="flex flex-wrap items-center gap-3 rounded-xl bg-surface-container-low p-4"><button className={button} disabled={busy} onClick={()=>void importSelected(false,[],importWork)}>{t("Resume import")} ({importWork.pending.length})</button><button type="button" className="min-h-11 px-3 text-primary" disabled={busy} onClick={()=>keepImport(null)}>{t("Discard remaining import")}</button><p className="text-body-sm text-on-surface-variant">{t("Your unfinished import is saved in this browser. Already imported games are kept.")}</p></div>}
     {ratingSession&&ratingHidden&&<div className="flex flex-wrap items-center gap-3 rounded-xl bg-surface-container-low p-4"><button className={button} onClick={()=>{setRatingHidden(false);setDetailsOpen(importing);}}>{t("Resume rating games")} ({Math.max(0,ratingGames.length-ratingIndex)})</button><p className="text-body-sm text-on-surface-variant">{t("Your unfinished ratings are kept in this browser.")}</p></div>}
     <p className="text-body-sm text-on-surface-variant">{t("Steam Game details must be Public, including playtime. Your Playlogg profile visibility does not change.")}</p>
-    <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex flex-wrap gap-3"><button className={button} disabled={busy} onClick={()=>load(filters,amount,false,true)}>{t(loading ? "Loading…" : "Refresh library")}</button><button className={button} disabled={busy||!preview?.syncAppIds.length} onClick={syncPlaytime}>{t(syncing ? "Syncing playtime…" : "Sync Steam playtime")}</button><Link href="/profile" className="inline-flex min-h-11 items-center rounded-xl bg-surface-container text-primary px-5 py-3">{t("View profile")}</Link></div><button className={`${button} ml-auto`} disabled={busy||ratingSession||!selected.length} onClick={()=>setChoice("ask")}>{t("Import selected games")} ({selected.length})</button></div>
+    <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex flex-wrap gap-3"><button className={button} disabled={busy} onClick={()=>load(filters,amount,false,true)}>{t(loading ? "Loading…" : "Refresh library")}</button><button className={button} disabled={busy||!preview?.syncAppIds.length} onClick={syncPlaytime}>{t(syncing ? "Syncing playtime…" : "Sync Steam playtime")}</button><Link href="/profile" className="inline-flex min-h-11 items-center rounded-xl bg-surface-container text-primary px-5 py-3">{t("View profile")}</Link></div><button className={`${button} ml-auto`} disabled={busy||ratingSession||(Boolean(importWork)&&!failures.length)||!selected.length} onClick={()=>setChoice("ask")}>{t("Import selected games")} ({selected.length})</button></div>
     <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end rounded-xl bg-surface-container-low p-5">
       <label className="min-w-0 space-y-2"><span className="block">{t("Sort by")}</span><select aria-label={t("Sort by")} disabled={busy&&!loading} value={displaySort} onChange={event=>setDisplaySort(event.target.value as SteamBrowse["sort"])} className="w-full rounded-xl bg-surface-container p-3"><option value="title">{t("Title A–Z")}</option><option value="hours_desc">{t("Most played")}</option><option value="hours_asc">{t("Least played")}</option></select></label>
       <label className="min-w-0 space-y-2"><span className="block">{t("Minimum hours")}</span><input disabled={busy&&!loading} type="number" min="0" step="any" value={minHours} onChange={event=>{setMinHours(event.target.value);updateFilters(event.target.value,maxHours);}} className="w-full rounded-xl bg-surface-container p-3" /></label>
@@ -217,14 +257,14 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
       {choice==="some"&&<SteamRatingPicker games={preview?.games.filter(game=>selected.includes(game.appId))??[]} onBack={()=>setChoice("ask")} onStart={ids=>importSelected(false,ids)}/>}
       {!choice&&<>
       {!ratingSession&&importProgress}
-      {ratingSession&&<>{ratingGames[ratingIndex] ? <SteamRatingEditor key={ratingGames[ratingIndex].slug} game={ratingGames[ratingIndex]} draft={draft} onDraft={setDraft} onNext={nextRating}/> : importing ? <p role="status" className="mt-5">{t("Waiting for the next imported game…")}</p> : <div className="mt-5 space-y-4"><p>{t(progress<importTotal ? "Your imported games have been reviewed. Refresh the library to import remaining games." : "Your imports and rating session are complete.")}</p><button className={button} onClick={()=>setRatingSession(false)}>{t("Done")}</button></div>}</>}
+      {ratingSession&&<>{ratingGames[ratingIndex] ? <SteamRatingEditor key={ratingGames[ratingIndex].slug} game={ratingGames[ratingIndex]} draft={draft} onDraft={setDraft} onNext={nextRating}/> : importing ? <p role="status" className="mt-5">{t("Waiting for the next imported game…")}</p> : <div className="mt-5 space-y-4"><p>{t(progress<importTotal ? "Your imported games have been reviewed. Resume the import to continue." : "Your imports and rating session are complete.")}</p><button className={button} onClick={()=>setRatingSession(false)}>{t("Done")}</button></div>}</>}
       </>}
       {modalOpen&&progressToast}
     </dialog>
     {!modalOpen&&progressToast}
     {loading&&<button type="button" onClick={()=>{stopLoading.current=true;}} className="min-h-11 rounded-xl bg-surface-container text-primary px-4">{t("Stop loading")}</button>}
     {summary&&<p role="status">{t("Imported")}: {summary.imported} · {t("Skipped")}: {summary.skipped} · {t("Failed")}: {summary.failed}</p>}
-    {!!failures.length&&<button disabled={busy||ratingSession} onClick={()=>importSelected(true)} className={button}>{t("Retry failed games")}</button>}
+    {!!failures.length&&<button disabled={busy||ratingSession} onClick={()=>importWork ? importSelected(false,[],importWork) : importSelected(true)} className={button}>{t("Retry failed games")}</button>}
     {!!failures.length&&<ul className="space-y-2 text-on-surface-variant">{failures.map(failure=><li key={failure.appId}><span translate="no">{failure.title}</span>: {t(failure.message)}</li>)}</ul>}
     {preview&&preview.total>0&&<>
       <div className="flex flex-wrap items-center justify-between gap-4"><p>{preview.games.length} / {preview.total} {t("Steam games")}</p><div className="flex flex-wrap gap-3"><button className="min-h-11 rounded-xl bg-surface-container text-primary px-4" disabled={(busy&&!loading)||!available.length} onClick={()=>setSelected(available.map(game=>game.appId))}>{t("Select available games")}</button><button className="min-h-11 rounded-xl bg-surface-container text-primary px-4" disabled={(busy&&!loading)||!selected.length} onClick={()=>setSelected([])}>{t("Clear selection")}</button></div></div>

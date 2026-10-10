@@ -1,7 +1,7 @@
 # Audit fixes - October 10, 2026
 
 The requested must-fix and should-fix findings (1-14) are implemented.
-Nice-to-have ideas remain outside this change.
+Nice-to-have findings 15, 16 and 19 are also implemented.
 
 | Finding | Result |
 |---|---|
@@ -40,7 +40,22 @@ GitHub browser-job timeout increased to 30 minutes for the expanded suite.
 ## Limits
 
 Editor drafts use sessionStorage in the same tab; they are not cross-device backups.
-Existing manual ranking lists retain their saved positions. Steam imports still
-require the page to remain open. External Steam/IGDB outages are not simulated by
+Existing manual ranking lists retain their saved positions. Steam import queues pause when leaving and resume in the same browser.
+Imports do not run while the browser is closed. External Steam/IGDB outages are not simulated by
 the fixture suite. Older documents under docs/ are historical unless reflected in
 README and AGENTS.
+
+## Requested nice-to-have improvements
+
+- 15: Nintendo Switch/Switch 2, Wii/Wii U, GameCube, N64, NES/SNES and handhelds; Sega, Android, iOS and browser choices. Shared validation and database constraint accept all choices.
+- 16: Per-profile browser checkpoints save pending Steam IDs and rating choices before requests. Resume/Discard controls recover interrupted imports without changing existing entries; blank PC imports can rejoin rating when their response was lost.
+- 19: Ongoing statuses (currently playing, paused, stopped playing) have a separate summary and are excluded from finishable-game completion. Classification follows the user's status; no genre guess or historical rewrite.
+
+### Verification for 15, 16 and 19
+
+Production build, type checking and lint pass; all 99 unit tests pass.
+All 20 targeted desktop/mobile scenarios pass across the final run and isolated
+rerun: eight new platform/statistics/import-recovery scenarios and twelve Steam
+regressions. One desktop reload timed out on external resources and passed on
+retry. The platform migration was applied and verified live in a rolled-back
+transaction against the private test profile.

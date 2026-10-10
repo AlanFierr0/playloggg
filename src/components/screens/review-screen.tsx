@@ -179,9 +179,11 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 <button type="button" onClick={() => setPlatform(isPC ? null : "pc")} title={t("Select platform; click again to clear")} aria-pressed={isPC} aria-expanded={isPC} aria-controls="pc-store-selector" className={`platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider flex items-center gap-1.5 ${isPC ? "bg-primary/15 text-primary shadow-sm" : "bg-surface-container-highest text-on-surface-variant hover:bg-surface-bright hover:text-on-surface"}`}><span aria-hidden="true" className="material-symbols-outlined text-[14px]">desktop_windows</span>PC</button>
 <ConsolePlatformSelector family="PlayStation" value={platform} onChange={setPlatform} />
 <ConsolePlatformSelector family="Xbox" value={platform} onChange={setPlatform} />
+<ConsolePlatformSelector family="Nintendo" value={platform} onChange={setPlatform} />
+<ConsolePlatformSelector family="Other platforms" value={platform} onChange={setPlatform} />
 <button type="button" onClick={() => setPlatform(platform === "steam_deck" ? null : "steam_deck")} aria-pressed={platform === "steam_deck"} title={t("Select platform; click again to clear")} className={`platform-btn flex items-center gap-1.5 rounded px-3 py-1 font-label-sm text-label-sm uppercase tracking-wider ${platform === "steam_deck" ? "bg-primary/15 text-primary" : "bg-surface-container-highest text-on-surface-variant hover:bg-surface-bright hover:text-on-surface"}`}><span aria-hidden="true" className="material-symbols-outlined text-[14px]">tablet</span>Steam Deck</button>
 </div>
-{platform && (platform.startsWith("ps") || platform.startsWith("xbox")) && <p className="font-body-sm text-body-sm text-primary">{t("Console")}: {t(playedPlatformLabels[platform])}</p>}
+{platform && !platform.startsWith("pc") && platform !== "steam_deck" && <p className="font-body-sm text-body-sm text-primary">{t(platform.startsWith("ps") || platform.startsWith("xbox") ? "Console" : "Platform")}: {t(playedPlatformLabels[platform])}</p>}
 <div id="pc-store-selector" hidden={!isPC}>
   {isPC && <div className="ml-3 border-l-2 border-primary/30 pl-3 space-y-2" role="group" aria-label={t("PC store")}>
     <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{t("PC store")}</span>
