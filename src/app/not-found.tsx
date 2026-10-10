@@ -16,11 +16,10 @@ export default async function NotFound() {
         </div>
       </div>
       <div aria-hidden="true" className="order-1 relative min-w-0 md:order-2">
-        <div className="flex items-center justify-between border-b border-outline-variant/30 pb-3 font-label-md text-label-md text-on-surface-variant">
+        <div className="flex items-center border-b border-outline-variant/30 pb-3 font-label-md text-label-md text-on-surface-variant">
           <span>{t("Page not found")}</span>
-          <span className="text-primary">404</span>
         </div>
-        <Image src="/images/wrong-warp.webp" alt="" width={1536} height={1024} priority sizes="(min-width: 768px) 55vw, 100vw" className="h-auto w-full" />
+        <Image src="/images/backlog-404.webp" alt="" width={1536} height={1024} priority sizes="(min-width: 768px) 55vw, 100vw" className="h-auto w-full" />
         <div className="flex items-center gap-2 font-label-md text-label-md text-on-surface-variant">
           <span className="h-2 w-2 rounded-full bg-primary" />
           {t("Next quest: clear your backlog.")}
