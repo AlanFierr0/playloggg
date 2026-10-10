@@ -67,18 +67,22 @@ const getSearchIndex = cache(async () => {
     if (page.length < 500) return rows;
   }
 });
-export const getSearchPortfolio = cache(async (query = "", offset = 0): Promise<Portfolio & { hasMore: boolean }> => {
+export const getSearchPortfolio = cache(async (query = "", offset = 0, hideRated = false): Promise<Portfolio & { hasMore: boolean; excludedSlugs: string[] }> => {
   const [shell, ratings] = await Promise.all([getPortfolioShell(), selectedRatings()]);
+  const ratedIds = new Set(hideRated ? ratings.filter(rating => rating.score !== null).map(rating => rating.game_id) : []);
+  const index = query.trim() || ratedIds.size ? await getSearchIndex() : [];
+  const excludedSlugs = index.filter(row => ratedIds.has(row.id)).map(row => row.slug);
   let rows: GameRow[];
   let hasMore: boolean;
-  if (!query.trim()) {
+  if (!query.trim() && !ratedIds.size) {
     rows = await readPublic<GameRow>(`games?select=${searchFields}&order=id.asc&limit=25&offset=${offset}`, ["game-catalog"]);
     hasMore = rows.length > 24;
     rows = rows.slice(0, 24);
   } else {
     const byGame = new Map(ratings.map(rating => [rating.game_id, rating]));
     const words = query.toLowerCase().trim().split(/\s+/);
-    const matches = (await getSearchIndex()).filter(row => {
+    const matches = index.filter(row => {
+      if (ratedIds.has(row.id)) return false;
       const content = `${row.title} ${row.search_keywords} ${row.genres.join(" ")} ${(byGame.get(row.id)?.tags ?? []).join(" ")}`.toLowerCase();
       return words.every(word => content.includes(word));
     }).sort((a, b) => (byGame.get(b.id)?.score ?? -1) - (byGame.get(a.id)?.score ?? -1) || a.slug.localeCompare(b.slug));
@@ -88,7 +92,7 @@ export const getSearchPortfolio = cache(async (query = "", offset = 0): Promise<
   }
   // Search rows need cards and personal scores, not reviews or game-detail media.
   const games = portfolioGames(rows.map(row => ({...row, artwork_image_ids: [], screenshot_image_ids: [], igdb_metadata: {}, igdb_url: null})), ratings).map(game => ({...game, review: null}));
-  return { ...shell, games, hasMore };
+  return { ...shell, games, hasMore, excludedSlugs };
 });
 export const getPortfolio = cache(async (): Promise<Portfolio> => {
   const [shell, rows, ratings] = await Promise.all([getPortfolioShell(), getCatalog(), selectedRatings()]);

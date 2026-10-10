@@ -8,7 +8,7 @@ export default async function LogPage({ searchParams }: { searchParams: Promise<
   const query = await searchParams;
   if (!query.game) {
     const portfolio = await getPortfolioShell();
-    return <SearchScreen portfolio={getSearchPortfolio()} initialQuery="" returnPath={portfolio.access?.canEdit ? "/profile" : "/"} mode="log" />;
+    return <SearchScreen portfolio={getSearchPortfolio("", 0, true)} initialQuery="" returnPath={portfolio.access?.canEdit ? "/profile" : "/"} mode="log" />;
   }
   const game = await getPublicGame(query.game);
   if (!game) notFound();

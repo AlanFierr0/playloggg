@@ -10,7 +10,7 @@ import type { Game, Profile } from "@/types/domain";
 import { HighlightedTitle, ReferenceProfile0 } from "./search-reference-rows";
 
 export type SearchScope = "all" | "games" | "curators";
-export function SearchResults({ query, scope, mode, profiles, profilesLoading, profilesError, gamesLoading, gamesError, hasMore, onLoadMore, onRetry }: { query: string; scope: SearchScope; mode: "browse" | "log"; profiles: Profile[]; profilesLoading: boolean; profilesError?: boolean; gamesLoading: boolean; gamesError: boolean; hasMore: boolean; onLoadMore: () => void; onRetry: () => void }) {
+export function SearchResults({ query, scope, mode, profiles, profilesLoading, profilesError, excludedSlugs, gamesLoading, gamesError, hasMore, onLoadMore, onRetry }: { query: string; scope: SearchScope; mode: "browse" | "log"; profiles: Profile[]; profilesLoading: boolean; profilesError?: boolean; excludedSlugs: string[]; gamesLoading: boolean; gamesError: boolean; hasMore: boolean; onLoadMore: () => void; onRetry: () => void }) {
   const t = useMessages();
   const portfolio = usePortfolio();
   const { titles } = getSearchMatches(query, portfolio);
@@ -26,7 +26,7 @@ export function SearchResults({ query, scope, mode, profiles, profilesLoading, p
           {gamesLoading && <p role="status" className="p-4 text-on-surface-variant">{t("Loading…")}</p>}
           {gamesError && <div className="p-4"><p role="status">{t("Game search could not be loaded.")}</p><button type="button" onClick={onRetry} className="mt-2 text-primary">{t("Retry search")}</button></div>}
           {hasMore && !gamesLoading && <button type="button" onClick={onLoadMore} className="m-3 rounded-lg border border-outline-variant px-4 py-2 text-primary">{t("Load more")}</button>}
-          {portfolio.access?.canImportCatalog && <div className={gamesLoading || gamesError ? "hidden" : undefined}><IgdbSearch query={query} mode={mode} excludeSlugs={titles.map(game => game.slug)} /></div>}
+          {portfolio.access?.canImportCatalog && <div className={gamesLoading || gamesError ? "hidden" : undefined}><IgdbSearch query={query} mode={mode} excludeSlugs={[...excludedSlugs, ...titles.map(game => game.slug)]} /></div>}
         </div>
       </section>}
       {show("curators") && <section className="pt-3">

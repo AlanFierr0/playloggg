@@ -9,7 +9,7 @@ import { PortfolioProvider } from "@/components/portfolio-provider";
 import type { Portfolio, Profile } from "@/types/domain";
 
 
-export function SearchScreen({ initialQuery, returnPath, mode, portfolio }: { initialQuery: string; returnPath: string; mode: "browse" | "log"; portfolio: Promise<Portfolio & {hasMore: boolean}> }) {
+export function SearchScreen({ initialQuery, returnPath, mode, portfolio }: { initialQuery: string; returnPath: string; mode: "browse" | "log"; portfolio: Promise<Portfolio & {hasMore: boolean; excludedSlugs: string[]}> }) {
   const t = useMessages();
 
 
@@ -95,7 +95,7 @@ return (
 );
 }
 
-function SearchData({ portfolio, initialQuery, offset, onLoadMore, ...props }: Omit<ComponentProps<typeof SearchResults>, "gamesLoading" | "gamesError" | "hasMore" | "onLoadMore" | "onRetry"> & { portfolio: Promise<Portfolio & {hasMore: boolean}>; initialQuery: string; offset: number; onLoadMore: () => void }) {
+function SearchData({ portfolio, initialQuery, offset, onLoadMore, ...props }: Omit<ComponentProps<typeof SearchResults>, "gamesLoading" | "gamesError" | "hasMore" | "onLoadMore" | "onRetry" | "excludedSlugs"> & { portfolio: Promise<Portfolio & {hasMore: boolean; excludedSlugs: string[]}>; initialQuery: string; offset: number; onLoadMore: () => void }) {
   const initial = use(portfolio);
   type Batch = Pick<Portfolio, "games"> & {hasMore: boolean};
   const [results, setResults] = useState(() => new Map<string, Batch>([[`0:${initialQuery}`, initial]]));
@@ -109,7 +109,7 @@ function SearchData({ portfolio, initialQuery, offset, onLoadMore, ...props }: O
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
-        const response = await fetch(`/api/games/search?q=${encodeURIComponent(props.query)}&offset=${offset}`, {signal: controller.signal, cache: "no-store"});
+        const response = await fetch(`/api/games/search?q=${encodeURIComponent(props.query)}&offset=${offset}&mode=${props.mode}`, {signal: controller.signal, cache: "no-store"});
         if (!response.ok) throw new Error("Game search failed.");
         const data: Batch = await response.json();
         if (!controller.signal.aborted) setResults(cached => {
@@ -123,6 +123,6 @@ function SearchData({ portfolio, initialQuery, offset, onLoadMore, ...props }: O
       }
     }, 250);
     return () => {clearTimeout(timer); controller.abort();};
-  }, [props.query, props.scope, offset, retry, results, key, previous]);
-  return <PortfolioProvider portfolio={{...initial, games: visible?.games ?? previous?.games ?? []}}><SearchResults {...props} gamesLoading={!visible && failed !== key} gamesError={!visible && failed === key} hasMore={visible?.hasMore ?? false} onLoadMore={onLoadMore} onRetry={() => {setFailed(null); setRetry(value => value + 1);}} /></PortfolioProvider>;
+  }, [props.query, props.scope, props.mode, offset, retry, results, key, previous]);
+  return <PortfolioProvider portfolio={{...initial, games: visible?.games ?? previous?.games ?? []}}><SearchResults {...props} excludedSlugs={initial.excludedSlugs} gamesLoading={!visible && failed !== key} gamesError={!visible && failed === key} hasMore={visible?.hasMore ?? false} onLoadMore={onLoadMore} onRetry={() => {setFailed(null); setRetry(value => value + 1);}} /></PortfolioProvider>;
 }
