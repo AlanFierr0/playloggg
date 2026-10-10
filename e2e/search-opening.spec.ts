@@ -44,7 +44,7 @@ test("search starts with a small batch and still finds games outside it", async 
   await dialog.getByRole("button", {name: "Load more", exact: true}).click();
   await expect(dialog.locator('[data-search-result][href^="/game/"]')).toHaveCount(48);
   let fail = true;
-  await page.route("**/api/games/search?q=Fixture%20Game%20118&offset=0", async route => {
+  await page.route(url => url.pathname === "/api/games/search" && url.searchParams.get("q") === "Fixture Game 118" && url.searchParams.get("offset") === "0", async route => {
     if (fail) {fail = false; await route.abort("failed");}
     else await route.continue();
   });

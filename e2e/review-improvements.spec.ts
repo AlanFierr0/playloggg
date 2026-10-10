@@ -45,13 +45,15 @@ test("ranking keeps its filters without the game management subsection",async({p
  expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
 });
 
-test("Compare suggests followed consenting friends and keeps its owner first",async({page,context})=>{
- await context.addCookies([authCookie]);await page.goto("/people");
+test("Compare finds a followed public profile and keeps its owner first",async({page,context})=>{
+ await context.addCookies([authCookie]);await page.goto("/people",{waitUntil:"domcontentloaded"});
  await page.getByRole("button",{name:"Follow",exact:true}).first().click();
  await page.goto("/compare");
  await expect(page.getByLabel("First profile handle",{exact:true})).toHaveValue("fixture_owner");
- await expect(page.locator("#compare-friends option[value=fixture_public]")).toHaveCount(1);
- await page.getByLabel("Second profile handle",{exact:true}).fill("fixture_public");
+ await page.getByLabel("Second profile handle",{exact:true}).fill("Published Fixture");
+ await page.getByRole("option",{name:/@fixture_public/}).click();
+ await expect(page.getByLabel("Second profile handle",{exact:true})).toHaveValue("fixture_public");
+ await expect(page.getByLabel("First profile handle",{exact:true})).toHaveValue("fixture_owner");
  await page.getByRole("button",{name:"Compare profiles",exact:true}).click();
  await expect(page.getByText("More shared scored games needed",{exact:false})).toContainText("5");
 });
