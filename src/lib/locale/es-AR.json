@@ -1323,5 +1323,9 @@
   "Players who share your taste in games.": "Jugadores que comparten tu gusto por los videojuegos.",
   "Error 404": "Error 404",
   "Go home": "Volver al inicio",
-  "This link may be outdated, or the page may have moved. Let’s get you back to your games.": "Puede que el enlace esté desactualizado o que la página se haya movido. Volvamos a tus juegos."
+  "This link may be outdated, or the page may have moved. Let’s get you back to your games.": "Puede que el enlace esté desactualizado o que la página se haya movido. Volvamos a tus juegos.",
+  "You took a wrong warp.": "Tomaste el portal equivocado.",
+  "There is no level on the other side of this portal. Head home or find your next game.": "No hay ningún nivel del otro lado de este portal. Volvé al inicio o encontrá tu próximo juego.",
+  "Level not found": "Nivel no encontrado",
+  "Return to your last checkpoint": "Volvé a tu último punto de control"
 }

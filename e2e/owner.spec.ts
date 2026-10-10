@@ -89,7 +89,7 @@ test("404 offers accessible recovery in both languages and themes", async ({ pag
       { name: "playlogg_theme", value: theme, url: "http://127.0.0.1:3100" },
     ]);
     expect((await page.goto("/missing-fixture-page"))?.status()).toBe(404);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(locale === "en" ? "This page isn’t available." : "Esta página no está disponible.");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(locale === "en" ? "You took a wrong warp." : "Tomaste el portal equivocado.");
     const content = page.locator("#main-content");
     await expect(content.getByRole("link", { name: locale === "en" ? "Go home" : "Volver al inicio", exact: true })).toHaveAttribute("href", "/");
     await expect(content.getByRole("link", { name: locale === "en" ? "Search games" : "Buscar juegos", exact: true })).toHaveAttribute("href", "/search?q=&from=/");
