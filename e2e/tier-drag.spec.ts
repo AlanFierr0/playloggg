@@ -3,7 +3,7 @@ import AxeBuilder from "@axe-core/playwright";
 // @ts-expect-error Local fixture only.
 import {authCookie} from "./fixture-server.mjs";
 
-test("dragging between tiers saves only the owner's tier and persists on reload",async({page,context,request},info)=>{
+test("dragging restores score placement for only the owner and persists on reload",async({page,context,request},info)=>{
   await context.addCookies([authCookie]);await page.goto("/tiers");
   const before=await (await request.get("http://127.0.0.1:3101/__state")).json();
   const card=page.locator('[data-tier-game="elden-ring-shadow-of-the-erdtree"]');
@@ -13,14 +13,14 @@ test("dragging between tiers saves only the owner's tier and persists on reload"
   await expect(page.locator("#tier-b").locator(card)).toBeVisible();
   await card.dragTo(page.locator("#tier-a"));
   await expect(page.getByRole("status")).toHaveText("Tier saved.");
-  await expect(page.locator("#tier-a").locator(card)).toBeVisible();
-  await page.reload();await expect(page.locator("#tier-a").locator(card)).toBeVisible();
+  await expect(page.locator("#tier-b").locator(card)).toBeVisible();
+  await page.reload();await expect(page.locator("#tier-b").locator(card)).toBeVisible();
   const after=await (await request.get("http://127.0.0.1:3101/__state")).json();
-  for(const row of before.ratings){const saved=after.ratings.find((r:{profile_id:number;game_id:number})=>r.profile_id===row.profile_id&&r.game_id===row.game_id);if(row.profile_id===2&&row.game_id===2){const {tier,updated_at,...details}=row;void tier;void updated_at;expect(saved).toMatchObject({...details,tier:"A"});}else expect(saved).toEqual(row);}
+  for(const row of before.ratings){const saved=after.ratings.find((r:{profile_id:number;game_id:number})=>r.profile_id===row.profile_id&&r.game_id===row.game_id);if(row.profile_id===2&&row.game_id===2){const {tier,tier_manual,updated_at,...details}=row;void tier;void tier_manual;void updated_at;expect(saved).toMatchObject({...details,tier:"B",tier_manual:false});}else expect(saved).toEqual(row);}
   await page.screenshot({path:`e2e-artifacts/tier-drag-${info.project.name}.png`});
 });
 
-test("pointer handle moves a game, supports cancellation and keeps navigation available",async({page,context})=>{
+test("pointer dragging restores score placement, supports cancellation and keeps navigation available",async({page,context})=>{
   await context.addCookies([authCookie]);await page.goto("/tiers");
   const handle=page.getByRole("button",{name:"Drag to change tier: Elden Ring: Shadow of the Erdtree",exact:true});
   await handle.scrollIntoViewIfNeeded();
@@ -37,7 +37,7 @@ test("pointer handle moves a game, supports cancellation and keeps navigation av
   }
   const target=(await page.locator("#tier-a").boundingBox())!;
   await page.mouse.move(target.x+target.width/2,target.y+target.height/2,{steps:12});await page.mouse.up();
-  await expect(page.locator('#tier-a [data-tier-game="elden-ring-shadow-of-the-erdtree"]')).toBeVisible();
+  await expect(page.locator('#tier-b [data-tier-game="elden-ring-shadow-of-the-erdtree"]')).toBeVisible();
   await page.getByRole("link",{name:"Elden Ring: Shadow of the Erdtree",exact:true}).click();await expect(page).toHaveURL(/\/game\/elden-ring-shadow-of-the-erdtree$/);
 });
 
@@ -94,7 +94,7 @@ test("compact board clears a tier while preserving the log entry",async({page,co
   await page.screenshot({path:`e2e-artifacts/tier-compact-${info.project.name}.png`,fullPage:true});
 });
 
-test("touch dragging scrolls to an offscreen tier and saves it",async({page,context},info)=>{
+test("touch dragging scrolls to an offscreen tier and restores score placement",async({page,context},info)=>{
   test.skip(info.project.name!=="mobile","Touch gesture uses the mobile layout.");
   await context.addCookies([authCookie]);await page.goto("/tiers");
   const handle=page.getByRole("button",{name:"Drag to change tier: Elden Ring: Shadow of the Erdtree",exact:true});
@@ -107,7 +107,7 @@ test("touch dragging scrolls to an offscreen tier and saves it",async({page,cont
   const target=(await page.locator("#tier-a").boundingBox())!;
   await touch("touchMove",target.x+target.width/2,target.y+target.height/2);
   await touch("touchEnd");
-  await expect(page.locator('#tier-a [data-tier-game="elden-ring-shadow-of-the-erdtree"]')).toBeVisible();
+  await expect(page.locator('#tier-b [data-tier-game="elden-ring-shadow-of-the-erdtree"]')).toBeVisible();
   await expect(page.getByRole("status")).toHaveText("Tier saved.");
 });
 
@@ -139,12 +139,13 @@ test("tier selection filters the colored board instead of jumping to an anchor",
 test("score ranges persist, preserve manual games and support opting back into automation",async({page,context,request},info)=>{
  await context.addCookies([authCookie]);await page.goto("/tiers");
  const card='[data-tier-game="elden-ring-shadow-of-the-erdtree"]';
+ await expect(page.getByRole("button",{name:/Use score range for/})).toHaveCount(0);
  await expect(page.getByText("Edit score ranges",{exact:true})).toHaveCount(0);
  const min=page.getByRole("spinbutton",{name:"Minimum score for tier B",exact:true});
  await min.fill("81");await page.getByRole("button",{name:"Save score ranges",exact:true}).click();
  await expect(page.getByRole("status")).toHaveText("Score ranges saved. Manual tiers were kept.");
  await expect(page.locator('#tier-b '+card)).toBeVisible();
- await page.getByRole("button",{name:"Use score range for Elden Ring: Shadow of the Erdtree",exact:true}).click();
+ await page.locator(card).dragTo(page.locator("#tier-unassigned"));
  await expect(page.locator('#tier-unassigned '+card)).toBeVisible();
  await page.getByRole("combobox",{name:"Tier for Elden Ring: Shadow of the Erdtree",exact:true}).selectOption("A");
  await expect(page.locator('#tier-a '+card)).toBeVisible();
@@ -152,7 +153,7 @@ test("score ranges persist, preserve manual games and support opting back into a
  await expect(page.getByRole("status")).toHaveText("Score ranges saved. Manual tiers were kept.");
  await expect(page.locator('#tier-a '+card)).toBeVisible();
  await page.reload();await expect(min).toHaveValue("80");
- await page.getByRole("button",{name:"Use score range for Elden Ring: Shadow of the Erdtree",exact:true}).click();
+ await page.locator(card).dragTo(page.locator("#tier-unassigned"));
  await expect(page.locator('#tier-b '+card)).toBeVisible();
  await page.getByRole("spinbutton",{name:"Minimum score for tier S",exact:true}).fill("90");
  await page.getByRole("button",{name:"Save score ranges",exact:true}).click();
