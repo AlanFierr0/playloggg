@@ -6,6 +6,10 @@ export async function generateMetadata() { return localizeMetadata({ title: "Sea
 
 async function safeReturnPath(value?: string): Promise<string> {
   if (value && ["/", "/games", "/profile", "/tiers", "/compare", "/log"].includes(value)) return value;
+  if (value?.startsWith("/log?")) {
+    const slug = new URLSearchParams(value.slice(5)).get("game");
+    if (slug && await getCatalogGame(slug)) return `/log?${new URLSearchParams({game:slug})}`;
+  }
   if (value?.startsWith("/games?")) {
     const state = parseGamesQuery(new URLSearchParams(value.slice(7)));
     const query = gamesQuery(state.filters, state.page);

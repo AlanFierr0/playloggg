@@ -62,7 +62,7 @@ export interface Portfolio {
   publicBase?: string;
   lists?: CuratedListSummary[];
   favorites?: Favorite[];
-  ranking?: {slugs:string[];revision:number};
+  ranking?: {slugs:string[];revision:number;manualPositions?:Record<string,number>};
   access?: { signedIn: boolean; canEdit: boolean; canImportCatalog?: boolean };
 }
 

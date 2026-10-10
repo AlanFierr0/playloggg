@@ -8,7 +8,7 @@ const checks = [
   ["/people",200,"Explore profiles"],
   ["/quick-rate",404,null],
   ["/profile/wrapped",404,null],
-  ["/profile/activity",307,null],
+  ["/profile/activity",404,null],
   ["/profile/social",307,null],
   ["/profile/import/steam",307,null],
   ["/api/share/profile",404,null],

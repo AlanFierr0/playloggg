@@ -328,16 +328,19 @@ export type Database = {
       profile_rankings: {
         Row: {
           game_ids: number[]
+          manual_positions: Json
           profile_id: number
           revision: number
         }
         Insert: {
           game_ids?: number[]
+          manual_positions?: Json
           profile_id: number
           revision?: number
         }
         Update: {
           game_ids?: number[]
+          manual_positions?: Json
           profile_id?: number
           revision?: number
         }
@@ -525,6 +528,20 @@ export type Database = {
           object_name: string
         }[]
       }
+      anonymous_game_scores: {
+        Args: { p_ids?: number[] }
+        Returns: {
+          average: number
+          deviation: number
+          game_id: number
+          sample_count: number
+        }[]
+      }
+      catalog_page: {
+        Args: { p_filters: Json; p_page: number; p_profile_id: number | null }
+        Returns: Json
+      }
+      catalog_platform_family: { Args: { name: string }; Returns: string }
       clear_account_operation_limits: {
         Args: { p_owner: string }
         Returns: undefined
@@ -570,6 +587,32 @@ export type Database = {
       delete_owned_profile: {
         Args: { p_handle: string; p_owner: string }
         Returns: Json
+      }
+      discover_games: {
+        Args: { p_amount: number; p_seed: string }
+        Returns: {
+          artwork_image_ids: string[]
+          cover_image_id: string | null
+          cover_url: string
+          genres: string[]
+          id: number
+          igdb_id: number | null
+          igdb_metadata: Json
+          igdb_synced_at: string | null
+          igdb_url: string | null
+          release_year: number | null
+          released_on: string | null
+          screenshot_image_ids: string[]
+          search_keywords: string
+          slug: string
+          title: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "games"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       platform_game_scores: {
         Args: never
@@ -621,6 +664,50 @@ export type Database = {
       save_preference_ranking: {
         Args: { p_ids: number[]; p_revision: number }
         Returns: number
+      }
+      save_preference_ranking_v2: {
+        Args: { p_ids: number[]; p_manual: Json; p_revision: number }
+        Returns: number
+      }
+      save_rating: {
+        Args: {
+          // SQL accepts null for a new entry. The generator omits nullable RPC arguments.
+          p_expected_updated_at: string | null
+          p_game_id: number
+          p_values: Json
+        }
+        Returns: string
+      }
+      search_catalog: {
+        Args: {
+          p_hide_rated: boolean
+          p_offset: number
+          p_profile_id: number | null
+          p_query: string
+        }
+        Returns: {
+          artwork_image_ids: string[]
+          cover_image_id: string | null
+          cover_url: string
+          genres: string[]
+          id: number
+          igdb_id: number | null
+          igdb_metadata: Json
+          igdb_synced_at: string | null
+          igdb_url: string | null
+          release_year: number | null
+          released_on: string | null
+          screenshot_image_ids: string[]
+          search_keywords: string
+          slug: string
+          title: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "games"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       set_profile_favorite: {
         Args: {

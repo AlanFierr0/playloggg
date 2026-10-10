@@ -3,7 +3,7 @@ import { avatarSource } from "@/lib/avatar-input";
 import { createPublicClient } from "@/lib/supabase/public";
 import { publicProfilePath } from "@/lib/profile-settings";
 import { readFavorites } from "@/lib/favorites";
-import { getCatalog, portfolioGames } from "@/lib/portfolio";
+import { getCatalogRows, portfolioGames } from "@/lib/portfolio";
 import { getAccount } from "@/lib/owner";
 import type { Database } from "@/types/database";
 import type { Profile } from "@/types/domain";
@@ -43,7 +43,7 @@ async function readComparison(left: string, right: string, account: Awaited<Retu
   }
   const [a,b] = await Promise.all([read(left),read(right)]);
   if (!a || !b) return null;
-  const rows = await getCatalog();
+  const rows = await getCatalogRows([...a.entries,...b.entries].map(entry => entry.game_id), [...a.favorites,...b.favorites].map(favorite => favorite.slug));
   // Recheck both profiles after all paginated reads, even for signed-in visitors.
   const current = await Promise.all([a,b].map(async side => {
     let request = side.client.from("profiles").select("id").eq("id",side.profile.id).eq("handle",side.profile.handle);

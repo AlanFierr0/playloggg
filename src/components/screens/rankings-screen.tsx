@@ -14,6 +14,7 @@ import { playbackLabels } from "@/lib/playback-status";
 export function RankingsScreen() {
   const t = useMessages();
 const { games, profile, access, publicBase } = usePortfolio();
+const [view, setView] = useState<"personal" | "score">(publicBase ? "score" : "personal");
 const [filter, setFilter] = useState<RankingFilter>("all");
 const [tag, setTag] = useState("");
 const tags = [...new Map(loggedGames(games).flatMap((game) => game.tags ?? []).map((value) => [value.toLowerCase(), value])).values()].sort();
@@ -42,10 +43,10 @@ return <div className="site-container mx-auto w-full min-w-0 px-4 py-8 sm:px-6 l
   {!publicBase && <div className="mb-8"><ProfileNavigation /></div>}
   <header className="mb-8 flex flex-wrap items-center justify-between gap-6 border-b border-outline-variant/30 pb-8">
     <div className="flex min-w-0 items-center gap-4">
-      <ProfileAvatar src={profile.avatarUrl} name={profile.displayName} className="h-14 w-14 rounded-xl sm:h-16 sm:w-16" />
+      {!publicBase && <ProfileAvatar src={profile.avatarUrl} name={profile.displayName} className="h-14 w-14 rounded-xl sm:h-16 sm:w-16" />}
       <div className="min-w-0 space-y-1">
         <div className="flex flex-wrap items-center gap-3"><h1 className="font-headline-xl text-headline-xl font-semibold">{t("Ranking")}</h1>{(profile.isSample || !profile.isPublic) && <span className="rounded bg-surface-container-high px-2 py-1 text-label-sm text-on-surface-variant">{t(profile.isSample ? "Sample profile" : "Private profile")}</span>}</div>
-        <p translate="no" className="break-words text-body-md text-on-surface-variant">{profile.displayName} <span className="text-primary">@{profile.handle}</span></p>
+        {!publicBase && <p translate="no" className="break-words text-body-md text-on-surface-variant">{profile.displayName} <span className="text-primary">@{profile.handle}</span></p>}
       </div>
     </div>
     <dl className="flex flex-wrap gap-6 sm:gap-10">
@@ -54,8 +55,9 @@ return <div className="site-container mx-auto w-full min-w-0 px-4 py-8 sm:px-6 l
     </dl>
     {!publicBase && access?.canEdit && <Link href="/settings" className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-body-sm text-primary hover:bg-surface-container-low"><span aria-hidden="true" className="material-symbols-outlined text-[18px]">settings</span>{t("Profile settings")}</Link>}
   </header>
-  <PreferenceRanking />
-  <section className="mt-12 space-y-6 border-t border-outline-variant/30 pt-8" aria-label={t("Score ranking")}>
+  <nav aria-label={t("Ranking view")} className="mb-6 flex gap-2">{([['personal', 'Personal order'], ['score', 'By score']] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={view === value} onClick={() => setView(value)} className={`min-h-11 rounded-lg px-4 font-semibold ${view === value ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface'}`}>{t(label)}</button>)}</nav>
+  <div hidden={view !== "personal"}><PreferenceRanking /></div>
+  <section hidden={view !== "score"} className="space-y-6" aria-label={t("Score ranking")}>
     <div className="flex flex-wrap items-center justify-between gap-3">
       <h2 className="font-headline-lg text-headline-lg font-semibold">{t("Score ranking")}</h2>
       <span className="text-body-sm text-on-surface-variant">{t("Score (Desc)")}</span>

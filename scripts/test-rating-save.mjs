@@ -10,7 +10,7 @@ test("save uses the catalog release date, rejects earlier completion and permits
   const dependencies = {
     "next/cache": { revalidatePath() {} },
     "@/lib/rating-input": { maximumPlaytime, validateRating },
-    "@/lib/owner": { getAccount: async () => ({ profile: { id: 2 }, supabase: { from(table) {
+    "@/lib/owner": { getAccount: async () => ({ profile: { id: 2 }, supabase: { rpc: async () => { writes++; return {data: new Date().toISOString(), error:null}; }, from(table) {
       return table === "games" ? { select() { return this; }, eq() { return this; }, single: async () => ({ data: { id: 1, released_on }, error: null }) }
         : { upsert: async () => { writes++; return { error: null }; } };
     } } }) },
@@ -20,6 +20,7 @@ test("save uses the catalog release date, rejects earlier completion and permits
   const input = { slug: "hades", score: null, tier: null, status: null, platform: null, tags: [], hoursPlayed: null, completedOn: "2019-12-31", review: "", released_on: "1900-01-01" };
   assert.equal((await context.exports.saveRating(input)).ok, false);
   assert.equal(writes, 0);
+  assert.equal((await context.exports.saveRating({...input, completedOn: "2099-01-01"})).ok, false);
   assert.equal((await context.exports.saveRating({ ...input, completedOn: "2020-01-01" })).ok, true);
   assert.equal((await context.exports.saveRating({ ...input, completedOn: null })).ok, true);
   assert.equal((await context.exports.saveRating({ ...input, completedOn: null, hoursPlayed: 1e12 })).ok, false);

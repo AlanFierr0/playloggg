@@ -1,192 +1,91 @@
 # Playlogg
 
-A gaming portfolio based on the original Google Stitch exports. People can keep
-private entries and curated lists, browse a shared game catalog, and optionally
-publish a profile. All people use the same profile concepts. Catalog browsing does not invent
-ratings or select a demo player. See [accounts, pictures and catalog expansion](docs/accounts-pictures-and-catalog.md).
+Playlogg lets people log games, score them, arrange personal rankings and tiers,
+write reviews, import Steam libraries and compare gaming taste. Entries persist
+in Supabase; the production site is https://playloggg.vercel.app.
 
-For the current application inventory and prioritized next milestones, see the
-[application review and roadmap](docs/application-roadmap.md).
+## Current routes
 
-## Local development
+| Route | Purpose |
+|---|---|
+| `/` | Personal home, exploration, real community recommendations and carousels |
+| `/games` | Catalog filters/sorts and 25-card incremental batches |
+| `/search` | Game/profile search; game logging picker |
+| `/game/[slug]` | Catalog details, anonymous community average, friends' scores and reviews |
+| `/log?game=[slug]` | Edit an entry; tab-local drafts survive navigation and refresh |
+| `/tiers` | Owner tier board with editable ranges and queued optimistic moves |
+| `/people` | Public profile directory and text search |
+| `/compare` | Compare any two eligible profiles, defaulting to the owner |
+| `/profile` | Owner overview, favorites, total recorded playtime, hot take and taste fingerprint |
+| `/profile/ranking` | Personal order or score order, shown one view at a time |
+| `/profile/reviews`, `/profile/stats` | Reviews/voting and rating/taste statistics |
+| `/profile/favorites`, `/profile/social` | Manage favorites and following |
+| `/profile/import/steam` | Link Steam, preview/import games, sync hours and resume ratings |
+| `/settings` | Names, picture, optional identity details, privacy/discovery and account deletion |
+| `/u/[handle]` | Public overview with ranking/tiers/reviews/stats/favorites and entry pages |
+| `/login`, `/signup`, `/reset-password` | Verified email/Steam authentication and profile setup |
 
-Use `main` for ongoing work, with logical commits directly on that branch.
-Feature branches and pull requests are used only when explicitly requested.
-Pushing `main` triggers the Vercel production deployment.
+Lists, quick-rate, yearly wrapped and `/profile/activity` are retired. Their legacy
+pages return 404; stored lists and trusted activity records are preserved. Removed
+features must not be inferred as available from historical documentation.
 
-Use Node.js 22.13+ and pnpm 11.19.0 (the version pinned in `package.json`).
+## Behavior
 
-```sh
-pnpm install --frozen-lockfile
-pnpm dev
+- Profiles default to public and discoverable; settings allow opting out. The testing
+  account remains private. Search finds public profiles even when discovery is disabled.
+- Owners edit only their own data. Public profile reads recheck visibility.
+- Scores are optional whole numbers from 0 to 100. Anonymous averages use every
+  supplied score, including private profiles, without a minimum rating count.
+- Personal ranking follows scores unless a game has a manual position. Scores and
+  favorites remain independent of manual ranking and tiers.
+- Automatic tiers use editable ranges; manual exceptions remain where placed.
+- Playback includes completed, in progress, backlog, shelved, currently playing,
+  paused and stopped playing. Recorded hours must be nonnegative and cannot exceed
+  elapsed time since known launch. Completion cannot precede launch or exceed today (UTC).
+- Saving a whole entry checks its previous timestamp. Conflicting saves keep the draft
+  and offer an explicit discard/reload action instead of overwriting newer information.
+- Favorites do not create logs. Up to four can be featured. Unknown hours display `—`;
+  playtime totals include the number of entries with recorded hours.
+- Reviews are original text with clickable HTTP/HTTPS sources. Helpful votes are
+  upvotes minus downvotes. Automatic translation is pending in TODO.md.
+- Steam import offers rating all/some/none, imports selected games in batches and keeps
+  existing logs. Rating order is descending playtime. Import requires the page to stay
+  open; rating-session resume is stored in that browser.
+- English/Spanish (Argentina), light/dark themes, keyboard access and reduced motion
+  are supported. Profile/account/search/compare pages remain noindex.
+
+## Development
+
+Use the pnpm version pinned in package.json. Install with `corepack pnpm install`.
+Configure ignored `.env.local` using the environment variable names in `.env.example`.
+The Supabase URL/publishable key are public configuration; service-role, Steam and
+IGDB credentials stay server-only. Never commit credentials.
+
+```text
+corepack pnpm dev
+corepack pnpm typecheck
+corepack pnpm lint
+corepack pnpm test
+corepack pnpm exec playwright test
+corepack pnpm build
 ```
 
-Open `http://localhost:3000`.
+Browser tests use an isolated loopback fixture, not production accounts or data.
+Production build bootstrap may import approved catalog metadata when configured;
+local/preview builds skip that operation. Catalog imports never invent user scores.
 
-```sh
-pnpm typecheck
-pnpm lint
-pnpm build
-pnpm start
-node --experimental-strip-types --test scripts/test-portfolio-view.mjs
-```
+## Structure and operations
 
-Next.js, React, strict TypeScript and Tailwind CSS 3 provide the application
-foundation. Tailwind 3 preserves the export's existing utilities and theme
-values. ESLint 9 is pinned because the React rules shipped with the current
-Next.js ESLint configuration fail on ESLint 10's rule API.
+- src/app: Next.js routes. src/components: UI. src/lib: shared domain/server helpers.
+- src/types/database.ts: generated schema types, with nullable RPC argument annotations.
+- supabase/migrations: versioned database changes; preserve ownership and RLS.
+- e2e and scripts/test-*.mjs: browser scenarios and domain/server tests.
+- design-reference: untouched original design data. src/data: sample/test fixtures.
+- TODO.md: pending work. AGENTS.md: current development/product rules.
+- docs: implementation history and operation notes; older feature descriptions are
+  historical unless reflected in this README and current AGENTS.md.
 
-## Application routes
-
-| Route | Screen |
-| --- | --- |
-| `/` | Discover / editorial home |
-| `/games` | Full saved game catalog with search, filters and pagination |
-| `/profile` | Personal profile and rankings |
-| `/tiers` | S–F tier board |
-| `/compare` | Comparison of two published profiles |
-| `/search` | Search overlay; Ctrl/Cmd+K also opens it |
-| `/log` | Personal rating/review and playback-status editor |
-| `/login` | Steam, verified email/password registration and sign-in, password recovery, owner email link |
-| `/signup` | Private profile name setup after first sign-in |
-| `/settings` | Personal names, bio, picture and optional publishing |
-| `/reset-password` | Set a password after email recovery |
-| `/u/[handle]`, `/u/[handle]/tiers`, `/u/[handle]/lists` | Shareable rankings, tiers and curated lists for published profiles |
-| `/u/[handle]/lists/[id]`, `/u/[handle]/game/[slug]` | Public list and saved-entry details |
-| `/lists`, `/lists/[id]` | Curated lists and custom game order |
-| `/game/[slug]` | Game detail using the existing detail-page layout |
-
-Search reads the public Supabase catalog and your own profile, with categories, arrow keys, Enter,
-Escape and modal focus trapping. “Switch Game” opens search in rating mode.
-Score and tier are independently editable. Saved owner scores, tiers, playback
-status and reviews reload from Supabase. Scores are optional; zero is a real
-score. Saved optional platform, playtime and completion date reload from Supabase.
-Their migration is applied and production rollout is authorized; see
-[saved play details](docs/saved-play-details.md). Personal tags and ordered lists
-use the applied Supabase schema; production rollout is authorized. See
-[tags and curated lists](docs/tags-and-curated-lists.md). Timeline broadcasting is unavailable.
-
-“Commit to Log” saves the signed-in owner's optional score, independent tier,
-playback status, play details, tags and review. It is disabled for the sample
-portfolio. Nothing is broadcast. Unsupported controls are disabled and visibly labeled unavailable. Counts, averages, rankings and tiers use the selected profile.
-The Backlog uses saved entries, including unscored games. Its migration is
-applied and production rollout is authorized; see
-[Backlog and playback status](docs/backlog-and-playback-status.md).
-Comparison metrics, discovery content, public-figure profiles and editorial
-reviews remain illustrative content from Stitch. Curated list visibility follows
-the owning profile; list membership is independent of ratings.
-
-## Structure and design
-
-Layouts adapt across phones, tablets, desktop and short landscape screens while
-preserving the existing style. Mobile navigation and search remain accessible;
-forms, grids, typography and spacing adapt to the viewport. See
-[responsive layouts](docs/responsive-layouts.md) for behavior and verification.
-The header also offers light/dark and English/Español (Argentina) toggles.
-Selections persist in cookies; see [display preferences](docs/display-preferences.md).
-Changes merged into `main` deploy automatically through Vercel.
-
-- `src/app`: App Router pages, shared layout and metadata.
-- `src/components`: shared navigation, feedback, controls and screen components.
-- `src/data`: clearly identified sample fixtures, including 32 game entries.
-- `src/types`: shared frontend concepts and generated Supabase database types.
-- `design-reference`: original unmodified exports and screenshots.
-- `AGENTS.md`: durable development rules and product decisions.
-
-The user approved the HTML values when they conflict with `DESIGN.md` for this
-prototype. Ask again about any newly encountered conflict or visible design
-change. The tier and comparison screenshots are failed exports containing error
-text; their original HTML remains available. Fonts retain their original external URLs. Game imagery uses reviewed IGDB
-covers/artwork, with verified box art for the two comparison-only classics.
-Profile portraits use initials until a real image is supplied; generated Stitch
-images are absent from the application. See [image sources](docs/image-sources.md). Reviewed sample IGDB metadata is imported through separate administrative
-scripts. Owner-only in-app IGDB search/import is deployed. The owner confirmed
-production credentials are configured; real owner search/import and duplicate
-reuse are verified. See the
-[IGDB catalog setup guide](docs/igdb-catalog-import.md). Credentials remain on
-the server; public browsing reads the stored catalog without provider requests.
-
-Original fixtures remain as design references. Connected screens use reconciled
-Supabase ratings and imported catalog metadata. Game cards use the catalog cover consistently across rankings, tiers, search,
-and the editor. Detail backgrounds use the selected game's artwork; missing
-artwork is not invented.
-
-## Infrastructure
-
-Public Steam sign-in and private profile setup are deployed; real sign-in,
-entry/list persistence and repeat sign-in are verified. A second Steam account
-was unavailable for its isolation scenario. Each person edits only their own entries and lists; IGDB import stays
-restricted to the original owner. See [Steam sign-in](docs/steam-sign-in.md).
-Optional profile publishing and shareable portfolio pages are deployed. Guest
-routes and signed-in publishing/unpublishing work. See
-[public profiles](docs/public-profiles.md).
-
-The prototype is published from GitHub `main` at https://playloggg.vercel.app/.
-Use the Next.js preset on Vercel. The recommended package-manager setting is
-Corepack (`ENABLE_EXPERIMENTAL_COREPACK=1`) to respect the pinned pnpm version;
-verify the version in Vercel's install logs.
-
-A new Supabase project exists. Its URL and publishable key are configured in
-ignored local `.env.local` using `NEXT_PUBLIC_SUPABASE_URL` and
-`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. The application requires both variables
-to read public data on the server. The cloned repository does not include
-local environment files. A missing configuration or failed read shows a retry
-state; fixtures are not silently substituted.
-
-Authenticated Supabase plugin inspection confirmed the project is healthy in
-`us-east-1` (North Virginia, within Americas). The approved `profiles`, `games` and
-`ratings` schema is now applied, with 1,000 real IGDB catalog games and no demo profiles or ratings. Public reads and owner-only writes have been verified. See
-the Backlog rollout document for the current security-advisor result.
-
-The application reads public data with the publishable key. Search, profile
-rankings, calculated statistics and tiers share the loaded portfolio.
-Owner sign-in and persistent entry editing are implemented. Ownership and
-optional-score/status migrations are applied; the user verified production
-magic-link sign-in after completing account/Auth configuration. See
-[owner persistence and rollout](docs/owner-persistence.md) for the access model,
-tested migration and required Auth settings. Other editing remains deferred.
-See [backend setup and verification](docs/read-only-backend-proposal.md) for the
-applied migration, seed rules and checks. Automatic demo seeding is disabled. The following commands maintain historical
-fixtures only; do not apply demo seed data to production:
-
-```sh
-node scripts/generate-demo-seed.mjs
-node scripts/generate-demo-seed.mjs --check
-```
-
-Use authenticated Supabase plugin or
-CLI access for schema inspection and migrations; public application credentials
-are not administration credentials. Plugin authentication and CLI login are
-separate.
-
-Canonical URLs use https://playloggg.vercel.app. Only Discover, unfiltered Games
-and anonymous catalog details are eligible for indexing; profiles and account
-pages remain noindex. The sitemap includes catalog routes only. Discover uses
-stored catalog metadata and labels its editorial selection. See
-[public launch](docs/public-launch.md) and the
-[data operations plan](docs/data-operations.md) for scope and remaining operations.
-
-The Games navigation tab browses every stored catalog game, including unlogged
-titles, with genre, available platform, release year and sorting controls.
-Optional profile filters cover logged entries, status, tier, rating and score
-range. See [Games catalog](docs/games-catalog.md) for behavior and verification.
-
-Secrets must stay in ignored environment files, never source or documentation.
-Agree on ownership and write access before exposing any database editing flow.
-Track approved future database changes through versioned migrations.
-
-Step 2 adds working Shelf/editor navigation and catalog-link copying, clear sample
-labels, real personal entry cards and hidden footer placeholders. See
-[visible action inventory](docs/visible-actions.md).
-
-Repeatable browser checks use a local fixture API and fake sessions, never
-production writes. Run `pnpm test` for domain tests, `pnpm test:e2e` for desktop
-and mobile journeys, and `pnpm test:smoke` for read-only production checks. See
-[journey tests and failure reports](docs/journey-tests.md).
-
-Profile v2 makes `/profile` and published `/u/[handle]` pages gaming identity
-overviews, with independent favorites and an optional featured Top 4. Bio,
-location and platform preference follow profile visibility. Ranking, tiers, lists,
-reviews and basic stats are profile sections; main navigation is Discover, Games,
-Profile and Compare. See [Profile v2](docs/profile-v2.md) and the
-[product identity roadmap](docs/product-identity-roadmap.md).
+Production deploys from GitHub main to Vercel. Verify changes before routine pushes
+and deployment. Do not reset infrastructure or delete user data as part of routine
+maintenance. Self-service export, scheduled backup and recovery features are not
+implemented or promised by this application.

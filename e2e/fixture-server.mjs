@@ -1,3 +1,5 @@
+import { gamesPage } from "../src/lib/games-page.ts";
+import { createHash } from "node:crypto";
 import { defaultTierRanges, tierForScore, parseTierRanges } from "../src/lib/tier-ranges.ts";
 import { createServer } from "node:http";
 
@@ -113,6 +115,7 @@ export async function startFixtureServer() {
         if(body.includes('search "Unified'))return reply(200,[candidate]);
         return reply(200,[]);
       }
+      if (url.pathname === "/__source-review" && req.method === "POST") {ratings.find(row=>row.profile_id===3&&row.game_id===1).review="https://www.youtube.com/watch?v=example";return reply(200,{ok:true});}
       if (url.pathname === "/__reset" && req.method === "POST") { reset(); return reply(200, { ok: true }); }
       if (url.pathname === "/__fail-save" && req.method === "POST") { failSave = true; return reply(200, { ok: true }); }
       if (url.pathname === "/__state") return reply(200, { requestCounts, accountDeleted, pictures:[...pictures.keys()], reviewVotes, ratings, favorites, games, profiles:profiles.filter(row=>!profileDeleted||row.id!==2) });
@@ -164,6 +167,45 @@ export async function startFixtureServer() {
         return reply(201,url.searchParams.has("select")?created:null);
       }
       const visibleProfiles = profiles.filter(profile=>(!profileDeleted||profile.id!==2)&&(admin || profile.is_public || (authenticated && profile.owner_user_id === ownerId)));
+      if(["rpc/catalog_page","rpc/search_catalog","rpc/discover_games"].includes(resource)) {
+        if(!admin)return reply(403,{message:"Server only"});
+        let body="";for await(const part of req)body+=part;const input=JSON.parse(body);
+        if(resource==="rpc/discover_games") return reply(200,[...games].sort((a,b)=>createHash("md5").update(`${input.p_seed}:${a.id}`).digest("hex").localeCompare(createHash("md5").update(`${input.p_seed}:${b.id}`).digest("hex"))).slice(0,input.p_amount));
+        if(resource==="rpc/search_catalog") {
+          const words=input.p_query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+          const results=games.filter(game=>{
+            const rating=ratings.find(row=>row.profile_id===input.p_profile_id&&row.game_id===game.id);
+            const content=`${game.title} ${game.search_keywords} ${game.genres.join(" ")} ${(rating?.tags??[]).join(" ")}`.toLowerCase();
+            return (!input.p_hide_rated || rating?.score==null)&&words.every(word=>content.includes(word));
+          }).sort((a,b)=>{
+            if(!words.length&&!input.p_hide_rated)return a.id-b.id;
+            const score=game=>ratings.find(row=>row.profile_id===input.p_profile_id&&row.game_id===game.id)?.score??-1;
+            return score(b)-score(a)||a.slug.localeCompare(b.slug);
+          });
+          return reply(200,results.slice(input.p_offset,input.p_offset+25));
+        }
+        const mapped=games.map(game=>{
+          const rating=ratings.find(row=>row.profile_id===input.p_profile_id&&row.game_id===game.id);
+          const scores=ratings.filter(row=>row.game_id===game.id&&row.score!=null).map(row=>row.score);
+          return {slug:game.slug,title:game.title,cover:game.cover_url,year:game.release_year,releasedOn:game.released_on,genres:game.genres,keywords:game.search_keywords,platforms:game.igdb_metadata.platforms,
+            score:rating?.score??null,tier:rating?.tier??null,status:rating?.status??null,tags:rating?.tags??[],logged:Boolean(rating),
+            platformScore:scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:null,platformRatingCount:scores.length};
+        });
+        const result=gamesPage(mapped,input.p_filters,input.p_page,25);
+        if(input.p_filters.valid===false)Object.assign(result,{games:[],matched:0,page:1,pageCount:1});
+        return reply(200,result);
+      }
+      if(resource==="rpc/save_rating") {
+        if(!authenticated)return reply(403,{message:"Not owned"});
+        let body="";for await(const part of req)body+=part;const input=JSON.parse(body);
+        if(failSave){failSave=false;return reply(503,{message:"Controlled save failure"});}
+        const previous=ratings.find(row=>row.profile_id===2&&row.game_id===input.p_game_id);
+        if((previous?.updated_at??null)!==input.p_expected_updated_at)return reply(409,{code:"40001",message:"Entry changed"});
+        const row={...input.p_values,profile_id:2,game_id:input.p_game_id,updated_at:new Date().toISOString()};
+        if(!row.tier_manual)row.tier=tierForScore(row.score,profiles[1].tier_ranges);
+        ratings=ratings.filter(r=>!(r.profile_id===2&&r.game_id===input.p_game_id));ratings.push(row);
+        return reply(200,row.updated_at);
+      }
       if(resource==="rpc/platform_game_scores") {
         if(!admin)return reply(403,{message:"Server only"});
         const groups=new Map();
@@ -174,10 +216,11 @@ export async function startFixtureServer() {
         return reply(200,rows.slice(Number(url.searchParams.get("offset")??0),Number(url.searchParams.get("offset")??0)+Number(url.searchParams.get("limit")??1000)));
       }
       if(resource==="rpc/community_trending_games")return reply(200,showTrending?Array.from({length:5},(_,index)=>({game_id:index+1,sample_count:5-index})):[]);
-      if(resource==="rpc/community_game_scores"){
+      if(resource==="rpc/community_game_scores" || resource==="rpc/anonymous_game_scores"){
+        if(resource==="rpc/anonymous_game_scores"&&!admin)return reply(403,{message:"Server only"});
         let body="";for await(const part of req)body+=part;const input=body ? JSON.parse(body) : {};
         const groups=new Map();
-        for(const row of ratings){const profile=profiles.find(p=>p.id===row.profile_id);if(!profile?.is_public||!profile.is_discoverable||row.score==null||(input.p_ids&&!input.p_ids.includes(row.game_id)))continue;const values=groups.get(row.game_id)??[];values.push(row.score);groups.set(row.game_id,values);}
+        for(const row of ratings){const profile=profiles.find(p=>p.id===row.profile_id);if((resource==="rpc/community_game_scores"&&(!profile?.is_public||!profile.is_discoverable))||row.score==null||(input.p_ids&&!input.p_ids.includes(row.game_id)))continue;const values=groups.get(row.game_id)??[];values.push(row.score);groups.set(row.game_id,values);}
         return reply(200,[...groups].filter(([,values])=>values.length>=Number(url.searchParams.get("sample_count")?.replace("gte.","")??1)).map(([game_id,values])=>{const average=values.reduce((a,b)=>a+b,0)/values.length;return {game_id,sample_count:values.length,average:Math.round(average*10)/10,deviation:Math.sqrt(values.reduce((sum,value)=>sum+(value-average)**2,0)/values.length)};}));
       }
       if(resource==="rpc/consume_operation_limit_batch"&&req.method==="POST"){
@@ -276,7 +319,7 @@ export async function startFixtureServer() {
         if(existing)existing.featured_slot=slot;else favorites.push({profile_id:2,game_id:input.p_game_id,featured_slot:slot,created_at:new Date().toISOString()});
         return reply(200,null);
       }
-      if(resource==="rpc/save_preference_ranking"&&req.method==="POST"){let body="";for await(const part of req)body+=part;const input=JSON.parse(body);if(!authenticated||input.p_ids.some(id=>!ratings.some(row=>row.profile_id===2&&row.game_id===id)))return reply(403,{message:"Not owned"});if(failSave){failSave=false;return reply(503,{message:"Controlled ranking save failure"});}const existing=rankings.find(row=>row.profile_id===2);if((existing?.revision??null)!==input.p_revision)return reply(409,{code:"40001",message:"Stale ranking"});const row={profile_id:2,game_ids:input.p_ids,revision:(existing?.revision??0)+1};rankings=[row];return reply(200,row.revision);}
+      if(["rpc/save_preference_ranking","rpc/save_preference_ranking_v2"].includes(resource)&&req.method==="POST"){let body="";for await(const part of req)body+=part;const input=JSON.parse(body);if(!authenticated||input.p_ids.some(id=>!ratings.some(row=>row.profile_id===2&&row.game_id===id)))return reply(403,{message:"Not owned"});if(failSave){failSave=false;return reply(503,{message:"Controlled ranking save failure"});}const existing=rankings.find(row=>row.profile_id===2);if((existing?.revision??null)!==input.p_revision)return reply(409,{code:"40001",message:"Stale ranking"});const row={profile_id:2,game_ids:input.p_ids,manual_positions:input.p_manual??{},revision:(existing?.revision??0)+1};rankings=[row];return reply(200,row.revision);}
       if(resource==="rpc/save_curated_list_v2"&&req.method==="POST"){let body="";for await(const part of req)body+=part;const input=JSON.parse(body);if(!authenticated||input.p_profile_id!==2)return reply(403,{message:"Not owned"});const existing=curated.find(row=>row.id===input.p_list_id);if(existing&&existing.revision!==input.p_expected_revision)return reply(409,{code:"40001",message:"Stale list"});const row={id:existing?.id??11,profile_id:2,name:input.p_name,description:input.p_description,is_public:input.p_public,is_ranked:input.p_ranked,revision:(existing?.revision??0)+1};curated=curated.filter(item=>item.id!==row.id);curated.push(row);listItems=listItems.filter(item=>item.list_id!==row.id);input.p_game_ids.forEach((game_id,position)=>listItems.push({list_id:row.id,game_id,position}));return reply(200,row);}
       if(["profile_follows","profile_blocks","list_likes"].includes(resource)&&["POST","DELETE"].includes(req.method)){if(!authenticated)return reply(403,{message:"Not owned"});let rows=resource==="profile_follows"?follows:resource==="profile_blocks"?blocks:likes;if(req.method==="POST"){let body="";for await(const part of req)body+=part;rows.push(JSON.parse(body));}else rows=rows.filter(row=>![...url.searchParams].every(([key,value])=>String(row[key])===value.slice(3)));if(resource==="profile_follows")follows=rows;else if(resource==="profile_blocks")blocks=rows;else likes=rows;return reply(200,null);}
       if(resource==="rpc/public_list_like_counts")return reply(200,[]);

@@ -25,6 +25,10 @@ test("authenticated unscored Backlog persists, failed saves retain the draft, an
   await expect(page.getByText(/Your rating could not be saved/)).toBeVisible();
   await expect(page.locator("#dispatch-textarea")).toHaveValue("Unsaved draft");
   await page.reload();
+  await expect(page.locator("#dispatch-textarea")).toHaveValue("Unsaved draft");
+  await page.locator("#discard-rating").click();
+  await expect(page).toHaveURL(/\/profile$/);
+  await page.goto("/log?game=hades");
   await expect(page.locator("#dispatch-textarea")).toHaveValue("Fixture-only saved review");
   await page.getByRole("button", { name: "Add score", exact: true }).click();
   await page.getByRole("button", { name: /^Choose tier, currently / }).click();

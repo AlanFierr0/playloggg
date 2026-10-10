@@ -1,8 +1,10 @@
 "use server";
 import { getAccount } from "@/lib/owner";
 import { revalidatePath } from "next/cache";
-export async function saveRanking(slugs: unknown, revision: unknown) {
+export async function saveRanking(slugs: unknown, revision: unknown, manual: Record<string, number>) {
   if (
+    !manual || typeof manual !== "object" || Array.isArray(manual) ||
+    Object.entries(manual).some(([slug, position]) => !Array.isArray(slugs) || !slugs.includes(slug) || !Number.isInteger(position) || position < 0 || position >= slugs.length) ||
     !Array.isArray(slugs) ||
     slugs.length > 10000 ||
     slugs.some(
@@ -35,10 +37,11 @@ export async function saveRanking(slugs: unknown, revision: unknown) {
     if (rows.length !== slugs.length)
       return { ok: false, message: "A game is unavailable." };
     const { data, error } = await account.supabase.rpc(
-      "save_preference_ranking",
+      "save_preference_ranking_v2",
       {
         p_ids: slugs.map((slug) => bySlug.get(slug)!),
         p_revision: revision as number,
+        p_manual: Object.fromEntries(Object.entries(manual).map(([slug, position]) => [String(bySlug.get(slug)!), position])),
       },
     );
     if (error)

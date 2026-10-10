@@ -37,8 +37,8 @@ test("optional play details preserve null and supplied zero without requiring co
 test("reject invalid platforms, nonfinite/negative hours and impossible or timezone-bearing dates", () => {
   for (const platform of [undefined, "switch", "PC", "toString", "__proto__", [], 1]) assert.equal(validateRating({ ...draft, platform }), null);
   for (const hoursPlayed of [undefined, -1, NaN, Infinity, -Infinity, "0", true]) assert.equal(validateRating({ ...draft, hoursPlayed }), null);
-  for (const completedOn of [undefined, "", "2023-02-29", "2024-02-30", "2024-13-01", "2024-04-31", "0000-01-01", "10000-01-01", "2024-01-01T00:00:00Z", "October 28, 2024"]) assert.equal(validateRating({ ...draft, completedOn }), null);
-  for (const completedOn of ["0001-01-01", "0099-12-31", "2024-02-29", "9999-12-31"]) assert.equal(validateRating({ ...draft, completedOn }).completedOn, completedOn);
+  for (const completedOn of [undefined, "", "2023-02-29", "2024-02-30", "2024-13-01", "2024-04-31", "0000-01-01", "10000-01-01", "2024-01-01T00:00:00Z", "October 28, 2024", "9999-12-31", "2099-01-01"]) assert.equal(validateRating({ ...draft, completedOn }), null);
+  for (const completedOn of ["0001-01-01", "0099-12-31", "2024-02-29"]) assert.equal(validateRating({ ...draft, completedOn }).completedOn, completedOn);
 });
 test("parse playtime explicitly so blanks and invalid text never silently become zero", () => {
   for (const text of ["", "   "]) assert.equal(parseHours(text), null);

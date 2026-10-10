@@ -88,7 +88,7 @@ test("public portfolios use anonymous fresh reads, paginate entries and hide unp
   const { getPublicPortfolio } = load("../src/lib/public-portfolio.ts", {
     "@/lib/tier-ranges":tierRanges, "@/lib/avatar-input": {avatarSource: () => null}, "server-only": {}, "react": { cache: (fn) => fn },
     "@/lib/supabase/public": { createPublicClient: () => client },
-    "@/lib/portfolio": { getCatalog: async () => [], portfolioGames: (_rows, entries) => entries },
+    "@/lib/portfolio": { getCatalogRows: async () => [], portfolioGames: (_rows, entries) => entries },
     "@/lib/profile-settings": { publicProfilePath },
     "@/lib/preference-ranking":{readPreferenceRanking:async()=>undefined},
     "@/lib/favorites": {readFavorites: async () => []},

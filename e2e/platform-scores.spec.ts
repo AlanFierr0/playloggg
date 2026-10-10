@@ -4,10 +4,10 @@ import {authCookie} from "./fixture-server.mjs";
 
 test("platform sorting uses anonymous all-profile averages and survives filtering and reloads",async({page,context},testInfo)=>{
   await page.goto("/game/fixture-game-0");
-  await expect(page.getByText("50 / 100",{exact:true})).toBeVisible();
-  await expect(page.getByText("1 ratings",{exact:true})).toBeVisible();
+  await expect(page.getByText("45 / 100",{exact:true})).toBeVisible();
+  await expect(page.getByText("2 ratings",{exact:true})).toBeVisible();
   await page.goto("/game/hades");
-  await expect(page.getByText("0 / 100",{exact:true})).toBeVisible();
+  await expect(page.getByText("33.3 / 100",{exact:true})).toBeVisible();
   await page.goto("/game/fixture-game-40");
   await expect(page.getByText("No ratings yet",{exact:true})).toBeVisible();
   await fetch("http://127.0.0.1:3101/__platform-scores",{method:"POST"});

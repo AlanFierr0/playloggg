@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { useMessages } from "@/components/site-preferences";
 import { saveRanking } from "@/app/actions/ranking";
+import { rankingOrder } from "@/lib/ranking-order";
+import { loggedGames } from "@/lib/portfolio-view";
 import { parseHours } from "@/lib/rating-input";
 import { playedPlatformLabels } from "@/lib/played-platforms";
 import { tierColors } from "@/components/rating-controls";
@@ -14,19 +16,13 @@ const button =
 export function PreferenceRanking() {
   const t = useMessages(),
     { games, ranking, access, publicBase } = usePortfolio();
-  const logged = games.filter((game) => game.logged);
+  const logged = loggedGames(games);
   const savedOrder =
     ranking?.slugs.filter((slug) =>
       logged.some((game) => game.slug === slug),
     ) ?? [];
-  const initial = [
-    ...savedOrder,
-    ...logged
-      .filter((game) => !savedOrder.includes(game.slug))
-      .sort((a, b) => a.title.localeCompare(b.title))
-      .map((game) => game.slug),
-  ];
-  const [order, setOrder] = useState(initial);
+  const [manual, setManual] = useState<Record<string, number>>(ranking?.manualPositions ?? Object.fromEntries(savedOrder.map((slug, index) => [slug, index])));
+  const order = rankingOrder(games, manual);
   const revision = useRef(ranking?.revision ?? null);
   const saving = useRef(false);
   const [failed, setFailed] = useState(false);
@@ -46,7 +42,7 @@ export function PreferenceRanking() {
   const minHours = parseHours(minimum), maxHours = parseHours(maximum);
   const validBounds = minHours !== undefined && maxHours !== undefined &&
     (minHours === null || maxHours === null || minHours <= maxHours);
-  const visible = (canEdit ? order : savedOrder).filter(slug => {
+  const visible = order.filter(slug => {
     const game = bySlug.get(slug);
     return game && validBounds && game.title.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()) &&
       (!platform || (platform === "unset" ? !game.platform : game.platform === platform)) &&
@@ -57,8 +53,10 @@ export function PreferenceRanking() {
     if (!canEdit || saving.current || !order.includes(slug) || !Number.isInteger(position) || position < 0 || position >= order.length || order.indexOf(slug) === position) return;
     const next = order.filter(value => value !== slug);
     next.splice(position, 0, slug);
-    setOrder(next);
-    save(next);
+    const overrides = Object.fromEntries(Object.keys(manual).map(key => [key, next.indexOf(key)]).filter(([, index]) => Number(index) >= 0));
+    overrides[slug] = position;
+    setManual(overrides);
+    save(next, overrides);
   }
   function endDrag() { pointer.current = null; setDragged(null); setOver(null); }
   function targetAt(x: number, y: number) {
@@ -68,18 +66,20 @@ export function PreferenceRanking() {
     if (saving.current) return;
     const next = order.filter(slug => slug !== winner);
     next.splice(next.indexOf(loser), 0, winner);
-    setOrder(next);
     setPair(current => current + 1);
-    save(next);
+    const overrides = Object.fromEntries(Object.keys(manual).map(key => [key, next.indexOf(key)]).filter(([, index]) => Number(index) >= 0));
+    overrides[winner] = next.indexOf(winner);
+    setManual(overrides);
+    save(next, overrides);
   }
-  function save(next: string[]) {
+  function save(next: string[], overrides = manual) {
     if (saving.current) return;
     saving.current = true;
     setFailed(false);
     setMessage("Saving…");
     startTransition(async () => {
       try {
-        const result = await saveRanking(next, revision.current);
+        const result = await saveRanking(next, revision.current, overrides);
         setMessage(result.message);
         setFailed(!result.ok);
         if (result.ok && result.revision) revision.current = result.revision;
@@ -143,7 +143,7 @@ export function PreferenceRanking() {
       {validBounds && !visible.length && <p className="text-on-surface-variant">{t("No logged games match these filters.")}</p>}
       <ol className="overflow-hidden rounded-xl border border-outline-variant/30 bg-surface-container-low divide-y divide-outline-variant/30">
         {visible.map((slug) => {
-          const index = (canEdit ? order : savedOrder).indexOf(slug);
+          const index = order.indexOf(slug);
           const game = bySlug.get(slug);
           return game ? (
             <li

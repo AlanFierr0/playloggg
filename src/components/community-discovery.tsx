@@ -5,16 +5,16 @@ import { getReviewHelpfulness } from "@/lib/review-helpfulness";
 import Link from "next/link";
 import { GameLogAction } from "@/components/game-actions";
 import { getCommunity, getTasteDiscovery } from "@/lib/community";
-import { getCatalog } from "@/lib/portfolio";
+import { getCatalogRows } from "@/lib/portfolio";
 import { getMessages } from "@/lib/locale/server";
 export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<string> }) {
-  const [community, discovery, catalog, t] = await Promise.all([
+  const [community, discovery, t] = await Promise.all([
     getCommunity(),
     getTasteDiscovery(),
-    getCatalog(),
     getMessages(),
   ]);
   const { recommendations, neighbors } = discovery;
+  const catalog = await getCatalogRows([...community.reviews.map(row => row.game_id), ...community.trending.map(row => row.gameId), ...community.controversial.map(row => row.gameId), ...discovery.recommendations.map(row => row.gameId)]);
   const games = new Map(catalog.map((game) => [game.id, game]));
   if (
     !community.trending.length &&

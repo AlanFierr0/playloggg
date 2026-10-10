@@ -1,4 +1,5 @@
 import "server-only";
+import { createAuthAdmin } from "@/lib/supabase/auth-admin";
 import { cache } from "react";
 import { createPublicClient } from "@/lib/supabase/public";
 import {
@@ -29,7 +30,7 @@ const readCommunityReviews = cache(async () => {
 export const getCommunity = cache(async () => {
   const client=createPublicClient();
   const [scoreResult,trendResult,reviews]=await Promise.all([
-    client.rpc("community_game_scores").gte("sample_count",5).order("deviation",{ascending:false}).order("sample_count",{ascending:false}).order("game_id").limit(5),
+    createAuthAdmin().rpc("anonymous_game_scores").gte("sample_count",5).order("deviation",{ascending:false}).order("sample_count",{ascending:false}).order("game_id").limit(5),
     client.rpc("community_trending_games"),
     readCommunityReviews(),
   ]);
@@ -50,7 +51,7 @@ export const getCommunity = cache(async () => {
 export const getCommunityScores=cache(async (gameIds:number[])=>{
   const scores:CommunityScore[]=[];
   for(let offset=0;offset<gameIds.length;offset+=100){
-    const {data,error}=await createPublicClient().rpc("community_game_scores",{p_ids:gameIds.slice(offset,offset+100)}).limit(100);
+    const {data,error}=await createAuthAdmin().rpc("anonymous_game_scores",{p_ids:gameIds.slice(offset,offset+100)}).limit(100);
     if(error)throw new Error("Community score could not be loaded.");
     scores.push(...data.map(toScore));
   }

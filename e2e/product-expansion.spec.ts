@@ -278,3 +278,13 @@ test("profile hot take shows the largest personal and public score gap", async (
   await expect(take.getByRole("link", {name:"Hades",exact:true})).toHaveAttribute("href","/u/fixture_public/game/hades");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
+
+
+test("personal ranking follows scores before manual changes",async({page,context})=>{
+ await context.addCookies([authCookie]);
+ for(const [score,first] of [[90,"Hades"],[0,"Elden Ring"]] as const){
+  await page.goto("/log?game=hades");await page.locator("#score-display").fill(String(score));
+  await page.locator("#commit-rating").click();await expect(page).toHaveURL(/\/profile$/);
+  await page.goto("/profile/ranking");await expect(page.locator("[data-ranking-game]").first()).toContainText(first);
+ }
+});

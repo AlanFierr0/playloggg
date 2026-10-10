@@ -1,4 +1,5 @@
 "use client";
+import { validateRating } from "@/lib/rating-input";
 import { useMessages } from "@/components/site-preferences";
 
 import Link from "next/link";
@@ -6,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { ConsolePlatformSelector } from "@/components/console-platform-selector";
 import { CompletionDate } from "@/components/completion-date";
 import { TagEditor } from "@/components/tag-editor";
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { tierForScore } from "@/lib/tier-ranges";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { saveRating } from "@/app/actions/ratings";
@@ -24,6 +25,11 @@ const { access, profile } = usePortfolio();
 const canEdit = access?.canEdit ?? false;
 const [pending, startTransition] = useTransition();
 const [saveMessage, setSaveMessage] = useState("");
+const [expectedUpdatedAt, setExpectedUpdatedAt] = useState(game.updatedAt ?? null);
+const [conflict, setConflict] = useState(false);
+const [draftReady, setDraftReady] = useState(false);
+const cleared = useRef(false);
+const draftKey = `playlogg_draft:${profile.id}:${game.slug}`;
 const [saved, setSaved] = useState({ score: game.score, tier: game.tier ?? null, status: game.status ?? null, review: game.review ?? "", platform: game.platform ?? null, hoursPlayed: game.hoursPlayed ?? null, completedOn: game.completedOn ?? null, tags: game.tags ?? [] });
 const [score, setScore] = useState<number | null>(game.score);
 const scoreInput = useRef<HTMLInputElement>(null);
@@ -40,8 +46,41 @@ const dateInput = useRef<HTMLInputElement>(null);
 const [tags, setTags] = useState<string[]>(game.tags ?? []);
 const [tagVersion, setTagVersion] = useState(0);
 const [review, setReview] = useState(game.review ?? "");
-function resetDraft() { setScore(saved.score); setTier(saved.tier); setPlatform(saved.platform); setStatus(saved.status); setHours(saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)); setDate(saved.completedOn ?? ""); setReview(saved.review); setTags(saved.tags); setTagVersion((value) => value + 1); setSaveMessage(""); router.push("/profile"); }
+const dirty = score !== saved.score || tier !== saved.tier || status !== saved.status || review !== saved.review || platform !== saved.platform
+  || hours !== (saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)) || (date || null) !== saved.completedOn || JSON.stringify(tags) !== JSON.stringify(saved.tags)
+  || tierManual !== (game.tierManual ?? Boolean(game.tier));
+useEffect(() => {
+  let cancelled = false;
+  queueMicrotask(() => {
+  if (cancelled) return;
+  if (canEdit) try {
+    const stored = sessionStorage.getItem(draftKey);
+    const raw = stored ? JSON.parse(stored) : null;
+    const draft = raw ? validateRating({...raw, hoursPlayed:null, completedOn:null}) : null;
+    if (draft?.slug === game.slug) {
+      setScore(draft.score); setTier(draft.tier); setTierManual(draft.tierManual ?? false);
+      setPlatform(draft.platform); setStatus(draft.status); setHours(typeof raw.rawHours === "string" && raw.rawHours.length <= 100 ? raw.rawHours : "");
+      setDate(typeof raw.rawDate === "string" && raw.rawDate.length <= 10 ? raw.rawDate : ""); setReview(draft.review); setTags(draft.tags); setTagVersion(value => value + 1);
+      setExpectedUpdatedAt(draft.expectedUpdatedAt ?? null);
+      setSaveMessage("Your unfinished draft has been restored.");
+    }
+  } catch { setSaveMessage("Draft storage is unavailable. Save before leaving this page."); }
+  setDraftReady(true);
+  });
+  return () => { cancelled = true; };
+}, [canEdit, draftKey, game.slug]);
+useEffect(() => {
+  if (!canEdit || !draftReady || cleared.current) return;
+  try {
+    if (!dirty) { sessionStorage.removeItem(draftKey); return; }
+    sessionStorage.setItem(draftKey, JSON.stringify({slug: game.slug, score, tier, tierManual, status, review, platform,
+      hoursPlayed: parseHours(hours) ?? null, completedOn: date || null, rawHours:hours, rawDate:date, tags, expectedUpdatedAt}));
+  } catch { queueMicrotask(() => setSaveMessage("Draft storage is unavailable. Save before leaving this page.")); }
+}, [canEdit, draftReady, dirty, draftKey, game.slug, score, tier, tierManual, status, review, platform, hours, date, tags, expectedUpdatedAt]);
+function clearStoredDraft() { cleared.current = true; try { sessionStorage.removeItem(draftKey); } catch {} }
+function resetDraft() { clearStoredDraft(); setScore(saved.score); setTier(saved.tier); setPlatform(saved.platform); setStatus(saved.status); setHours(saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)); setDate(saved.completedOn ?? ""); setReview(saved.review); setTags(saved.tags); setTagVersion((value) => value + 1); setSaveMessage(""); router.push("/profile"); }
 function commit() {
+  if (date && date > new Date().toISOString().slice(0, 10)) { setSaveMessage("Completion date cannot be in the future. Your draft has been kept."); return; }
   if (invalidScore || (scoreInput.current && !scoreInput.current.validity.valid)) { setSaveMessage("Use a whole-number score from 0 to 100."); scoreInput.current?.focus(); return; }
   if (dateInput.current && !dateInput.current.validity.valid) { setSaveMessage("Complete a valid calendar date, or clear it. Your draft has been kept."); return; }
   const hoursPlayed = parseHours(hours);
@@ -49,16 +88,16 @@ function commit() {
   const maxHours = maximumPlaytime(game.releasedOn);
   if (hoursPlayed !== null && maxHours !== null && hoursPlayed > maxHours) { setSaveMessage("Playtime cannot exceed the hours elapsed since the game’s release. Your draft has been kept."); return; }
   const completedOn = date || null;
-  const draft = { slug: game.slug, score, tier, tierManual, status, review, platform, hoursPlayed, completedOn, tags };
+  const draft = { slug: game.slug, score, tier, tierManual, status, review, platform, hoursPlayed, completedOn, tags, expectedUpdatedAt };
   startTransition(async () => {
     try {
       const result = await saveRating(draft);
-      setSaveMessage(result.message);
-      if (result.ok) { setSaved({ score, tier, status, review: review.trim(), platform, hoursPlayed, completedOn, tags: normalizeTags(tags)! }); setReview(review.trim()); setHours(hoursPlayed == null ? "" : String(hoursPlayed)); router.push("/profile"); }
+      setSaveMessage(result.message); setConflict(!result.ok && result.message.startsWith("This entry changed"));
+      if (result.ok) { clearStoredDraft(); setExpectedUpdatedAt(result.updatedAt ?? null); setSaved({ score, tier, status, review: review.trim(), platform, hoursPlayed, completedOn, tags: normalizeTags(tags)! }); setReview(review.trim()); setHours(hoursPlayed == null ? "" : String(hoursPlayed)); router.push("/profile"); }
     } catch { setSaveMessage("Saving is unavailable right now. Your draft has been kept; please try again."); }
   });
 }
-return (<><fieldset disabled={pending} className="contents">
+return (<>{conflict && <div role="alert" className="site-container mx-auto p-4"><p>{t(saveMessage)}</p><button type="button" onClick={() => { clearStoredDraft(); window.location.reload(); }} className="mt-3 min-h-11 rounded-lg bg-surface-container px-4 text-primary">{t("Discard draft and reload latest entry")}</button></div>}<fieldset disabled={pending} className="contents">
 <div className="w-full  bg-surface"><div className="flex flex-col w-full">
 <div className="relative w-full min-h-[calc(100dvh-var(--site-header-height))] flex items-stretch p-4 sm:p-6 lg:p-8 overflow-hidden">
 <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -84,7 +123,7 @@ return (<><fieldset disabled={pending} className="contents">
 </div>
 
 <div className="flex items-center gap-3">
-<Link className="group flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors" title={t("Change Title")} type="button" href="/search?mode=log&from=/log">
+<Link className="group flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors" title={t("Change Title")} type="button" href={`/search?mode=log&from=${encodeURIComponent(`/log?game=${game.slug}`)}`}>
 <span aria-hidden="true" className="material-symbols-outlined text-[15px]">{"swap_horiz"}</span>
 
 <span className="font-label-sm text-label-sm uppercase tracking-wider">{t("Switch Game")}</span>
@@ -251,7 +290,7 @@ return (<><fieldset disabled={pending} className="contents">
 </div>
 
 <div className="w-full bg-surface-container-lowest px-4 py-4 sm:px-10 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 mt-auto">
-<div className="min-w-0 space-y-2"><p className="font-label-sm text-label-sm text-on-surface-variant">{t("Updates appear in feeds only while your profile is public and discoverable.")}</p></div>
+<div />
 
 <div className="flex flex-col min-[360px]:flex-row items-center gap-3 w-full sm:w-auto justify-end">
 <button id="discard-rating" className="w-full sm:w-auto px-4 py-2 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-colors" type="button" onClick={resetDraft}>{t("\n            Discard Draft\n          ")}</button>

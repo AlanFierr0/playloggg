@@ -1333,5 +1333,14 @@
   "Back to Playlogg": "Volver a Playlogg",
   "Find a game": "Encontrar un juego",
   "Page not found": "Página no encontrada",
-  "Next quest: clear your backlog.": "Próxima misión: jugar tus pendientes."
+  "Next quest: clear your backlog.": "Próxima misión: jugar tus pendientes.",
+  "Games with recorded hours": "Juegos con horas registradas",
+  "Ranking view": "Vista del ranking",
+  "Personal order": "Orden personal",
+  "By score": "Por puntuación",
+  "Your unfinished draft has been restored.": "Se restauró tu borrador pendiente.",
+  "Draft storage is unavailable. Save before leaving this page.": "No se puede guardar el borrador en este navegador. Guardá los cambios antes de salir.",
+  "Completion date cannot be in the future. Your draft has been kept.": "La fecha de finalización no puede ser futura. Conservamos tu borrador.",
+  "This entry changed in another tab. Your draft is kept; reload and review the latest entry before saving.": "La entrada cambió en otra pestaña. Conservamos tu borrador; revisá la versión actual antes de guardar.",
+  "Discard draft and reload latest entry": "Descartar el borrador y cargar la entrada actual"
 }

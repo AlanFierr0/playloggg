@@ -16,7 +16,8 @@ export function ProfileOverviewScreen({ hotTake }: { hotTake?: React.ReactNode }
   const base = publicBase ?? "/profile";
   const rated = ratedGames(games);
   const entries = loggedGames(games);
-  const totalHours = entries.reduce((sum, game) => sum + (game.hoursPlayed ?? 0), 0);
+  const knownHours = entries.filter(game => game.hoursPlayed != null);
+  const totalHours = knownHours.reduce((sum, game) => sum + (game.hoursPlayed ?? 0), 0);
   const bySlug = new Map(games.map(game => [game.slug, game]));
   const featured = favorites.filter(f => f.featuredSlot !== null).sort((a, b) => a.featuredSlot! - b.featuredSlot!);
   const recent = entries.filter(g => g.updatedAt && Number.isFinite(Date.parse(g.updatedAt))).sort((a, b) => b.updatedAt!.localeCompare(a.updatedAt!) || a.slug.localeCompare(b.slug)).slice(0, 6);
@@ -48,7 +49,7 @@ export function ProfileOverviewScreen({ hotTake }: { hotTake?: React.ReactNode }
           </nav>}
         </div>
         <dl className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-5 border-y border-outline-variant/20 py-6">
-          {[[t("Games rated"), rated.length], [t("Completed games"), entries.filter(g => g.status === "completed").length], [t("Average score"), averageScore(rated)], [t("Favorites"), favorites.length], [t("Total hours played"), totalHours.toLocaleString(locale, { maximumFractionDigits: 2 })]].map(([label, value]) => <div key={label} className="min-w-0 space-y-1"><dt className="text-body-sm text-on-surface-variant">{label}</dt><dd className="font-headline-xl text-headline-xl text-primary tabular-nums">{value}</dd></div>)}
+          {[[t("Games rated"), rated.length], [t("Completed games"), entries.filter(g => g.status === "completed").length], [t("Average score"), averageScore(rated)], [t("Favorites"), favorites.length], [t("Total hours played"), knownHours.length ? totalHours.toLocaleString(locale, { maximumFractionDigits: 2 }) : "—"]].map(([label, value]) => <div key={label} className="min-w-0 space-y-1"><dt className="text-body-sm text-on-surface-variant">{label}</dt><dd className="font-headline-xl text-headline-xl text-primary tabular-nums"><span>{value}</span>{label === t("Total hours played") && <span className="block text-label-sm font-normal text-on-surface-variant">{knownHours.length} / {entries.length} {t("Games with recorded hours")}</span>}</dd></div>)}
         </dl>
       </header>
       <div className="grid lg:grid-cols-3 items-start gap-6">

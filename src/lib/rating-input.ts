@@ -6,6 +6,7 @@ import type { PlaybackStatus, PlayedPlatform, Tier } from "../types/domain.ts";
 export interface RatingInput {
   slug: string; score: number | null; tier: Tier | null; status: PlaybackStatus | null;
   tierManual?: boolean;
+  expectedUpdatedAt?: string | null;
   review: string; platform: PlayedPlatform | null; hoursPlayed: number | null; completedOn: string | null; tags: string[];
 }
 
@@ -32,7 +33,8 @@ function isCalendarDate(value: unknown): value is string {
 
 export function validateRating(input: unknown): RatingInput | null {
   if (!input || typeof input !== "object") return null;
-  const { tierManual } = input as Record<string,unknown>;
+  const { expectedUpdatedAt, tierManual } = input as Record<string,unknown>;
+  if (expectedUpdatedAt !== undefined && expectedUpdatedAt !== null && (typeof expectedUpdatedAt !== "string" || !/^\d{4}-\d{2}-\d{2}T/.test(expectedUpdatedAt) || !Number.isFinite(Date.parse(expectedUpdatedAt)))) return null;
   if (tierManual !== undefined && typeof tierManual !== "boolean") return null;
   const { slug, score, tier, status, review, platform, hoursPlayed, completedOn, tags: rawTags } = input as Record<string, unknown>;
   if (typeof slug !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 200) return null;
@@ -41,11 +43,11 @@ export function validateRating(input: unknown): RatingInput | null {
   if (status !== null && !isPlaybackStatus(status)) return null;
   if (platform !== null && !isPlayedPlatform(platform)) return null;
   if (hoursPlayed !== null && (typeof hoursPlayed !== "number" || !Number.isFinite(hoursPlayed) || hoursPlayed < 0)) return null;
-  if (completedOn !== null && !isCalendarDate(completedOn)) return null;
+  if (completedOn !== null && (!isCalendarDate(completedOn) || completedOn > new Date().toISOString().slice(0, 10))) return null;
   const tags = normalizeTags(rawTags);
   if (!tags) return null;
   if (typeof review !== "string" || review.length > 20000) return null;
-  return { ...(tierManual === undefined ? {} : {tierManual: tierManual as boolean}), slug, score, tier: tier as Tier | null, status: status as PlaybackStatus | null,
+  return { ...(expectedUpdatedAt === undefined ? {} : {expectedUpdatedAt: expectedUpdatedAt as string | null}), ...(tierManual === undefined ? {} : {tierManual: tierManual as boolean}), slug, score, tier: tier as Tier | null, status: status as PlaybackStatus | null,
     review: review.trim(), platform: platform as PlayedPlatform | null,
     hoursPlayed: hoursPlayed as number | null, completedOn: completedOn as string | null, tags };
 }

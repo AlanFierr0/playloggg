@@ -8,7 +8,7 @@ export async function readPreferenceRanking(
 ) {
   const { data, error } = await client
     .from("profile_rankings")
-    .select("game_ids,revision")
+    .select("game_ids,revision,manual_positions")
     .eq("profile_id", profileId)
     .maybeSingle();
   if (error) throw new Error("Your ranking could not be loaded.");
@@ -19,5 +19,6 @@ export async function readPreferenceRanking(
       slugs.get(id) ? [slugs.get(id)!] : [],
     ),
     revision: data.revision,
+    manualPositions: Object.fromEntries(Object.entries(data.manual_positions as Record<string,number>).flatMap(([id, position]) => slugs.has(Number(id)) ? [[slugs.get(Number(id))!, position]] : [])),
   };
 }
