@@ -55,7 +55,7 @@ export function HomeCarousel({ children, kind = "reviews" }: { children: ReactNo
     }
   }
   return <section aria-label={t(games ? "Trending games" : "Best reviews")} className="space-y-5">
-    <div className="space-y-2"><h2 className="font-headline-lg text-headline-lg">{t(games ? "Trending games" : "Best reviews")}</h2><p className="text-body-sm text-on-surface-variant">{t(games ? "Distinct people who changed a score in the last 30 days." : "Ranked by upvotes minus downvotes.")}</p></div>
+    <div className="space-y-2"><h2 className="font-headline-lg text-headline-lg">{t(games ? "Trending games" : "Best reviews")}</h2><p className="text-body-sm text-on-surface-variant">{t(games ? "Games people are rating right now." : "Reviews the community found helpful.")}</p></div>
     <div className={children.length > 1 ? "grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center gap-2 sm:gap-3" : "min-w-0"}>
       {children.length > 1 && <button type="button" aria-label={t(games ? "Previous games" : "Previous reviews")} onClick={() => move(-1)} className="flex h-11 w-11 items-center justify-center rounded-full bg-surface-container-high text-primary hover:bg-surface-container-highest motion-safe:transition-[background-color,transform] motion-safe:duration-150 motion-safe:hover:scale-105 motion-safe:active:scale-95"><span aria-hidden="true" className="material-symbols-outlined">chevron_left</span></button>}
       <div ref={track} role="group" aria-label={t(games ? "Trending games carousel" : "Review carousel")} tabIndex={0} onKeyDown={event => {

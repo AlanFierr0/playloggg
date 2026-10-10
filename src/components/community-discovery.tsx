@@ -36,7 +36,7 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
     {
       title: "Most controversial games",
       description:
-        "Highest score spread, measured by population standard deviation. At least 5 ratings are required; a higher spread means more disagreement.",
+        "Games that divide the community.",
       rows: community.controversial.slice(0, 5).map((row) => ({
         gameId: row.gameId,
         value: `${row.average} / 100 · ${row.count} ${t("ratings")} · σ ${row.deviation.toFixed(1)}`,
@@ -45,7 +45,7 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
     {
       title: "Games for your taste",
       description:
-        "Games you have not logged, rated 90+ by people with at least 85% Taste Match across 5 shared scored games.",
+        "Unlogged games recommended by people with similar taste.",
       rows: recommendations.slice(0, 5).map((row) => ({
         gameId: row.gameId,
         value: `${row.average} / 100 · ${row.count} ${t("people")} · ${row.bestMatch}% ${t("Taste Match")}`,
@@ -61,7 +61,7 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
           </h2>
           <p className="text-body-sm text-on-surface-variant">
             {t(
-              "Discoverable public profiles with at least 85% Taste Match across 5 shared scored games.",
+              "Players who share your taste in games.",
             )}
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">

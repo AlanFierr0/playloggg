@@ -40,12 +40,17 @@ test("home uses owned entries, qualifying genre ratings and working filters", as
   await expect(recent).toContainText("S · God");
   await expect(recent).toContainText("Completed");
   await expect(recent).not.toContainText("Elden Ring");
+  await expect(recent.getByRole("link", { name: "View collection" })).toHaveAttribute("href", "/profile/ranking");
+  if (testInfo.project.name === "desktop") {
+    expect((await playing.boundingBox())!.y).toBeCloseTo((await recent.boundingBox())!.y, 0);
+  }
   const taste = page.getByRole("region", { name: "Your taste", exact: true });
   await expect(taste).toContainText("80 / 100");
   await expect(taste).toContainText("3 Games rated");
   await expect(taste.getByRole("link", { name: "View stats" })).toHaveAttribute("href", "/profile/stats");
   const explore = page.getByRole("region", { name: "Explore your taste" });
   await expect(explore.locator("article")).toHaveCount(5);
+  await expect(explore.getByRole("link", { name: "Search games", exact: true })).toHaveAttribute("href", "/search?q=&from=/");
   await expect(explore).toContainText("From your genres: Adventure");
   for (const slug of ["fixture-game-0", "fixture-game-1", "fixture-game-2", "elden-ring-shadow-of-the-erdtree"]) {
     await expect(explore.locator(`a[href="/game/${slug}"]`)).toHaveCount(0);
@@ -164,7 +169,7 @@ test("explore games remain stable until selection expiry and then refresh automa
   await page.reload();
   expect(await links.allTextContents()).toEqual(titles);
   await expect.poll(async()=> (await getSelection()).value.split(".")[0]).not.toBe(seed);
-  expect(await links.allTextContents()).not.toEqual(titles);
+  await expect.poll(() => links.allTextContents()).not.toEqual(titles);
 });
 
 test("explore selection expires no later than the current login token", async ({ page, context, request }) => {
@@ -177,4 +182,24 @@ test("explore selection expires no later than the current login token", async ({
   await page.goto("/");
   const selection=(await context.cookies()).find(cookie=>cookie.name==="playlogg_discovery")!;
   expect(Number(selection.value.split(".")[1])).toBe(expires*1000);
+});
+
+
+test("guest home offers direct search and stays readable in both languages and themes", async ({ page, context }, testInfo) => {
+  await page.goto("/");
+  const explore = page.getByRole("region", { name: "Games worth exploring", exact: true });
+  await explore.getByRole("link", { name: "Search games", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Search the game catalog" })).toBeVisible();
+  await page.getByRole("dialog").press("Escape");
+  await expect(page).toHaveURL("http://127.0.0.1:3100/");
+  for (const locale of ["en", "es-AR"]) for (const theme of ["dark", "light"]) {
+    await context.addCookies([
+      {name:"playlogg_theme",value:theme,url:"http://127.0.0.1:3100"},
+      {name:"playlogg_locale",value:locale,url:"http://127.0.0.1:3100"},
+    ]);
+    await page.reload();
+    expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({path:`e2e-artifacts/home-guest-${testInfo.project.name}-${locale}-${theme}.png`,fullPage:true});
+  }
 });

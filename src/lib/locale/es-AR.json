@@ -1312,5 +1312,13 @@
   "Maximum": "Máximo",
   "Set the minimum and maximum score for each tier. Manually assigned games stay in their chosen tier.": "Definí la puntuación mínima y máxima de cada tier. Los juegos asignados manualmente conservan su tier.",
   "Scores from 0 to 100. Ranges cannot overlap.": "Puntuaciones de 0 a 100. Los rangos no pueden superponerse.",
-  "Total hours played": "Horas jugadas en total"
+  "Total hours played": "Horas jugadas en total",
+  "Pick up where you left off.": "Retomá donde lo dejaste.",
+  "View collection": "Ver colección",
+  "Something new to add to your collection.": "Algo nuevo para sumar a tu colección.",
+  "Games people are rating right now.": "Los juegos que la comunidad está puntuando.",
+  "Reviews the community found helpful.": "Reseñas que la comunidad encontró útiles.",
+  "Games that divide the community.": "Juegos que dividen a la comunidad.",
+  "Unlogged games recommended by people with similar taste.": "Juegos que todavía no registraste, recomendados por personas con gustos similares.",
+  "Players who share your taste in games.": "Jugadores que comparten tu gusto por los videojuegos."
 }
