@@ -1,4 +1,5 @@
 import { test, expect } from "./test";
+import AxeBuilder from "@axe-core/playwright";
 // @ts-expect-error This Node-only fixture file exports a plain cookie descriptor.
 import { authCookie } from "./fixture-server.mjs";
 
@@ -78,4 +79,33 @@ test("live-service statuses save, reload and filter without changing scores or t
  await page.getByRole("group",{name:"Playback status",exact:true}).scrollIntoViewIfNeeded();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:`e2e-artifacts/live-service-status-${info.project.name}.png`});
+});
+
+
+test("404 offers accessible recovery in both languages and themes", async ({ page, context }, testInfo) => {
+  for (const locale of ["en", "es-AR"]) for (const theme of ["dark", "light"]) {
+    await context.addCookies([
+      { name: "playlogg_locale", value: locale, url: "http://127.0.0.1:3100" },
+      { name: "playlogg_theme", value: theme, url: "http://127.0.0.1:3100" },
+    ]);
+    expect((await page.goto("/missing-fixture-page"))?.status()).toBe(404);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(locale === "en" ? "This page isn’t available." : "Esta página no está disponible.");
+    const content = page.locator("#main-content");
+    await expect(content.getByRole("link", { name: locale === "en" ? "Go home" : "Volver al inicio", exact: true })).toHaveAttribute("href", "/");
+    await expect(content.getByRole("link", { name: locale === "en" ? "Search games" : "Buscar juegos", exact: true })).toHaveAttribute("href", "/search?q=&from=/");
+    expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `e2e-artifacts/404-${testInfo.project.name}-${locale}-${theme}.png`, fullPage: true });
+  }
+  if (testInfo.project.name === "mobile") {
+    await page.setViewportSize({ width: 320, height: 812 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+  await page.locator("#main-content").getByRole("link", { name: "Buscar juegos", exact: true }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page).toHaveURL("http://127.0.0.1:3100/");
+  await page.goto("/missing-fixture-page");
+  await page.locator("#main-content").getByRole("link", { name: "Volver al inicio", exact: true }).click();
+  await expect(page).toHaveURL("http://127.0.0.1:3100/");
 });
