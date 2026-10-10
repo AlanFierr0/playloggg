@@ -184,9 +184,65 @@ test("saving scores automatically assigns tiers until a manual move overrides th
  }
  await page.locator('[data-tier-game="hades"]').dragTo(page.locator("#tier-a"));
  await expect(page.locator('#tier-a [data-tier-game="hades"]')).toBeVisible();
+ await expect(page.getByRole("status")).toHaveText("Tier saved.");
  await page.goto("/log?game=hades");await page.locator("#score-display").fill("25");
  await page.locator("#commit-rating").click();await expect(page).toHaveURL(/\/profile$/);
  await page.goto("/tiers");await expect(page.locator('#tier-a [data-tier-game="hades"]')).toBeVisible();
  const state=await(await request.get("http://127.0.0.1:3101/__state")).json();
  expect(state.ratings.find((r:{profile_id:number;game_id:number})=>r.profile_id===2&&r.game_id===1)).toMatchObject({score:25,tier:"A",tier_manual:true});
+});
+
+
+test("tier moves update immediately while saves queue, and failed saves only undo their own game", async ({page, context, request}) => {
+  await context.addCookies([authCookie]);
+  await page.goto("/log?game=hades");
+  await page.locator("#score-display").fill("96");
+  await page.locator("#commit-rating").click();
+  await expect(page).toHaveURL(/\/profile$/);
+  await page.goto("/tiers");
+  let holdNext = true;
+  let release: (() => void) | undefined;
+  let posts = 0;
+  await page.route("**/tiers", async route => {
+    if (route.request().method() === "POST") {
+      posts++;
+      if (holdNext) {holdNext = false; await new Promise<void>(resolve => {release = resolve;});}
+    }
+    await route.continue();
+  });
+  const hades = page.locator('[data-tier-game="hades"]');
+  const elden = page.locator('[data-tier-game="elden-ring-shadow-of-the-erdtree"]');
+  await hades.dragTo(page.locator("#tier-a"));
+  await expect(page.locator("#tier-a").locator(hades)).toBeVisible();
+  await expect.poll(() => Boolean(release)).toBe(true);
+  await expect(elden.getByRole("button", {name: /Drag to change tier/})).toBeEnabled();
+  await elden.dragTo(page.locator("#tier-c"));
+  await expect(page.locator("#tier-c").locator(elden)).toBeVisible();
+  await hades.dragTo(page.locator("#tier-d"));
+  await expect(page.locator("#tier-d").locator(hades)).toBeVisible();
+  await expect(page.getByRole("status")).toContainText("(3)");
+  expect(posts).toBe(1);
+  release!();
+  await expect(page.getByRole("status")).toHaveText("Tier saved.");
+  expect(posts).toBe(3);
+  await page.reload();
+  await expect(page.locator("#tier-d").locator(hades)).toBeVisible();
+  await expect(page.locator("#tier-c").locator(elden)).toBeVisible();
+  holdNext = true; release = undefined;
+  await request.post("http://127.0.0.1:3101/__fail-save");
+  await hades.dragTo(page.locator("#tier-f"));
+  await expect(page.locator("#tier-f").locator(hades)).toBeVisible();
+  await expect.poll(() => Boolean(release)).toBe(true);
+  await elden.dragTo(page.locator("#tier-a"));
+  await expect(page.locator("#tier-a").locator(elden)).toBeVisible();
+  release!();
+  await expect(page.getByRole("status")).toContainText("Tier could not be saved");
+  await expect(page.locator("#tier-d").locator(hades)).toBeVisible();
+  await expect(page.locator("#tier-a").locator(elden)).toBeVisible();
+  const state = await (await request.get("http://127.0.0.1:3101/__state")).json();
+  expect(state.ratings.find((row: {profile_id: number; game_id: number}) => row.profile_id === 2 && row.game_id === 1)).toMatchObject({score: 96, tier: "D", tier_manual: true});
+  expect(state.ratings.find((row: {profile_id: number; game_id: number}) => row.profile_id === 2 && row.game_id === 2)).toMatchObject({score: 80, tier: "A", tier_manual: true});
+  await page.reload();
+  await expect(page.locator("#tier-d").locator(hades)).toBeVisible();
+  await expect(page.locator("#tier-a").locator(elden)).toBeVisible();
 });

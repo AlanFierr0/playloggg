@@ -4,7 +4,7 @@ import { useMessages } from "@/components/site-preferences";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Fragment, useOptimistic, useRef, useState, useTransition, type FormEvent } from "react";
+import { Fragment, useEffect, useRef, useState, useTransition, type FormEvent } from "react";
 import { saveTierRanges, updateGameTier } from "@/app/actions/tiers";
 import { TierDragHandle } from "@/components/tier-drag-handle";
 import { usePortfolio } from "@/components/portfolio-provider";
@@ -25,29 +25,76 @@ const [message,setMessage]=useState("");
 const [selectedTier,setSelectedTier]=useState<Tier|"all"|null>("all");
 const [dragged,setDragged]=useState<string|null>(null);
 const [over,setOver]=useState<string|null>(null);
-const [displayGames, moveOptimistically] = useOptimistic(games, (current, move: {slug: string; tier: Tier | null; automatic: boolean}) => current.map(game => game.slug === move.slug ? {...game, tier: move.tier, tierManual: !move.automatic} : game));
+type Move = {slug: string; tier: Tier | null; automatic: boolean; id: number; saved?: boolean};
+const queue = useRef<Move[]>([]);
+const draining = useRef(false);
+const sequence = useRef(0);
+const confirmed = useRef(new Map<string, Pick<Move, "tier" | "automatic">>());
+const [queued, setQueued] = useState(0);
+const [overrides, setOverrides] = useState(new Map<string, Move>());
+const [previousGames, setPreviousGames] = useState(games);
+useEffect(() => {
+  if (!queued) return;
+  function preventLosingMoves(event: BeforeUnloadEvent) {event.preventDefault();}
+  window.addEventListener("beforeunload", preventLosingMoves);
+  return () => window.removeEventListener("beforeunload", preventLosingMoves);
+}, [queued]);
+if (previousGames !== games) {
+  setPreviousGames(games);
+  setOverrides(current => new Map([...current].filter(([slug, move]) => {
+    const game = games.find(game => game.slug === slug);
+    return !move.saved || game?.tier !== move.tier || game.tierManual !== !move.automatic;
+  })));
+}
+const displayGames = games.map(game => {
+  const move = overrides.get(game.slug);
+  return move ? {...game, tier: move.tier, tierManual: !move.automatic} : game;
+});
 const logged = loggedGames(displayGames);
 const groups = groupTiers(logged);
 const ranges = profile.tierRanges ?? defaultTierRanges;
+async function flushMoves() {
+  if (draining.current) return;
+  draining.current = true;
+  const failures = new Set<string>();
+  while (queue.current.length) {
+    const move = queue.current[0];
+    let result;
+    try {result = await updateGameTier(move.slug, move.tier, move.automatic);}
+    catch {result = {ok: false, message: "Tier could not be saved. Your game stayed in its previous tier. Please retry."};}
+    if (result.ok) {confirmed.current.set(move.slug, move); failures.delete(move.slug);}
+    else if (!queue.current.some(next => next.slug === move.slug && next.id > move.id)) {failures.add(move.slug); setMessage(result.message);}
+    const saved = confirmed.current.get(move.slug)!;
+    setOverrides(current => {
+      if (current.get(move.slug)?.id !== move.id) return current;
+      return new Map(current).set(move.slug, {...move, ...saved, saved: true});
+    });
+    queue.current.shift();
+    setQueued(queue.current.length);
+  }
+  draining.current = false;
+  if (!failures.size) setMessage("Tier saved.");
+  router.refresh();
+}
 function moveGame(slug:string,tier:Tier|null,automatic=false){
   const game=logged.find(game=>game.slug===slug);
   if(!canEdit||saving.current||pending||!game||(!automatic&&(game.tier??null)===tier))return;
-  saving.current=true;setMessage("");
-  startTransition(async()=>{
-    moveOptimistically({slug,tier,automatic});
-    try {const result=await updateGameTier(slug,tier,automatic);setMessage(result.message);if(result.ok)router.refresh();}
-    catch {setMessage("Tier could not be saved. Your game stayed in its previous tier. Please retry.");}
-    finally {saving.current=false;}
-  });
+  if (!queue.current.some(move => move.slug === slug)) confirmed.current.set(slug, {tier: game.tier ?? null, automatic: !game.tierManual});
+  const move = {slug, tier, automatic, id: ++sequence.current};
+  setOverrides(current => new Map(current).set(slug, move));
+  queue.current.push(move);
+  setQueued(queue.current.length);
+  if (!draining.current) setMessage("");
+  void flushMoves();
 }
 function saveRanges(event:FormEvent<HTMLFormElement>){
   event.preventDefault();
-  if(!canEdit||saving.current||pending)return;
+  if(!canEdit||saving.current||pending||queued)return;
   const form=new FormData(event.currentTarget);
   const next=Object.fromEntries(tiers.map(tier=>[tier,[Number(form.get(`min-${tier}`)),Number(form.get(`max-${tier}`))]]));
   saving.current=true;setMessage("");
   startTransition(async()=>{
-    try {const result=await saveTierRanges(next);setMessage(result.message);if(result.ok)router.refresh();}
+    try {const result=await saveTierRanges(next);setMessage(result.message);if(result.ok){confirmed.current.clear();setOverrides(new Map());router.refresh();}}
     catch {setMessage("Score ranges could not be saved. Please retry.");}
     finally {saving.current=false;}
   });
@@ -96,7 +143,7 @@ return (<>
 
 </section>
 
-{canEdit&&<p role="status" aria-live="polite" className={pending || message ? "fixed bottom-5 right-4 sm:right-6 z-50 flex max-w-[calc(100vw-2rem)] items-center gap-2 rounded-xl border border-outline-variant bg-surface-container-high px-4 py-3 text-body-sm text-primary shadow-xl" : "sr-only"}>{pending&&<span aria-hidden="true" className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-primary/30 border-t-primary motion-reduce:animate-none"/>}{t(pending ? "Saving…" : message)}</p>}
+{canEdit&&<p role="status" aria-live="polite" className={pending || queued || message ? "fixed bottom-5 right-4 sm:right-6 z-50 flex max-w-[calc(100vw-2rem)] items-center gap-2 rounded-xl border border-outline-variant bg-surface-container-high px-4 py-3 text-body-sm text-primary shadow-xl" : "sr-only"}>{(pending||queued>0)&&<span aria-hidden="true" className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-primary/30 border-t-primary motion-reduce:animate-none"/>}{t(pending || queued ? "Saving…" : message)}{queued>0&&<span className="tabular-nums">({queued})</span>}</p>}
 {canEdit&&<p className="text-body-sm text-on-surface-variant">{t("Drag a game to a tier to keep it there. Drop it back into its score range to restore automatic placement.")}</p>}
 <form id="tier-range-form" onSubmit={saveRanges} className="flex flex-col gap-6 w-full" aria-busy={pending}>
 {groups.filter(group => (canEdit || group.tier!==null || group.games.length>0 || selectedTier===null)).map((group) => {
@@ -110,7 +157,7 @@ return (<>
  <div className="flex items-center md:flex-col md:items-start gap-2"><span className="font-display-lg text-display-lg font-bold leading-none">{group.tier ?? "—"}</span><div className="flex flex-col"><span className="font-label-md text-label-md font-semibold uppercase tracking-wider">{t(theme.label)}</span>{!group.tier && <span className="font-label-sm text-label-sm">{t("No tier selected")}</span>}</div></div>
  {group.tier && (canEdit ? <div className="w-full max-w-[9rem] space-y-1.5" role="group" aria-label={`${t("Score range")} ${group.tier}`}><span className="block text-center font-label-sm text-label-sm font-semibold">{t("Range")}</span><div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5">
  {([0,1] as const).map(bound=><Fragment key={`${group.tier}-${bound}-${ranges[group.tier!][bound]}`}><label className="min-w-0 overflow-hidden rounded-lg border border-black/50 bg-white/15 text-black transition-colors hover:bg-white/25 focus-within:border-black focus-within:ring-2 focus-within:ring-black motion-reduce:transition-none">
- <input aria-label={`${t(bound===0 ? "Minimum score for tier" : "Maximum score for tier")} ${group.tier}`} name={`${bound===0 ? "min" : "max"}-${group.tier}`} type="number" min={0} max={100} step={1} required disabled={pending} defaultValue={ranges[group.tier!][bound]} className="min-h-11 w-full min-w-0 bg-transparent px-1 text-center text-xl font-semibold tabular-nums text-black outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none disabled:opacity-50"/>
+ <input aria-label={`${t(bound===0 ? "Minimum score for tier" : "Maximum score for tier")} ${group.tier}`} name={`${bound===0 ? "min" : "max"}-${group.tier}`} type="number" min={0} max={100} step={1} required disabled={pending||queued>0} defaultValue={ranges[group.tier!][bound]} className="min-h-11 w-full min-w-0 bg-transparent px-1 text-center text-xl font-semibold tabular-nums text-black outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none disabled:opacity-50"/>
  </label>{bound===0&&<span aria-hidden="true" className="text-lg font-semibold">–</span>}</Fragment>)}
  </div></div> : <p className="inline-flex items-baseline gap-1.5 rounded-lg border border-black/20 bg-black/5 px-3 py-2 text-body-md font-semibold tabular-nums" aria-label={`${t("Score range")} ${ranges[group.tier][0]}–${ranges[group.tier][1]}`}><span>{ranges[group.tier][0]}–{ranges[group.tier][1]}</span><span className="text-body-sm font-normal">/ 100</span></p>)}
  <div className="flex items-center gap-1.5 pt-0 md:pt-6"><span className="font-label-sm text-label-sm">{group.games.length} {group.games.length === 1 ? t("game") : t("games")}</span><span className="w-1.5 h-1.5 rounded-full bg-current"></span></div>
@@ -123,7 +170,7 @@ return (<>
 })}
 {canEdit&&<div className="flex flex-wrap items-center justify-between gap-3">
 <p className="text-body-sm text-on-surface-variant">{t("Scores from 0 to 100. Ranges cannot overlap.")}</p>
-<button disabled={pending} type="submit" className="min-h-11 rounded-xl bg-primary-container px-5 py-3 text-on-primary-container hover:bg-primary disabled:opacity-50">{t("Save score ranges")}</button>
+<button disabled={pending||queued>0} type="submit" className="min-h-11 rounded-xl bg-primary-container px-5 py-3 text-on-primary-container hover:bg-primary disabled:opacity-50">{t("Save score ranges")}</button>
 </div>}
 </form>
 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-xl bg-surface-container-low text-on-surface-variant mt-4">
