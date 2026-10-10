@@ -1,3 +1,4 @@
+import { CompareProfileInput } from "@/components/compare-profile-input";
 import {ShareCardControls} from "@/components/share-card-controls";
 import {tasteStats} from "@/lib/taste";
 import Link from "next/link";
@@ -9,7 +10,6 @@ import type { Profile } from "@/types/domain";
 
 type Comparison = NonNullable<Awaited<ReturnType<typeof getPublicComparison>>>;
 const panel="rounded-2xl border border-outline-variant/20 bg-surface-container-low p-5 sm:p-6";
-const control="catalog-control";
 export async function CompareScreen({left,right,comparison,requestedPage,ownHandle,friends=[]}:{friends?:{handle:string;display_name:string}[];left:string;right:string;comparison:Comparison|null;requestedPage:number;ownHandle?:string}) {
   const t=await getMessages();
   const ownProfile=Boolean(ownHandle && left===ownHandle);
@@ -29,9 +29,8 @@ export async function CompareScreen({left,right,comparison,requestedPage,ownHand
     <header className="space-y-3"><h1 className="font-headline-xl text-headline-xl font-semibold tracking-tight">{t("Compare gaming taste")}</h1><p className="text-body-lg text-on-surface-variant max-w-2xl">{t(ownHandle ? "Your profile is selected by default. You can change either profile handle." : "Enter two published profile handles. Private and unknown profiles are unavailable.")}</p></header>
     <section aria-label={t("Choose profiles")} className={`${panel} space-y-4`}>
       <form action="/compare" method="get" className="grid sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-4 items-end">
-        <label className="space-y-2 min-w-0"><span className="block text-body-sm text-on-surface-variant">{t("First profile handle")}</span><input className={control} placeholder={t("Profile handle")} name="left" defaultValue={left} list="compare-friends" required maxLength={30} autoCapitalize="none" autoCorrect="off" spellCheck={false} /></label>
-        <label className="space-y-2 min-w-0"><span className="block text-body-sm text-on-surface-variant">{t("Second profile handle")}</span><input className={control} placeholder={t("Profile handle")} name="right" list="compare-friends" defaultValue={right} required maxLength={30} autoCapitalize="none" autoCorrect="off" spellCheck={false} /></label>
-        <datalist id="compare-friends">{friends.map(friend=><option key={friend.handle} value={friend.handle}>{friend.display_name}</option>)}</datalist>
+        <CompareProfileInput key={`left-${left}`} name="left" label="First profile handle" initialValue={left} />
+        <CompareProfileInput key={`right-${right}`} name="right" label="Second profile handle" initialValue={right} />
         <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary-container text-on-primary-container px-5 py-3 text-body-md font-semibold whitespace-nowrap sm:col-span-2 lg:col-span-1"><span aria-hidden="true" className="material-symbols-outlined text-[20px]">compare_arrows</span>{t("Compare profiles")}</button>
       </form>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-body-sm">{ownProfile && <span className="inline-flex items-center gap-2 text-on-surface-variant"><span aria-hidden="true" className="material-symbols-outlined text-[18px]">check_circle</span>{t("Your profile is selected")}</span>}<Link href={ownHandle ? "/profile/social" : "/people"} className="inline-flex min-h-11 items-center gap-2 text-primary hover:underline">{t("Find friends to compare")}<span aria-hidden="true" className="material-symbols-outlined text-[18px]">arrow_forward</span></Link></div>

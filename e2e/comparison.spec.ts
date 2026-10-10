@@ -90,3 +90,29 @@ test("signed-in comparisons default to the owner but allow either profile to cha
  await page.goto("/compare");
  await expect(first).toHaveValue("fixture_owner");
 });
+
+
+test("compare fields search public profiles live and support pointer and keyboard selection", async ({page,context},info) => {
+ await context.addCookies([authCookie]);await page.goto("/compare");
+ const first=page.getByLabel("First profile handle",{exact:true}),second=page.getByLabel("Second profile handle",{exact:true});
+ await expect(first).toHaveValue("fixture_owner");
+ await first.fill("Published");
+ await expect(page.getByRole("option",{name:/Published Fixture/})).toBeVisible();
+ await expect(page.getByRole("option",{name:/Published Peer/})).toBeVisible();
+ expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.screenshot({path:`e2e-artifacts/compare-profile-dropdown-${info.project.name}.png`});
+ await page.getByRole("option",{name:/Published Fixture/}).click();
+ await expect(first).toHaveValue("fixture_public");await expect(page.getByRole("listbox")).toHaveCount(0);
+ await second.fill("@FIXTURE_PEER");
+ await expect(page.getByRole("option",{name:/Published Peer/})).toBeVisible();
+ await second.press("ArrowDown");await second.press("Enter");
+ await expect(second).toHaveValue("fixture_peer");await expect(page).toHaveURL(/\/compare$/);
+ await second.fill("fixture_owner");await expect(page.getByText("No profiles match this search.",{exact:true})).toBeVisible();
+ await second.fill("Published Peer");await expect(page.getByRole("option",{name:/Published Peer/})).toBeVisible();
+ await second.press("Escape");await expect(page.getByRole("listbox")).toHaveCount(0);
+ await second.fill("fixture_peer");await expect(page.getByRole("option",{name:/Published Peer/})).toBeVisible();
+ await second.press("ArrowDown");await second.press("Enter");
+ await page.getByRole("button",{name:"Compare profiles",exact:true}).click();
+ await expect(page).toHaveURL(/left=fixture_public&right=fixture_peer/);await expect(page.locator("[data-affinity]")).toHaveText("90%");
+});
