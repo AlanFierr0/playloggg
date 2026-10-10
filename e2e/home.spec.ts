@@ -42,7 +42,12 @@ test("home uses owned entries, qualifying genre ratings and working filters", as
   await expect(recent).not.toContainText("Elden Ring");
   await expect(recent.getByRole("link", { name: "View collection" })).toHaveAttribute("href", "/profile/ranking");
   if (testInfo.project.name === "desktop") {
-    expect((await playing.boundingBox())!.y).toBeCloseTo((await recent.boundingBox())!.y, 0);
+    const playingBox = (await playing.boundingBox())!, recentBox = (await recent.boundingBox())!;
+    expect(playingBox.y).toBeCloseTo(recentBox.y, 0);
+    expect(playingBox.height).toBeCloseTo(recentBox.height, 0);
+    expect((await playing.getByRole("heading").boundingBox())!.y).toBeCloseTo((await recent.getByRole("heading").boundingBox())!.y, 0);
+    const edits = recent.getByRole("link", {name:"Edit log entry",exact:true});
+    expect((await edits.nth(0).boundingBox())!.y).toBeCloseTo((await edits.nth(1).boundingBox())!.y, 0);
   }
   const taste = page.getByRole("region", { name: "Your taste", exact: true });
   await expect(taste).toContainText("80 / 100");
