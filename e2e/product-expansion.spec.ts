@@ -2,6 +2,7 @@ import { test, expect } from "./test";
 // @ts-expect-error Node-only fixture exports a cookie descriptor.
 import { authCookie } from "./fixture-server.mjs";
 import { readFile } from "node:fs/promises";
+import AxeBuilder from "@axe-core/playwright";
 test("independent ranking saves a pairwise choice without changing scores", async ({
   page,
   context,
@@ -98,6 +99,22 @@ test("independent ranking saves a pairwise choice without changing scores", asyn
     ).score,
   ).toBe(90);
   expect(state.ratings.find((row: { profile_id: number; game_id: number }) => row.profile_id === 2 && row.game_id === 2)).toMatchObject({ score: 80, tier: "B" });
+  for (const locale of ["en", "es-AR"]) for (const theme of ["dark", "light"]) {
+    await context.addCookies([
+      { name: "playlogg_locale", value: locale, url: "http://127.0.0.1:3100" },
+      { name: "playlogg_theme", value: theme, url: "http://127.0.0.1:3100" },
+    ]);
+    await page.reload();
+    await page.evaluate(() => window.scrollTo(0, 0));
+    expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `e2e-artifacts/ranking-redesign-${testInfo.project.name}-${locale}-${theme}.png`, fullPage: true });
+  }
+  if (testInfo.project.name === "mobile") {
+    await page.setViewportSize({ width: 320, height: 812 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.setViewportSize(testInfo.project.use.viewport!);
+  }
   await page.goto("/u/fixture_public/ranking");
   await expect(page.getByRole("textbox", { name: /^Position for/ })).toHaveCount(0);
   await expect(page.locator('[data-ranking-game][draggable="true"]')).toHaveCount(0);

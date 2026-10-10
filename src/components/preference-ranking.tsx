@@ -6,8 +6,11 @@ import { useMessages } from "@/components/site-preferences";
 import { saveRanking } from "@/app/actions/ranking";
 import { parseHours } from "@/lib/rating-input";
 import { playedPlatformLabels } from "@/lib/played-platforms";
+import { tierColors } from "@/components/rating-controls";
+import { tierLabels } from "@/lib/tier-labels";
+import { playbackLabels } from "@/lib/playback-status";
 const button =
-  "inline-flex items-center justify-center rounded bg-surface-container px-4 py-3 text-primary disabled:opacity-40";
+  "inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-surface-container px-3 py-2 text-primary hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-40";
 export function PreferenceRanking() {
   const t = useMessages(),
     { games, ranking, access, publicBase } = usePortfolio();
@@ -89,17 +92,17 @@ export function PreferenceRanking() {
     });
   }
   return (
-    <section className="space-y-6">
-      <h2 className="font-headline-xl text-headline-xl">
+    <section className="space-y-5" aria-label={t("Personal ranking")}>
+      <h2 className="font-headline-lg text-headline-lg font-semibold">
         {t("Personal ranking")}
       </h2>
       {canEdit && order.length > 0 && <p className="text-body-sm text-on-surface-variant">{t("Drag games or edit their position. Changes save automatically.")}</p>}
       {canEdit && left && right && (
-        <details className="space-y-5">
-          <summary className="cursor-pointer text-primary">
+        <details className="rounded-xl border border-outline-variant/30 bg-surface-container-low p-4 sm:p-5">
+          <summary className="min-h-6 cursor-pointer text-body-md font-semibold text-primary">
             {t("Which game do you prefer?")}
           </summary>
-          <div className="grid grid-cols-2 gap-4 pt-4">
+          <div className="mb-4 grid max-w-lg grid-cols-2 gap-4 pt-4">
             {[left, right].map((slug) => {
               const game = bySlug.get(slug)!;
               return (
@@ -130,15 +133,15 @@ export function PreferenceRanking() {
           </button>
         </details>
       )}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <label>{t("Search your games")}<input className="mt-2 min-h-11 w-full rounded-xl bg-surface-container p-3" value={query} onChange={event => setQuery(event.target.value)} /></label>
-        <label>{t("Platform")}<select className="mt-2 min-h-11 w-full rounded-xl bg-surface-container p-3" value={platform} onChange={event => setPlatform(event.target.value)}><option value="">{t("All platforms")}</option><option value="unset">{t("Unassigned")}</option>{Object.entries(playedPlatformLabels).map(([id, label]) => <option key={id} value={id}>{t(label)}</option>)}</select></label>
-        <label>{t("Minimum hours")}<input className="mt-2 min-h-11 w-full rounded-xl bg-surface-container p-3" type="number" min="0" step="any" value={minimum} onChange={event => setMinimum(event.target.value)} /></label>
-        <label>{t("Maximum hours")}<input className="mt-2 min-h-11 w-full rounded-xl bg-surface-container p-3" type="number" min="0" step="any" value={maximum} onChange={event => setMaximum(event.target.value)} /></label>
+      <div className="grid grid-cols-2 gap-3 rounded-xl border border-outline-variant/30 bg-surface-container-low p-4 text-body-sm sm:grid-cols-2 lg:grid-cols-[2fr_1.5fr_1fr_1fr]">
+        <label className="col-span-2 sm:col-span-1">{t("Search your games")}<input className="mt-2 min-h-11 w-full rounded-lg border border-outline-variant/40 bg-surface p-3" value={query} onChange={event => setQuery(event.target.value)} /></label>
+        <label className="col-span-2 sm:col-span-1">{t("Platform")}<select className="mt-2 min-h-11 w-full rounded-lg border border-outline-variant/40 bg-surface p-3" value={platform} onChange={event => setPlatform(event.target.value)}><option value="">{t("All platforms")}</option><option value="unset">{t("Unassigned")}</option>{Object.entries(playedPlatformLabels).map(([id, label]) => <option key={id} value={id}>{t(label)}</option>)}</select></label>
+        <label>{t("Minimum hours")}<input className="mt-2 min-h-11 w-full rounded-lg border border-outline-variant/40 bg-surface p-3" type="number" min="0" step="any" value={minimum} onChange={event => setMinimum(event.target.value)} /></label>
+        <label>{t("Maximum hours")}<input className="mt-2 min-h-11 w-full rounded-lg border border-outline-variant/40 bg-surface p-3" type="number" min="0" step="any" value={maximum} onChange={event => setMaximum(event.target.value)} /></label>
       </div>
       {!validBounds && <p role="alert">{t("Use nonnegative hours and a minimum no greater than the maximum.")}</p>}
       {validBounds && !visible.length && <p className="text-on-surface-variant">{t("No logged games match these filters.")}</p>}
-      <ol className="space-y-3">
+      <ol className="overflow-hidden rounded-xl border border-outline-variant/30 bg-surface-container-low divide-y divide-outline-variant/30">
         {visible.map((slug) => {
           const index = (canEdit ? order : savedOrder).indexOf(slug);
           const game = bySlug.get(slug);
@@ -151,10 +154,10 @@ export function PreferenceRanking() {
               onDragOver={event => { if (canEdit && !pending && dragged) { event.preventDefault(); event.dataTransfer.dropEffect = "move"; setOver(slug); } }}
               onDrop={event => { if (!canEdit || pending || !dragged) return; event.preventDefault(); move(dragged, index); endDrag(); }}
               onDragEnd={endDrag}
-              className={`flex flex-wrap items-center gap-3 rounded bg-surface-container-low p-3 ${dragged === slug ? "opacity-50" : ""} ${over === slug && dragged !== slug ? "ring-2 ring-primary" : ""}`}
+              className={`relative grid grid-cols-[2.75rem_3rem_minmax(0,1fr)_auto] items-center gap-x-2 gap-y-3 p-3 sm:grid-cols-[2.75rem_3.5rem_3.5rem_minmax(0,1fr)_auto_auto] sm:gap-x-4 sm:p-4 transition-colors motion-reduce:transition-none hover:bg-surface-container ${dragged === slug ? "opacity-50" : ""} ${over === slug && dragged !== slug ? "ring-2 ring-inset ring-primary bg-primary/10" : ""}`}
             >
               {canEdit ? <>
-                <button type="button" disabled={pending} aria-label={`${t("Drag to reorder")}: ${game.title}`} title={t("Drag to reorder")} className="flex min-h-11 min-w-11 items-center justify-center rounded bg-surface-container text-on-surface-variant touch-none cursor-grab active:cursor-grabbing disabled:opacity-40"
+                <button type="button" disabled={pending} aria-label={`${t("Drag to reorder")}: ${game.title}`} title={t("Drag to reorder")} className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary touch-none cursor-grab active:cursor-grabbing disabled:opacity-40"
                   onClick={event => { if (pointerMoved.current) { pointerMoved.current = false; return; } event.currentTarget.closest("li")?.querySelector("input")?.focus(); }}
                   onKeyDown={event => { if (event.key === "Escape") endDrag(); }}
                   onPointerDown={event => { if (pending || event.button !== 0) return; event.preventDefault(); pointerMoved.current = false; event.currentTarget.setPointerCapture(event.pointerId); pointer.current = { slug, x: event.clientX, y: event.clientY, moved: false }; }}
@@ -163,37 +166,36 @@ export function PreferenceRanking() {
                   onPointerCancel={endDrag} onLostPointerCapture={endDrag}>
                   <span aria-hidden="true" className="material-symbols-outlined text-[20px]">drag_indicator</span>
                 </button>
-                <input key={`${slug}:${index}`} type="text" inputMode="numeric" aria-label={`${t("Position for")} ${game.title}`} title={t("Edit ranking position")} defaultValue={index + 1} disabled={pending} maxLength={String(order.length).length} className="w-14 min-h-11 rounded border border-outline-variant/40 bg-surface-container px-2 text-center text-primary tabular-nums disabled:opacity-40"
+                <input key={`${slug}:${index}`} type="text" inputMode="numeric" aria-label={`${t("Position for")} ${game.title}`} title={t("Edit ranking position")} defaultValue={index + 1} disabled={pending} maxLength={String(order.length).length} className="w-full min-h-11 rounded-lg border border-outline-variant/40 bg-surface px-1 text-center text-body-lg font-semibold text-primary tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-40"
                   onFocus={event => event.currentTarget.select()}
                   onChange={event => { const value = event.currentTarget.value.replace(/\D/g, ""); event.currentTarget.value = value ? String(Math.max(1, Math.min(order.length, Number(value)))) : ""; }}
                   onBlur={event => { const position = Number(event.currentTarget.value); if (position >= 1 && position <= order.length) move(slug, position - 1); else event.currentTarget.value = String(index + 1); }}
                   onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); event.currentTarget.blur(); } if (event.key === "Escape") { event.currentTarget.value = String(index + 1); event.currentTarget.blur(); } }} />
-              </> : <span className="text-primary">#{index + 1}</span>}
+              </> : <span className="col-span-2 text-center text-headline-md font-semibold tabular-nums text-primary">#{index + 1}</span>}
               <img
                 src={game.cover}
                 alt=""
                 loading="lazy"
                 draggable={false}
-                className="w-10 aspect-[3/4] rounded object-cover"
+                className="hidden w-14 aspect-[3/4] rounded-lg object-cover sm:block"
               />
-              <Link
-                translate="no"
-                className="flex-1 min-w-0 break-words"
-                href={
-                  publicBase ? `${publicBase}/game/${slug}` : `/game/${slug}`
-                }
-              >
-                {game.title}
-              </Link>
+              <div className="min-w-0 space-y-2">
+                <Link translate="no" className="block break-words text-body-md font-semibold hover:text-primary sm:text-body-lg" href={publicBase ? `${publicBase}/game/${slug}` : `/game/${slug}`}>{game.title}</Link>
+                <div className="flex flex-wrap items-center gap-2 text-body-sm text-on-surface-variant">
+                  {game.tier && <span className={`rounded px-2 py-0.5 text-label-sm font-semibold ${tierColors[game.tier]}`}>{game.tier} · {t(tierLabels[game.tier])}</span>}
+                  {game.status && <span>{t(playbackLabels[game.status])}</span>}
+                </div>
+              </div>
+              <div className="text-right tabular-nums"><span className="text-body-lg font-semibold text-primary">{game.score ?? t("Unrated")}</span>{game.score !== null && <span className="hidden text-body-sm text-on-surface-variant sm:inline"> / 100</span>}</div>
               {canEdit && (
-                <div className="flex w-full sm:w-auto justify-end gap-2">
+                <div className="col-start-3 col-end-5 flex justify-end gap-2 sm:col-start-6 sm:col-end-7 sm:row-start-1">
                   <button
                     className={button}
                     aria-label={t(`Move ${game.title} up`)}
                     disabled={pending || index === 0}
                     onClick={() => move(slug, index - 1)}
                   >
-                    ↑
+                    <span aria-hidden="true" className="material-symbols-outlined text-[18px]">arrow_upward</span>
                   </button>
                   <button
                     className={button}
@@ -201,7 +203,7 @@ export function PreferenceRanking() {
                     disabled={pending || index === order.length - 1}
                     onClick={() => move(slug, index + 1)}
                   >
-                    ↓
+                    <span aria-hidden="true" className="material-symbols-outlined text-[18px]">arrow_downward</span>
                   </button>
                 </div>
               )}
@@ -214,7 +216,7 @@ export function PreferenceRanking() {
           {t("Retry saving ranking")}
         </button>
       )}
-      <p role="status" aria-live="polite" className="text-primary">
+      <p role="status" aria-live="polite" className="min-h-5 text-body-sm text-primary">
         {t(message)}
       </p>
     </section>
