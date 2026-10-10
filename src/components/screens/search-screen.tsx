@@ -86,10 +86,6 @@ return (
       <Suspense fallback={<p role="status" className="px-6 py-8 text-on-surface-variant">{t("Loading…")}</p>}>
       <SearchData portfolio={portfolio} initialQuery={initialQuery} offset={offset} onLoadMore={() => setOffset(value => value + 24)} query={query} scope={mode === "log" ? "games" : scope} mode={mode} profiles={profiles} profilesLoading={profilesLoading} profilesError={profileSearch?.query === query && profileSearch.error} />
       </Suspense>
-      <footer className="search-help hidden sm:flex shrink-0 items-center justify-between gap-4 border-t border-outline-variant/20 px-6 py-3 text-body-sm text-on-surface-variant">
-        <div className="flex items-center gap-4"><span>{t("Navigate")}</span><span>{t("Select title")}</span></div>
-        <span>{t("Dismiss")}</span>
-      </footer>
     </div>
   </dialog>
 );
