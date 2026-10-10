@@ -1327,5 +1327,11 @@
   "You took a wrong warp.": "Tomaste el portal equivocado.",
   "There is no level on the other side of this portal. Head home or find your next game.": "No hay ningún nivel del otro lado de este portal. Volvé al inicio o encontrá tu próximo juego.",
   "Level not found": "Nivel no encontrado",
-  "Return to your last checkpoint": "Volvé a tu último punto de control"
+  "Return to your last checkpoint": "Volvé a tu último punto de control",
+  "Nothing to play here.": "Acá no hay nada para jugar.",
+  "This page is missing. Your next favorite game is still out there, waiting to join your backlog.": "Esta página no está. Tu próximo juego favorito sigue ahí afuera, esperando sumarse a tus pendientes.",
+  "Back to Playlogg": "Volver a Playlogg",
+  "Find a game": "Encontrar un juego",
+  "Page not found": "Página no encontrada",
+  "Next quest: clear your backlog.": "Próxima misión: jugar tus pendientes."
 }

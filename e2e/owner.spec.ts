@@ -89,10 +89,10 @@ test("404 offers accessible recovery in both languages and themes", async ({ pag
       { name: "playlogg_theme", value: theme, url: "http://127.0.0.1:3100" },
     ]);
     expect((await page.goto("/missing-fixture-page"))?.status()).toBe(404);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(locale === "en" ? "You took a wrong warp." : "Tomaste el portal equivocado.");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(locale === "en" ? "Nothing to play here." : "Acá no hay nada para jugar.");
     const content = page.locator("#main-content");
-    await expect(content.getByRole("link", { name: locale === "en" ? "Go home" : "Volver al inicio", exact: true })).toHaveAttribute("href", "/");
-    await expect(content.getByRole("link", { name: locale === "en" ? "Search games" : "Buscar juegos", exact: true })).toHaveAttribute("href", "/search?q=&from=/");
+    await expect(content.getByRole("link", { name: locale === "en" ? "Back to Playlogg" : "Volver a Playlogg", exact: true })).toHaveAttribute("href", "/");
+    await expect(content.getByRole("link", { name: locale === "en" ? "Find a game" : "Encontrar un juego", exact: true })).toHaveAttribute("href", "/search?q=&from=/");
     expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: `e2e-artifacts/404-${testInfo.project.name}-${locale}-${theme}.png`, fullPage: true });
@@ -101,11 +101,11 @@ test("404 offers accessible recovery in both languages and themes", async ({ pag
     await page.setViewportSize({ width: 320, height: 812 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
-  await page.locator("#main-content").getByRole("link", { name: "Buscar juegos", exact: true }).click();
+  await page.locator("#main-content").getByRole("link", { name: "Encontrar un juego", exact: true }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page).toHaveURL("http://127.0.0.1:3100/");
   await page.goto("/missing-fixture-page");
-  await page.locator("#main-content").getByRole("link", { name: "Volver al inicio", exact: true }).click();
+  await page.locator("#main-content").getByRole("link", { name: "Volver a Playlogg", exact: true }).click();
   await expect(page).toHaveURL("http://127.0.0.1:3100/");
 });
