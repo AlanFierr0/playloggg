@@ -4,7 +4,7 @@ import { useMessages } from "@/components/site-preferences";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState, useTransition, type FormEvent } from "react";
+import { Fragment, useRef, useState, useTransition, type FormEvent } from "react";
 import { saveTierRanges, updateGameTier } from "@/app/actions/tiers";
 import { TierDragHandle } from "@/components/tier-drag-handle";
 import { usePortfolio } from "@/components/portfolio-provider";
@@ -101,12 +101,11 @@ return (<>
  onDrop={event=>{if(!canEdit||!dragged||pending)return;event.preventDefault();const slug=dragged;endDrag();moveGame(slug,group.tier,true);}}>
  <div className="flex flex-wrap gap-2 md:flex-col justify-between items-center md:items-start w-full md:w-44 flex-shrink-0 p-4 rounded-lg">
  <div className="flex items-center md:flex-col md:items-start gap-2"><span className="font-display-lg text-display-lg font-bold leading-none">{group.tier ?? "—"}</span><div className="flex flex-col"><span className="font-label-md text-label-md font-semibold uppercase tracking-wider">{t(theme.label)}</span>{!group.tier && <span className="font-label-sm text-label-sm">{t("No tier selected")}</span>}</div></div>
- {group.tier && (canEdit ? <div className="flex items-center gap-1.5" role="group" aria-label={`${t("Score range")} ${group.tier}`}>
- {([0,1] as const).map(bound=><label key={`${group.tier}-${bound}-${ranges[group.tier!][bound]}`} className="w-16 min-w-0 overflow-hidden rounded-lg border border-black/50 bg-white/15 text-black transition-colors hover:bg-white/25 focus-within:border-black focus-within:ring-2 focus-within:ring-black motion-reduce:transition-none">
- <span className="block pt-2 text-center text-[10px] font-semibold uppercase tracking-wider">{t(bound===0 ? "Minimum" : "Maximum")}</span>
- <input aria-label={`${t(bound===0 ? "Minimum score for tier" : "Maximum score for tier")} ${group.tier}`} name={`${bound===0 ? "min" : "max"}-${group.tier}`} type="number" min={0} max={100} step={1} required disabled={pending} defaultValue={ranges[group.tier!][bound]} className="min-h-11 w-full min-w-0 bg-transparent px-1 pb-1 text-center text-xl font-semibold tabular-nums text-black outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none disabled:opacity-50"/>
- </label>)}
- </div> : <p className="inline-flex items-baseline gap-1.5 rounded-lg border border-black/20 bg-black/5 px-3 py-2 text-body-md font-semibold tabular-nums" aria-label={`${t("Score range")} ${ranges[group.tier][0]}–${ranges[group.tier][1]}`}><span>{ranges[group.tier][0]}–{ranges[group.tier][1]}</span><span className="text-body-sm font-normal">/ 100</span></p>)}
+ {group.tier && (canEdit ? <div className="w-full max-w-[9rem] space-y-1.5" role="group" aria-label={`${t("Score range")} ${group.tier}`}><span className="block text-center font-label-sm text-label-sm font-semibold">{t("Range")}</span><div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5">
+ {([0,1] as const).map(bound=><Fragment key={`${group.tier}-${bound}-${ranges[group.tier!][bound]}`}><label className="min-w-0 overflow-hidden rounded-lg border border-black/50 bg-white/15 text-black transition-colors hover:bg-white/25 focus-within:border-black focus-within:ring-2 focus-within:ring-black motion-reduce:transition-none">
+ <input aria-label={`${t(bound===0 ? "Minimum score for tier" : "Maximum score for tier")} ${group.tier}`} name={`${bound===0 ? "min" : "max"}-${group.tier}`} type="number" min={0} max={100} step={1} required disabled={pending} defaultValue={ranges[group.tier!][bound]} className="min-h-11 w-full min-w-0 bg-transparent px-1 text-center text-xl font-semibold tabular-nums text-black outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none disabled:opacity-50"/>
+ </label>{bound===0&&<span aria-hidden="true" className="text-lg font-semibold">–</span>}</Fragment>)}
+ </div></div> : <p className="inline-flex items-baseline gap-1.5 rounded-lg border border-black/20 bg-black/5 px-3 py-2 text-body-md font-semibold tabular-nums" aria-label={`${t("Score range")} ${ranges[group.tier][0]}–${ranges[group.tier][1]}`}><span>{ranges[group.tier][0]}–{ranges[group.tier][1]}</span><span className="text-body-sm font-normal">/ 100</span></p>)}
  <div className="flex items-center gap-1.5 pt-0 md:pt-6"><span className="font-label-sm text-label-sm">{group.games.length} {group.games.length === 1 ? t("game") : t("games")}</span><span className="w-1.5 h-1.5 rounded-full bg-current"></span></div>
  </div>
  <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-2 flex-1 min-w-0">
