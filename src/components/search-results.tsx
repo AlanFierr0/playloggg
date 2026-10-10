@@ -10,7 +10,7 @@ import type { Game, Profile } from "@/types/domain";
 import { HighlightedTitle, ReferenceProfile0 } from "./search-reference-rows";
 
 export type SearchScope = "all" | "games" | "curators" | "actions";
-export function SearchResults({ query, scope, mode, profiles, profilesLoading, profilesError }: { query: string; scope: SearchScope; mode: "browse" | "log"; profiles: Profile[]; profilesLoading: boolean; profilesError?: boolean }) {
+export function SearchResults({ query, scope, mode, profiles, profilesLoading, profilesError, gamesLoading, gamesError, hasMore, onLoadMore, onRetry }: { query: string; scope: SearchScope; mode: "browse" | "log"; profiles: Profile[]; profilesLoading: boolean; profilesError?: boolean; gamesLoading: boolean; gamesError: boolean; hasMore: boolean; onLoadMore: () => void; onRetry: () => void }) {
   const t = useMessages();
   const portfolio = usePortfolio();
   const { titles } = getSearchMatches(query, portfolio);
@@ -20,10 +20,13 @@ export function SearchResults({ query, scope, mode, profiles, profilesLoading, p
     <div className="scroll-region min-h-0 flex-1 max-h-[560px] overflow-y-auto overscroll-contain px-3 sm:px-5 py-4 space-y-6" aria-live="polite" aria-atomic="false">
       <span className="sr-only">{portfolio.access?.canImportCatalog && show("games") && query.trim().length >= 2 ? t("Search results") : `${count} ${t("results")}`}</span>
       {show("games") && <section>
-        <ResultHeading icon="sports_esports" label={t("Games")} detail={portfolio.access?.canImportCatalog && query.trim().length >= 2 ? "Search results" : `${titles.length} matches${query ? ` for “${query}”` : ""}`} color="text-primary" />
+        <ResultHeading icon="sports_esports" label={t("Games")} detail={gamesLoading ? "Loading…" : hasMore ? "Search results" : portfolio.access?.canImportCatalog && query.trim().length >= 2 ? "Search results" : `${titles.length} matches${query ? ` for “${query}”` : ""}`} color="text-primary" />
         <div className="space-y-1.5">{titles.map(game => <GameResult key={game.slug} game={game} query={query} mode={mode} />)}
-          {titles.length === 0 && !portfolio.access?.canImportCatalog && <p className="p-4 font-body-md text-body-md text-on-surface-variant">{t("No games found. Sign in to search more games.")}</p>}
-          {portfolio.access?.canImportCatalog && <IgdbSearch query={query} mode={mode} excludeSlugs={titles.map(game => game.slug)} />}
+          {!gamesLoading && !gamesError && titles.length === 0 && !portfolio.access?.canImportCatalog && <p className="p-4 font-body-md text-body-md text-on-surface-variant">{t("No games found. Sign in to search more games.")}</p>}
+          {gamesLoading && <p role="status" className="p-4 text-on-surface-variant">{t("Loading…")}</p>}
+          {gamesError && <div className="p-4"><p role="status">{t("Game search could not be loaded.")}</p><button type="button" onClick={onRetry} className="mt-2 text-primary">{t("Retry search")}</button></div>}
+          {hasMore && !gamesLoading && <button type="button" onClick={onLoadMore} className="m-3 rounded-lg border border-outline-variant px-4 py-2 text-primary">{t("Load more")}</button>}
+          {portfolio.access?.canImportCatalog && <div className={gamesLoading || gamesError ? "hidden" : undefined}><IgdbSearch query={query} mode={mode} excludeSlugs={titles.map(game => game.slug)} /></div>}
         </div>
       </section>}
       {show("curators") && <section className="pt-3">

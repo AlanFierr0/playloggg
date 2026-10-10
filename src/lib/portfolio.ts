@@ -57,9 +57,38 @@ const selectedRatings = cache(async () => {
   const { owner, profile } = await selectedAccount();
   return owner?.profile && profile ? readProfileRatings(owner.supabase, profile.id) : [];
 });
-export const getSearchPortfolio = cache(async (): Promise<Portfolio> => {
-  const [shell, rows, ratings] = await Promise.all([getPortfolioShell(), getCatalog(), selectedRatings()]);
-  return { ...shell, games: portfolioGames(rows, ratings) };
+type SearchIndexRow = Pick<GameRow, "id" | "slug" | "title" | "genres" | "search_keywords">;
+const searchFields = "id,slug,title,cover_url,release_year,released_on,genres,search_keywords";
+const getSearchIndex = cache(async () => {
+  const rows: SearchIndexRow[] = [];
+  for (let offset = 0; ; offset += 500) {
+    const page = await readPublic<SearchIndexRow>(`games?select=id,slug,title,genres,search_keywords&order=id.asc&limit=500&offset=${offset}`, ["game-catalog"]);
+    rows.push(...page);
+    if (page.length < 500) return rows;
+  }
+});
+export const getSearchPortfolio = cache(async (query = "", offset = 0): Promise<Portfolio & { hasMore: boolean }> => {
+  const [shell, ratings] = await Promise.all([getPortfolioShell(), selectedRatings()]);
+  let rows: GameRow[];
+  let hasMore: boolean;
+  if (!query.trim()) {
+    rows = await readPublic<GameRow>(`games?select=${searchFields}&order=id.asc&limit=25&offset=${offset}`, ["game-catalog"]);
+    hasMore = rows.length > 24;
+    rows = rows.slice(0, 24);
+  } else {
+    const byGame = new Map(ratings.map(rating => [rating.game_id, rating]));
+    const words = query.toLowerCase().trim().split(/\s+/);
+    const matches = (await getSearchIndex()).filter(row => {
+      const content = `${row.title} ${row.search_keywords} ${row.genres.join(" ")} ${(byGame.get(row.id)?.tags ?? []).join(" ")}`.toLowerCase();
+      return words.every(word => content.includes(word));
+    }).sort((a, b) => (byGame.get(b.id)?.score ?? -1) - (byGame.get(a.id)?.score ?? -1) || a.slug.localeCompare(b.slug));
+    hasMore = matches.length > offset + 24;
+    const ids = matches.slice(offset, offset + 24).map(row => row.id);
+    rows = ids.length ? await readPublic<GameRow>(`games?select=${searchFields}&id=in.(${ids.join(",")})&limit=24`, ["game-catalog"]) : [];
+  }
+  // Search rows need cards and personal scores, not reviews or game-detail media.
+  const games = portfolioGames(rows.map(row => ({...row, artwork_image_ids: [], screenshot_image_ids: [], igdb_metadata: {}, igdb_url: null})), ratings).map(game => ({...game, review: null}));
+  return { ...shell, games, hasMore };
 });
 export const getPortfolio = cache(async (): Promise<Portfolio> => {
   const [shell, rows, ratings] = await Promise.all([getPortfolioShell(), getCatalog(), selectedRatings()]);

@@ -17,5 +17,6 @@ async function safeReturnPath(value?: string): Promise<string> {
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string; from?: string; mode?: string }> }) {
   const query = await searchParams;
-  return <SearchScreen portfolio={getSearchPortfolio()} key={`${query.q}-${query.mode}`} initialQuery={query.q ?? (query.mode === "log" ? "" : "cyber")} returnPath={await safeReturnPath(query.from)} mode={query.mode === "log" ? "log" : "browse"} />;
+  const initialQuery = query.q ?? (query.mode === "log" ? "" : "cyber");
+  return <SearchScreen portfolio={getSearchPortfolio(initialQuery)} key={`${query.q}-${query.mode}`} initialQuery={initialQuery} returnPath={await safeReturnPath(query.from)} mode={query.mode === "log" ? "log" : "browse"} />;
 }
