@@ -11,7 +11,7 @@ test("Log starts with game selection and opens options only after a choice", asy
   await expect(page.getByRole("heading", { name: "Choose a game", exact: true })).toBeVisible();
   await expect(page.locator("#score-slider")).toHaveCount(0);
   await expect(page.getByText("Quick Commands", { exact: true })).toHaveCount(0);
-  const search = page.getByRole("textbox", { name: "Search titles, profiles and commands" });
+  const search = page.getByRole("textbox", { name: "Search titles and profiles" });
   await expect(search).toHaveValue("");
   expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze()).violations).toEqual([]);
   await page.screenshot({ path: `e2e-artifacts/log-picker-${testInfo.project.name}.png`, fullPage: true });
@@ -39,7 +39,7 @@ test("game picker can be cancelled and guest selection keeps save unavailable", 
   await page.getByRole("dialog").press("Escape");
   await expect(page).toHaveURL("http://127.0.0.1:3100/");
   await page.goto("/log");
-  const search=page.getByRole("textbox", { name: "Search titles, profiles and commands" });
+  const search=page.getByRole("textbox", { name: "Search titles and profiles" });
   await search.fill("Hades");
   await search.press("Enter");
   await expect(page.locator("#commit-rating")).toBeDisabled();

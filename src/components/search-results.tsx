@@ -9,13 +9,13 @@ import { getSearchMatches } from "@/lib/portfolio-view";
 import type { Game, Profile } from "@/types/domain";
 import { HighlightedTitle, ReferenceProfile0 } from "./search-reference-rows";
 
-export type SearchScope = "all" | "games" | "curators" | "actions";
+export type SearchScope = "all" | "games" | "curators";
 export function SearchResults({ query, scope, mode, profiles, profilesLoading, profilesError, gamesLoading, gamesError, hasMore, onLoadMore, onRetry }: { query: string; scope: SearchScope; mode: "browse" | "log"; profiles: Profile[]; profilesLoading: boolean; profilesError?: boolean; gamesLoading: boolean; gamesError: boolean; hasMore: boolean; onLoadMore: () => void; onRetry: () => void }) {
   const t = useMessages();
   const portfolio = usePortfolio();
   const { titles } = getSearchMatches(query, portfolio);
   const show = (section: SearchScope) => scope === "all" || scope === section;
-  const count = (show("games") ? titles.length : 0) + (show("curators") ? profiles.length : 0) + (show("actions") ? 2 : 0);
+  const count = (show("games") ? titles.length : 0) + (show("curators") ? profiles.length : 0);
   return (
     <div className="scroll-region min-h-0 flex-1 max-h-[560px] overflow-y-auto overscroll-contain px-3 sm:px-5 py-4 space-y-6" aria-live="polite" aria-atomic="false">
       <span className="sr-only">{portfolio.access?.canImportCatalog && show("games") && query.trim().length >= 2 ? t("Search results") : `${count} ${t("results")}`}</span>
@@ -34,11 +34,6 @@ export function SearchResults({ query, scope, mode, profiles, profilesLoading, p
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">{profiles.map((profile) => <ReferenceProfile0 key={profile.id} profile={profile} />)}</div>
         {profilesLoading ? <p className="p-4 text-on-surface-variant">{t("Loading…")}</p> : profilesError ? <p className="p-4 text-on-surface-variant">{t("Profile search could not be loaded.")}</p> : profiles.length === 0 && <p className="p-4 text-on-surface-variant">{t("No profiles match this search.")}</p>}
       </section>}
-      {show("actions") && <section className="pt-3 pb-1">
-        <ResultHeading icon="bolt" label={t("Actions")} detail="Shortcuts" color="text-primary" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">{[["/log", "add", "Log a game"], ["/compare", "compare_arrows", "Compare games"]].map(([href, icon, label]) => <Link key={href} data-search-result href={href} className="flex min-h-14 items-center gap-3 rounded-xl bg-surface-container px-4 py-3 text-body-md hover:bg-surface-container-high transition-colors"><span aria-hidden="true" className="material-symbols-outlined text-primary text-[20px]">{icon}</span>{t(label)}<span aria-hidden="true" className="material-symbols-outlined ml-auto text-[18px]">chevron_right</span></Link>)}</div>
-      </section>}
-      {count === 0 && !show("games") && !show("curators") && <p className="px-2 py-6 text-on-surface-variant">{t("No results in this category.")}</p>}
     </div>
   );
 }

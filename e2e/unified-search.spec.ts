@@ -7,7 +7,7 @@ test("one search deduplicates stored games and hides stale or failed provider re
   await context.addCookies([authCookie]);
   await page.goto("/log");
   const dialog = page.getByRole("dialog");
-  const search = page.getByRole("textbox", { name: "Search titles, profiles and commands" });
+  const search = page.getByRole("textbox", { name: "Search titles and profiles" });
   await expect(dialog).not.toContainText(/IGDB|Saved catalog|Catalog entry/i);
   await search.fill("Hades");
   await expect(dialog.locator('[data-search-result][href="/log?game=hades"]')).toHaveCount(1);
@@ -35,7 +35,7 @@ test("a missing game imports from the same search and opens the chosen editor", 
   const slug = mobile ? "unified-mobile-adventure" : "unified-fixture-adventure";
   await context.addCookies([authCookie]);
   await page.goto("/log");
-  await page.getByRole("textbox", { name: "Search titles, profiles and commands" }).fill(mobile ? "Unified Mobile" : "Unified");
+  await page.getByRole("textbox", { name: "Search titles and profiles" }).fill(mobile ? "Unified Mobile" : "Unified");
   const dialog = page.getByRole("dialog");
   const importButton = dialog.getByRole("button", { name: `Import ${title} (2020)`, exact: true });
   await expect(importButton).toBeVisible();

@@ -58,7 +58,7 @@ test("Compare suggests followed consenting friends and keeps its owner first",as
 
 test("external search fails closed on quota limits and recovers without blocking the saved catalog",async({page,context})=>{
  await context.addCookies([authCookie]);await page.goto("/log");
- const search=page.getByRole("textbox",{name:"Search titles, profiles and commands"});
+ const search=page.getByRole("textbox",{name:"Search titles and profiles"});
  await fetch("http://127.0.0.1:3101/__quota-denied",{method:"POST"});
  await search.fill("Unified");await expect(page.getByText("Too many requests. Try again in 60 seconds.",{exact:true})).toBeVisible();
  await fetch("http://127.0.0.1:3101/__quota-unavailable",{method:"POST"});

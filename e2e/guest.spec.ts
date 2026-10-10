@@ -79,8 +79,9 @@ test("search supports keyboard selection and returns to its originating route", 
   await page.goto("/games");
   await page.getByRole("link", { name: "Open game search" }).filter({ visible: true }).click();
   await expect(page.getByRole("dialog", { name: "Search the game catalog" })).toBeVisible();
-  await page.getByRole("textbox", { name: "Search titles, profiles and commands" }).fill("Hades");
-  await page.getByRole("textbox", { name: "Search titles, profiles and commands" }).press("Enter");
+  await page.getByRole("textbox", { name: "Search titles and profiles" }).fill("Hades");
+  await expect(page.locator('[data-search-result][href="/game/hades"]')).toBeVisible();
+  await page.getByRole("textbox", { name: "Search titles and profiles" }).press("Enter");
   await expect(page).toHaveURL(/\/game\/hades$/);
   await expect(page.getByRole("heading", { name: "Hades", exact: true })).toBeVisible();
   await page.goto("/search?q=&from=/games");
@@ -95,8 +96,10 @@ test("search supports keyboard selection and returns to its originating route", 
     expect(box.width).toBeLessThanOrEqual(768);
     expect(box.x + box.width / 2).toBeCloseTo(page.viewportSize()!.width / 2, 0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    await dialog.getByRole("button", { name: "Actions", exact: true }).click();
-    await expect(dialog.getByRole("link", { name: "Compare games", exact: true })).toBeVisible();
+    await expect(dialog.getByRole("button", { name: "Actions", exact: true })).toHaveCount(0);
+    await expect(dialog.locator('[data-search-result][href="/log"], [data-search-result][href="/compare"]')).toHaveCount(0);
+    await dialog.getByRole("button", { name: /^Profiles/ }).click();
+    await expect(dialog.getByRole("button", { name: /^Profiles/ })).toHaveAttribute("aria-pressed", "true");
     await dialog.getByRole("button", { name: "All Results", exact: true }).click();
     expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
     await page.screenshot({ path: `e2e-artifacts/search-redesign-${theme}-${testInfo.project.name}.png` });
