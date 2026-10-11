@@ -1,7 +1,7 @@
 "use server";
 import { getAccount } from "@/lib/owner";
 import { revalidatePath } from "next/cache";
-export async function saveRanking(slugs: unknown, revision: unknown, manual: Record<string, number>) {
+export async function saveRanking(slugs: unknown, revision: unknown, manual: Record<string, number>): Promise<{ok:boolean;message:string;revision?:number|null;conflict?:boolean}> {
   if (
     !manual || typeof manual !== "object" || Array.isArray(manual) ||
     Object.entries(manual).some(([slug, position]) => !Array.isArray(slugs) || !slugs.includes(slug) || !Number.isInteger(position) || position < 0 || position >= slugs.length) ||
@@ -44,14 +44,13 @@ export async function saveRanking(slugs: unknown, revision: unknown, manual: Rec
         p_manual: Object.fromEntries(Object.entries(manual).map(([slug, position]) => [String(bySlug.get(slug)!), position])),
       },
     );
-    if (error)
-      return {
-        ok: false,
-        message:
-          error.code === "40001"
-            ? "Ranking changed in another tab. Reload before saving."
-            : "Ranking could not be saved. Your draft has been kept.",
-      };
+    if(error){
+      if(error.code==="40001"){
+        const {data:current,error:readError}=await account.supabase.from("profile_rankings").select("revision").eq("profile_id",account.profile.id).maybeSingle();
+        if(!readError)return {ok:false,conflict:true,revision:current?.revision??null,message:"Ranking changed elsewhere. Your draft is kept. Review it before retrying against the latest saved version."};
+      }
+      return {ok:false,message:"Ranking could not be saved. Your draft has been kept."};
+    }
     revalidatePath("/", "layout");
     return {
       ok: true,

@@ -178,7 +178,7 @@ export async function importSteamGames(input: unknown, recover=false): Promise<{
     }
     if(entries.size){
       // One atomic batch insert; conflicts never overwrite a manual entry or retry.
-      const {data:saved,error}=await account.supabase.from("ratings").upsert([...entries].map(([game_id,game])=>({profile_id:account.profile!.id,game_id,platform:"pc" as const,hours_played:game.hours,score:null,tier:null,status:null,review:null,tags:[],completed_on:null})),{onConflict:"profile_id,game_id",ignoreDuplicates:true}).select("game_id,updated_at");
+      const {data:saved,error}=await account.supabase.from("ratings").upsert([...entries].map(([game_id,game])=>({profile_id:account.profile!.id,game_id,platform:"pc" as const,hours_played:game.hours})),{onConflict:"profile_id,game_id",ignoreDuplicates:true}).select("game_id,updated_at");
       profileChanged=!error&&saved.length>0;
       const inserted=new Map((saved??[]).map(row=>[row.game_id,row]));
       const recovered=new Map<number,{game_id:number;updated_at:string|null}>();
@@ -217,12 +217,13 @@ export async function saveSteamImportRating(input: unknown, updatedAt: unknown) 
     if (!account?.profile || !steamIdentity(account.user.app_metadata.playlogg_steam_id)) return {ok:false,message:"Sign in with Steam to import your library."};
     const {data:game,error:gameError} = await account.supabase.from("games").select("id").eq("slug",rating.slug).single();
     if (gameError || !game) throw new Error("Unavailable game");
-    let request = account.supabase.from("ratings").update({score:rating.score,tier:rating.tier,tier_manual:rating.tierManual ?? rating.tier !== null,status:rating.status,updated_at:new Date().toISOString()})
-      .eq("profile_id",account.profile.id).eq("game_id",game.id).eq("platform","pc");
-    request = updatedAt === null ? request.is("updated_at",null) : request.eq("updated_at",updatedAt as string);
-    const {data,error} = await request.select("game_id");
-    if (error) throw new Error("Save failed");
-    if (data.length !== 1) return {ok:false,message:"This entry changed elsewhere. Skip it and edit the latest entry from your profile."};
+    const {data:previous,error:readError}=await account.supabase.from("ratings").select("score,tier,tier_manual,status,platform,hours_played,completed_on,tags,review,updated_at").eq("profile_id",account.profile.id).eq("game_id",game.id).eq("platform","pc").maybeSingle();
+    if(readError)throw new Error("Save failed");
+    if(!previous || previous.updated_at!==updatedAt)return {ok:false,message:"This entry changed elsewhere. Skip it and edit the latest entry from your profile."};
+    const {error}=await account.supabase.rpc("save_rating",{p_game_id:game.id,p_expected_updated_at:updatedAt as string,
+      p_values:{...previous,score:rating.score,tier:rating.tier,tier_manual:rating.tierManual??rating.tier!==null,status:rating.status}});
+    if(error?.code==="40001")return {ok:false,message:"This entry changed elsewhere. Skip it and edit the latest entry from your profile."};
+    if(error)throw new Error("Save failed");
     revalidatePath("/profile","layout");
     return {ok:true,message:"Saved."};
   } catch { return {ok:false,message:"Your rating could not be saved. Please retry or skip this game."}; }

@@ -59,3 +59,34 @@ rerun: eight new platform/statistics/import-recovery scenarios and twelve Steam
 regressions. One desktop reload timed out on external resources and passed on
 retry. The platform migration was applied and verified live in a rolled-back
 transaction against the private test profile.
+
+## Second audit: must and should fixes (1–13)
+
+1. Database launch/date/hour guards; whole-entry replacement uses the owned timestamp RPC. Direct permissions permit only blank Steam inserts and narrow tier/playtime patches. Every update advances its database timestamp, including playtime sync.
+2. Review text changes invalidate votes; unrelated edits retain them.
+3. Ranking drafts survive navigation/refresh in the same tab, with explicit retry/discard and conflict acknowledgement.
+4. Search reads lightweight own ratings only for its 24 results. Provider results exclude previously scored games in Log mode.
+5. Home reads at most 12 ranked reviews, six neighbors and five recommendations. No per-profile helpfulness fanout.
+6. Optional community/exploration failures preserve core home and show an availability message.
+7. Invalid hidden score ranges become visible and focused.
+8. Discovery settings distinguish browsing/recommendations from public name search.
+9. Personalized exploration uses seeded rotation and the existing ten-minute/token expiry.
+10. Ranking edits are optimistic; queued changes coalesce behind the current save without changing scores.
+11. Removed retired collection/bulk/year helpers and dead social options; kept stored records and migrations.
+12. Comparison highlights show unique game cards with honest relative-score labels.
+13. Hot take requests community scores only for the viewed profile’s scored games.
+
+The database rollout adds compatible functions and triggers first, deploys the updated Steam save/import callers, then restricts direct rating writes. Launch/date/hour and review-vote checks run in a rolled-back transaction; no existing entries or votes are rewritten.
+
+### Second-audit verification
+
+Production build, type checking and lint pass (27 existing warnings, no errors).
+All 96 remaining unit tests pass after removing tests for retired features.
+All 72 targeted desktop/mobile browser scenarios pass, including queued ranking
+saves, refresh recovery, two-tab conflicts, hidden range validation, bounded search,
+home failure handling, Steam imports/linking/sync, comparisons and profile identity.
+Additional desktop regressions cover tier dragging/ranges, review voting and unified
+search. A local browser network-buffer failure passed on rerun; it was not an app error.
+Database checks confirm owned timestamp guards, review-vote invalidation and date/hour
+validation in rolled-back transactions, plus bounded public review results and
+restricted home-query permissions. Full-scale load testing is not part of this pass.

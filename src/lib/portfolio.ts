@@ -76,12 +76,18 @@ const selectedRatings = cache(async () => {
 });
 const searchFields = "id,slug,title,cover_url,release_year,released_on,genres,search_keywords";
 export const getSearchPortfolio = cache(async (query = "", offset = 0, hideRated = false): Promise<Portfolio & { hasMore: boolean; excludedSlugs: string[] }> => {
-  const [shell, ratings] = await Promise.all([getPortfolioShell(), selectedRatings()]);
+  const shell = await getPortfolioShell();
   const {data, error} = await createAuthAdmin().rpc("search_catalog", {p_profile_id: shell.profile.id ? Number(shell.profile.id) : null,
     p_query: query, p_offset: offset, p_hide_rated: hideRated}).select(searchFields);
   if (error) throw new Error("Game search could not be loaded.");
   const rows = data as GameRow[];
-  const excludedSlugs = hideRated ? (await getCatalogRows(ratings.filter(row => row.score !== null).map(row => row.game_id))).map(row => row.slug) : [];
+  const { owner, profile } = await selectedAccount();
+  const {data: ownRatings, error: ratingError} = owner && profile && rows.length
+    ? await owner.supabase.from("ratings").select("game_id,score,tier,tier_manual,status,platform,hours_played,completed_on,tags,updated_at").eq("profile_id",profile.id).in("game_id",rows.slice(0,24).map(row=>row.id))
+    : {data:[],error:null};
+  if (ratingError) throw new Error("Your ratings could not be loaded.");
+  const ratings = ownRatings.map(row=>({...row,review:null}));
+  const excludedSlugs: string[] = [];
   const games = portfolioGames(rows.slice(0,24).map(row => ({...row, artwork_image_ids: [], screenshot_image_ids: [], igdb_metadata: {}, igdb_url: null})), ratings).map(game => ({...game, review: null}));
   return {...shell, games, hasMore: rows.length > 24, excludedSlugs};
 });

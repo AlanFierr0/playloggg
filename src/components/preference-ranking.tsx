@@ -1,9 +1,10 @@
 "use client";
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { useMessages } from "@/components/site-preferences";
 import { saveRanking } from "@/app/actions/ranking";
+import { readRankingDraft } from "@/lib/ranking-draft";
 import { rankingOrder } from "@/lib/ranking-order";
 import { loggedGames } from "@/lib/portfolio-view";
 import { parseHours } from "@/lib/rating-input";
@@ -15,7 +16,7 @@ const button =
   "inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-surface-container px-3 py-2 text-primary hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-40";
 export function PreferenceRanking() {
   const t = useMessages(),
-    { games, ranking, access, publicBase } = usePortfolio();
+    { games, ranking, access, publicBase, profile } = usePortfolio();
   const logged = loggedGames(games);
   const savedOrder =
     ranking?.slugs.filter((slug) =>
@@ -25,6 +26,14 @@ export function PreferenceRanking() {
   const order = rankingOrder(games, manual);
   const revision = useRef(ranking?.revision ?? null);
   const saving = useRef(false);
+  const latest = useRef(manual);
+  const queued = useRef<Record<string, number> | null>(null);
+  const mounted = useRef(true);
+  const [ready, setReady] = useState(false);
+  const [conflictRevision, setConflictRevision] = useState<number | null | undefined>(undefined);
+  const [storageWarning, setStorageWarning] = useState(false);
+  const initialRanking = useRef({games, ranking});
+  const draftKey = `playlogg-ranking-draft:${profile.id}`;
   const [failed, setFailed] = useState(false);
   const [query, setQuery] = useState(""), [platform, setPlatform] = useState("");
   const [minimum, setMinimum] = useState(""), [maximum, setMaximum] = useState("");
@@ -37,6 +46,27 @@ export function PreferenceRanking() {
   const [pending, startTransition] = useTransition();
   const bySlug = new Map(logged.map((game) => [game.slug, game]));
   const canEdit = Boolean(access?.canEdit);
+  useEffect(() => {
+    mounted.current=true;
+    if (canEdit) {
+      try {
+        const draft=readRankingDraft(sessionStorage.getItem(draftKey));
+        if(draft) queueMicrotask(()=>{
+          if(!mounted.current)return;
+          const restored=Object.fromEntries(Object.entries(draft.manual).filter(([slug])=>initialRanking.current.games.some(game=>game.logged&&game.slug===slug)).map(([slug,position])=>[slug,Math.min(position,loggedGames(initialRanking.current.games).length-1)]));
+          latest.current=restored;setManual(restored);revision.current=draft.revision;
+          setFailed(true);setMessage("Unsaved ranking restored. Review it before retrying.");
+          if(draft.revision !== (initialRanking.current.ranking?.revision??null))setConflictRevision(initialRanking.current.ranking?.revision??null);
+        });
+      } catch { queueMicrotask(()=>setStorageWarning(true)); }
+    }
+    queueMicrotask(()=>{if(mounted.current)setReady(true);});
+    return ()=>{mounted.current=false;};
+  }, [draftKey, canEdit]); // Restore once per owned profile, not after each save refresh.
+  function checkpoint(overrides:Record<string,number>) {
+    try {sessionStorage.setItem(draftKey,JSON.stringify({version:1,revision:revision.current,manual:overrides}));}
+    catch {setStorageWarning(true);}
+  }
   const left = order.length > 1 ? order[pair % order.length] : null;
   const right = order.length > 1 ? order[(pair + 1) % order.length] : null;
   const minHours = parseHours(minimum), maxHours = parseHours(maximum);
@@ -50,45 +80,54 @@ export function PreferenceRanking() {
       (maxHours === null || (game.hoursPlayed != null && game.hoursPlayed <= maxHours));
   });
   function move(slug: string, position: number) {
-    if (!canEdit || saving.current || !order.includes(slug) || !Number.isInteger(position) || position < 0 || position >= order.length || order.indexOf(slug) === position) return;
-    const next = order.filter(value => value !== slug);
+    const currentOrder=rankingOrder(games,latest.current);
+    if (!canEdit || !ready || !currentOrder.includes(slug) || !Number.isInteger(position) || position < 0 || position >= order.length || currentOrder.indexOf(slug) === position) return;
+    const next = rankingOrder(games,latest.current).filter(value => value !== slug);
     next.splice(position, 0, slug);
-    const overrides = Object.fromEntries(Object.keys(manual).map(key => [key, next.indexOf(key)]).filter(([, index]) => Number(index) >= 0));
+    const overrides = Object.fromEntries(Object.keys(latest.current).map(key => [key, next.indexOf(key)]).filter(([, index]) => Number(index) >= 0));
     overrides[slug] = position;
-    setManual(overrides);
-    save(next, overrides);
+    latest.current=overrides;setManual(overrides);
+    save(overrides);
   }
   function endDrag() { pointer.current = null; setDragged(null); setOver(null); }
   function targetAt(x: number, y: number) {
     return document.elementFromPoint(x, y)?.closest<HTMLElement>("[data-ranking-game]")?.dataset.rankingGame;
   }
   function prefer(winner: string, loser: string) {
-    if (saving.current) return;
-    const next = order.filter(slug => slug !== winner);
+    if (!ready) return;
+    const next = rankingOrder(games,latest.current).filter(slug => slug !== winner);
     next.splice(next.indexOf(loser), 0, winner);
     setPair(current => current + 1);
-    const overrides = Object.fromEntries(Object.keys(manual).map(key => [key, next.indexOf(key)]).filter(([, index]) => Number(index) >= 0));
+    const overrides = Object.fromEntries(Object.keys(latest.current).map(key => [key, next.indexOf(key)]).filter(([, index]) => Number(index) >= 0));
     overrides[winner] = next.indexOf(winner);
-    setManual(overrides);
-    save(next, overrides);
+    latest.current=overrides;setManual(overrides);
+    save(overrides);
   }
-  function save(next: string[], overrides = manual) {
-    if (saving.current) return;
-    saving.current = true;
-    setFailed(false);
-    setMessage("Saving…");
-    startTransition(async () => {
+  function save(overrides = latest.current) {
+    checkpoint(overrides);
+    queued.current=overrides;
+    if(saving.current || conflictRevision!==undefined)return;
+    saving.current=true;setFailed(false);setMessage("Saving…");
+    startTransition(async()=>{
       try {
-        const result = await saveRanking(next, revision.current, overrides);
-        setMessage(result.message);
-        setFailed(!result.ok);
-        if (result.ok && result.revision) revision.current = result.revision;
-      } catch {
-        setMessage("Ranking could not be saved. Your draft has been kept.");
-        setFailed(true);
-      } finally {
-        saving.current = false;
-      }
+        while(queued.current && mounted.current){
+          const next=queued.current;queued.current=null;
+          const result=await saveRanking(rankingOrder(games,next),revision.current,next);
+          if(!result.ok){
+            queued.current=null;setFailed(true);setMessage(result.message);
+            if(result.conflict)setConflictRevision(result.revision??null);
+            checkpoint(latest.current);return;
+          }
+          revision.current=result.revision??revision.current;
+          if(queued.current || latest.current!==next)checkpoint(latest.current);
+          else {
+            try {sessionStorage.removeItem(draftKey);}catch{setStorageWarning(true);}
+            setMessage(result.message);
+          }
+        }
+      }catch{
+        queued.current=null;checkpoint(latest.current);setMessage("Ranking could not be saved. Your draft has been kept.");setFailed(true);
+      }finally{saving.current=false;}
     });
   }
   return (
@@ -109,7 +148,7 @@ export function PreferenceRanking() {
                 <button
                   key={slug}
                   className="text-left space-y-2 disabled:opacity-40"
-                  disabled={pending}
+                  disabled={!ready}
                   onClick={() => prefer(slug, slug === left ? right : left)}
                 >
                   <img
@@ -126,7 +165,7 @@ export function PreferenceRanking() {
           </div>
           <button
             className={button}
-            disabled={pending}
+            disabled={!ready}
             onClick={() => setPair((current) => current + 1)}
           >
             {t("Skip")}
@@ -149,24 +188,24 @@ export function PreferenceRanking() {
             <li
               key={slug}
               data-ranking-game={slug}
-              draggable={canEdit && !pending}
-              onDragStart={event => { if (!canEdit || pending) { event.preventDefault(); return; } setDragged(slug); event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("text/plain", slug); }}
-              onDragOver={event => { if (canEdit && !pending && dragged) { event.preventDefault(); event.dataTransfer.dropEffect = "move"; setOver(slug); } }}
-              onDrop={event => { if (!canEdit || pending || !dragged) return; event.preventDefault(); move(dragged, index); endDrag(); }}
+              draggable={canEdit && ready}
+              onDragStart={event => { if (!canEdit || !ready) { event.preventDefault(); return; } setDragged(slug); event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("text/plain", slug); }}
+              onDragOver={event => { if (canEdit && ready && dragged) { event.preventDefault(); event.dataTransfer.dropEffect = "move"; setOver(slug); } }}
+              onDrop={event => { if (!canEdit || !ready || !dragged) return; event.preventDefault(); move(dragged, index); endDrag(); }}
               onDragEnd={endDrag}
               className={`relative grid grid-cols-[2.75rem_3rem_minmax(0,1fr)_auto] items-center gap-x-2 gap-y-3 p-3 sm:grid-cols-[2.75rem_3.5rem_3.5rem_minmax(0,1fr)_auto_auto] sm:gap-x-4 sm:p-4 transition-colors motion-reduce:transition-none hover:bg-surface-container ${dragged === slug ? "opacity-50" : ""} ${over === slug && dragged !== slug ? "ring-2 ring-inset ring-primary bg-primary/10" : ""}`}
             >
               {canEdit ? <>
-                <button type="button" disabled={pending} aria-label={`${t("Drag to reorder")}: ${game.title}`} title={t("Drag to reorder")} className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary touch-none cursor-grab active:cursor-grabbing disabled:opacity-40"
+                <button type="button" disabled={!ready} aria-label={`${t("Drag to reorder")}: ${game.title}`} title={t("Drag to reorder")} className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary touch-none cursor-grab active:cursor-grabbing disabled:opacity-40"
                   onClick={event => { if (pointerMoved.current) { pointerMoved.current = false; return; } event.currentTarget.closest("li")?.querySelector("input")?.focus(); }}
                   onKeyDown={event => { if (event.key === "Escape") endDrag(); }}
-                  onPointerDown={event => { if (pending || event.button !== 0) return; event.preventDefault(); pointerMoved.current = false; event.currentTarget.setPointerCapture(event.pointerId); pointer.current = { slug, x: event.clientX, y: event.clientY, moved: false }; }}
+                  onPointerDown={event => { if (!ready || event.button !== 0) return; event.preventDefault(); pointerMoved.current = false; event.currentTarget.setPointerCapture(event.pointerId); pointer.current = { slug, x: event.clientX, y: event.clientY, moved: false }; }}
                   onPointerMove={event => { const current = pointer.current; if (!current) return; current.moved ||= Math.hypot(event.clientX - current.x, event.clientY - current.y) > 6; if (!current.moved) return; pointerMoved.current = true; setDragged(current.slug); setOver(targetAt(event.clientX, event.clientY) ?? null); if (event.clientY < 80) window.scrollBy(0, -12); else if (event.clientY > innerHeight - 80) window.scrollBy(0, 12); }}
                   onPointerUp={event => { const current = pointer.current; const target = targetAt(event.clientX, event.clientY); endDrag(); if (current?.moved && target) move(current.slug, order.indexOf(target)); }}
                   onPointerCancel={endDrag} onLostPointerCapture={endDrag}>
                   <span aria-hidden="true" className="material-symbols-outlined text-[20px]">drag_indicator</span>
                 </button>
-                <input key={`${slug}:${index}`} type="text" inputMode="numeric" aria-label={`${t("Position for")} ${game.title}`} title={t("Edit ranking position")} defaultValue={index + 1} disabled={pending} maxLength={String(order.length).length} className="w-full min-h-11 rounded-lg border border-outline-variant/40 bg-surface px-1 text-center text-body-lg font-semibold text-primary tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-40"
+                <input key={`${slug}:${index}`} type="text" inputMode="numeric" aria-label={`${t("Position for")} ${game.title}`} title={t("Edit ranking position")} defaultValue={index + 1} disabled={!ready} maxLength={String(order.length).length} className="w-full min-h-11 rounded-lg border border-outline-variant/40 bg-surface px-1 text-center text-body-lg font-semibold text-primary tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-40"
                   onFocus={event => event.currentTarget.select()}
                   onChange={event => { const value = event.currentTarget.value.replace(/\D/g, ""); event.currentTarget.value = value ? String(Math.max(1, Math.min(order.length, Number(value)))) : ""; }}
                   onBlur={event => { const position = Number(event.currentTarget.value); if (position >= 1 && position <= order.length) move(slug, position - 1); else event.currentTarget.value = String(index + 1); }}
@@ -192,7 +231,7 @@ export function PreferenceRanking() {
                   <button
                     className={button}
                     aria-label={t(`Move ${game.title} up`)}
-                    disabled={pending || index === 0}
+                    disabled={!ready || index === 0}
                     onClick={() => move(slug, index - 1)}
                   >
                     <span aria-hidden="true" className="material-symbols-outlined text-[18px]">arrow_upward</span>
@@ -200,7 +239,7 @@ export function PreferenceRanking() {
                   <button
                     className={button}
                     aria-label={t(`Move ${game.title} down`)}
-                    disabled={pending || index === order.length - 1}
+                    disabled={!ready || index === order.length - 1}
                     onClick={() => move(slug, index + 1)}
                   >
                     <span aria-hidden="true" className="material-symbols-outlined text-[18px]">arrow_downward</span>
@@ -211,11 +250,18 @@ export function PreferenceRanking() {
           ) : null;
         })}
       </ol>
-      {canEdit && failed && (
-        <button className={button} disabled={pending} onClick={() => save(order)}>
+      {canEdit && failed && conflictRevision===undefined && (
+        <button className={button} disabled={pending || !ready} onClick={() => save()}>
           {t("Retry saving ranking")}
         </button>
       )}
+      {canEdit && conflictRevision!==undefined && <button className={button} disabled={pending} onClick={()=>{
+        revision.current=conflictRevision;setConflictRevision(undefined);queued.current=null;
+        // Explicitly applying the reviewed draft permits a save against the latest revision.
+        checkpoint(latest.current);
+      }}>{t("Use latest saved version for retry")}</button>}
+      {canEdit && failed && <button className={button} disabled={pending} onClick={()=>{try{sessionStorage.removeItem(draftKey);window.location.reload();}catch{setMessage("Unsaved ranking could not be discarded. Browser storage is unavailable.");}}}>{t("Discard unsaved ranking")}</button>}
+      {storageWarning && <p role="alert">{t("Browser storage is unavailable. Keep this page open until your ranking saves.")}</p>}
       <p role="status" aria-live="polite" className="min-h-5 text-body-sm text-primary">
         {t(message)}
       </p>

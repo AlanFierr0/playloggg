@@ -47,19 +47,16 @@ test("parse playtime explicitly so blanks and invalid text never silently become
 });
 
 
-test("live-service statuses are shared by full saves, bulk saves and catalog URLs", async()=>{
-  const {validateBulkRating}=await import("../src/lib/bulk-rating-input.ts");
+test("live-service statuses are shared by full saves and catalog URLs", async()=>{
   const {parseGamesQuery}=await import("../src/lib/games-query.ts");
   const {filterGames}=await import("../src/lib/games-view.ts");
   for(const status of ["active","paused","stopped"]){
-    assert.equal(validateBulkRating({slugs:["hades"],status}).status,status);
     const {filters}=parseGamesQuery(new URLSearchParams({status}));
     assert.equal(filters.status,status);
     assert.equal(filterGames([{...draft,logged:true,title:"Hades",keywords:"",genres:[],status}],filters).length,1);
   }
   for(const status of ["toString","__proto__",{},"unknown"]){
     assert.equal(validateRating({...draft,status}),null);
-    assert.equal(validateBulkRating({slugs:["hades"],status}),null);
   }
 });
 

@@ -1,12 +1,18 @@
 import Link from "next/link";
 import { getMessages } from "@/lib/locale/server";
-import { getPlatformScores } from "@/lib/platform-scores";
+import { getCommunityScores } from "@/lib/community";
+import { getCatalogRows } from "@/lib/portfolio";
 import { largestScoreGap } from "@/lib/portfolio-view";
 import type { Portfolio } from "@/types/domain";
 
 export async function ProfileHotTake({ portfolio }: { portfolio: Portfolio }) {
   let take;
-  try { take = largestScoreGap(portfolio.games, await getPlatformScores()); }
+  try {
+    const rows=await getCatalogRows([],portfolio.games.filter(game=>game.score!==null).map(game=>game.slug));
+    const scores=await getCommunityScores(rows.map(row=>row.id));
+    const byId=new Map(scores.map(score=>[score.gameId,score]));
+    take=largestScoreGap(portfolio.games,new Map(rows.flatMap(row=>{const score=byId.get(row.id);return score ? [[row.slug,{average:score.average,count:score.count}]] : [];})));
+  }
   catch { return null; }
   if (!take) return null;
   const t = await getMessages();

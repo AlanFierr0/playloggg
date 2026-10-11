@@ -59,6 +59,7 @@ implementation decisions; they do not override this file or later user requests.
 - Played platforms include Nintendo consoles, Sega, mobile and browser options.
 - Use shared played-platform labels; keep legacy pc for PC / Steam imports and sync.
 - Votes allow one up/down vote per other user's current public review and no self-voting.
+  Review text changes clear votes; score/status/tier edits retain them.
 - Taste Match is 100 minus mean absolute difference across at least five shared scores.
   Genre/studio preferences need three scores; stats initially hide groups with fewer than five.
 - Recommendations use 85%+ matches across five shared scores and source scores of 90+.
@@ -73,8 +74,11 @@ implementation decisions; they do not override this file or later user requests.
   Log search hides already scored games, including zero; unscored logs remain eligible.
 - Personal/public portfolios load only logged and favorite games. Favorite catalog browsing
   loads separately. Never serialize the entire catalog to a profile.
+- Personal ranking moves update immediately and serialize/coalesce saves. Failed drafts
+  persist per profile in the same tab and require explicit retry/discard after conflicts.
 - Home exploration stays stable until ten minutes or login-token expiry, whichever is first.
-  Community sections use real data; review carousel sorts upvotes minus downvotes.
+  Community sections use bounded database results and fail independently of core home.
+  Review carousel sorts upvotes minus downvotes; personalized exploration uses the same seed.
 - Steam imports offer rate all/some/none. Some supports genre, playtime and title filters.
   Import all selected games while rating new entries in descending playtime order.
   Preserve existing logs and concurrent manual edits. Import runs while the page stays open;

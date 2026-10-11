@@ -145,7 +145,11 @@ return (<>
 
 {canEdit&&<p role="status" aria-live="polite" className={pending || queued || message ? "fixed bottom-5 right-4 sm:right-6 z-50 flex max-w-[calc(100vw-2rem)] items-center gap-2 rounded-xl border border-outline-variant bg-surface-container-high px-4 py-3 text-body-sm text-primary shadow-xl" : "sr-only"}>{(pending||queued>0)&&<span aria-hidden="true" className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-primary/30 border-t-primary motion-reduce:animate-none"/>}{t(pending || queued ? "Saving…" : message)}{queued>0&&<span className="tabular-nums">({queued})</span>}</p>}
 {canEdit&&<p className="text-body-sm text-on-surface-variant">{t("Drag a game to a tier to keep it there. Drop it back into its score range to restore automatic placement.")}</p>}
-<form id="tier-range-form" onSubmit={saveRanges} className="flex flex-col gap-6 w-full" aria-busy={pending}>
+<form id="tier-range-form" onInvalidCapture={event=>{
+  event.preventDefault();setSelectedTier("all");setMessage("Check the highlighted score range. Enter whole numbers from 0 to 100.");
+  const field=event.target as HTMLInputElement;
+  requestAnimationFrame(()=>{field.focus();field.scrollIntoView({block:"center",behavior:"auto"});});
+}} onSubmit={saveRanges} className="flex flex-col gap-6 w-full" aria-busy={pending}>
 {groups.filter(group => (canEdit || group.tier!==null || group.games.length>0 || selectedTier===null)).map((group) => {
  const key = group.tier ?? "Unassigned";
  const theme = tierThemes[key];

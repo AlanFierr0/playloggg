@@ -6,15 +6,13 @@ import { HomeIntro, type HomeEntry } from "@/components/home-intro";
 import Link from "next/link";
 import { ProfilePreview } from "@/components/profile-preview";
 import { getPortfolio } from "@/lib/portfolio";
-import { getCatalogPage } from "@/lib/catalog-page";
-import { parseGamesQuery } from "@/lib/games-query";
 import { GameLogAction } from "@/components/game-actions";
 import { GameTags } from "@/components/game-tags";
 import { tasteStats } from "@/lib/taste";
 import type { Game } from "@/types/domain";
 
 export async function HomeScreen() {
-  const [t, { games: sampled, expiresAt }, portfolio] = await Promise.all([getMessages(), getDiscover(9), getPortfolio()]);
+  const [t, { games: sampled, expiresAt }, portfolio] = await Promise.all([getMessages(), getDiscover(9).catch(()=>({games:[],expiresAt:0})), getPortfolio()]);
   const personal = Boolean(portfolio.access?.canEdit);
   const entries = personal ? portfolio.games.filter(game => game.logged).sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "") || a.slug.localeCompare(b.slug)) : [];
   const loggedSlugs = new Set(entries.map(game => game.slug));
@@ -28,13 +26,9 @@ export async function HomeScreen() {
   const preferred = stats.preferredGenres.slice(0, 3);
   const genres = preferred.length ? preferred.map(group => group.name) : [...new Set(entries.flatMap(game => game.genres ?? []))].slice(0, 3);
   const tags = [...new Map(entries.flatMap(game => game.tags ?? []).map(tag => [tag.toLowerCase(), tag])).values()].slice(0, 4);
-  const candidates = (await Promise.all(preferred.map(group => getCatalogPage(parseGamesQuery(new URLSearchParams({genre:group.name,library:"unlogged"})).filters, 1)))).flatMap(result => result.data.games);
+  const candidates=preferred.length && personal ? (await getDiscover(5,preferred.map(group=>group.name),Number(portfolio.profile.id)).catch(()=>({games:[]}))).games : [];
   const suggestions = new Map<string, { game: Game; genre?: string }>();
-  for (const group of preferred) {
-    for (const game of candidates) {
-      if (!game.logged && game.genres?.includes(group.name) && suggestions.size < 5 && !suggestions.has(game.slug)) suggestions.set(game.slug, { game, genre: group.name });
-    }
-  }
+  for(const game of candidates)if(!game.logged&&!loggedSlugs.has(game.slug))suggestions.set(game.slug,{game,genre:preferred.find(group=>game.genres?.includes(group.name))?.name});
   const personalized = suggestions.size > 0;
   if (!personalized) {
     const fallback = personal ? [...sampled, ...portfolio.games].filter(game => !loggedSlugs.has(game.slug)) : sampled.slice(previewCount);

@@ -37,7 +37,8 @@ features must not be inferred as available from historical documentation.
 - Scores are optional whole numbers from 0 to 100. Anonymous averages use every
   supplied score, including private profiles, without a minimum rating count.
 - Personal ranking follows scores unless a game has a manual position. Scores and
-  favorites remain independent of manual ranking and tiers.
+  favorites remain independent of manual ranking and tiers. Moves are immediate, queued
+  saves coalesce, and failed drafts survive navigation/refresh in the same tab.
 - Automatic tiers use editable ranges; manual exceptions remain where placed.
 - Playback includes completed, in progress, backlog, shelved, currently playing,
   paused and stopped playing. Recorded hours must be nonnegative and cannot exceed
@@ -47,7 +48,8 @@ features must not be inferred as available from historical documentation.
 - Favorites do not create logs. Up to four can be featured. Unknown hours display `—`;
   playtime totals include the number of entries with recorded hours.
 - Reviews are original text with clickable HTTP/HTTPS sources. Helpful votes are
-  upvotes minus downvotes. Automatic translation is pending in TODO.md.
+  upvotes minus downvotes. Changing review text clears its votes; other edits keep them.
+  Automatic translation is pending in TODO.md.
 - Steam import offers rating all/some/none, imports selected games in batches and keeps
   existing logs. Rating order is descending playtime. Import queues and rating sessions
   are saved per profile in this browser. Leaving pauses work; Resume import retries

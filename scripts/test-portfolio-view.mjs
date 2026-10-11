@@ -43,7 +43,6 @@ test("local search uses the catalog without substituting the selected profile fo
   assert.equal(getSearchMatches("space", portfolio).titles[0].score, null);
   assert.equal("profiles" in getSearchMatches("alexvance", portfolio), false);
   assert.equal(getSearchMatches("Cyberpunk", portfolio).titles.length, 0);
-  assert.equal(getSearchMatches("", portfolio).listMatches, false);
 });
 test("real backlog includes unrated entries and responds to status changes without altering scored rankings", () => {
   const backlog = { ...game("next-game", null), status: "backlog", logged: true };

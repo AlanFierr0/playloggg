@@ -18,28 +18,29 @@ export function IgdbSearch({ query, mode = "browse", onImported, onBusyChange, d
   const [importMessage, setImportMessage] = useState({ query: "", value: "" });
   const cache = useRef(new Map<string, Awaited<ReturnType<typeof searchIgdb>>>());
   const current = query.trim();
+  const cacheKey=`${mode}:${current.toLowerCase()}`;
   const visible = result?.query === current ? result : undefined;
   const loading = !disabled && loadingQuery === current;
   useEffect(() => {
     let cancelled = false;
     if (disabled || !catalogQuery(current)) return;
-    const cached = cache.current.get(current.toLowerCase());
+    const cached = cache.current.get(cacheKey);
     const timer = setTimeout(async () => {
       if (cached) { setResult({ ...cached, query: current }); setLoadingQuery(null); return; }
       setLoadingQuery(current);
       try {
-        const response = await searchIgdb(current);
+        const response = await searchIgdb(current, mode === "log");
         if (cancelled) return;
         if (response.ok) {
           if (cache.current.size >= 20) cache.current.delete(cache.current.keys().next().value!);
-          cache.current.set(current.toLowerCase(), response);
+          cache.current.set(cacheKey, response);
         }
         setResult({ ...response, query: current });
       } catch { if (!cancelled) setResult({ ok: false, query: current, games: [], message: "Game search is unavailable right now. Please retry." }); }
       finally { if (!cancelled) setLoadingQuery(null); }
     }, cached ? 0 : 400);
     return () => { cancelled = true; clearTimeout(timer); };
-  }, [current, disabled, retry]);
+  }, [current, disabled, retry, mode, cacheKey]);
   function select(id: number) {
     setImportMessage({ query: current, value: "" });
     onBusyChange?.(true);

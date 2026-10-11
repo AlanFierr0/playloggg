@@ -1,3 +1,4 @@
+import { tasteNeighbors, tasteRecommendations } from "../src/lib/community-stats.ts";
 import { gamesPage } from "../src/lib/games-page.ts";
 import { createHash } from "node:crypto";
 import { defaultTierRanges, tierForScore, parseTierRanges } from "../src/lib/tier-ranges.ts";
@@ -25,6 +26,7 @@ let ratings;
 let reviewVotes;
 let ratingsDelay = 0;
 let failSave;
+let rankingDelay=0;let failHome=false;
 let showTrending=false;
 let steamMode="public";
 let requestCounts={};
@@ -36,7 +38,7 @@ let favorites;
 let rankings=[];let curated=[];let listItems=[];let follows=[];let blocks=[];let likes=[];
 let pictures = new Map();
 // Shared catalog imports persist between tests, like the application cache; personal data resets.
-function reset() { alternateToken=undefined; reviewVotes=[]; ratingsDelay=0; showTrending=false; accountDeleted=false;failAuthDelete=false;failStorageDelete=false; quotaMode="allow";user.app_metadata={};steamMode="public";rankings=[];follows=[];blocks=[];likes=[];curated=[{id:10,profile_id:3,name:"Public fixture list",revision:1,description:"Fixture description",is_public:true,is_ranked:true}];listItems=[{list_id:10,game_id:1,position:0}];pictures.clear(); Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false,is_discoverable:false,bio:null,location:null,platform_preference:null,avatar_url:null}); favorites=[{profile_id:3,game_id:1,featured_slot:1,created_at:"2026-09-29T12:00:00Z"}]; ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
+function reset() {rankingDelay=0;failHome=false; alternateToken=undefined; reviewVotes=[]; ratingsDelay=0; showTrending=false; accountDeleted=false;failAuthDelete=false;failStorageDelete=false; quotaMode="allow";user.app_metadata={};steamMode="public";rankings=[];follows=[];blocks=[];likes=[];curated=[{id:10,profile_id:3,name:"Public fixture list",revision:1,description:"Fixture description",is_public:true,is_ranked:true}];listItems=[{list_id:10,game_id:1,position:0}];pictures.clear(); Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false,is_discoverable:false,bio:null,location:null,platform_preference:null,avatar_url:null}); favorites=[{profile_id:3,game_id:1,featured_slot:1,created_at:"2026-09-29T12:00:00Z"}]; ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
  for (const game_id of [3,4,5,6]) ratings.push({profile_id:3,game_id,score:50,tier:null,status:"playing",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  for (const game_id of [1,3,4,5,6]) ratings.push({profile_id:4,game_id,score:game_id===1 ? 10 : 40,tier:"A",status:"completed",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  ratings.push({profile_id:3,game_id:7,score:null,tier:"S",status:"backlog",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
@@ -53,6 +55,13 @@ export async function startFixtureServer() {
     const url = new URL(req.url, fixtureOrigin);
     function reply(status, data) { res.writeHead(status, { "Content-Type": "application/json" }); res.end(data === undefined ? undefined : JSON.stringify(data)); }
     try {
+      if(url.pathname==="/__ranking-delay"){rankingDelay=600;return reply(200,{ok:true});}
+      if(url.pathname==="/__home-failure"){failHome=true;return reply(200,{ok:true});}
+      if(url.pathname==="/__ranking-edit"){
+        ratings=ratings.filter(r=>r.profile_id!==2);
+        for(const game_id of [1,2,3])ratings.push({profile_id:2,game_id,score:100-game_id*10,tier:null,tier_manual:false,status:null,review:null,tags:[],hours_played:null,platform:null,completed_on:null,updated_at:"2026-09-29T12:00:00Z"});
+        return reply(200,{ok:true});
+      }
       if(url.pathname==="/__slow-ratings" && req.method==="POST"){ratingsDelay=4000;return reply(200,{ok:true});}
       if(url.pathname==="/__reset-request-counts"){requestCounts={};return reply(200,{ok:true});}
       if(!url.pathname.startsWith("/__") || ["/__provider-games","/__steam-library"].includes(url.pathname)){const key=`${req.method} ${url.pathname}`;requestCounts[key]=(requestCounts[key]??0)+1;}
@@ -118,7 +127,7 @@ export async function startFixtureServer() {
       if (url.pathname === "/__source-review" && req.method === "POST") {ratings.find(row=>row.profile_id===3&&row.game_id===1).review="https://www.youtube.com/watch?v=example";return reply(200,{ok:true});}
       if (url.pathname === "/__reset" && req.method === "POST") { reset(); return reply(200, { ok: true }); }
       if (url.pathname === "/__fail-save" && req.method === "POST") { failSave = true; return reply(200, { ok: true }); }
-      if (url.pathname === "/__state") return reply(200, { requestCounts, accountDeleted, pictures:[...pictures.keys()], reviewVotes, ratings, favorites, games, profiles:profiles.filter(row=>!profileDeleted||row.id!==2) });
+      if (url.pathname === "/__state") return reply(200, { requestCounts, rankings, accountDeleted, pictures:[...pictures.keys()], reviewVotes, ratings, favorites, games, profiles:profiles.filter(row=>!profileDeleted||row.id!==2) });
       if(url.pathname==="/__fail-auth-delete"&&req.method==="POST"){failAuthDelete=true;return reply(200,{ok:true});}
       if(url.pathname==="/__fail-storage-delete"&&req.method==="POST"){failStorageDelete=true;return reply(200,{ok:true});}
       if(url.pathname==="/__profileless"&&req.method==="POST"){profileDeleted=true;return reply(200,{ok:true});}
@@ -167,10 +176,23 @@ export async function startFixtureServer() {
         return reply(201,url.searchParams.has("select")?created:null);
       }
       const visibleProfiles = profiles.filter(profile=>(!profileDeleted||profile.id!==2)&&(admin || profile.is_public || (authenticated && profile.owner_user_id === ownerId)));
-      if(["rpc/catalog_page","rpc/search_catalog","rpc/discover_games"].includes(resource)) {
+      if(resource==="rpc/home_reviews"){
+        if(failHome)return reply(503,{message:"Controlled optional failure"});
+        const rows=ratings.filter(r=>r.review?.trim()&&profiles.some(p=>p.id===r.profile_id&&p.is_public&&p.is_discoverable)).map(r=>{
+          const p=profiles.find(p=>p.id===r.profile_id),votes=reviewVotes.filter(v=>v.reviewer_profile_id===r.profile_id&&v.game_id===r.game_id);
+          return {profile_id:r.profile_id,game_id:r.game_id,review:r.review,updated_at:r.updated_at,handle:p.handle,display_name:p.display_name,upvotes:votes.filter(v=>v.value===1).length,downvotes:votes.filter(v=>v.value===-1).length,viewer_vote:authenticated?votes.find(v=>v.voter_profile_id===2)?.value??0:0};
+        }).sort((a,b)=>(b.upvotes-b.downvotes)-(a.upvotes-a.downvotes)||String(b.updated_at??"").localeCompare(String(a.updated_at??""))||a.profile_id-b.profile_id||a.game_id-b.game_id).slice(0,12);
+        return reply(200,rows);
+      }
+      if(resource==="rpc/home_taste"){
+        if(!authenticated)return reply(403,{message:"Not owned"});
+        const own=ratings.filter(r=>r.profile_id===2),others=ratings.filter(r=>profiles.some(p=>p.id===r.profile_id&&p.is_public&&p.is_discoverable));
+        return reply(200,{neighbors:tasteNeighbors(own,others,2).slice(0,6).map(n=>{const p=profiles.find(p=>p.id===n.profileId);return {...n,handle:p.handle,displayName:p.display_name,avatarUrl:p.avatar_url??null};}),recommendations:tasteRecommendations(own,others,2).slice(0,5)});
+      }
+      if(["rpc/catalog_page","rpc/search_catalog","rpc/discover_games","rpc/explore_games"].includes(resource)) {
         if(!admin)return reply(403,{message:"Server only"});
         let body="";for await(const part of req)body+=part;const input=JSON.parse(body);
-        if(resource==="rpc/discover_games") return reply(200,[...games].sort((a,b)=>createHash("md5").update(`${input.p_seed}:${a.id}`).digest("hex").localeCompare(createHash("md5").update(`${input.p_seed}:${b.id}`).digest("hex"))).slice(0,input.p_amount));
+        if(["rpc/discover_games","rpc/explore_games"].includes(resource)) return reply(200,games.filter(g=>resource!=="rpc/explore_games"||(g.genres.some(genre=>input.p_genres.includes(genre))&&!ratings.some(r=>r.profile_id===input.p_profile_id&&r.game_id===g.id))).sort((a,b)=>createHash("md5").update(`${input.p_seed}:${a.id}`).digest("hex").localeCompare(createHash("md5").update(`${input.p_seed}:${b.id}`).digest("hex"))).slice(0,input.p_amount));
         if(resource==="rpc/search_catalog") {
           const words=input.p_query.trim().toLowerCase().split(/\s+/).filter(Boolean);
           const results=games.filter(game=>{
@@ -203,6 +225,7 @@ export async function startFixtureServer() {
         if((previous?.updated_at??null)!==input.p_expected_updated_at)return reply(409,{code:"40001",message:"Entry changed"});
         const row={...input.p_values,profile_id:2,game_id:input.p_game_id,updated_at:new Date().toISOString()};
         if(!row.tier_manual)row.tier=tierForScore(row.score,profiles[1].tier_ranges);
+        if(previous?.review!==row.review)reviewVotes=reviewVotes.filter(v=>v.reviewer_profile_id!==2||v.game_id!==input.p_game_id);
         ratings=ratings.filter(r=>!(r.profile_id===2&&r.game_id===input.p_game_id));ratings.push(row);
         return reply(200,row.updated_at);
       }
@@ -276,7 +299,7 @@ export async function startFixtureServer() {
       if (resource === "ratings" && req.method === "PATCH") {
         if(!authenticated || url.searchParams.get("profile_id")!=="eq.2")return reply(403,{message:"Fixture ownership denied"});
         let body="";for await(const part of req)body+=part;const patch=JSON.parse(body);
-        if(Object.keys(patch).some(key=>!["hours_played","status","platform","tier","tier_manual","score","updated_at"].includes(key)))return reply(400,{message:"Unsupported entry fields"});
+        if(Object.keys(patch).some(key=>!["hours_played","tier","tier_manual","updated_at"].includes(key)))return reply(400,{message:"Unsupported entry fields"});
         if(failSave){failSave=false;return reply(503,{message:"Controlled save failure"});}
         const matches=ratings.filter(row=>[...url.searchParams].filter(([key])=>key!=="select").every(([key,value])=>value.startsWith("eq.")?String(row[key])===value.slice(3):value.startsWith("in.(")?value.slice(4,-1).split(",").includes(String(row[key])):value==="is.null"&&row[key]===null));
         matches.forEach(row=>{Object.assign(row,patch,{updated_at:new Date().toISOString()});if(!row.tier_manual)row.tier=tierForScore(row.score,profiles[1].tier_ranges);});
@@ -292,7 +315,7 @@ export async function startFixtureServer() {
         for(const rating of rows){
           if(req.headers.prefer?.includes("resolution=ignore-duplicates")&&ratings.some(row=>row.profile_id===rating.profile_id&&row.game_id===rating.game_id))continue;
           ratings=ratings.filter(row=>row.profile_id!==rating.profile_id||row.game_id!==rating.game_id);
-          const row={tier_manual:false,...rating,updated_at:new Date().toISOString()};if(!row.tier_manual)row.tier=tierForScore(row.score,profiles[1].tier_ranges);ratings.push(row);saved.push(row);
+          const row={score:null,tier:null,status:null,review:null,tags:[],completed_on:null,tier_manual:false,...rating,updated_at:new Date().toISOString()};if(!row.tier_manual)row.tier=tierForScore(row.score,profiles[1].tier_ranges);ratings.push(row);saved.push(row);
         }
         return reply(201,url.searchParams.has("select")?saved.map(row=>({game_id:row.game_id,updated_at:row.updated_at})):undefined);
       }
@@ -319,7 +342,7 @@ export async function startFixtureServer() {
         if(existing)existing.featured_slot=slot;else favorites.push({profile_id:2,game_id:input.p_game_id,featured_slot:slot,created_at:new Date().toISOString()});
         return reply(200,null);
       }
-      if(["rpc/save_preference_ranking","rpc/save_preference_ranking_v2"].includes(resource)&&req.method==="POST"){let body="";for await(const part of req)body+=part;const input=JSON.parse(body);if(!authenticated||input.p_ids.some(id=>!ratings.some(row=>row.profile_id===2&&row.game_id===id)))return reply(403,{message:"Not owned"});if(failSave){failSave=false;return reply(503,{message:"Controlled ranking save failure"});}const existing=rankings.find(row=>row.profile_id===2);if((existing?.revision??null)!==input.p_revision)return reply(409,{code:"40001",message:"Stale ranking"});const row={profile_id:2,game_ids:input.p_ids,manual_positions:input.p_manual??{},revision:(existing?.revision??0)+1};rankings=[row];return reply(200,row.revision);}
+      if(["rpc/save_preference_ranking","rpc/save_preference_ranking_v2"].includes(resource)&&req.method==="POST"){let body="";for await(const part of req)body+=part;const input=JSON.parse(body);if(!authenticated||input.p_ids.some(id=>!ratings.some(row=>row.profile_id===2&&row.game_id===id)))return reply(403,{message:"Not owned"});if(failSave){failSave=false;return reply(503,{message:"Controlled ranking save failure"});}if(rankingDelay)await new Promise(resolve=>setTimeout(resolve,rankingDelay));const existing=rankings.find(row=>row.profile_id===2);if((existing?.revision??null)!==input.p_revision)return reply(409,{code:"40001",message:"Stale ranking"});const row={profile_id:2,game_ids:input.p_ids,manual_positions:input.p_manual??{},revision:(existing?.revision??0)+1};rankings=[row];return reply(200,row.revision);}
       if(resource==="rpc/save_curated_list_v2"&&req.method==="POST"){let body="";for await(const part of req)body+=part;const input=JSON.parse(body);if(!authenticated||input.p_profile_id!==2)return reply(403,{message:"Not owned"});const existing=curated.find(row=>row.id===input.p_list_id);if(existing&&existing.revision!==input.p_expected_revision)return reply(409,{code:"40001",message:"Stale list"});const row={id:existing?.id??11,profile_id:2,name:input.p_name,description:input.p_description,is_public:input.p_public,is_ranked:input.p_ranked,revision:(existing?.revision??0)+1};curated=curated.filter(item=>item.id!==row.id);curated.push(row);listItems=listItems.filter(item=>item.list_id!==row.id);input.p_game_ids.forEach((game_id,position)=>listItems.push({list_id:row.id,game_id,position}));return reply(200,row);}
       if(["profile_follows","profile_blocks","list_likes"].includes(resource)&&["POST","DELETE"].includes(req.method)){if(!authenticated)return reply(403,{message:"Not owned"});let rows=resource==="profile_follows"?follows:resource==="profile_blocks"?blocks:likes;if(req.method==="POST"){let body="";for await(const part of req)body+=part;rows.push(JSON.parse(body));}else rows=rows.filter(row=>![...url.searchParams].every(([key,value])=>String(row[key])===value.slice(3)));if(resource==="profile_follows")follows=rows;else if(resource==="profile_blocks")blocks=rows;else likes=rows;return reply(200,null);}
       if(resource==="rpc/public_list_like_counts")return reply(200,[]);

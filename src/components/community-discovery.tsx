@@ -1,7 +1,6 @@
 import { ReviewHelpfulness } from "@/components/review-helpfulness";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import { HomeCarousel } from "@/components/home-carousel";
-import { getReviewHelpfulness } from "@/lib/review-helpfulness";
 import Link from "next/link";
 import { GameLogAction } from "@/components/game-actions";
 import { getCommunity, getTasteDiscovery } from "@/lib/community";
@@ -9,30 +8,28 @@ import { getCatalogRows } from "@/lib/portfolio";
 import { getMessages } from "@/lib/locale/server";
 export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<string> }) {
   const [community, discovery, t] = await Promise.all([
-    getCommunity(),
-    getTasteDiscovery(),
+    getCommunity().catch(()=>({controversial:[],trending:[],reviews:[],viewerId:null,unavailable:true})),
+    getTasteDiscovery().catch(()=>({recommendations:[],neighbors:[],unavailable:true})),
     getMessages(),
   ]);
   const { recommendations, neighbors } = discovery;
-  const catalog = await getCatalogRows([...community.reviews.map(row => row.game_id), ...community.trending.map(row => row.gameId), ...community.controversial.map(row => row.gameId), ...discovery.recommendations.map(row => row.gameId)]);
+  const catalog = await getCatalogRows([...community.reviews.map(row => row.game_id), ...community.trending.map(row => row.gameId), ...community.controversial.map(row => row.gameId), ...discovery.recommendations.map(row => row.gameId)]).catch(()=>null);
+  if(!catalog)return <section className="site-container mx-auto px-4 py-8"><p role="status">{t("Community suggestions are temporarily unavailable. Try refreshing the page.")}</p></section>;
   const games = new Map(catalog.map((game) => [game.id, game]));
   if (
     !community.trending.length &&
     !community.controversial.length &&
     !recommendations.length &&
     !neighbors.length &&
-    !community.reviews.length
+    !community.reviews.length && !community.unavailable && !("unavailable" in discovery)
   )
     return null;
-  // ponytail: one aggregate request per reviewing profile; use a ranked database RPC if this becomes a measured bottleneck.
-  const helpfulness = new Map(await Promise.all(
-    [...new Set(community.reviews.map(review => review.profile_id))].map(async id => [id, await getReviewHelpfulness(id)] as const),
-  ));
-  const reviews = community.reviews.flatMap(review => {
-    const game = games.get(review.game_id), data = helpfulness.get(review.profile_id);
-    const counts = game && data?.reviews[game.slug];
-    return game && data && counts ? [{ ...review, game, data, net: counts.upvotes - counts.downvotes }] : [];
-  }).sort((a, b) => b.net - a.net || (b.updated_at ?? "").localeCompare(a.updated_at ?? "") || a.profile_id - b.profile_id || a.game_id - b.game_id).slice(0, 12);
+  const reviews=community.reviews.flatMap(review=>{
+    const game=games.get(review.game_id);
+    return game ? [{...review,game,profiles:{handle:review.handle,display_name:review.display_name},
+      data:{signedIn:community.viewerId!==null,canVote:community.viewerId!==null&&community.viewerId!==review.profile_id,
+        reviews:{[game.slug]:{upvotes:review.upvotes,downvotes:review.downvotes,vote:review.viewer_vote as -1|0|1}}}}] : [];
+  });
   const sections = [
     {
       title: "Most controversial games",
@@ -55,6 +52,7 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
   ];
   return (
     <div className="w-full site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 space-y-12">
+      {(community.unavailable || "unavailable" in discovery) && <p role="status" className="text-body-sm text-on-surface-variant">{t("Some community suggestions are unavailable. Try refreshing the page.")}</p>}
       {neighbors.length > 0 && (
         <section className="space-y-4">
           <h2 className="font-headline-lg text-headline-lg">

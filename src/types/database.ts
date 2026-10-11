@@ -614,6 +614,52 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      explore_games: {
+        Args: {
+          p_amount: number
+          p_genres: string[]
+          p_profile_id: number
+          p_seed: string
+        }
+        Returns: {
+          artwork_image_ids: string[]
+          cover_image_id: string | null
+          cover_url: string
+          genres: string[]
+          id: number
+          igdb_id: number | null
+          igdb_metadata: Json
+          igdb_synced_at: string | null
+          igdb_url: string | null
+          release_year: number | null
+          released_on: string | null
+          screenshot_image_ids: string[]
+          search_keywords: string
+          slug: string
+          title: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "games"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      home_reviews: {
+        Args: { p_limit?: number }
+        Returns: {
+          display_name: string
+          downvotes: number
+          game_id: number
+          handle: string
+          profile_id: number
+          review: string
+          updated_at: string
+          upvotes: number
+          viewer_vote: number
+        }[]
+      }
+      home_taste: { Args: never; Returns: Json }
       platform_game_scores: {
         Args: never
         Returns: {
@@ -671,7 +717,6 @@ export type Database = {
       }
       save_rating: {
         Args: {
-          // SQL accepts null for a new entry. The generator omits nullable RPC arguments.
           p_expected_updated_at: string | null
           p_game_id: number
           p_values: Json

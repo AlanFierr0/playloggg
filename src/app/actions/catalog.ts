@@ -11,20 +11,26 @@ type SearchResult = { ok: boolean; message: string; games: IgdbMatch[] };
 type ImportResult = { ok: boolean; message: string; game?: Game };
 const fields = "id,slug,title,cover_url,release_year,search_keywords";
 
-export async function searchIgdb(input: unknown): Promise<SearchResult> {
+export async function searchIgdb(input: unknown, hideRated = false): Promise<SearchResult> {
   const query = catalogQuery(input);
-  if (!query) return { ok: false, message: "Enter a title of 2–100 characters.", games: [] };
+  if (!query || typeof hideRated !== "boolean") return { ok: false, message: "Enter a title of 2–100 characters.", games: [] };
   try {
     const owner = await getAccount();
     if (!owner?.profile) return { ok: false, message: "Sign in to search more games.", games: [] };
     await checkOperationLimit(owner.user.id,"search");
     const records = await queryIgdb(searchBody(query));
     const seen = new Set<number>();
-    const games = records.slice(0, 20).map(normalizeMatch).filter((game): game is IgdbMatch => Boolean(game && !seen.has(game.id) && seen.add(game.id)));
+    let games = records.slice(0, 20).map(normalizeMatch).filter((game): game is IgdbMatch => Boolean(game && !seen.has(game.id) && seen.add(game.id)));
     if (games.length) {
-      const { data: stored, error } = await owner.supabase.from("games").select("igdb_id,slug").in("igdb_id", games.map(game => game.id));
+      const { data: stored, error } = await owner.supabase.from("games").select("id,igdb_id,slug").in("igdb_id", games.map(game => game.id));
       if (error) return { ok: false, games: [], message: "The catalog could not be checked. Please retry." };
       for (const game of games) { const existing = stored.find(row => row.igdb_id === game.id); if (existing) game.catalogSlug = existing.slug; }
+      if (hideRated && stored.length) {
+        const {data:rated,error:ratingError}=await owner.supabase.from("ratings").select("game_id").eq("profile_id",owner.profile.id).in("game_id",stored.map(row=>row.id)).not("score","is",null);
+        if(ratingError) return {ok:false,games:[],message:"Your ratings could not be loaded."};
+        const excluded=new Set(stored.filter(row=>rated.some(rating=>rating.game_id===row.id)).map(row=>row.igdb_id));
+        games=games.filter(game=>!excluded.has(game.id));
+      }
     }
     return { ok: true, games, message: games.length ? "" : "No games found. Try another title." };
   } catch(error) {
