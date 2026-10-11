@@ -39,3 +39,30 @@ do $$ begin
     raise exception 'Required owned write unavailable';
   end if;
 end $$;
+
+-- Verify actual authenticated writes and stale-edit protection; preserve all data.
+begin;
+do $$ declare actor uuid; begin
+  select owner_user_id into actor from public.profiles where owner_user_id is not null and not is_public limit 1;
+  if actor is null then raise exception 'Private test owner required'; end if;
+  perform set_config('request.jwt.claims',jsonb_build_object('sub',actor)::text,true);
+end $$;
+set local role authenticated;
+do $$ declare owned bigint; g bigint; old_stamp timestamptz; stamp timestamptz; denied boolean; begin
+  select id into owned from public.profiles where owner_user_id=auth.uid();
+  select id into g from public.games where released_on<current_date-1 and not exists(select 1 from public.ratings where profile_id=owned and game_id=games.id) limit 1;
+  insert into public.ratings(profile_id,game_id,platform,hours_played) values(owned,g,'pc',0) returning updated_at into old_stamp;
+  update public.ratings set hours_played=1 where profile_id=owned and game_id=g returning updated_at into stamp;
+  if stamp<=old_stamp then raise exception 'Narrow update did not advance revision'; end if;
+  denied=false;
+  begin perform public.save_rating(g,'{"score":80}'::jsonb,old_stamp); exception when sqlstate '40001' then denied=true; end;
+  if not denied then raise exception 'Stale full edit undid a narrow patch'; end if;
+  perform public.save_rating(g,'{"score":80,"hours_played":1}'::jsonb,stamp);
+  denied=false;
+  begin update public.ratings set score=90 where profile_id=owned and game_id=g; exception when insufficient_privilege then denied=true; end;
+  if not denied then raise exception 'Direct score update accepted'; end if;
+  denied=false;
+  begin insert into public.ratings(profile_id,game_id,score) values(owned,g,90); exception when insufficient_privilege then denied=true; end;
+  if not denied then raise exception 'Direct full-entry insert accepted'; end if;
+end $$;
+rollback;

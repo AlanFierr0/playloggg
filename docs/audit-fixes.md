@@ -90,3 +90,8 @@ search. A local browser network-buffer failure passed on rerun; it was not an ap
 Database checks confirm owned timestamp guards, review-vote invalidation and date/hour
 validation in rolled-back transactions, plus bounded public review results and
 restricted home-query permissions. Full-scale load testing is not part of this pass.
+
+The final permission migration is applied in production. Actual authenticated blank
+imports, playtime patches and guarded saves pass; direct score updates/full inserts
+are denied. A playtime patch advances the timestamp and rejects a stale whole-entry
+replacement. All assertions ran inside rolled-back transactions.
