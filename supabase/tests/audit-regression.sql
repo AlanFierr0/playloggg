@@ -113,6 +113,8 @@ do $$ declare owned bigint; g bigint; other_game bigint; begin
  select id into owned from public.profiles where handle='sql_test_owner';
  select id into g from public.games where slug='sql-test-game-two';
  select id into other_game from public.games where slug='sql-test-game-one';
+ insert into public.ratings(profile_id,game_id,score) values(owned,other_game,80) on conflict do nothing;
+ insert into public.review_votes(reviewer_profile_id,game_id,voter_profile_id,value) select owned,g,id,1 from public.profiles where handle='rollback_audit_voter';
  insert into public.profile_favorites(profile_id,game_id) values(owned,g);
  insert into public.profile_rankings(profile_id,game_ids,manual_positions) values(owned,array[g,other_game],jsonb_build_object(g::text,0,other_game::text,1));
  if has_function_privilege('anon','public.remove_rating(bigint,timestamptz)','EXECUTE') or has_table_privilege('authenticated','public.ratings','DELETE') then raise exception 'Unrestricted removal privilege'; end if;
@@ -128,6 +130,7 @@ do $$ declare owned bigint; g bigint; other_game bigint; stamp timestamptz; deni
  if not denied or not exists(select 1 from public.ratings where profile_id=owned and game_id=g) then raise exception 'Stale removal changed an entry'; end if;
  if not public.remove_rating(g,stamp) then raise exception 'Owned removal failed'; end if;
  if exists(select 1 from public.ratings where profile_id=owned and game_id=g) then raise exception 'Owned rating retained'; end if;
+ if exists(select 1 from public.review_votes where reviewer_profile_id=owned and game_id=g) then raise exception 'Removed review votes retained'; end if;
  if not exists(select 1 from public.profile_favorites where profile_id=owned and game_id=g) then raise exception 'Independent favorite lost'; end if;
  if not exists(select 1 from public.profile_rankings where profile_id=owned and game_ids=array[other_game] and manual_positions=jsonb_build_object(other_game::text,0) and revision=2) then raise exception 'Ranking not cleaned and shifted'; end if;
  if public.remove_rating(g,stamp) then raise exception 'Missing entry removed twice'; end if;
@@ -139,6 +142,33 @@ set local role authenticated;
 do $$ declare denied boolean=false; begin
  begin perform public.remove_rating((select id from public.games limit 1),now()); exception when insufficient_privilege then denied=true; end;
  if not denied then raise exception 'Unowned removal accepted'; end if;
+end $$;
+reset role;
+-- Public review browsing stays scoped, bounded and visibility-aware.
+insert into public.profiles(handle,display_name,is_public,is_discoverable)
+select 'sql_review_'||lpad(n::text,2,'0'),'SQL Reviewer '||n,true,true from generate_series(1,30) n;
+insert into public.ratings(profile_id,game_id,score,review)
+select p.id,g.id,80,'SQL public review '||p.handle from public.profiles p,public.games g
+where p.handle like 'sql_review_%' and g.slug='sql-test-game-one';
+insert into public.review_votes(reviewer_profile_id,game_id,voter_profile_id,value)
+select p.id,g.id,v.id,1 from public.profiles p,public.profiles v,public.games g
+where p.handle='sql_review_01' and v.handle='rollback_audit_voter' and g.slug='sql-test-game-one';
+set local role anon;
+do $$ declare g bigint; first_author text; total integer; begin
+ select id into g from public.games where slug='sql-test-game-one';
+ select count(*) into total from public.game_reviews(g,0);
+ if total<>25 then raise exception 'Review page was not bounded'; end if;
+ select handle into first_author from public.game_reviews(g,0) limit 1;
+ if first_author<>'sql_review_01' then raise exception 'Helpfulness ordering lost'; end if;
+ if exists(select 1 from public.game_reviews(g,0) r join public.profiles p on p.id=r.profile_id where not p.is_public or not p.is_discoverable) then raise exception 'Ineligible review exposed'; end if;
+ if exists(select 1 from (select profile_id from public.game_reviews(g,0) limit 24) a join public.game_reviews(g,24) b using(profile_id)) then raise exception 'Review batch repeated earlier authors'; end if;
+end $$;
+reset role;
+update public.profiles set is_public=false where handle='sql_review_01';
+set local role anon;
+do $$ declare g bigint; begin
+ select id into g from public.games where slug='sql-test-game-one';
+ if exists(select 1 from public.game_reviews(g,0) where handle='sql_review_01') then raise exception 'Unpublished review retained'; end if;
 end $$;
 reset role;
 rollback;

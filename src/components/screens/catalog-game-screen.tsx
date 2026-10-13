@@ -1,3 +1,4 @@
+import {CommunityGameReviews} from "@/components/community-game-reviews";
 import { ReviewText } from "@/components/review-text";
 import { FriendsGameRatings } from "@/components/friends-game-ratings";
 import { Suspense } from "react";
@@ -57,6 +58,7 @@ export async function CatalogGameScreen({ game, isSample, publicProfile }: { gam
           </div>
         </div>
       </div>
+      {!publicProfile&&<Suspense fallback={null}><CommunityGameReviews slug={game.slug}/></Suspense>}
       <section className="space-y-4"><h2 className="font-headline-lg text-headline-lg font-bold">{t("About this game")}</h2><p className="max-w-3xl whitespace-pre-wrap break-words text-on-surface-variant font-body-lg text-body-lg leading-relaxed">{game.summary || t("No overview is available from IGDB yet.")}</p></section>
       {Boolean(game.screenshots?.length) && <section className="space-y-4"><h2 className="font-headline-lg text-headline-lg font-bold">{t("Screenshots")}</h2><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">{game.screenshots!.map((src, index) => <img key={src} src={src} alt={t(`${game.title} screenshot ${index + 1}`)} loading="lazy" className="w-full aspect-video object-cover rounded-lg bg-surface-container" />)}</div></section>}
     </div>

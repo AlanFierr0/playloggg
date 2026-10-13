@@ -1388,5 +1388,9 @@
   "This entry changed in another tab. Reload the latest entry before removing it.": "Esta entrada cambió en otra pestaña. Recargá la versión actual antes de eliminarla.",
   "The log could not be removed. Your entry and draft have been kept.": "No se pudo eliminar el registro. Se conservaron la entrada y el borrador.",
   "This entry is no longer available. Reload your profile.": "Esta entrada ya no está disponible. Recargá tu perfil.",
-  "Log removed. Favorites are unchanged.": "Registro eliminado. Tus favoritos no cambiaron."
+  "Log removed. Favorites are unchanged.": "Registro eliminado. Tus favoritos no cambiaron.",
+  "Community reviews": "Reseñas de la comunidad",
+  "Most helpful first": "Las más útiles primero",
+  "No community reviews yet.": "Todavía no hay reseñas de la comunidad.",
+  "Community reviews could not be loaded.": "No se pudieron cargar las reseñas de la comunidad."
 }
