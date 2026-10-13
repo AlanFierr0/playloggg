@@ -107,3 +107,18 @@ test("a manually placed game keeps its position after another score changes", as
   await page.reload();
   await expect(page.locator("[data-ranking-game]").nth(1)).toContainText("Hades");
 });
+
+
+test("unchanged legacy date and hours do not block a review edit", async ({page,context}) => {
+  await context.addCookies([authCookie]);
+  await fetch("http://127.0.0.1:3101/__legacy-entry",{method:"POST"});
+  await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");
+  await page.locator("#dispatch-textarea").fill("Review changed without rewriting history");
+  await page.locator("#commit-rating").click();
+  await expect(page).toHaveURL(/\/profile$/);
+  const state=await (await fetch("http://127.0.0.1:3101/__state")).json();
+  const entry=state.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===2);
+  expect(entry.review).toBe("Review changed without rewriting history");
+  expect(entry.hours_played).toBe(1e9);
+  expect(entry.completed_on).toBe("2099-01-01");
+});

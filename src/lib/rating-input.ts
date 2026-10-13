@@ -31,7 +31,7 @@ function isCalendarDate(value: unknown): value is string {
   return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
 
-export function validateRating(input: unknown): RatingInput | null {
+export function validateRating(input: unknown, allowFutureCompletion = false): RatingInput | null {
   if (!input || typeof input !== "object") return null;
   const { expectedUpdatedAt, tierManual } = input as Record<string,unknown>;
   if (expectedUpdatedAt !== undefined && expectedUpdatedAt !== null && (typeof expectedUpdatedAt !== "string" || !/^\d{4}-\d{2}-\d{2}T/.test(expectedUpdatedAt) || !Number.isFinite(Date.parse(expectedUpdatedAt)))) return null;
@@ -43,7 +43,7 @@ export function validateRating(input: unknown): RatingInput | null {
   if (status !== null && !isPlaybackStatus(status)) return null;
   if (platform !== null && !isPlayedPlatform(platform)) return null;
   if (hoursPlayed !== null && (typeof hoursPlayed !== "number" || !Number.isFinite(hoursPlayed) || hoursPlayed < 0)) return null;
-  if (completedOn !== null && (!isCalendarDate(completedOn) || completedOn > new Date().toISOString().slice(0, 10))) return null;
+  if (completedOn !== null && (!isCalendarDate(completedOn) || (!allowFutureCompletion && completedOn > new Date().toISOString().slice(0, 10)))) return null;
   const tags = normalizeTags(rawTags);
   if (!tags) return null;
   if (typeof review !== "string" || review.length > 20000) return null;

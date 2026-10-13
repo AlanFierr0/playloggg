@@ -46,3 +46,19 @@ jobs:
             test-results/
             e2e-artifacts/
           retention-days: 7
+
+  database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.120.0
+      - name: Apply migrations in an isolated local database
+        run: supabase start --exclude gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+      - name: Verify guards, ownership and legacy edits with real Postgres
+        run: docker exec -i supabase_db_playlogg psql -U postgres -d postgres -v ON_ERROR_STOP=1 < supabase/tests/audit-regression.sql
+      - name: Stop isolated database
+        if: always()
+        run: supabase stop --no-backup

@@ -80,13 +80,13 @@ useEffect(() => {
 function clearStoredDraft() { cleared.current = true; try { sessionStorage.removeItem(draftKey); } catch {} }
 function resetDraft() { clearStoredDraft(); setScore(saved.score); setTier(saved.tier); setPlatform(saved.platform); setStatus(saved.status); setHours(saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)); setDate(saved.completedOn ?? ""); setReview(saved.review); setTags(saved.tags); setTagVersion((value) => value + 1); setSaveMessage(""); router.push("/profile"); }
 function commit() {
-  if (date && date > new Date().toISOString().slice(0, 10)) { setSaveMessage("Completion date cannot be in the future. Your draft has been kept."); return; }
+  if ((date || null) !== saved.completedOn && date && date > new Date().toISOString().slice(0, 10)) { setSaveMessage("Completion date cannot be in the future. Your draft has been kept."); return; }
   if (invalidScore || (scoreInput.current && !scoreInput.current.validity.valid)) { setSaveMessage("Use a whole-number score from 0 to 100."); scoreInput.current?.focus(); return; }
-  if (dateInput.current && !dateInput.current.validity.valid) { setSaveMessage("Complete a valid calendar date, or clear it. Your draft has been kept."); return; }
+  if ((date || null) !== saved.completedOn && dateInput.current && !dateInput.current.validity.valid) { setSaveMessage("Complete a valid calendar date, or clear it. Your draft has been kept."); return; }
   const hoursPlayed = parseHours(hours);
   if (hoursPlayed === undefined) { setSaveMessage("Enter nonnegative decimal hours, or leave playtime blank. Your draft has been kept."); return; }
   const maxHours = maximumPlaytime(game.releasedOn);
-  if (hoursPlayed !== null && maxHours !== null && hoursPlayed > maxHours) { setSaveMessage("Playtime cannot exceed the hours elapsed since the game’s release. Your draft has been kept."); return; }
+  if (hoursPlayed !== saved.hoursPlayed && hoursPlayed !== null && maxHours !== null && hoursPlayed > maxHours) { setSaveMessage("Playtime cannot exceed the hours elapsed since the game’s release. Your draft has been kept."); return; }
   const completedOn = date || null;
   const draft = { slug: game.slug, score, tier, tierManual, status, review, platform, hoursPlayed, completedOn, tags, expectedUpdatedAt };
   startTransition(async () => {

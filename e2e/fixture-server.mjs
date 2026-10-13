@@ -124,6 +124,7 @@ export async function startFixtureServer() {
         if(body.includes('search "Unified'))return reply(200,[candidate]);
         return reply(200,[]);
       }
+      if (url.pathname === "/__legacy-entry" && req.method === "POST") {Object.assign(ratings.find(row=>row.profile_id===2&&row.game_id===2),{hours_played:1e9,completed_on:"2099-01-01"});return reply(200,{ok:true});}
       if (url.pathname === "/__source-review" && req.method === "POST") {ratings.find(row=>row.profile_id===3&&row.game_id===1).review="https://www.youtube.com/watch?v=example";return reply(200,{ok:true});}
       if (url.pathname === "/__reset" && req.method === "POST") { reset(); return reply(200, { ok: true }); }
       if (url.pathname === "/__fail-save" && req.method === "POST") { failSave = true; return reply(200, { ok: true }); }
