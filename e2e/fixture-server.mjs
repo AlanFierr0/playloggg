@@ -88,7 +88,7 @@ export async function startFixtureServer() {
           profiles.push({id:1000+i,handle:`reviewer_${i}`,display_name:`Game Reviewer ${i}`,is_public:true,is_discoverable:true,owner_user_id:null,avatar_url:null});
           ratings.push({profile_id:1000+i,game_id:1,score:80,review:`Community review ${i}`,updated_at:"2026-10-01T00:00:00Z"});
         }
-        for(const [id,is_public,is_discoverable,review] of [[1100,false,true,"Hidden community review"],[1101,true,false,"Link-only community review"]]){
+        for(const [id,is_public,is_discoverable,review] of [[1100,false,false,"Hidden community review"],[1101,true,false,"Link-only community review"]]){
           profiles.push({id,handle:`reviewer_${id}`,display_name:`Hidden Reviewer ${id}`,is_public,is_discoverable,owner_user_id:null});ratings.push({profile_id:id,game_id:1,score:50,review});
         }
         reviewVotes.push({reviewer_profile_id:1000,game_id:1,voter_profile_id:2,value:1},{reviewer_profile_id:1000,game_id:1,voter_profile_id:4,value:1});

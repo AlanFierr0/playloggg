@@ -92,5 +92,6 @@ local/preview builds skip that operation. Catalog imports never invent user scor
 
 Production deploys from GitHub main to Vercel. Verify changes before routine pushes
 and deployment. Do not reset infrastructure or delete user data as part of routine
-maintenance. Self-service export, scheduled backup and recovery features are not
-implemented or promised by this application.
+maintenance. Owners can export logs, rankings, ranges and favorites as JSON or CSV from Settings.
+Recovery instructions and the isolated rehearsal are in `docs/data-recovery.md`.
+Production off-site backup scheduling is not configured or promised by the application.

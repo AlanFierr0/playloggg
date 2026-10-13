@@ -164,7 +164,7 @@ do $$ declare g bigint; first_author text; total integer; begin
  if exists(select 1 from (select profile_id from public.game_reviews(g,0) limit 24) a join public.game_reviews(g,24) b using(profile_id)) then raise exception 'Review batch repeated earlier authors'; end if;
 end $$;
 reset role;
-update public.profiles set is_public=false where handle='sql_review_01';
+update public.profiles set is_public=false,is_discoverable=false where handle='sql_review_01';
 set local role anon;
 do $$ declare g bigint; begin
  select id into g from public.games where slug='sql-test-game-one';

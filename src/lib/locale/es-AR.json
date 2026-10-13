@@ -1392,5 +1392,9 @@
   "Community reviews": "Reseñas de la comunidad",
   "Most helpful first": "Las más útiles primero",
   "No community reviews yet.": "Todavía no hay reseñas de la comunidad.",
-  "Community reviews could not be loaded.": "No se pudieron cargar las reseñas de la comunidad."
+  "Community reviews could not be loaded.": "No se pudieron cargar las reseñas de la comunidad.",
+  "Export your data": "Exportá tus datos",
+  "Download your game logs, personal ranking, score ranges and favorites.": "Descargá tus registros de juegos, ranking personal, rangos de puntuación y favoritos.",
+  "Full copy (JSON)": "Copia completa (JSON)",
+  "Spreadsheet (CSV)": "Planilla (CSV)"
 }
