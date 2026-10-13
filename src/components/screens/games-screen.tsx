@@ -20,6 +20,8 @@ const button = "inline-flex items-center justify-center rounded px-4 py-2.5 font
 export function GamesScreen({ data, access }: { data: GamesPageData; profile: Portfolio["profile"]; access: Portfolio["access"] }) {
   const t = useMessages();
   const router = useRouter();
+  const [interactive, setInteractive] = useState(false);
+  useEffect(() => { queueMicrotask(() => setInteractive(true)); }, []);
   const [optimisticFilters, updateFilters] = useOptimistic(data.filters);
   const [draftFilters,setDraftFilters]=useState<GamesFilters|null>(null);
   const filters=draftFilters??optimisticFilters;
@@ -87,7 +89,7 @@ export function GamesScreen({ data, access }: { data: GamesPageData; profile: Po
   function clear() { setDraftFilters(null);setLoaded(null);navigate(defaultGamesFilters); }
   return <div aria-busy={pending || loadingMore} onClickCapture={event=>{if((event.target as HTMLElement).closest("a[href]")){if(typingTimer.current)clearTimeout(typingTimer.current);typingTimer.current=null;loadRequest.current?.abort();setDraftFilters(null);}}} className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-10 space-y-6">
     <header className="flex flex-wrap items-end justify-between gap-4"><div className="min-w-0 space-y-2"><h1 className="font-headline-xl text-headline-xl font-semibold tracking-tight">{t("Games")}</h1></div>{access?.canImportCatalog && <Link href="/search?q=&from=/games" className="inline-flex items-center rounded px-4 py-2.5 bg-primary-container text-on-primary-container font-label-md text-label-md">{t("Search games →")}</Link>}</header>
-    <section aria-label={t("Catalog filters")} className="space-y-4">
+    <fieldset disabled={!interactive} aria-label={t("Catalog filters")} className="min-w-0 space-y-4">
       <div className="grid sm:grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
         <Field label={t("Search titles")}><input id="games-query" type="search" className={control} value={filters.query} placeholder={t("Search the catalog…")} onChange={event => change("query", event.target.value)} /></Field>
         <button type="button" aria-expanded={filtersOpen} aria-controls="catalog-filter-fields" onClick={() => setFiltersOpen(open => !open)} className={`flex min-h-12 items-center justify-center gap-3 rounded-xl border px-4 py-3 font-body-md text-body-md font-medium transition-colors ${filtersOpen || activeFilters ? "border-primary/40 bg-primary/10 text-primary hover:bg-primary/20" : "border-outline-variant/40 bg-surface-container-low text-on-surface hover:bg-surface-container"}`}>
@@ -119,7 +121,7 @@ export function GamesScreen({ data, access }: { data: GamesPageData; profile: Po
       </div></fieldset>}
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3"><p role="status" aria-live="polite" className="text-on-surface-variant font-body-sm text-body-sm">{validScoreRange(filters) ? t(`${matched} of ${total} games${matched ? ` · Showing ${offset + 1}–${offset + visible.length}` : ""}`) : t("Use whole-number scores from 0 to 100, with minimum no greater than maximum.")}</p><button type="button" className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors" onClick={clear}><span aria-hidden="true" className="material-symbols-outlined text-[18px]">restart_alt</span>{t("Clear filters")}</button></div>
-    </section>
+    </fieldset>
     {filters.query.trim().length >= 2 && <section className="rounded-xl bg-surface-container-low p-5 space-y-3"><h2 className="font-headline-md text-headline-md">{t("Missing a game?")}</h2>{access?.canImportCatalog ? <IgdbSearch query={filters.query} excludeSlugs={visible.map(game => game.slug)} /> : <Link href="/login" className="text-primary underline">{t("Sign in to search more games and import a game.")}</Link>}</section>}
     <section aria-label={t("Game catalog results")}><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-3 gap-y-6 sm:gap-x-5">{visible.map((game) => <CatalogCard key={game.slug} game={game} logged={Boolean(game.logged)} canEdit={Boolean(access?.canEdit)} filters={filters} />)}</div>{!visible.length && <div className="py-12 text-center space-y-4"><h2 className="font-headline-lg text-headline-lg">{t("No games match these filters")}</h2><p className="text-on-surface-variant">{t("Try a broader search or clear the filters.")}</p><button className={button} onClick={clear}>{t("Show all games")}</button></div>}</section>
     {loadError && <p role="alert" className="text-error">{t("The game catalog could not be loaded.")} {t("Try again.")}</p>}
