@@ -10,7 +10,7 @@ Database backups do not include picture bytes, only Storage metadata. See [Supab
 
 ## Rehearsal in Application checks
 
-The database job starts fresh local Supabase, applies every migration and verifies owned writes, visibility and guards. `scripts/verify-recovery.mjs` then seeds unmistakable dummy data and uploads a real WebP to local private Storage. It downloads a file copy, dumps the local database with pg_dump, restores it into a new isolated database and verifies Auth identity, zero/null-safe log data, favorites, ranking anchors, custom ranges, picture metadata and RLS. It removes only the dummy local object, uploads the saved bytes and checks SHA-256 equality. Its CI/local-host guards prevent use against production. It never downloads production user records. The CI database job fails if any rehearsal check fails.
+The database job starts fresh local Supabase, applies every migration and verifies owned writes, visibility and guards. `scripts/verify-recovery.mjs` then seeds unmistakable dummy data and uploads a real WebP to local private Storage. It downloads a file copy, dumps the local database with pg_dump, restores it as the local Supabase administrator into a new isolated database and verifies Auth identity, zero/null-safe log data, favorites, ranking anchors, custom ranges, picture metadata and RLS. It removes only the dummy local object, uploads the saved bytes and checks SHA-256 equality. Its CI/local-host guards prevent use against production. It never downloads production user records. The CI database job fails if any rehearsal check fails.
 
 ## Actual incident procedure
 
