@@ -6,7 +6,7 @@ import { ProfileDetailsScreen } from "@/components/screens/profile-details-scree
 import { publicPageMetadata } from "@/lib/public-page-metadata";
 export async function generateMetadata({params}: {params:Promise<{handle:string}>}) {return publicPageMetadata((await params).handle,"/reviews","Reviews");}
 export default async function Page({ params }: { params: Promise<{ handle: string }> }) {
-  const portfolio = await getPublicPortfolio((await params).handle);
+  const portfolio = await getPublicPortfolio((await params).handle,"reviews");
   if (!portfolio) notFound();
   const reviewHelpfulness = await getReviewHelpfulness(Number(portfolio.profile.id));
   return <PortfolioProvider portfolio={{ ...portfolio, reviewHelpfulness }}><ProfileDetailsScreen section="reviews" /></PortfolioProvider>;

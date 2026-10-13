@@ -132,3 +132,11 @@ test("closing global search preserves profile, directory and comparison context"
     await expect(page).toHaveURL(new RegExp(path.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"$"));
   }
 });
+
+
+test("public entry downloads only its selected rating and no unrelated reviews",async({page,request})=>{
+ await request.post("http://127.0.0.1:3101/__source-review");
+ await page.goto("/u/fixture_public/game/fixture-game-0");
+ await expect(page.getByRole("heading",{name:"Fixture Game 00",exact:true}).first()).toBeVisible();
+ expect(await page.content()).not.toContain("https://www.youtube.com/watch?v=example");
+});

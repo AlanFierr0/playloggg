@@ -1,3 +1,4 @@
+import { PortfolioProvider } from "@/components/portfolio-provider";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getPublicPortfolio } from "@/lib/public-portfolio";
@@ -6,5 +7,5 @@ import { ProfileOverviewScreen } from "@/components/screens/profile-overview-scr
 export default async function PublicProfilePage({ params }: { params: Promise<{ handle: string }> }) {
   const portfolio = await getPublicPortfolio((await params).handle);
   if (!portfolio) notFound();
-  return <ProfileOverviewScreen hotTake={<Suspense fallback={null}><ProfileHotTake portfolio={portfolio} /></Suspense>} />;
+  return <PortfolioProvider portfolio={portfolio}><ProfileOverviewScreen hotTake={<Suspense fallback={null}><ProfileHotTake portfolio={portfolio} /></Suspense>} /></PortfolioProvider>;
 }
