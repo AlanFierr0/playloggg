@@ -94,6 +94,20 @@ implementation decisions; they do not override this file or later user requests.
 - Catalog pages are indexable; personal/public profile, auth, search and compare routes are
   noindex. Sitemap is catalog-only. Export/backup/recovery remain planned, not implemented.
 
+## Agent skills
+
+### Issue tracker
+
+Issues and specifications use GitHub Issues in `AlanFierr0/playloggg`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Use `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout: root `GLOSSARY.md` and `docs/adr/`, created only when needed. See `docs/agents/domain.md`.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know
