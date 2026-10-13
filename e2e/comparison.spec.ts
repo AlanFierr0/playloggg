@@ -9,6 +9,22 @@ test("published comparisons show real affinity, independent tiers and reloadable
  await page.getByLabel("Second profile handle").fill("fixture_peer");
  await page.getByRole("button",{name:"Compare profiles"}).click();
  await expect(page.locator("[data-affinity]")).toHaveText("90%");
+ const legend=page.getByRole("list",{name:"Games on this chart",exact:true});
+ await expect(legend).toBeVisible();
+ const legendGames=legend.getByRole("button");
+ expect(await legendGames.count()).toBeGreaterThan(1);
+ await legendGames.last().click();
+ await expect(legendGames.last()).toHaveAttribute("aria-pressed","true");
+ const lastSlug=await page.locator("[data-score-point]").last().getAttribute("data-score-point");
+ await expect(page.locator("[data-selected-score-point]")).toHaveAttribute("data-selected-score-point",lastSlug!);
+ await legendGames.first().focus();
+ await expect(legendGames.first()).toHaveAttribute("aria-pressed","true");
+ await expect(legendGames.last()).toHaveAttribute("aria-pressed","false");
+ const firstSlug=await page.locator("[data-score-point]").first().getAttribute("data-score-point");
+ await expect(page.locator("[data-selected-score-point]")).toHaveAttribute("data-selected-score-point",firstSlug!);
+ await page.locator('[data-score-point="hades"]').hover();
+ await expect(page.locator("[data-selected-score-point]")).toHaveAttribute("data-selected-score-point","hades");
+
  await expect(page.getByRole("table")).toContainText("Score: 0");
  await expect(page.getByRole("table")).toContainText("Score: Unrated");
  await expect(page.getByRole("table")).toContainText("Tier: D");
@@ -22,8 +38,8 @@ test("published comparisons show real affinity, independent tiers and reloadable
    await expect(page.locator("[data-affinity]")).toHaveText("90%");
    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
    expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
-   await expect(page.getByText("X · Published Fixture", {exact:true})).toBeVisible();
-   await expect(page.getByText("Y · Published Peer", {exact:true})).toBeVisible();
+   await expect(page.locator("p").filter({hasText:"X · Published Fixture"})).toBeVisible();
+   await expect(page.locator("p").filter({hasText:"Y · Published Peer"})).toBeVisible();
    await expect(page.getByRole("img", {name:"Shared score comparison: X — Published Fixture; Y — Published Peer",exact:true})).toBeVisible();
    await page.getByRole("heading", {name:"Score correlation",exact:true}).locator("..").screenshot({path:`e2e-artifacts/compare-axes-${theme}-${info.project.name}.png`});
    await page.screenshot({path:`e2e-artifacts/compare-results-${theme}-${info.project.name}.png`,fullPage:true});
