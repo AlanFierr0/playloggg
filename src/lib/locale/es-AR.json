@@ -1378,6 +1378,7 @@
   "Unsaved ranking could not be discarded. Browser storage is unavailable.": "No se pudo descartar el ranking. El almacenamiento del navegador no está disponible.",
   "Games on this chart": "Juegos en este gráfico",
   "Choose a game to highlight its point.": "Elegí un juego para destacar su punto.",
+  "Choose a completion date between release and today.": "Elegí una fecha de finalización entre el lanzamiento y hoy.",
   "Most similar ratings": "Puntuaciones más parecidas",
   "Largest rating differences": "Mayores diferencias de puntuación",
   "Both rated 90+": "Ambos puntuaron 90+"

@@ -339,7 +339,9 @@ test("completion calendar blocks dates before launch and accepts launch day", as
   await expect(input).toHaveAttribute("min", "2020-01-01");
   await input.fill("2019-12-31");
   await page.getByRole("button", { name: "Choose completion date", exact: true }).click();
-  await expect(input).toHaveValue("2020-01-01");
+  await expect(input).toHaveValue("2019-12-31");
+  await expect(input).toHaveAttribute("aria-invalid","true");
+  await expect(page.getByText("Choose a completion date between release and today.", {exact:true})).toBeVisible();
   const calendar = page.getByRole("dialog", { name: "Completion date", exact: true });
   await expect(calendar.locator('[data-date="2019-12-31"]')).toBeDisabled();
   await expect(calendar.getByRole("button", { name: "Previous month", exact: true })).toBeDisabled();

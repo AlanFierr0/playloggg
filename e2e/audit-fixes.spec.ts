@@ -122,3 +122,13 @@ test("unchanged legacy date and hours do not block a review edit", async ({page,
   expect(entry.hours_played).toBe(1e9);
   expect(entry.completed_on).toBe("2099-01-01");
 });
+
+test("closing global search preserves profile, directory and comparison context", async ({page}) => {
+  for(const path of ["/u/fixture_public/ranking","/people?q=Fixture&page=1","/compare?left=fixture_other&right=fixture_public&page=1"]){
+    await page.goto(path);
+    await page.getByRole("link",{name:"Open game search",exact:true}).filter({visible:true}).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page).toHaveURL(new RegExp(path.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"$"));
+  }
+});

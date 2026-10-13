@@ -19,7 +19,7 @@ export function SiteHeader() {
   const { locale, theme, setLocale, setTheme } = useSitePreferences();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const returnPath = pathname === "/games" && searchParams.size ? `${pathname}?${searchParams}` : pathname;
+  const returnPath = searchParams.size ? `${pathname}?${searchParams}` : pathname;
   const searchHref = `/search?q=&from=${encodeURIComponent(pathname === "/search" ? "/" : returnPath)}`;
   const isActive = (href: string) => pathname === href;
   return (

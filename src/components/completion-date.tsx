@@ -27,6 +27,7 @@ export function CompletionDate({ value, onChange, inputRef, minDate = "0001-01-0
   const first = calendarDate(year, monthIndex);
   const offset = (first.getDay() + 6) % 7;
   const today = new Date().toISOString().slice(0, 10);
+  const invalid = Boolean(value && (value < minDate || value > today));
   const format = (date: Date, options: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(locale, options).format(date);
   function open() {
     const selected = value && value <= today ? value : today;
@@ -52,9 +53,10 @@ export function CompletionDate({ value, onChange, inputRef, minDate = "0001-01-0
   }
   return <>
     <div className="flex items-center rounded-lg border border-outline-variant/30 bg-surface-container focus-within:border-primary">
-      <input ref={inputRef} id="date-input" type="date" min={minDate} max={today} value={value} onChange={event => onChange(event.target.value)} onBlur={event => { if (event.target.value && event.target.value < minDate) onChange(minDate); }} className="min-w-0 flex-1 rounded-lg bg-transparent px-4 py-2.5 font-label-md text-label-md text-on-surface focus:outline-none [&::-webkit-calendar-picker-indicator]:hidden" />
+      <input ref={inputRef} id="date-input" type="date" min={minDate} max={today} value={value} onChange={event => onChange(event.target.value)} aria-invalid={invalid} aria-describedby={invalid ? "completion-date-error" : undefined} className="min-w-0 flex-1 rounded-lg bg-transparent px-4 py-2.5 font-label-md text-label-md text-on-surface focus:outline-none [&::-webkit-calendar-picker-indicator]:hidden" />
       <button ref={trigger} type="button" onClick={open} aria-label={t("Choose completion date")} aria-haspopup="dialog" className={`${control} mr-1 text-primary`}><span aria-hidden="true" className="material-symbols-outlined">calendar_month</span></button>
     </div>
+    {invalid && <p id="completion-date-error" role="alert" className="mt-2 text-body-sm text-error">{t("Choose a completion date between release and today.")}</p>}
     <dialog ref={dialog} aria-labelledby="completion-calendar-title" onClose={() => trigger.current?.focus()} onClick={event => { if (event.target === dialog.current) { const rect = dialog.current.getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.current.close(); } }} className="m-auto w-[22rem] max-w-[calc(100vw-2rem)] rounded-xl border border-outline-variant/40 bg-surface-container-low p-5 text-on-surface shadow-2xl backdrop:bg-black/50">
       <div className="mb-5 flex items-center justify-between gap-2"><h2 id="completion-calendar-title" className="font-headline-sm text-title-lg">{t("Completion date")}</h2><button type="button" aria-label={t("Close calendar")} onClick={() => dialog.current?.close()} className={control}><span aria-hidden="true" className="material-symbols-outlined text-[20px]">close</span></button></div>
       <div className="mb-4 flex items-center gap-2">
