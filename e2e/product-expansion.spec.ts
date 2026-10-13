@@ -1,7 +1,6 @@
 import { test, expect } from "./test";
 // @ts-expect-error Node-only fixture exports a cookie descriptor.
 import { authCookie } from "./fixture-server.mjs";
-import { readFile } from "node:fs/promises";
 import AxeBuilder from "@axe-core/playwright";
 test("independent ranking saves a pairwise choice without changing scores", async ({
   page,
@@ -175,7 +174,7 @@ test("social controls support follow and unfollow without block controls", async
   await expect(page.getByRole("button", { name: "Block", exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Unblock", exact: true })).toHaveCount(0);
 });
-test("profile hides share controls; comparison cards export correct PNG sizes and reject private handles", async ({
+test("profiles and comparisons hide share controls and reject private handles", async ({
   page,
   context,
 }) => {
@@ -187,24 +186,8 @@ test("profile hides share controls; comparison cards export correct PNG sizes an
   await expect(page.getByRole("button", { name: "Download share card", exact: true })).toHaveCount(0);
   await context.clearCookies();
   await page.goto("/compare?left=fixture_public&right=fixture_peer");
-  for (const [value, width, height] of [
-    ["square", 1080, 1080],
-    ["story", 1080, 1920],
-    ["landscape", 1920, 1080],
-  ] as const) {
-    await page
-      .getByLabel("Share card format", { exact: true })
-      .selectOption(value);
-    const downloadPromise = page.waitForEvent("download");
-    await page
-      .getByRole("button", { name: "Download share card", exact: true })
-      .click();
-    const download = await downloadPromise;
-    const bytes = await readFile((await download.path())!);
-    expect(bytes.subarray(1, 4).toString()).toBe("PNG");
-    expect(bytes.readUInt32BE(16)).toBe(width);
-    expect(bytes.readUInt32BE(20)).toBe(height);
-  }
+  await expect(page.getByLabel("Share card format", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Download share card", exact: true })).toHaveCount(0);
   expect(
     (
       await page.request.get("/api/share/profile?handle=fixture_owner")

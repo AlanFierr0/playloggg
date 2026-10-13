@@ -58,7 +58,8 @@ test("published comparisons show real affinity, independent tiers and reloadable
  await expect(page.getByText("Comparison unavailable. Check both handles and make sure both profiles are published.")).toBeVisible();
  await page.goto("/compare?left=fixture_public&right=fixture_empty");
  await expect(page.getByText("These profiles have no shared logged games yet.")).toBeVisible();
- await expect(page.getByRole("button",{name:"Download share card",exact:true})).toBeVisible();
+ await expect(page.getByRole("button",{name:"Download share card",exact:true})).toHaveCount(0);
+ await expect(page.getByRole("combobox",{name:"Share card format",exact:true})).toHaveCount(0);
 });
 test("other users private and missing profiles stay unavailable even to a signed-in owner",async ({page,context})=>{
  await context.addCookies([authCookie]);

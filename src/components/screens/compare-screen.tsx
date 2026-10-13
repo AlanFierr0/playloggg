@@ -1,6 +1,5 @@
 import {ScoreComparisonChart} from "@/components/score-comparison-chart";
 import { CompareProfileInput } from "@/components/compare-profile-input";
-import {ShareCardControls} from "@/components/share-card-controls";
 import {tasteStats} from "@/lib/taste";
 import Link from "next/link";
 import { getMessages } from "@/lib/locale/server";
@@ -78,7 +77,6 @@ export async function CompareScreen({left,right,comparison,requestedPage,ownHand
         <div className="max-w-full overflow-x-auto rounded-xl bg-surface-container-low"><table className="w-full text-left text-body-sm"><caption className="sr-only">{t("Shared games, scores and independent tiers")}</caption><thead className="bg-surface-container"><tr>{[t("Game"),comparison.left.profile.displayName,comparison.right.profile.displayName,t("Score difference")].map((label,index)=><th key={index} scope="col" className="p-4">{label}</th>)}</tr></thead><tbody>{result.shared.slice(offset,offset+20).map(entry => <tr key={entry.game.slug} className="border-t border-outline-variant/20"><th scope="row" className="p-4"><Link href={`/game/${entry.game.slug}`} className="flex items-center gap-3 text-primary"><img src={entry.game.cover} alt="" loading="lazy" width={36} height={48} className="h-12 w-9 shrink-0 rounded object-cover bg-surface-container" /><span className="break-words">{entry.game.title}</span></Link></th>{[entry.game,entry.other].map((game,index)=><td key={index} className="p-4"><Link href={(index===0 ? left : right)===ownHandle ? `/log?game=${game.slug}` : `/u/${index===0 ? left : right}/game/${game.slug}`} className="hover:text-primary"><span>{t("Score")}: {game.score===null ? t("Unrated") : game.score}</span><br /><span>{t("Tier")}: {game.tier ?? t("Unassigned")}</span></Link></td>)}<td className="p-4">{entry.difference ?? t("Unrated")}</td></tr>)}</tbody></table></div>
         <nav aria-label={t("Comparison pagination")} className="flex flex-wrap items-center justify-between gap-4 text-body-sm"><span>{t("Page")} {page} / {pageCount} · {result.shared.length} {t("Shared games")}</span>{page>1 && <Link href={href(page-1)} className="text-primary">{t("Previous")}</Link>}{page<pageCount && <Link href={href(page+1)} className="text-primary">{t("Next")}</Link>}</nav>
     </>}</section>
-        {comparison.left.profile.isPublic && comparison.right.profile.isPublic && <ShareCardControls endpoint={`/api/share/compare?${new URLSearchParams({left,right})}`}/>}
     </>}
   </div>;
 }
