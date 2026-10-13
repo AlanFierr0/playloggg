@@ -1377,5 +1377,8 @@
   "Ranking changed elsewhere. Your draft is kept. Review it before retrying against the latest saved version.": "El ranking cambió en otra sesión. Conservamos tu borrador. Revisalo antes de reintentar con la última versión guardada.",
   "Unsaved ranking could not be discarded. Browser storage is unavailable.": "No se pudo descartar el ranking. El almacenamiento del navegador no está disponible.",
   "Games on this chart": "Juegos en este gráfico",
-  "Choose a game to highlight its point.": "Elegí un juego para destacar su punto."
+  "Choose a game to highlight its point.": "Elegí un juego para destacar su punto.",
+  "Most similar ratings": "Puntuaciones más parecidas",
+  "Largest rating differences": "Mayores diferencias de puntuación",
+  "Both rated 90+": "Ambos puntuaron 90+"
 }
