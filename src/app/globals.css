@@ -47,8 +47,31 @@ select option, select optgroup { font-family: "Hanken Grotesk", Arial, sans-seri
 }
 @media (max-height: 500px) { .search-help { display: none; } }
 
-/* Google's icon stylesheet follows Next's CSS. Match the export's icon sizes
-   with enough specificity to preserve Tailwind's original sizing. */
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: block;
+  src: url('/fonts/material-symbols-outlined.woff2') format('woff2');
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Preserve the export's icon sizes. */
 .material-symbols-outlined.text-\[13px\] { font-size: 13px; }
 .material-symbols-outlined.text-\[14px\] { font-size: 14px; }
 .material-symbols-outlined.text-\[15px\] { font-size: 15px; }

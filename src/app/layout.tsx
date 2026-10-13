@@ -32,9 +32,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang={locale} className={`${theme} ${bodyFont.variable} ${headingFont.variable} ${labelFont.variable}`}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
+        <link rel="preload" href="/fonts/material-symbols-outlined.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       </head>
       <body className="flex min-h-dvh flex-col bg-surface font-body-md text-on-surface antialiased">
         <PortfolioProvider portfolio={portfolio}><SitePreferences initialLocale={locale} initialTheme={theme}><PreviewNoticeProvider>

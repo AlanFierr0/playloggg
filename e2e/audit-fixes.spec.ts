@@ -149,3 +149,18 @@ test("optional community score failure leaves game details and logging available
  await expect(page.getByRole("link",{name:"Log this game",exact:true})).toBeVisible();
  await expect(page.getByText("Community score could not be loaded.",{exact:true})).toBeVisible();
 });
+
+
+test("navigation icons work without the external Google icon stylesheet",async({page})=>{
+ await page.route("https://fonts.googleapis.com/**",route=>route.abort());
+ await page.route("https://fonts.gstatic.com/**",route=>route.abort());
+ await page.goto("/games");
+ const fontLoaded=await page.evaluate(async()=>{
+  await document.fonts.load('24px "Material Symbols Outlined"','tune');
+  return document.fonts.check('24px "Material Symbols Outlined"','tune');
+ });
+ expect(fontLoaded).toBe(true);
+ const face=await page.locator(".material-symbols-outlined").first().evaluate(element=>getComputedStyle(element).fontFamily);
+ expect(face).toContain("Material Symbols Outlined");
+ expect(await page.locator('link[href*="fonts.googleapis.com"]').count()).toBe(0);
+});
