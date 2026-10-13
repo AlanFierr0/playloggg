@@ -1381,5 +1381,12 @@
   "Choose a completion date between release and today.": "Elegí una fecha de finalización entre el lanzamiento y hoy.",
   "Most similar ratings": "Puntuaciones más parecidas",
   "Largest rating differences": "Mayores diferencias de puntuación",
-  "Both rated 90+": "Ambos puntuaron 90+"
+  "Both rated 90+": "Ambos puntuaron 90+",
+  "Remove log": "Eliminar registro",
+  "Remove permanently": "Eliminar definitivamente",
+  "This removes your rating, tier, review, playtime and status for this game. Your favorite stays. This cannot be undone.": "Esto elimina tu puntuación, tier, reseña, horas y estado de este juego. Se conserva como favorito. No se puede deshacer.",
+  "This entry changed in another tab. Reload the latest entry before removing it.": "Esta entrada cambió en otra pestaña. Recargá la versión actual antes de eliminarla.",
+  "The log could not be removed. Your entry and draft have been kept.": "No se pudo eliminar el registro. Se conservaron la entrada y el borrador.",
+  "This entry is no longer available. Reload your profile.": "Esta entrada ya no está disponible. Recargá tu perfil.",
+  "Log removed. Favorites are unchanged.": "Registro eliminado. Tus favoritos no cambiaron."
 }

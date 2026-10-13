@@ -10,6 +10,7 @@ import { TagEditor } from "@/components/tag-editor";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { tierForScore } from "@/lib/tier-ranges";
 import { usePortfolio } from "@/components/portfolio-provider";
+import { RemoveLog } from "@/components/remove-log";
 import { saveRating } from "@/app/actions/ratings";
 import { normalizeTags } from "@/lib/collection-input";
 import { maximumPlaytime, parseHours } from "@/lib/rating-input";
@@ -292,7 +293,7 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 </div>
 
 <div className="w-full bg-surface-container-lowest px-4 py-4 sm:px-10 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 mt-auto">
-<div />
+{canEdit && game.logged ? <RemoveLog slug={game.slug} title={game.title} updatedAt={expectedUpdatedAt} onRemoved={clearStoredDraft} /> : <div />}
 
 <div className="flex flex-col min-[360px]:flex-row items-center gap-3 w-full sm:w-auto justify-end">
 <button id="discard-rating" className="w-full sm:w-auto px-4 py-2 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-colors" type="button" onClick={resetDraft}>{t("\n            Discard Draft\n          ")}</button>

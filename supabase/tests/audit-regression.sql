@@ -108,4 +108,37 @@ do $$ declare filters jsonb; first_page jsonb; next_page jsonb; begin
   if exists(select 1 from jsonb_array_elements(first_page->'games') a,jsonb_array_elements(next_page->'games') b where a->>'slug'=b->>'slug') then raise exception 'Catalog batch repeated earlier cards'; end if;
   if jsonb_array_length(public.catalog_page(null,filters,2)->'games')<>50 then raise exception 'Cumulative refresh lost prior cards'; end if;
 end $$;
+-- Confirm removal is limited to the authenticated owner and the current revision.
+do $$ declare owned bigint; g bigint; other_game bigint; begin
+ select id into owned from public.profiles where handle='sql_test_owner';
+ select id into g from public.games where slug='sql-test-game-two';
+ select id into other_game from public.games where slug='sql-test-game-one';
+ insert into public.profile_favorites(profile_id,game_id) values(owned,g);
+ insert into public.profile_rankings(profile_id,game_ids,manual_positions) values(owned,array[g,other_game],jsonb_build_object(g::text,0,other_game::text,1));
+ if has_function_privilege('anon','public.remove_rating(bigint,timestamptz)','EXECUTE') or has_table_privilege('authenticated','public.ratings','DELETE') then raise exception 'Unrestricted removal privilege'; end if;
+end $$;
+set local role authenticated;
+do $$ declare owned bigint; g bigint; other_game bigint; stamp timestamptz; denied boolean; begin
+ select id into owned from public.profiles where owner_user_id=auth.uid();
+ select id into g from public.games where slug='sql-test-game-two';
+ select id into other_game from public.games where slug='sql-test-game-one';
+ select updated_at into stamp from public.ratings where profile_id=owned and game_id=g;
+ denied=false;
+ begin perform public.remove_rating(g,stamp-interval '1 second'); exception when sqlstate '40001' then denied=true; end;
+ if not denied or not exists(select 1 from public.ratings where profile_id=owned and game_id=g) then raise exception 'Stale removal changed an entry'; end if;
+ if not public.remove_rating(g,stamp) then raise exception 'Owned removal failed'; end if;
+ if exists(select 1 from public.ratings where profile_id=owned and game_id=g) then raise exception 'Owned rating retained'; end if;
+ if not exists(select 1 from public.profile_favorites where profile_id=owned and game_id=g) then raise exception 'Independent favorite lost'; end if;
+ if not exists(select 1 from public.profile_rankings where profile_id=owned and game_ids=array[other_game] and manual_positions=jsonb_build_object(other_game::text,0) and revision=2) then raise exception 'Ranking not cleaned and shifted'; end if;
+ if public.remove_rating(g,stamp) then raise exception 'Missing entry removed twice'; end if;
+end $$;
+reset role;
+-- An Auth identity without a profile cannot remove anybody's entry.
+select set_config('request.jwt.claims','{"sub":"44444444-4444-4444-8444-444444444444"}',true);
+set local role authenticated;
+do $$ declare denied boolean=false; begin
+ begin perform public.remove_rating((select id from public.games limit 1),now()); exception when insufficient_privilege then denied=true; end;
+ if not denied then raise exception 'Unowned removal accepted'; end if;
+end $$;
+reset role;
 rollback;

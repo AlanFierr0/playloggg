@@ -1,0 +1,44 @@
+import {test,expect} from "./test";
+// @ts-expect-error Local fixture identity only.
+import {authCookie} from "./fixture-server.mjs";
+const fixture="http://127.0.0.1:3101";
+test("removing one log requires confirmation, preserves favorites and safely retries failures",async({page,context,request})=>{
+ await context.addCookies([authCookie]);
+ await page.goto("/game/elden-ring-shadow-of-the-erdtree");
+ await page.getByRole("button",{name:"Add favorite",exact:true}).click();
+ await expect(page.getByRole("button",{name:"Remove favorite",exact:true})).toBeVisible();
+ await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");
+ await page.locator("#dispatch-textarea").fill("Draft kept if removal fails");
+ await page.getByRole("button",{name:"Remove log",exact:true}).click();
+ const dialog=page.getByRole("dialog",{name:"Remove log",exact:true});
+ await dialog.getByRole("button",{name:"Cancel",exact:true}).click();
+ await expect(page.locator("#dispatch-textarea")).toHaveValue("Draft kept if removal fails");
+ await page.getByRole("button",{name:"Remove log",exact:true}).click();
+ await request.post(`${fixture}/__fail-save`);
+ await dialog.getByRole("button",{name:"Remove permanently",exact:true}).click();
+ await expect(dialog.getByRole("status")).toContainText("The log could not be removed");
+ let state=await (await request.get(`${fixture}/__state`)).json();
+ expect(state.ratings.some((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===2)).toBe(true);
+ await dialog.getByRole("button",{name:"Remove permanently",exact:true}).click();
+ await expect(page).toHaveURL(/\/profile$/);
+ state=await (await request.get(`${fixture}/__state`)).json();
+ expect(state.ratings.some((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===2)).toBe(false);
+ expect(state.favorites.some((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===2)).toBe(true);
+ await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");
+ await expect(page.getByRole("button",{name:"Remove log",exact:true})).toHaveCount(0);
+ await expect(page.locator("#dispatch-textarea")).toHaveValue("");
+});
+test("a stale editor cannot remove a newer saved entry",async({page,context,request})=>{
+ await context.addCookies([authCookie]);
+ await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");
+ const other=await context.newPage();await other.goto("/log?game=elden-ring-shadow-of-the-erdtree");
+ await other.locator("#dispatch-textarea").fill("Newer review remains");await other.locator("#commit-rating").click();
+ await expect(other).toHaveURL(/\/profile$/);
+ await page.getByRole("button",{name:"Remove log",exact:true}).click();
+ const dialog=page.getByRole("dialog",{name:"Remove log",exact:true});
+ await dialog.getByRole("button",{name:"Remove permanently",exact:true}).click();
+ await expect(dialog.getByRole("status")).toContainText("This entry changed in another tab");
+ const state=await (await request.get(`${fixture}/__state`)).json();
+ expect(state.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===2).review).toBe("Newer review remains");
+ await other.close();
+});

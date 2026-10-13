@@ -1,0 +1,20 @@
+import {test} from "node:test";
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import vm from "node:vm";
+import ts from "typescript";
+test("log removal validates identity and revision before invoking the narrow RPC",async()=>{
+ let account=null,catalogReads=0,writes=0,error=null,data=true,revalidated=0;
+ const stamp="2026-10-13T00:00:00Z";
+ const dependencies={"@/lib/owner":{getAccount:async()=>account},"@/lib/portfolio":{getCatalogGame:async()=>{catalogReads++;return {id:7};}},"next/cache":{revalidatePath(){revalidated++;}}};
+ const context={exports:{},Date,require:name=>{assert.ok(name in dependencies);return dependencies[name];}};
+ vm.runInNewContext(ts.transpileModule(readFileSync(new URL("../src/app/actions/remove-rating.ts",import.meta.url),"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,context);
+ const remove=context.exports.removeRating;
+ assert.equal((await remove("hades",null)).ok,false);
+ assert.equal((await remove("../../hades",stamp)).ok,false);
+ assert.equal((await remove("hades",stamp)).ok,false);assert.equal(catalogReads,0);
+ account={profile:{id:2},supabase:{rpc:async(name,args)=>{writes++;assert.equal(name,"remove_rating");assert.equal(args.p_game_id,7);assert.equal(args.p_expected_updated_at,stamp);assert.deepEqual(Object.keys(args).sort(),["p_expected_updated_at","p_game_id"]);return {data,error};}}};
+ error={code:"40001"};assert.match((await remove("hades",stamp)).message,/changed in another tab/);assert.equal(revalidated,0);
+ error=null;data=false;assert.equal((await remove("hades",stamp)).ok,false);
+ data=true;assert.equal((await remove("hades",stamp)).ok,true);assert.equal(revalidated,1);assert.equal(writes,3);
+});

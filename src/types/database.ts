@@ -715,6 +715,10 @@ export type Database = {
         Args: { p_ids: number[]; p_manual: Json; p_revision: number }
         Returns: number
       }
+      remove_rating: {
+        Args: { p_game_id: number; p_expected_updated_at: string }
+        Returns: boolean
+      }
       save_rating: {
         Args: {
           p_expected_updated_at: string | null

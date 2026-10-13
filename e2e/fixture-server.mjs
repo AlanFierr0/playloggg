@@ -220,6 +220,20 @@ export async function startFixtureServer() {
         if(input.p_filters.valid===false)Object.assign(result,{games:[],matched:0,page:1,pageCount:1});
         return reply(200,result);
       }
+      if(resource==="rpc/remove_rating"){
+        let body="";for await(const part of req)body+=part;const input=JSON.parse(body);
+        if(!authenticated)return reply(403,{code:"42501",message:"Owned profile required"});
+        const previous=ratings.find(row=>row.profile_id===2&&row.game_id===input.p_game_id);
+        if(!previous)return reply(200,false);
+        if(previous.updated_at!==input.p_expected_updated_at)return reply(409,{code:"40001",message:"Entry changed"});
+        if(failSave){failSave=false;return reply(503,{message:"Controlled remove failure"});}
+        for(const ranking of rankings.filter(row=>row.profile_id===2&&row.game_ids.includes(input.p_game_id))){
+          const position=ranking.game_ids.indexOf(input.p_game_id);ranking.game_ids=ranking.game_ids.filter(id=>id!==input.p_game_id);
+          ranking.manual_positions=Object.fromEntries(Object.entries(ranking.manual_positions).filter(([id])=>Number(id)!==input.p_game_id).map(([id,value])=>[id,value>position?value-1:value]));ranking.revision++;
+        }
+        ratings=ratings.filter(row=>row!==previous);reviewVotes=reviewVotes.filter(v=>v.reviewer_profile_id!==2||v.game_id!==input.p_game_id);
+        return reply(200,true);
+      }
       if(resource==="rpc/save_rating") {
         if(!authenticated)return reply(403,{message:"Not owned"});
         let body="";for await(const part of req)body+=part;const input=JSON.parse(body);
