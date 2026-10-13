@@ -1048,6 +1048,7 @@
   "ratings": "puntuaciones",
   "Community score": "Puntuación de la comunidad",
   "Your score": "Tu puntuación",
+  "Community score could not be loaded.": "No se pudo cargar el puntaje de la comunidad.",
   "No ratings yet": "Todavía no hay puntuaciones",
   "Not enough ratings": "Faltan puntuaciones",
   "Community scores use discoverable public profiles and require at least 5 ratings.": "Las puntuaciones de la comunidad usan perfiles públicos en descubrimiento y necesitan al menos 5 puntuaciones.",

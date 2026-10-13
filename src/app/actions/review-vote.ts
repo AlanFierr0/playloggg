@@ -21,7 +21,7 @@ export async function reviewVote(_previous: ReviewVoteState, form: FormData): Pr
       ? await account.supabase.from("review_votes").delete().eq("reviewer_profile_id", target).eq("game_id", game.id).eq("voter_profile_id", account.profile.id)
       : await account.supabase.from("review_votes").upsert({ reviewer_profile_id: target, game_id: game.id, voter_profile_id: account.profile.id, value }, { onConflict: "reviewer_profile_id,game_id,voter_profile_id" });
     if (error) return { counts: _previous?.counts, message: "Your vote could not be saved. Please retry." };
-    const data = await getReviewHelpfulness(target);
+    const data = await getReviewHelpfulness(target,slug);
     const counts = data.reviews[slug];
     return counts ? { message: "Vote saved.", counts } : { message: "This review is unavailable." };
   } catch {

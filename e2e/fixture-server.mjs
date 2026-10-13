@@ -27,7 +27,7 @@ let catalogBatches=[];
 let reviewVotes;
 let ratingsDelay = 0;
 let failSave;
-let rankingDelay=0;let failHome=false;
+let rankingDelay=0;let failHome=false;let failScore=false;
 let showTrending=false;
 let steamMode="public";
 let requestCounts={};
@@ -39,7 +39,7 @@ let favorites;
 let rankings=[];let curated=[];let listItems=[];let follows=[];let blocks=[];let likes=[];
 let pictures = new Map();
 // Shared catalog imports persist between tests, like the application cache; personal data resets.
-function reset() {catalogBatches=[];rankingDelay=0;failHome=false; alternateToken=undefined; reviewVotes=[]; ratingsDelay=0; showTrending=false; accountDeleted=false;failAuthDelete=false;failStorageDelete=false; quotaMode="allow";user.app_metadata={};steamMode="public";rankings=[];follows=[];blocks=[];likes=[];curated=[{id:10,profile_id:3,name:"Public fixture list",revision:1,description:"Fixture description",is_public:true,is_ranked:true}];listItems=[{list_id:10,game_id:1,position:0}];pictures.clear(); Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false,is_discoverable:false,bio:null,location:null,platform_preference:null,avatar_url:null}); favorites=[{profile_id:3,game_id:1,featured_slot:1,created_at:"2026-09-29T12:00:00Z"}]; ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
+function reset() {catalogBatches=[];rankingDelay=0;failHome=false;failScore=false; alternateToken=undefined; reviewVotes=[]; ratingsDelay=0; showTrending=false; accountDeleted=false;failAuthDelete=false;failStorageDelete=false; quotaMode="allow";user.app_metadata={};steamMode="public";rankings=[];follows=[];blocks=[];likes=[];curated=[{id:10,profile_id:3,name:"Public fixture list",revision:1,description:"Fixture description",is_public:true,is_ranked:true}];listItems=[{list_id:10,game_id:1,position:0}];pictures.clear(); Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false,is_discoverable:false,bio:null,location:null,platform_preference:null,avatar_url:null}); favorites=[{profile_id:3,game_id:1,featured_slot:1,created_at:"2026-09-29T12:00:00Z"}]; ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
  for (const game_id of [3,4,5,6]) ratings.push({profile_id:3,game_id,score:50,tier:null,status:"playing",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  for (const game_id of [1,3,4,5,6]) ratings.push({profile_id:4,game_id,score:game_id===1 ? 10 : 40,tier:"A",status:"completed",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  ratings.push({profile_id:3,game_id:7,score:null,tier:"S",status:"backlog",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
@@ -57,6 +57,7 @@ export async function startFixtureServer() {
     function reply(status, data) { res.writeHead(status, { "Content-Type": "application/json" }); res.end(data === undefined ? undefined : JSON.stringify(data)); }
     try {
       if(url.pathname==="/__ranking-delay"){rankingDelay=600;return reply(200,{ok:true});}
+      if(url.pathname==="/__community-failure"){failScore=true;return reply(200,{ok:true});}
       if(url.pathname==="/__home-failure"){failHome=true;return reply(200,{ok:true});}
       if(url.pathname==="/__ranking-edit"){
         ratings=ratings.filter(r=>r.profile_id!==2);
@@ -242,6 +243,7 @@ export async function startFixtureServer() {
       }
       if(resource==="rpc/community_trending_games")return reply(200,showTrending?Array.from({length:5},(_,index)=>({game_id:index+1,sample_count:5-index})):[]);
       if(resource==="rpc/community_game_scores" || resource==="rpc/anonymous_game_scores"){
+        if(failScore)return reply(503,{message:"Controlled optional score failure"});
         if(resource==="rpc/anonymous_game_scores"&&!admin)return reply(403,{message:"Server only"});
         let body="";for await(const part of req)body+=part;const input=body ? JSON.parse(body) : {};
         const groups=new Map();
@@ -280,7 +282,7 @@ export async function startFixtureServer() {
       if(resource==="rpc/review_helpfulness") {
         let body="";for await(const part of req)body+=part;const {p_profile_id}=JSON.parse(body);
         const profile=profiles.find(p=>p.id===p_profile_id);
-        return reply(200,!profile?.is_public ? [] : ratings.filter(r=>r.profile_id===p_profile_id&&r.review?.trim()).map(r=>{
+        return reply(200,!profile?.is_public ? [] : ratings.filter(r=>r.profile_id===p_profile_id&&r.review?.trim()&&(!url.searchParams.has("game_slug")||games.find(g=>g.id===r.game_id).slug===url.searchParams.get("game_slug").slice(3))).map(r=>{
           const votes=reviewVotes.filter(v=>v.reviewer_profile_id===r.profile_id&&v.game_id===r.game_id);
           return {game_slug:games.find(g=>g.id===r.game_id).slug,upvotes:votes.filter(v=>v.value===1).length,downvotes:votes.filter(v=>v.value===-1).length,viewer_vote:authenticated ? votes.find(v=>v.voter_profile_id===2)?.value??0 : 0};
         }));

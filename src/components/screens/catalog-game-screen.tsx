@@ -16,7 +16,7 @@ import { playbackLabels } from "@/lib/playback-status";
 // The Stitch sample reviews/community statistics belong to the original samples.
 export async function CatalogGameScreen({ game, isSample, publicProfile }: { game: Game; isSample: boolean; publicProfile?: Profile }) {
   const [t,row] = await Promise.all([getMessages(),getCatalogGame(game.slug)]);
-  const communityScore=row ? await getCommunityGameScore(row.id) : undefined;
+  const communityScore=row ? await getCommunityGameScore(row.id).catch(() => null) : undefined;
   return <div className="relative overflow-hidden bg-surface-container-lowest">
     {game.artwork && <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[620px] bg-cover bg-top opacity-25" style={{ backgroundImage: `url(${game.artwork})`, maskImage: "linear-gradient(to bottom, black 0%, black 45%, transparent 100%)" }} />}
     <div className="absolute inset-0 bg-gradient-to-b from-surface/70 via-surface/90 to-surface pointer-events-none" />
@@ -52,7 +52,7 @@ export async function CatalogGameScreen({ game, isSample, publicProfile }: { gam
           {row && <Suspense fallback={null}><FriendsGameRatings gameId={row.id} slug={game.slug} /></Suspense>}
           <div className="text-body-sm text-on-surface-variant flex flex-wrap gap-x-3 gap-y-1">
             <span>{t("Community score")}</span>
-            <span>{communityScore ? `${communityScore.average} / 100` : t("No ratings yet")}</span>
+            <span>{communityScore === null ? t("Community score could not be loaded.") : communityScore ? `${communityScore.average} / 100` : t("No ratings yet")}</span>
             {communityScore && <span>{communityScore.count} {t("ratings")}</span>}
           </div>
         </div>

@@ -140,3 +140,12 @@ test("public entry downloads only its selected rating and no unrelated reviews",
  await expect(page.getByRole("heading",{name:"Fixture Game 00",exact:true}).first()).toBeVisible();
  expect(await page.content()).not.toContain("https://www.youtube.com/watch?v=example");
 });
+
+
+test("optional community score failure leaves game details and logging available",async({page,request})=>{
+ await request.post("http://127.0.0.1:3101/__community-failure");
+ await page.goto("/game/hades");
+ await expect(page.getByRole("heading",{name:"Hades",exact:true})).toBeVisible();
+ await expect(page.getByRole("link",{name:"Log this game",exact:true})).toBeVisible();
+ await expect(page.getByText("Community score could not be loaded.",{exact:true})).toBeVisible();
+});
