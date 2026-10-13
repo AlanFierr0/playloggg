@@ -19,7 +19,7 @@ const [scope, setScope] = useState<SearchScope>("all");
 const dialog = useRef<HTMLDialogElement>(null);
 const input = useRef<HTMLInputElement>(null);
 const router = useRouter();
-const [profileSearch, setProfileSearch] = useState<{ query: string; profiles: Profile[]; error?: boolean } | null>(null);
+const [profileSearch, setProfileSearch] = useState<{ query: string; profiles: Profile[]; hasMore?: boolean; error?: boolean } | null>(null);
 const profiles = profileSearch?.query === query ? profileSearch.profiles : [];
 const profilesLoading = mode !== "log" && profileSearch?.query !== query;
 useEffect(() => {
@@ -29,8 +29,8 @@ useEffect(() => {
     try {
       const response = await fetch(`/api/profiles/search?q=${encodeURIComponent(query)}`, { signal: controller.signal, cache: "no-store" });
       if (!response.ok) throw new Error("Profile search failed.");
-      const data: { profiles: Profile[] } = await response.json();
-      if (!controller.signal.aborted) setProfileSearch({ query, profiles: data.profiles });
+      const data: { profiles: Profile[]; hasMore: boolean } = await response.json();
+      if (!controller.signal.aborted) setProfileSearch({ query, profiles: data.profiles, hasMore: data.hasMore });
     } catch {
       if (!controller.signal.aborted) setProfileSearch({ query, profiles: [], error: true });
     }
@@ -80,11 +80,11 @@ return (
           <input ref={input} id="command-input" type="text" value={query} onChange={event => {setQuery(event.target.value); setOffset(0);}} placeholder={t("Search games…")} maxLength={100} aria-label={t("Search titles and profiles")} className="min-w-0 flex-1 bg-transparent py-4 text-body-lg text-on-surface placeholder:text-on-surface-variant caret-primary focus:outline-none" />
         </div>
         {mode !== "log" && <nav aria-label={t("Search categories")} className="mt-4 flex flex-wrap gap-1 border-b border-outline-variant/20 pb-4">
-          {categories.map(category => <button key={category.scope} type="button" onClick={() => setScope(category.scope)} aria-pressed={scope === category.scope} className={`min-h-11 rounded-lg px-3 sm:px-4 text-body-sm font-medium transition-colors ${scope === category.scope ? "bg-primary/10 text-primary" : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"}`}>{t(category.label)}{category.scope === "curators" && <span className="ml-1.5 text-label-sm">({profilesLoading ? "…" : profiles.length})</span>}</button>)}
+          {categories.map(category => <button key={category.scope} type="button" onClick={() => setScope(category.scope)} aria-pressed={scope === category.scope} className={`min-h-11 rounded-lg px-3 sm:px-4 text-body-sm font-medium transition-colors ${scope === category.scope ? "bg-primary/10 text-primary" : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"}`}>{t(category.label)}{category.scope === "curators" && <span className="ml-1.5 text-label-sm">({profilesLoading ? "…" : `${profiles.length}${profileSearch?.hasMore ? "+" : ""}`})</span>}</button>)}
         </nav>}
       </header>
       <Suspense fallback={<p role="status" className="px-6 py-8 text-on-surface-variant">{t("Loading…")}</p>}>
-      <SearchData portfolio={portfolio} initialQuery={initialQuery} offset={offset} onLoadMore={() => setOffset(value => value + 24)} query={query} scope={mode === "log" ? "games" : scope} mode={mode} profiles={profiles} profilesLoading={profilesLoading} profilesError={profileSearch?.query === query && profileSearch.error} />
+      <SearchData portfolio={portfolio} initialQuery={initialQuery} offset={offset} onLoadMore={() => setOffset(value => value + 24)} query={query} scope={mode === "log" ? "games" : scope} mode={mode} profiles={profiles} profilesHasMore={profileSearch?.query === query && profileSearch.hasMore} profilesLoading={profilesLoading} profilesError={profileSearch?.query === query && profileSearch.error} />
       </Suspense>
     </div>
   </dialog>

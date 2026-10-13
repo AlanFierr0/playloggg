@@ -432,7 +432,7 @@
   "Profile score": "Puntuación del perfil",
   "Profile score: highest": "Puntuación del perfil: más alta",
   "Profile score: lowest": "Puntuación del perfil: más baja",
-  "Profile settings": "Configuración de perfil",
+  "Profile settings": "Configuración del perfil",
   "Profile settings | Playlogg": "Configuración de perfil | Playlogg",
   "Profile settings and visibility": "Configuración de perfil y visibilidad",
   "Profile setup is unavailable. Please retry.": "La configuración del perfil no está disponible. Vuelva a intentarlo.",
@@ -1400,5 +1400,17 @@
   "Automatically translated with DeepL": "Traducido automáticamente con DeepL",
   "Original review": "Reseña original",
   "Show original": "Mostrar original",
-  "Show translation": "Mostrar traducción"
+  "Show translation": "Mostrar traducción",
+  "View all matching profiles": "Ver todos los perfiles coincidentes",
+  "Rate, rank and remember what you play.": "Puntuá, ordená y recordá lo que jugás.",
+  "Your scores, personal rankings, tiers and reviews in one gaming portfolio.": "Tus puntuaciones, rankings personales, tiers y reseñas en un solo perfil de videojuegos.",
+  "Your profile, your choice": "Tu perfil, tu elección",
+  "Profiles are public and discoverable by default. You can change this in settings.": "Los perfiles son públicos y visibles por defecto. Podés cambiarlo en la configuración.",
+  "Creator’s website": "Sitio del creador",
+  "Feedback and bug reports": "Comentarios y errores",
+  "Game data": "Datos de videojuegos",
+  "Sort reviews": "Ordenar reseñas",
+  "Newest reviews": "Reseñas más recientes",
+  "Most helpful": "Más útiles",
+  "Review updated": "Reseña actualizada"
 }

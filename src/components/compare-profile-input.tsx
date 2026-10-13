@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useId, useState } from "react";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import { useMessages } from "@/components/site-preferences";
@@ -7,7 +8,7 @@ import type { Profile } from "@/types/domain";
 export function CompareProfileInput({ name, label, initialValue }: { name: string; label: string; initialValue: string }) {
   const t = useMessages(), id = useId();
   const [query, setQuery] = useState(initialValue), [open, setOpen] = useState(false), [active, setActive] = useState(-1);
-  const [result, setResult] = useState<{ query: string; profiles: Profile[]; error?: boolean } | null>(null);
+  const [result, setResult] = useState<{ query: string; profiles: Profile[]; hasMore?: boolean; error?: boolean } | null>(null);
   const profiles = result?.query === query ? result.profiles : [];
   const expanded = open && Boolean(query.trim());
   useEffect(() => {
@@ -17,8 +18,8 @@ export function CompareProfileInput({ name, label, initialValue }: { name: strin
       try {
         const response = await fetch(`/api/profiles/search?q=${encodeURIComponent(query)}`, { signal: controller.signal, cache: "no-store" });
         if (!response.ok) throw new Error("Profile search failed.");
-        const data: { profiles: Profile[] } = await response.json();
-        if (!controller.signal.aborted) setResult({ query, profiles: data.profiles });
+        const data: { profiles: Profile[]; hasMore: boolean } = await response.json();
+        if (!controller.signal.aborted) setResult({ query, profiles: data.profiles, hasMore: data.hasMore });
       } catch {
         if (!controller.signal.aborted) setResult({ query, profiles: [], error: true });
       }
@@ -47,6 +48,7 @@ export function CompareProfileInput({ name, label, initialValue }: { name: strin
           <span className="min-w-0"><span translate="no" className="block truncate text-body-md font-semibold text-on-surface">{profile.displayName}</span><span translate="no" className="block truncate text-body-sm text-on-surface-variant">@{profile.handle}</span></span>
         </button>)}
       </div>
+      {result?.query === query && result.hasMore && <Link href={`/people?q=${encodeURIComponent(query)}`} className="block border-t border-outline-variant/30 px-4 py-3 text-body-sm text-primary hover:bg-surface-container">{t("View all matching profiles")}</Link>}
       {!profiles.length && <p role="status" className="px-3 py-4 text-body-sm text-on-surface-variant">{t(result?.query !== query ? "Searching profiles…" : result.error ? "Profile search could not be loaded." : "No profiles match this search.")}</p>}
     </div>}
   </div>;

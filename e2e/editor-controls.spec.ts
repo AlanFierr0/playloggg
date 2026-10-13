@@ -320,6 +320,7 @@ test("console platform popups save specific consoles and preserve existing entry
   }
   await page.getByRole("button", { name: "Xbox", exact: true }).click();
   await page.getByRole("menuitemradio", { name: "Xbox Series S", exact: true }).press("Home");
+  await page.getByRole("menu", { name: "Xbox console", exact: true }).evaluate(menu => menu.dispatchEvent(new ToggleEvent("toggle", {oldState:"closed",newState:"open"})));
   await expect(page.getByRole("menuitemradio", { name: "Xbox", exact: true })).toBeFocused();
   await page.keyboard.press("ArrowDown");
   await expect(page.getByRole("menuitemradio", { name: "Xbox 360", exact: true })).toBeFocused();

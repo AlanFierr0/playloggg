@@ -86,7 +86,7 @@ export const getSearchPortfolio = cache(async (query = "", offset = 0, hideRated
     ? await owner.supabase.from("ratings").select("game_id,score,tier,tier_manual,status,platform,hours_played,completed_on,tags,updated_at").eq("profile_id",profile.id).in("game_id",rows.slice(0,24).map(row=>row.id))
     : {data:[],error:null};
   if (ratingError) throw new Error("Your ratings could not be loaded.");
-  const ratings = ownRatings.map(row=>({...row,review:null}));
+  const ratings = ownRatings.map(row=>({...row,review:null,review_updated_at:null}));
   const excludedSlugs: string[] = [];
   const games = portfolioGames(rows.slice(0,24).map(row => ({...row, artwork_image_ids: [], screenshot_image_ids: [], igdb_metadata: {}, igdb_url: null})), ratings).map(game => ({...game, review: null}));
   return {...shell, games, hasMore: rows.length > 24, excludedSlugs};
@@ -104,14 +104,14 @@ export const getPublicGame = cache(async (slug: string) => {
   const { owner, profile } = await selectedAccount();
   let ratings: RatingRow[];
   if (owner?.profile && profile) {
-    const { data, error } = await owner.supabase.from("ratings").select("game_id,score,tier,tier_manual,review,status,platform,hours_played,completed_on,tags,updated_at").eq("profile_id", profile.id).eq("game_id", row.id).limit(1);
+    const { data, error } = await owner.supabase.from("ratings").select("game_id,score,tier,tier_manual,review,review_updated_at,status,platform,hours_played,completed_on,tags,updated_at").eq("profile_id", profile.id).eq("game_id", row.id).limit(1);
     if (error) throw new Error("Your ratings could not be loaded.");
     ratings = data as RatingRow[];
   } else ratings = [];
   return portfolioGames([row], ratings)[0];
 });
 
-export function portfolioGames(rows: GameRow[], ratings: (Pick<RatingRow, "game_id" | "score" | "tier" | "review" | "status" | "platform" | "hours_played" | "completed_on" | "tags"> & {updated_at?: string; tier_manual?: boolean})[]): Game[] {
+export function portfolioGames(rows: GameRow[], ratings: (Pick<RatingRow, "game_id" | "score" | "tier" | "review" | "status" | "platform" | "hours_played" | "completed_on" | "tags"> & {updated_at?: string; review_updated_at?: string | null; tier_manual?: boolean})[]): Game[] {
   const byGame = new Map(ratings.map((rating) => [rating.game_id, rating]));
   const games: Game[] = rows.map((row) => {
     const rating = byGame.get(row.id);
@@ -122,6 +122,7 @@ export function portfolioGames(rows: GameRow[], ratings: (Pick<RatingRow, "game_
       releasedOn: row.released_on, genres: row.genres, keywords: row.search_keywords,
       score: rating?.score ?? null, tier: rating?.tier as Game["tier"] ?? null,
       review: rating?.review ?? null,
+      reviewUpdatedAt: rating?.review_updated_at ?? null,
       ...(rating?.updated_at ? {updatedAt: rating.updated_at} : {}),
       status: rating?.status as Game["status"] ?? null, logged: Boolean(rating),
       platform: rating?.platform as Game["platform"] ?? null,

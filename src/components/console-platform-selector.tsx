@@ -23,8 +23,11 @@ export function ConsolePlatformSelector({ family, value, onChange }: { family: "
       const height = popup.current.getBoundingClientRect().height;
       popup.current.style.left = `${Math.max(12, Math.min(rect.left, innerWidth - 236))}px`;
       popup.current.style.top = `${Math.max(12, Math.min(rect.bottom + 8, innerHeight - height - 12))}px`;
-      popup.current.querySelector<HTMLButtonElement>('[aria-checked="true"]')?.focus();
-      if (!selected) popup.current.querySelector<HTMLButtonElement>('[role="menuitemradio"]')?.focus();
+      // The queued toggle event must not undo navigation already made inside the menu.
+      if (!popup.current.contains(document.activeElement)) {
+        popup.current.querySelector<HTMLButtonElement>('[aria-checked="true"]')?.focus();
+        if (!selected) popup.current.querySelector<HTMLButtonElement>('[role="menuitemradio"]')?.focus();
+      }
     }} onKeyDown={event => {
       if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
       event.preventDefault();

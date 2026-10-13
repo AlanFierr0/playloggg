@@ -411,6 +411,7 @@ export type Database = {
           platform: string | null
           profile_id: number
           review: string | null
+          review_updated_at: string | null
           score: number | null
           status: string | null
           tags: string[]
@@ -426,6 +427,7 @@ export type Database = {
           platform?: string | null
           profile_id: number
           review?: string | null
+          review_updated_at?: string | null
           score?: number | null
           status?: string | null
           tags?: string[]
@@ -441,6 +443,7 @@ export type Database = {
           platform?: string | null
           profile_id?: number
           review?: string | null
+          review_updated_at?: string | null
           score?: number | null
           status?: string | null
           tags?: string[]

@@ -19,6 +19,7 @@ export interface Game {
   completedOn?: string | null;
   tags?: string[];
   updatedAt?: string;
+  reviewUpdatedAt?: string | null;
   keywords: string;
   releasedOn?: string | null;
   genres?: string[];
