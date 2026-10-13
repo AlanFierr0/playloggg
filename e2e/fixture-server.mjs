@@ -23,7 +23,7 @@ const initialGames = titles.map(([slug, title, genre], index) => ({ id: index + 
 let alternateToken;
 let games = structuredClone(initialGames);
 let ratings;
-let catalogBatches=[];
+let catalogBatches=[];let reviewTranslations=[];let translateCalls=0;let translatedCharacters=0;let failTranslation=false;
 let reviewVotes;
 let ratingsDelay = 0;
 let failSave;
@@ -39,7 +39,7 @@ let favorites;
 let rankings=[];let curated=[];let listItems=[];let follows=[];let blocks=[];let likes=[];
 let pictures = new Map();
 // Shared catalog imports persist between tests, like the application cache; personal data resets.
-function reset() {for(let i=profiles.length-1;i>=0;i--)if(profiles[i].id>=1000)profiles.splice(i,1);catalogBatches=[];rankingDelay=0;failHome=false;failScore=false; alternateToken=undefined; reviewVotes=[]; ratingsDelay=0; showTrending=false; accountDeleted=false;failAuthDelete=false;failStorageDelete=false; quotaMode="allow";user.app_metadata={};steamMode="public";rankings=[];follows=[];blocks=[];likes=[];curated=[{id:10,profile_id:3,name:"Public fixture list",revision:1,description:"Fixture description",is_public:true,is_ranked:true}];listItems=[{list_id:10,game_id:1,position:0}];pictures.clear(); Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false,is_discoverable:false,bio:null,location:null,platform_preference:null,avatar_url:null}); favorites=[{profile_id:3,game_id:1,featured_slot:1,created_at:"2026-09-29T12:00:00Z"}]; ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
+function reset() {reviewTranslations=[];translateCalls=0;translatedCharacters=0;failTranslation=false;for(let i=profiles.length-1;i>=0;i--)if(profiles[i].id>=1000)profiles.splice(i,1);catalogBatches=[];rankingDelay=0;failHome=false;failScore=false; alternateToken=undefined; reviewVotes=[]; ratingsDelay=0; showTrending=false; accountDeleted=false;failAuthDelete=false;failStorageDelete=false; quotaMode="allow";user.app_metadata={};steamMode="public";rankings=[];follows=[];blocks=[];likes=[];curated=[{id:10,profile_id:3,name:"Public fixture list",revision:1,description:"Fixture description",is_public:true,is_ranked:true}];listItems=[{list_id:10,game_id:1,position:0}];pictures.clear(); Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false,is_discoverable:false,bio:null,location:null,platform_preference:null,avatar_url:null}); favorites=[{profile_id:3,game_id:1,featured_slot:1,created_at:"2026-09-29T12:00:00Z"}]; ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
  for (const game_id of [3,4,5,6]) ratings.push({profile_id:3,game_id,score:50,tier:null,status:"playing",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  for (const game_id of [1,3,4,5,6]) ratings.push({profile_id:4,game_id,score:game_id===1 ? 10 : 40,tier:"A",status:"completed",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  ratings.push({profile_id:3,game_id:7,score:null,tier:"S",status:"backlog",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
@@ -138,10 +138,17 @@ export async function startFixtureServer() {
         return reply(200,[]);
       }
       if (url.pathname === "/__legacy-entry" && req.method === "POST") {Object.assign(ratings.find(row=>row.profile_id===2&&row.game_id===2),{hours_played:1e9,completed_on:"2099-01-01"});return reply(200,{ok:true});}
+      if(url.pathname==="/__translation-failure"){failTranslation=true;return reply(200,{ok:true});}
+      if(url.pathname==="/__translation-review"){ratings.find(row=>row.profile_id===3&&row.game_id===1).review="Review with sources\nhttps://www.youtube.com/watch?v=example&t=637s";return reply(200,{ok:true});}
+      if(url.pathname==="/__translate"){
+        translateCalls++;if(failTranslation)return reply(503,{message:"Controlled translation failure"});
+        let body="";for await(const part of req)body+=part;const input=JSON.parse(body);
+        return reply(200,{translations:input.text.map(text=>({detected_source_language:/Reseña|Texto español/.test(text)?"ES":"EN",text:input.target_lang==="ES"?({"Public fixture review":"Reseña pública de prueba","Private fixture review":"Reseña privada de prueba","Review with sources":"Reseña con fuentes"}[text]??`Traducción: ${text}`):text}))});
+      }
       if (url.pathname === "/__source-review" && req.method === "POST") {ratings.find(row=>row.profile_id===3&&row.game_id===1).review="https://www.youtube.com/watch?v=example";return reply(200,{ok:true});}
       if (url.pathname === "/__reset" && req.method === "POST") { reset(); return reply(200, { ok: true }); }
       if (url.pathname === "/__fail-save" && req.method === "POST") { failSave = true; return reply(200, { ok: true }); }
-      if (url.pathname === "/__state") return reply(200, { requestCounts, catalogBatches, rankings, accountDeleted, pictures:[...pictures.keys()], reviewVotes, ratings, favorites, games, profiles:profiles.filter(row=>!profileDeleted||row.id!==2) });
+      if (url.pathname === "/__state") return reply(200, { requestCounts, catalogBatches, reviewTranslations, translateCalls, translatedCharacters, rankings, accountDeleted, pictures:[...pictures.keys()], reviewVotes, ratings, favorites, games, profiles:profiles.filter(row=>!profileDeleted||row.id!==2) });
       if(url.pathname==="/__fail-auth-delete"&&req.method==="POST"){failAuthDelete=true;return reply(200,{ok:true});}
       if(url.pathname==="/__fail-storage-delete"&&req.method==="POST"){failStorageDelete=true;return reply(200,{ok:true});}
       if(url.pathname==="/__profileless"&&req.method==="POST"){profileDeleted=true;return reply(200,{ok:true});}
@@ -251,7 +258,7 @@ export async function startFixtureServer() {
           const position=ranking.game_ids.indexOf(input.p_game_id);ranking.game_ids=ranking.game_ids.filter(id=>id!==input.p_game_id);
           ranking.manual_positions=Object.fromEntries(Object.entries(ranking.manual_positions).filter(([id])=>Number(id)!==input.p_game_id).map(([id,value])=>[id,value>position?value-1:value]));ranking.revision++;
         }
-        ratings=ratings.filter(row=>row!==previous);reviewVotes=reviewVotes.filter(v=>v.reviewer_profile_id!==2||v.game_id!==input.p_game_id);
+        reviewTranslations=reviewTranslations.filter(row=>row.profile_id!==2||row.game_id!==input.p_game_id);ratings=ratings.filter(row=>row!==previous);reviewVotes=reviewVotes.filter(v=>v.reviewer_profile_id!==2||v.game_id!==input.p_game_id);
         return reply(200,true);
       }
       if(resource==="rpc/save_rating") {
@@ -262,7 +269,7 @@ export async function startFixtureServer() {
         if((previous?.updated_at??null)!==input.p_expected_updated_at)return reply(409,{code:"40001",message:"Entry changed"});
         const row={...input.p_values,profile_id:2,game_id:input.p_game_id,updated_at:new Date().toISOString()};
         if(!row.tier_manual)row.tier=tierForScore(row.score,profiles[1].tier_ranges);
-        if(previous?.review!==row.review)reviewVotes=reviewVotes.filter(v=>v.reviewer_profile_id!==2||v.game_id!==input.p_game_id);
+        if(previous?.review!==row.review){reviewVotes=reviewVotes.filter(v=>v.reviewer_profile_id!==2||v.game_id!==input.p_game_id);reviewTranslations=reviewTranslations.filter(value=>value.profile_id!==2||value.game_id!==input.p_game_id);}
         ratings=ratings.filter(r=>!(r.profile_id===2&&r.game_id===input.p_game_id));ratings.push(row);
         return reply(200,row.updated_at);
       }
@@ -283,6 +290,15 @@ export async function startFixtureServer() {
         const groups=new Map();
         for(const row of ratings){const profile=profiles.find(p=>p.id===row.profile_id);if((resource==="rpc/community_game_scores"&&(!profile?.is_public||!profile.is_discoverable))||row.score==null||(input.p_ids&&!input.p_ids.includes(row.game_id)))continue;const values=groups.get(row.game_id)??[];values.push(row.score);groups.set(row.game_id,values);}
         return reply(200,[...groups].filter(([,values])=>values.length>=Number(url.searchParams.get("sample_count")?.replace("gte.","")??1)).map(([game_id,values])=>{const average=values.reduce((a,b)=>a+b,0)/values.length;return {game_id,sample_count:values.length,average:Math.round(average*10)/10,deviation:Math.sqrt(values.reduce((sum,value)=>sum+(value-average)**2,0)/values.length)};}));
+      }
+      if(["rpc/read_review_translation","rpc/store_review_translation","rpc/reserve_review_translation"].includes(resource)){
+        if(!admin)return reply(403,{message:"Server only"});
+        let body="";for await(const part of req)body+=part;const input=JSON.parse(body);
+        if(resource==="rpc/reserve_review_translation"){if(translatedCharacters+input.p_characters>500000)return reply(200,false);translatedCharacters+=input.p_characters;return reply(200,true);}
+        if(resource==="rpc/read_review_translation")return reply(200,reviewTranslations.find(row=>row.profile_id===input.p_profile_id&&row.game_id===input.p_game_id&&row.hash===input.p_hash&&row.target===input.p_target)?.value??null);
+        if(!ratings.some(row=>row.profile_id===input.p_profile_id&&row.game_id===input.p_game_id&&row.review===input.p_original))return reply(200,false);
+        reviewTranslations=reviewTranslations.filter(row=>row.profile_id!==input.p_profile_id||row.game_id!==input.p_game_id||row.target!==input.p_target);
+        reviewTranslations.push({profile_id:input.p_profile_id,game_id:input.p_game_id,hash:input.p_hash,target:input.p_target,value:{text:input.p_translation,sourceLanguage:input.p_source_language}});return reply(200,true);
       }
       if(resource==="rpc/consume_operation_limit_batch"&&req.method==="POST"){
         if(!admin)return reply(403,{message:"Server only"});

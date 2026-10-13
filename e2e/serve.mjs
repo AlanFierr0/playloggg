@@ -6,7 +6,7 @@ mkdirSync("e2e-artifacts", { recursive: true });
 const log = createWriteStream("e2e-artifacts/server.log", { flags: "w" });
 const server = await startFixtureServer();
 // Explicit values override ignored .env files. No production identity/provider keys.
-const env = { ...process.env, PLAYLOGG_E2E_BUILD: "1", NEXT_PUBLIC_SUPABASE_URL: fixtureOrigin, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "fixture-publishable-key", PLAYLOGG_OWNER_EMAIL: "owner@fixture.test", PLAYLOGG_SITE_URL: "http://localhost:3100", SUPABASE_SECRET_KEY: fixtureAdminKey, STEAM_WEB_API_KEY: "fixture-steam-key", IGDB_CLIENT_ID: "fixture-client", IGDB_CLIENT_SECRET: "fixture-secret", NEXT_TELEMETRY_DISABLED: "1" };
+const env = { ...process.env, PLAYLOGG_E2E_BUILD: "1", NEXT_PUBLIC_SUPABASE_URL: fixtureOrigin, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "fixture-publishable-key", PLAYLOGG_OWNER_EMAIL: "owner@fixture.test", PLAYLOGG_SITE_URL: "http://localhost:3100", SUPABASE_SECRET_KEY: fixtureAdminKey, STEAM_WEB_API_KEY: "fixture-steam-key", DEEPL_API_KEY: "fixture-deepl-key:fx", IGDB_CLIENT_ID: "fixture-client", IGDB_CLIENT_SECRET: "fixture-secret", NEXT_TELEMETRY_DISABLED: "1" };
 let child;
 function launch(args) {
   child = spawn(process.execPath, ["--import", "./e2e/provider-fetch.mjs", "node_modules/next/dist/bin/next", ...args], { env, stdio: ["ignore", "pipe", "pipe"] });

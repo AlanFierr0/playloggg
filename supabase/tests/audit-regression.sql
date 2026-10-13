@@ -171,4 +171,37 @@ do $$ declare g bigint; begin
  if exists(select 1 from public.game_reviews(g,0) where handle='sql_review_01') then raise exception 'Unpublished review retained'; end if;
 end $$;
 reset role;
+-- Translation caches are server-only, revision-aware and deleted with reviews.
+do $$ declare p bigint;g bigint;begin
+ select id into p from public.profiles where handle='sql_test_owner';
+ select id into g from public.games where slug='sql-test-game-one';
+ update public.ratings set review='Cache original' where profile_id=p and game_id=g;
+ if has_function_privilege('anon','public.read_review_translation(bigint,bigint,text,text)','EXECUTE') or has_function_privilege('authenticated','public.store_review_translation(bigint,bigint,text,text,text,text,text)','EXECUTE') then raise exception 'Translation cache exposed';end if;
+ if has_table_privilege('anon','private.review_translations','SELECT') then raise exception 'Translation table exposed';end if;
+ insert into private.translation_usage(period_start,characters) values(date_trunc('month',now() at time zone 'UTC')::date,499990);
+end $$;
+set local role service_role;
+do $$ declare p bigint;g bigint;value jsonb;begin
+ select id into p from public.profiles where handle='sql_test_owner';select id into g from public.games where slug='sql-test-game-one';
+ if public.reserve_review_translation(20) then raise exception 'Translation budget exceeded';end if;
+ if not public.reserve_review_translation(10) or public.reserve_review_translation(1) then raise exception 'Translation budget inaccurate';end if;
+ if not public.store_review_translation(p,g,repeat('a',64),'ES','Cache original','Traducción','EN') then raise exception 'Current cache rejected';end if;
+ value:=public.read_review_translation(p,g,repeat('a',64),'ES');
+ if value->>'text'<>'Traducción' then raise exception 'Cache text lost';end if;
+ if public.read_review_translation(p,g,repeat('b',64),'ES') is not null then raise exception 'Stale hash accepted';end if;
+end $$;
+reset role;
+update public.ratings set review='Cache revised' where profile_id=(select id from public.profiles where handle='sql_test_owner') and game_id=(select id from public.games where slug='sql-test-game-one');
+set local role service_role;
+do $$ declare p bigint;g bigint;begin
+ select id into p from public.profiles where handle='sql_test_owner';select id into g from public.games where slug='sql-test-game-one';
+ if public.read_review_translation(p,g,repeat('a',64),'ES') is not null then raise exception 'Review edit retained translation';end if;
+ if public.store_review_translation(p,g,repeat('a',64),'ES','Cache original','Old translation','EN') then raise exception 'Outdated original cached';end if;
+ perform public.store_review_translation(p,g,repeat('b',64),'ES','Cache revised','Updated translation','EN');
+end $$;
+reset role;
+delete from public.ratings where profile_id=(select id from public.profiles where handle='sql_test_owner') and game_id=(select id from public.games where slug='sql-test-game-one');
+do $$ begin
+ if exists(select 1 from private.review_translations where profile_id=(select id from public.profiles where handle='sql_test_owner')) then raise exception 'Removed review retained translation';end if;
+end $$;
 rollback;

@@ -1,3 +1,4 @@
+import {ReviewText} from "@/components/review-text";
 import { ReviewHelpfulness } from "@/components/review-helpfulness";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import { HomeCarousel } from "@/components/home-carousel";
@@ -165,7 +166,7 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
               <Link translate="no" href={`/u/${review.profiles.handle}`} className="text-body-sm text-primary hover:underline">{review.profiles.display_name}</Link>
             </div>
           </div>
-          <p translate="no" className="line-clamp-5 whitespace-pre-wrap break-words text-body-md text-on-surface-variant">{review.review}</p>
+          <ReviewText text={review.review} slug={review.game.slug} profileId={String(review.profile_id)} className="line-clamp-5 text-body-md"/>
           <Link href={`/u/${review.profiles.handle}/game/${review.game.slug}`} className="mt-auto inline-flex min-h-11 items-center gap-2 text-primary text-body-sm hover:underline">{t("Read review")}<span aria-hidden="true" className="material-symbols-outlined text-[18px]">arrow_forward</span></Link>
           <ReviewHelpfulness profileId={String(review.profile_id)} slug={review.game.slug} data={{ ...review.data, reviews: { [review.game.slug]: review.data.reviews[review.game.slug] } }} />
         </article>)}

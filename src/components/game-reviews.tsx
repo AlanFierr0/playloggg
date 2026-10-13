@@ -31,7 +31,7 @@ export function GameReviews({slug,initial}:{slug:string;initial:GameReviewPage})
     <Link href={`/u/${review.handle}`} className="flex min-w-0 flex-1 items-center gap-3 hover:text-primary"><ProfileAvatar name={review.display_name} src={review.avatar_url} className="h-10 w-10 rounded-lg"/><span translate="no" className="font-semibold break-words">{review.display_name}</span></Link>
     <span className="font-semibold tabular-nums text-primary">{review.score===null?t("Unrated"):`${review.score} / 100`}</span>
    </header>
-   <ReviewText text={review.review}/>
+   <ReviewText text={review.review} slug={slug} profileId={String(review.profile_id)}/>
    <ReviewHelpfulness slug={slug} profileId={String(review.profile_id)} data={{signedIn:data.viewerId!==null,canVote:data.viewerId!==null&&data.viewerId!==review.profile_id,reviews:{[slug]:{upvotes:review.upvotes,downvotes:review.downvotes,vote:review.viewer_vote}}}}/>
   </article>)}</div>
   {failed&&<p role="alert" className="text-error">{t("Community reviews could not be loaded.")}</p>}
