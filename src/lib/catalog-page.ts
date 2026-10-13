@@ -4,11 +4,11 @@ import { getPortfolioShell } from "@/lib/portfolio";
 import { validScoreRange, type GamesFilters } from "@/lib/games-view";
 import type { GamesPageData } from "@/lib/games-page";
 
-export async function getCatalogPage(filters: GamesFilters, page: number) {
+export async function getCatalogPage(filters: GamesFilters, page: number, batch = false) {
   const shell = await getPortfolioShell();
   const valid = validScoreRange(filters);
   const {data, error} = await createAuthAdmin().rpc("catalog_page", {p_profile_id: shell.profile.id ? Number(shell.profile.id) : null,
-    p_filters: {...filters, valid, ...(!valid ? {minScore:"", maxScore:""} : {})}, p_page: page});
+    p_filters: {...filters, valid, batch, ...(!valid ? {minScore:"", maxScore:""} : {})}, p_page: page});
   if (error || !data) throw new Error("The game catalog could not be loaded.");
   const result = data as unknown as GamesPageData;
   result.filters = filters;

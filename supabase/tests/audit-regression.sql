@@ -98,4 +98,14 @@ do $$ declare g bigint; stamp timestamptz; value jsonb; denied boolean; begin
   if not denied then raise exception 'New prelaunch date accepted'; end if;
 end $$;
 reset role;
+insert into public.games(slug,title,cover_url,released_on)
+select 'sql-catalog-'||n,'SQL catalog '||lpad(n::text,3,'0'),'/icon.svg','2020-01-01' from generate_series(1,60) n;
+do $$ declare filters jsonb; first_page jsonb; next_page jsonb; begin
+  filters:='{"query":"SQL catalog","genre":"","tag":"","platform":"","year":"","library":"all","status":"all","tier":"all","rating":"all","minScore":"","maxScore":"","sort":"title","valid":true}'::jsonb;
+  first_page:=public.catalog_page(null,filters,1);
+  next_page:=public.catalog_page(null,filters||'{"batch":true}'::jsonb,2);
+  if jsonb_array_length(first_page->'games')<>25 or jsonb_array_length(next_page->'games')<>25 or (next_page->>'offset')::integer<>25 then raise exception 'Catalog batch was not bounded'; end if;
+  if exists(select 1 from jsonb_array_elements(first_page->'games') a,jsonb_array_elements(next_page->'games') b where a->>'slug'=b->>'slug') then raise exception 'Catalog batch repeated earlier cards'; end if;
+  if jsonb_array_length(public.catalog_page(null,filters,2)->'games')<>50 then raise exception 'Cumulative refresh lost prior cards'; end if;
+end $$;
 rollback;

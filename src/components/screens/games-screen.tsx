@@ -20,27 +20,55 @@ const button = "inline-flex items-center justify-center rounded px-4 py-2.5 font
 export function GamesScreen({ data, access }: { data: GamesPageData; profile: Portfolio["profile"]; access: Portfolio["access"] }) {
   const t = useMessages();
   const router = useRouter();
-  const [filters, updateFilters] = useOptimistic(data.filters);
+  const [optimisticFilters, updateFilters] = useOptimistic(data.filters);
+  const [draftFilters,setDraftFilters]=useState<GamesFilters|null>(null);
+  const filters=draftFilters??optimisticFilters;
+  const typingTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
+  const loadRequest=useRef<AbortController|null>(null);
+  const [loaded,setLoaded]=useState<GamesPageData|null>(null);
+  const [loadingMore,setLoadingMore]=useState(false);
+  const [loadError,setLoadError]=useState(false);
+  const dataKey=JSON.stringify(data.filters);
+  const batches=loaded&&JSON.stringify(loaded.filters)===dataKey ? loaded : data;
+  useEffect(()=>{
+    queueMicrotask(()=>setDraftFilters(current=>current&&JSON.stringify(current)===dataKey?null:current));
+  },[dataKey]);
+  useEffect(()=>{
+    function resetTyping(){if(typingTimer.current)clearTimeout(typingTimer.current);typingTimer.current=null;setDraftFilters(null);loadRequest.current?.abort();setLoaded(null);}
+    window.addEventListener("popstate",resetTyping);
+    return ()=>{window.removeEventListener("popstate",resetTyping);if(typingTimer.current)clearTimeout(typingTimer.current);loadRequest.current?.abort();};
+  },[]);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const sentinel = useRef<HTMLDivElement>(null);
   const activeKeys = (Object.keys(filters) as (keyof GamesFilters)[]).filter(key => key !== "query" && filters[key] !== defaultGamesFilters[key]);
   const activeFilters = activeKeys.length;
   const [pending, startTransition] = useTransition();
-  const { games: visible, total, matched, genres, tags, platforms, years, page: currentPage, pageCount, offset } = data;
-  function navigate(next: GamesFilters, page = 1) {
+  const { games: visible, total, matched, genres, tags, platforms, years, page: currentPage, pageCount, offset } = batches;
+  function navigate(next: GamesFilters, page = 1, replace = false) {
+    if(typingTimer.current)clearTimeout(typingTimer.current);
+    typingTimer.current=null;loadRequest.current?.abort();setLoadError(false);
     window.scrollTo({ top: 0 });
-    startTransition(() => { updateFilters(next); const query = gamesQuery(next, page); router.push(`/games${query ? `?${query}` : ""}`, { scroll: false }); });
+    startTransition(() => { updateFilters(next); const query = gamesQuery(next, page); router[replace?"replace":"push"](`/games${query ? `?${query}` : ""}`, { scroll: false }); });
   }
-  const loadMore = useCallback(() => {
-    if (pending || currentPage >= pageCount) return;
-    startTransition(() => {
-      const query = gamesQuery(data.filters, currentPage + 1);
-      router.replace(`/games?${query}`, { scroll: false });
-    });
-  }, [pending, currentPage, pageCount, data.filters, router]);
+  const loadMore = useCallback(async () => {
+    if (pending || draftFilters || loadingMore || currentPage >= pageCount) return;
+    const controller=new AbortController();loadRequest.current=controller;
+    setLoadingMore(true);setLoadError(false);
+    try{
+      const query=gamesQuery(data.filters,currentPage+1);
+      const response=await fetch(`/api/games/batch?${query}`,{signal:controller.signal,cache:"no-store"});
+      if(!response.ok)throw new Error("Catalog batch unavailable");
+      const batch:GamesPageData=await response.json();
+      if(controller.signal.aborted)return;
+      const games=[...new Map([...visible,...batch.games].map(game=>[game.slug,game])).values()];
+      setLoaded({...batch,games,offset:0});
+      window.history.replaceState(null,"",`/games?${query}`);
+    }catch{if(!controller.signal.aborted)setLoadError(true);}
+    finally{if(loadRequest.current===controller){loadRequest.current=null;setLoadingMore(false);}}
+  }, [pending, draftFilters, loadingMore, currentPage, pageCount, data.filters, visible]);
   useEffect(() => {
     const target = sentinel.current;
-    if (!target || pending || currentPage >= pageCount || !('IntersectionObserver' in window)) return;
+    if (!target || pending || draftFilters || loadingMore || loadError || currentPage >= pageCount || !('IntersectionObserver' in window)) return;
     const observer = new IntersectionObserver(entries => {
       if (entries.some(entry => entry.isIntersecting)) {
         observer.disconnect();
@@ -49,10 +77,15 @@ export function GamesScreen({ data, access }: { data: GamesPageData; profile: Po
     }, { rootMargin: '300px 0px' });
     observer.observe(target);
     return () => observer.disconnect();
-  }, [loadMore, pending, currentPage, pageCount]);
-  function change<K extends keyof GamesFilters>(key: K, value: GamesFilters[K]) { navigate({ ...filters, [key]: value }); }
-  function clear() { navigate(defaultGamesFilters); }
-  return <div aria-busy={pending} className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-10 space-y-6">
+  }, [loadMore, pending, draftFilters, loadingMore, loadError, currentPage, pageCount]);
+  function change<K extends keyof GamesFilters>(key: K, value: GamesFilters[K]) {
+    const next={...filters,[key]:value};setDraftFilters(next);
+    if(typingTimer.current)clearTimeout(typingTimer.current);
+    if(key==="query"||key==="minScore"||key==="maxScore")typingTimer.current=setTimeout(()=>navigate(next,1,true),300);
+    else navigate(next);
+  }
+  function clear() { setDraftFilters(null);setLoaded(null);navigate(defaultGamesFilters); }
+  return <div aria-busy={pending || loadingMore} onClickCapture={event=>{if((event.target as HTMLElement).closest("a[href]")){if(typingTimer.current)clearTimeout(typingTimer.current);typingTimer.current=null;loadRequest.current?.abort();setDraftFilters(null);}}} className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-10 space-y-6">
     <header className="flex flex-wrap items-end justify-between gap-4"><div className="min-w-0 space-y-2"><h1 className="font-headline-xl text-headline-xl font-semibold tracking-tight">{t("Games")}</h1></div>{access?.canImportCatalog && <Link href="/search?q=&from=/games" className="inline-flex items-center rounded px-4 py-2.5 bg-primary-container text-on-primary-container font-label-md text-label-md">{t("Search games →")}</Link>}</header>
     <section aria-label={t("Catalog filters")} className="space-y-4">
       <div className="grid sm:grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
@@ -89,8 +122,9 @@ export function GamesScreen({ data, access }: { data: GamesPageData; profile: Po
     </section>
     {filters.query.trim().length >= 2 && <section className="rounded-xl bg-surface-container-low p-5 space-y-3"><h2 className="font-headline-md text-headline-md">{t("Missing a game?")}</h2>{access?.canImportCatalog ? <IgdbSearch query={filters.query} excludeSlugs={visible.map(game => game.slug)} /> : <Link href="/login" className="text-primary underline">{t("Sign in to search more games and import a game.")}</Link>}</section>}
     <section aria-label={t("Game catalog results")}><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-3 gap-y-6 sm:gap-x-5">{visible.map((game) => <CatalogCard key={game.slug} game={game} logged={Boolean(game.logged)} canEdit={Boolean(access?.canEdit)} filters={filters} />)}</div>{!visible.length && <div className="py-12 text-center space-y-4"><h2 className="font-headline-lg text-headline-lg">{t("No games match these filters")}</h2><p className="text-on-surface-variant">{t("Try a broader search or clear the filters.")}</p><button className={button} onClick={clear}>{t("Show all games")}</button></div>}</section>
+    {loadError && <p role="alert" className="text-error">{t("The game catalog could not be loaded.")} {t("Try again.")}</p>}
     {currentPage < pageCount && <div ref={sentinel} data-infinite-scroll className="flex min-h-14 justify-center items-center">
-      {pending ? <p role="status" className="inline-flex items-center gap-2 text-on-surface-variant"><span aria-hidden="true" className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />{t("Loading…")}</p> : <button type="button" className={button} onClick={loadMore}>{t("Load more")}</button>}
+      {pending || loadingMore ? <p role="status" className="inline-flex items-center gap-2 text-on-surface-variant"><span aria-hidden="true" className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />{t("Loading…")}</p> : <button type="button" className={button} onClick={loadMore}>{t("Load more")}</button>}
     </div>}
   </div>;
 }
