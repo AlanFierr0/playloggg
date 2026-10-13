@@ -22,7 +22,7 @@ const original=readFileSync("public/images/backlog-404.webp");await upload(origi
 const archive=join(mkdtempSync(join(tmpdir(),"playlogg-recovery-")),"picture.webp");writeFileSync(archive,await download());
 execFileSync("docker",["exec",container,"pg_dump","-U","postgres","-d","postgres","--format=custom","--file=/tmp/playlogg-recovery.dump"],{stdio:"pipe"});
 execFileSync("docker",["exec",container,"createdb","-U","postgres","-T","template0","playlogg_recovery_test"],{stdio:"pipe"});
-execFileSync("docker",["exec",container,"pg_restore","-U","postgres","--clean","--if-exists","--no-owner","--exit-on-error","-d","playlogg_recovery_test","/tmp/playlogg-recovery.dump"],{stdio:"pipe"});
+execFileSync("docker",["exec",container,"pg_restore","-U","postgres","--no-owner","--exit-on-error","-d","playlogg_recovery_test","/tmp/playlogg-recovery.dump"],{stdio:"pipe"});
 execFileSync("docker",["exec","-i",container,"psql","-U","postgres","-d","playlogg_recovery_test","-v","ON_ERROR_STOP=1"],{input:readFileSync("supabase/tests/recovery-verify.sql"),stdio:"pipe"});
 const removed=await fetch(root,{method:"DELETE",headers:{...auth,"Content-Type":"application/json"},body:JSON.stringify({prefixes:[path]}),signal:AbortSignal.timeout(30000)});assert.ok(removed.ok,"Local fixture picture removal failed.");
 await upload(readFileSync(archive));const recovered=await download();
