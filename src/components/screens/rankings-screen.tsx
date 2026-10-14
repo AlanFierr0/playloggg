@@ -24,11 +24,10 @@ const rated = ratedGames(games);
 const filtered = filterRankings(games, filter, tag);
 const pageCount = Math.max(1, Math.ceil(filtered.length / 8));
 const currentPage = Math.min(page, pageCount);
-const offset = publicBase ? 0 : (currentPage - 1) * 8;
-const visible = filtered.slice(offset, currentPage * 8);
+const visible = filtered.slice(0, currentPage * 8);
 useEffect(() => {
   const target = sentinel.current;
-  if (!publicBase || !target || currentPage >= pageCount || typeof IntersectionObserver === "undefined") return;
+  if (view !== "score" || !target || currentPage >= pageCount || typeof IntersectionObserver === "undefined") return;
   const observer = new IntersectionObserver(entries => {
     if (entries.some(entry => entry.isIntersecting)) {
       observer.disconnect();
@@ -37,7 +36,7 @@ useEffect(() => {
   }, { rootMargin: "300px 0px" });
   observer.observe(target);
   return () => observer.disconnect();
-}, [publicBase, currentPage, pageCount, filter, tag]);
+}, [view, currentPage, pageCount, filter, tag]);
 const ranksBySlug = new Map(rated.map((game, index) => [game.slug, index + 1]));
 return <div className="site-container mx-auto w-full min-w-0 px-4 py-8 sm:px-6 lg:px-12">
   {!publicBase && <div className="mb-8"><ProfileNavigation /></div>}
@@ -68,21 +67,14 @@ return <div className="site-container mx-auto w-full min-w-0 px-4 py-8 sm:px-6 l
       </nav>
       {tags.length > 0 && <label className="min-w-0 space-y-1 text-body-sm"><span className="block text-on-surface-variant">{t("Filter by tag")}</span><select id="tag-filter" className="min-h-11 max-w-full rounded-lg border border-outline-variant/40 bg-surface px-3" value={tag} onChange={event => { setTag(event.target.value); setPage(1); }}><option value="">{t("All tags")}</option>{tags.map(value => <option key={value} value={value}>{value}</option>)}</select></label>}
     </div>
-    <div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4" aria-live="polite">
+    <div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-4 sm:gap-x-5 lg:grid-cols-5 xl:grid-cols-6" aria-live="polite">
       {filtered.length === 0 && <p className="col-span-full rounded-xl bg-surface-container-low p-6 text-body-md text-on-surface-variant">{filter === 'backlog' ? publicBase ? t("This profile's backlog is empty.") : t("Your backlog is empty. Choose Backlog in the game log and save; a score is optional.") : t("No ratings match this filter.")}</p>}
       {visible.map(game => <RankingCard key={game.slug} game={game} rank={ranksBySlug.get(game.slug)} publicBase={publicBase} />)}
     </div>
-    {publicBase ? <footer className="space-y-4 py-4 text-center text-on-surface-variant">
+    <footer className="space-y-4 py-4 text-center text-on-surface-variant">
       <p role="status" className="text-body-sm">{t("Displaying entries ")}{visible.length ? 1 : 0}–{visible.length} {t("of ")}{filtered.length}</p>
       {currentPage < pageCount && <div ref={sentinel} data-ranking-scroll><button type="button" onClick={() => setPage(currentPage + 1)} className="ui-action bg-surface-container-high text-on-surface hover:bg-surface-container-highest">{t("Load more")}</button></div>}
-    </footer> : <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-outline-variant/30 py-5 text-on-surface-variant">
-      <div className="flex items-center gap-3">
-        <button type="button" aria-label={t("Previous Page")} className="flex h-11 w-11 items-center justify-center rounded-lg bg-surface-container-low hover:text-primary disabled:opacity-30" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}><span className="material-symbols-outlined text-[20px]" aria-hidden="true">west</span></button>
-        <span className="text-body-sm tabular-nums">{currentPage} {t("of")} {pageCount}</span>
-        <button type="button" aria-label={t("Next Page")} className="flex h-11 w-11 items-center justify-center rounded-lg bg-surface-container-low hover:text-primary disabled:opacity-30" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}><span className="material-symbols-outlined text-[20px]" aria-hidden="true">east</span></button>
-      </div>
-      <p className="text-body-sm">{t("Displaying entries ")}{filtered.length ? offset + 1 : 0}–{offset + visible.length} {t("of ")}{filtered.length}</p>
-    </footer>}
+    </footer>
   </section>
 </div>;
 }
@@ -96,7 +88,7 @@ function RankingCard({ game, rank, publicBase }: { game: Game; rank?: number; pu
     </div>
     <div className="space-y-2 pt-3">
       <div className="flex items-start justify-between gap-2">
-        <h3 translate="no" className="min-w-0 line-clamp-2 text-body-lg font-semibold group-hover:text-primary"><Link className="after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-primary" href={(publicBase ?? '') + '/game/' + game.slug}>{game.title}</Link></h3>
+        <h3 translate="no" className="min-w-0 line-clamp-2 text-body-md font-semibold group-hover:text-primary"><Link className="after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-primary" href={(publicBase ?? '') + '/game/' + game.slug}>{game.title}</Link></h3>
         <span className="shrink-0 text-body-lg font-semibold tabular-nums text-primary">{game.score ?? t('Unrated')}</span>
       </div>
       <p className="text-body-sm text-on-surface-variant">{[game.year, game.status ? t(playbackLabels[game.status]) : null].filter(Boolean).join(' · ') || t('Profile rating')}</p>

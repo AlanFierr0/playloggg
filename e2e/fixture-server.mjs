@@ -83,9 +83,10 @@ export async function startFixtureServer() {
         }
         return reply(200,{ok:true});
       }
-      if (url.pathname === "/__ranking-scroll" && req.method === "POST") {
-        ratings = ratings.filter(row => row.profile_id !== 3);
-        ratings.push(...games.slice(0, 20).map((game, index) => ({profile_id:3,game_id:game.id,score:100-index,tier:null,status:null,review:null,tags:[],hours_played:null,platform:null,completed_on:null})));
+      if (["/__ranking-scroll", "/__owner-ranking-scroll"].includes(url.pathname) && req.method === "POST") {
+        const profileId = url.pathname === "/__owner-ranking-scroll" ? 2 : 3;
+        ratings = ratings.filter(row => row.profile_id !== profileId);
+        ratings.push(...games.slice(0, 20).map((game, index) => ({profile_id:profileId,game_id:game.id,score:100-index,tier:null,status:null,review:null,tags:[],hours_played:null,platform:null,completed_on:null})));
         return reply(200,{ok:true});
       }
       if(url.pathname==="/__review-dates"){
