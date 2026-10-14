@@ -27,3 +27,20 @@ export function completionTimeline(games: Game[]) {
     undated: undated.sort((a, b) => a.title.localeCompare(b.title)),
   };
 }
+
+
+export function completionChart(months: { month: string; games: Game[] }[], year = "") {
+  if (year) {
+    const counts = new Map(months.map(group => [group.month, group.games.length]));
+    return Array.from({ length: 12 }, (_, index) => {
+      const period = `${year}-${String(index + 1).padStart(2, "0")}`;
+      return { period, count: counts.get(period) ?? 0 };
+    });
+  }
+  const years = new Map<string, number>();
+  for (const group of months) {
+    const period = group.month.slice(0, 4);
+    years.set(period, (years.get(period) ?? 0) + group.games.length);
+  }
+  return [...years].sort(([a], [b]) => a.localeCompare(b)).map(([period, count]) => ({ period, count }));
+}

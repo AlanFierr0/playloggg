@@ -10,6 +10,17 @@ test("completion timeline uses saved dates, loads more, filters years and keeps 
  await page.getByRole("navigation",{name:"Profile sections"}).getByRole("link",{name:"Timeline",exact:true}).click();
  await expect(page).toHaveURL(/\/profile\/timeline$/);
  await expect(page.getByRole("link",{name:"Timeline",exact:true})).toHaveAttribute("aria-current","page");
+ const chart=page.getByRole("region",{name:"Completion chart",exact:true});
+ await expect(chart.locator("[data-completion-period]")).toHaveCount(15);
+ await expect(chart.locator(`[data-completion-period="2025"]`)).toHaveAttribute("data-completion-count","2");
+ await chart.getByRole("button",{name:"2025: 2 Completed games",exact:true}).click();
+ await expect(page.getByLabel("Year",{exact:true})).toHaveValue("2025");
+ await expect(chart).toBeFocused();
+ await expect(chart.locator("[data-completion-period]")).toHaveCount(12);
+ await expect(chart.locator(`[data-completion-period="2025-01"]`).getByRole("button")).toBeDisabled();
+ await chart.getByRole("button",{name:"March 2025: 2 Completed games",exact:true}).click();
+ await expect(page.getByRole("heading",{name:"March 2025",exact:true})).toBeInViewport();
+ await page.getByLabel("Year",{exact:true}).selectOption("");
  const months=page.locator("[data-timeline-month]");
  await expect(months).toHaveCount(12);
  await expect(months.first()).toHaveAttribute("data-timeline-month","2025-03");
@@ -40,6 +51,7 @@ test("timeline with no completion dates offers an honest empty state",async({pag
  await context.addCookies([authCookie]);await page.goto("/profile/timeline");
  await expect(page.getByRole("heading",{name:"Your timeline starts with a completion date.",exact:true})).toBeVisible();
  await expect(page.locator("[data-timeline-month]")).toHaveCount(0);
+ await expect(page.getByRole("region",{name:"Completion chart",exact:true})).toHaveCount(0);
  const empty=page.getByRole("heading",{name:"Your timeline starts with a completion date.",exact:true}).locator("..");
  await expect(empty.getByRole("link",{name:"Log a game",exact:true})).toHaveAttribute("href","/log");
 });

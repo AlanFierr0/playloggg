@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { completionTimeline } from "../src/lib/completion-timeline.ts";
+import { completionChart, completionTimeline } from "../src/lib/completion-timeline.ts";
 const game = (slug, date, extra = {}) => ({slug, title:slug, logged:true, status:"completed", completedOn:date, score:null, hoursPlayed:null, genres:[], ...extra});
 test("completion timeline groups real dates newest first and preserves zero and unknown values", () => {
  const input=[game("older","2024-02-29",{score:0,hoursPlayed:0,genres:["Puzzle","Puzzle"]}),game("newer","2025-03-02",{score:90,hoursPlayed:12.5,genres:["Adventure"]}),game("same-month","2025-03-01",{score:70,hoursPlayed:null,genres:["Adventure","Puzzle"]}),game("no-date",null),game("bad-date","2025-02-29"),game("ongoing","2025-03-03",{status:"active"}),game("not-logged","2025-03-03",{logged:false})];
@@ -18,4 +18,15 @@ test("unknown scores and playtime stay unknown and update timestamps never becom
  assert.equal(result.months[0].average,null);assert.equal(result.months[0].hours,null);
  assert.equal(result.undated[0].slug,"imported");
  assert.deepEqual(completionTimeline([]),{months:[],undated:[]});
+});
+
+
+test("completion chart counts real dated games, aggregates years and includes zero months",()=>{
+ const months=completionTimeline([game("a","2025-03-02"),game("b","2025-03-01"),game("c","2024-02-29"),game("undated",null)]).months;
+ assert.deepEqual(completionChart(months),[{period:"2024",count:1},{period:"2025",count:2}]);
+ const chart=completionChart(months,"2025");assert.equal(chart.length,12);
+ assert.equal(chart[0].period,"2025-01");assert.equal(chart[0].count,0);
+ assert.equal(chart[2].period,"2025-03");assert.equal(chart[2].count,2);
+ assert.equal(chart[11].period,"2025-12");assert.equal(chart.reduce((sum,bar)=>sum+bar.count,0),2);
+ assert.deepEqual(completionChart([]),[]);
 });
