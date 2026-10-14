@@ -56,6 +56,12 @@ export async function startFixtureServer() {
     const url = new URL(req.url, fixtureOrigin);
     function reply(status, data) { res.writeHead(status, { "Content-Type": "application/json" }); res.end(data === undefined ? undefined : JSON.stringify(data)); }
     try {
+      if(url.pathname==="/__taste-recommendations" && req.method==="POST"){
+        ratings=ratings.filter(r=>![2,3].includes(r.profile_id));
+        for(const profile_id of [2,3])for(let game_id=1;game_id<=5;game_id++)ratings.push({profile_id,game_id,score:90,tier:null,status:null,review:null,tags:[]});
+        ratings.push({profile_id:3,game_id:6,score:95,tier:null,status:null,review:null,tags:[]});
+        return reply(200,{ok:true});
+      }
       if(url.pathname==="/__tier-drag-board"){
         ratings=ratings.filter(r=>r.profile_id!==2);
         for(let i=1;i<=16;i++)ratings.push({profile_id:2,game_id:i,score:i<=8?93:90,tier:i<=8?"S":"A",tier_manual:true,status:null,review:null,review_updated_at:null,tags:[],hours_played:null,platform:null,completed_on:null,updated_at:"2026-09-29T12:00:00Z"});

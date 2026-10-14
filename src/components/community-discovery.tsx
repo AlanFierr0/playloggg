@@ -123,27 +123,18 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
               const game = games.get(row.gameId);
               return (
                 game && (
-                  <Link
-                    href={`/game/${game.slug}`}
-                    key={game.id}
-                    className="min-w-0 space-y-2"
-                  >
-                    <img
-                      src={game.cover_url}
-                      alt=""
-                      loading="lazy"
-                      className="w-full aspect-[3/4] object-cover rounded-lg"
-                    />
-                    <h3
-                      translate="no"
-                      className="font-headline-md text-headline-md break-words"
-                    >
-                      {game.title}
+                  <article key={game.id} className="group/game min-w-0 space-y-2">
+                    <div className="relative w-full aspect-[3/4] overflow-hidden rounded-lg bg-surface-container-low">
+                      <Link href={`/game/${game.slug}`} aria-label={game.title} className="block h-full">
+                        <img src={game.cover_url} alt="" loading="lazy" className="w-full h-full object-cover transition-opacity group-hover/game:opacity-90" />
+                      </Link>
+                      <GameLogAction slug={game.slug} logged={loggedSlugs.has(game.slug)} />
+                    </div>
+                    <h3 translate="no" className="font-headline-md text-headline-md break-words group-hover/game:text-primary">
+                      <Link href={`/game/${game.slug}`}>{game.title}</Link>
                     </h3>
-                    <p className="text-body-sm text-primary break-words">
-                      {row.value}
-                    </p>
-                  </Link>
+                    <p className="text-body-sm text-primary break-words">{row.value}</p>
+                  </article>
                 )
               );
             })}
