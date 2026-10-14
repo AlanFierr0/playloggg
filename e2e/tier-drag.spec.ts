@@ -83,6 +83,7 @@ test("compact board clears a tier while preserving the log entry",async({page,co
   await expect(remove).toHaveCSS("opacity","1");await remove.click();
   await expect(page.locator('#tier-unassigned [data-tier-game="elden-ring-shadow-of-the-erdtree"]')).toBeVisible();
   await expect(page.getByRole("button",{name:/Clear tier for/})).toHaveCount(0);
+  await expect(page.getByRole("status")).toHaveText("Tier saved.");
   await page.reload();await expect(page.getByRole("combobox",{name:"Tier for Elden Ring: Shadow of the Erdtree",exact:true})).toHaveValue("");
   const after=(await (await request.get("http://127.0.0.1:3101/__state")).json()).ratings;
   expect(after).toHaveLength(before.length);
