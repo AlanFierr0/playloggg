@@ -49,7 +49,7 @@ features must not be inferred as available from historical documentation.
   playtime totals include the number of entries with recorded hours.
 - Reviews are original text with clickable HTTP/HTTPS sources. Helpful votes are
   upvotes minus downvotes. Changing review text clears its votes; other edits keep them.
-  Automatic translation is pending in TODO.md.
+  Automatic English/Spanish review translation is active; translated reviews include a notice and Show original.
 - Steam import opens ratings for all selected games directly, imports them in batches and keeps
   existing logs. Rating order is descending playtime. Import queues and rating sessions
   are saved per profile in this browser. Leaving pauses work; Resume import retries
