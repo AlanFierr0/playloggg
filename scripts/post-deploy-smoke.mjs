@@ -19,6 +19,7 @@ const checks = [
   ["/profile/ranking", 307, null],
   ["/profile/reviews", 307, null],
   ["/profile/stats", 307, null],
+  ["/profile/timeline", 307, null],
   ["/u/alexvance", 404, null],
   ["/u/unknown_smoke_profile/favorites", 404, null],
   ["/search?q=Hades&from=/games", 200, "Search the game catalog"],

@@ -97,3 +97,7 @@ and deployment. Do not reset infrastructure or delete user data as part of routi
 maintenance. Owners can export logs, rankings, ranges and favorites as JSON or CSV from Settings.
 Recovery instructions and the isolated rehearsal are in `docs/data-recovery.md`.
 Production off-site backup scheduling is not configured or promised by the application.
+
+### Completion timeline
+
+Owners can open `/profile/timeline` from their profile tabs. Completed logs with valid saved completion dates are grouped newest-first by month, with year filtering and 12-month Load more. Month summaries use current scores and lifetime recorded playtime for those games, not historical score changes or hours earned in that month. Undated completed games remain separate with links to add their dates. No update/import/release date is substituted for a completion date. This page is authenticated and has no public counterpart.

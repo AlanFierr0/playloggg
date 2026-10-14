@@ -56,6 +56,13 @@ export async function startFixtureServer() {
     const url = new URL(req.url, fixtureOrigin);
     function reply(status, data) { res.writeHead(status, { "Content-Type": "application/json" }); res.end(data === undefined ? undefined : JSON.stringify(data)); }
     try {
+      if(url.pathname==="/__completion-timeline" && req.method==="POST"){
+        ratings=ratings.filter(r=>r.profile_id!==2);
+        const dates=["2025-03-02","2025-03-01","2024-02-29",null,"2023-02-29"];
+        for(let index=0;index<dates.length;index++)ratings.push({profile_id:2,game_id:index+1,score:index===0?0:index===1?90:null,tier:null,status:"completed",completed_on:dates[index],hours_played:index===0?0:index===1?12.5:null,review:null,tags:[],updated_at:"2026-10-14T00:00:00Z"});
+        for(let index=0;index<13;index++)ratings.push({profile_id:2,game_id:index+10,score:80,tier:null,status:"completed",completed_on:`${2010+index}-01-02`,hours_played:null,review:null,tags:[],updated_at:"2026-10-14T00:00:00Z"});
+        return reply(200,{ok:true});
+      }
       if(url.pathname==="/__taste-recommendations" && req.method==="POST"){
         ratings=ratings.filter(r=>![2,3].includes(r.profile_id));
         for(const profile_id of [2,3])for(let game_id=1;game_id<=5;game_id++)ratings.push({profile_id,game_id,score:90,tier:null,status:null,review:null,tags:[]});

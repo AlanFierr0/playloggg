@@ -22,8 +22,9 @@ export function ProfileNavigation() {
     ["Overview", base], ["Ranking", `${base}/ranking`],
     ...(publicBase ? [["Tier List", `${base}/tiers`]] : []),
     ["Reviews", `${base}/reviews`], ["Stats", `${base}/stats`],
+    ...(!publicBase ? [["Timeline", "/profile/timeline"]] : []),
   ];
-  return <><nav ref={navigation} aria-label={t("Profile sections")} className={`relative flex overflow-x-auto overscroll-x-contain lg:grid ${publicBase ? "lg:grid-cols-5" : "lg:grid-cols-4"} gap-2 rounded-xl bg-surface-container-low p-2`}>
+  return <><nav ref={navigation} aria-label={t("Profile sections")} className="relative flex overflow-x-auto overscroll-x-contain lg:grid lg:grid-cols-5 gap-2 rounded-xl bg-surface-container-low p-2">
     {items.map(([label, href]) => <Link key={href} href={href} aria-current={path === href ? "page" : undefined} className={`min-h-12 shrink-0 inline-flex justify-center items-center rounded-lg px-4 py-3 text-center font-label-md ${path === href ? "bg-primary-container text-on-primary-container font-semibold" : "text-on-surface-variant hover:bg-surface-container-high hover:text-primary"}`}>{t(label)}</Link>)}
   </nav>
   {publicBase && path !== publicBase && (

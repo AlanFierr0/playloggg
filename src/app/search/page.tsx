@@ -32,7 +32,7 @@ async function safeReturnPath(value?: string): Promise<string> {
   } else if (path.startsWith("/game/")) {
     return await getCatalogGame(path.slice(6)) ? path : "/";
   } else if (!/^\/u\/[a-z0-9][a-z0-9_]{2,29}(?:\/(?:ranking|tiers|reviews|stats|favorites)|\/game\/[a-z0-9]+(?:-[a-z0-9]+)*)?$/.test(path)
-    && !["/", "/profile", "/profile/ranking", "/profile/reviews", "/profile/stats", "/profile/favorites", "/profile/social", "/profile/import/steam", "/settings", "/tiers"].includes(path)) return "/";
+    && !["/", "/profile", "/profile/ranking", "/profile/reviews", "/profile/stats", "/profile/timeline", "/profile/favorites", "/profile/social", "/profile/import/steam", "/settings", "/tiers"].includes(path)) return "/";
   return `${path}${query.size ? `?${query}` : ""}`;
 }
 

@@ -1416,5 +1416,16 @@
   "Game type": "Tipo de juego",
   "Campaign": "Campaña",
   "Ongoing online": "Online continuo",
-  "Game type preference could not be saved in this browser.": "No se pudo guardar el tipo de juego en este navegador."
+  "Game type preference could not be saved in this browser.": "No se pudo guardar el tipo de juego en este navegador.",
+  "Timeline": "Cronología",
+  "Completion timeline": "Historial de juegos completados",
+  "Your finished games, month by month.": "Tus juegos completados, mes a mes.",
+  "Dated completions": "Completados con fecha",
+  "Recorded playtime": "Horas registradas",
+  "Completion months": "Meses con juegos completados",
+  "Playtime and scores are current values for games completed in each month, not a history of changes.": "Las horas y puntuaciones son los valores actuales de los juegos completados en cada mes, no un historial de cambios.",
+  "Your timeline starts with a completion date.": "Tu cronología empieza con una fecha de finalización.",
+  "Mark a game completed and add its completion date to see it here.": "Marcá un juego como completado y agregá su fecha de finalización para verlo acá.",
+  "Completed without a date": "Completados sin fecha",
+  "Add a completion date to place these games on your timeline.": "Agregá una fecha de finalización para ubicar estos juegos en tu cronología."
 }
