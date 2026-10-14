@@ -22,7 +22,8 @@ export function PlaybackStatusPicker({slug,value,onChange}:{slug:string;value:Pl
     getGamePlayStyle(slug).then(style=>{if(!ignore)setDetected(style);}).catch(()=>{});
     return ()=>{ignore=true;};
   },[slug,storageKey]);
-  const style=chosen??statusPlayStyle(value)??detected??"campaign";
+  const savedStyle=statusPlayStyle(value);
+  const style=chosen??(savedStyle==="ongoing"?"ongoing":detected??savedStyle??"campaign");
   const choices=playbackGroups[style];
   // Keep an existing saved status visible when the user switches groups.
   const visible=value&&!choices.includes(value)?[...choices,value]:choices;
