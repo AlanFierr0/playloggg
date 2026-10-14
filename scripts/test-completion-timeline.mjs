@@ -21,12 +21,12 @@ test("unknown scores and playtime stay unknown and update timestamps never becom
 });
 
 
-test("completion chart counts real dated games, aggregates years and includes zero months",()=>{
- const months=completionTimeline([game("a","2025-03-02"),game("b","2025-03-01"),game("c","2024-02-29"),game("undated",null)]).months;
- assert.deepEqual(completionChart(months),[{period:"2024",count:1},{period:"2025",count:2}]);
- const chart=completionChart(months,"2025");assert.equal(chart.length,12);
- assert.equal(chart[0].period,"2025-01");assert.equal(chart[0].count,0);
- assert.equal(chart[2].period,"2025-03");assert.equal(chart[2].count,2);
- assert.equal(chart[11].period,"2025-12");assert.equal(chart.reduce((sum,bar)=>sum+bar.count,0),2);
- assert.deepEqual(completionChart([]),[]);
+test("completion orbit aggregates each month across years and retains empty months",()=>{
+ const months=completionTimeline([game("a","2025-03-02"),game("b","2025-03-01"),game("c","2024-02-29"),game("d","2024-03-02"),game("undated",null)]).months;
+ const chart=completionChart(months);assert.equal(chart.length,12);
+ assert.equal(chart[0].period,"01");assert.equal(chart[0].count,0);
+ assert.equal(chart[1].count,1);assert.equal(chart[2].period,"03");assert.equal(chart[2].count,3);
+ assert.equal(chart[11].period,"12");assert.equal(chart.reduce((sum,point)=>sum+point.count,0),4);
+ assert.equal(completionChart(months.filter(group=>group.month.startsWith("2025")))[2].count,2);
+ assert.equal(completionChart([]).reduce((sum,point)=>sum+point.count,0),0);
 });

@@ -1428,8 +1428,8 @@
   "Mark a game completed and add its completion date to see it here.": "Marcá un juego como completado y agregá su fecha de finalización para verlo acá.",
   "Completed without a date": "Completados sin fecha",
   "Add a completion date to place these games on your timeline.": "Agregá una fecha de finalización para ubicar estos juegos en tu cronología.",
-  "Completion history": "Historial de finalizaciones",
-  "Completed games by month": "Juegos completados por mes",
-  "Completed games by year": "Juegos completados por año",
-  "Completion chart": "Gráfico de juegos completados"
+  "Completion chart": "Gráfico de juegos completados",
+  "Your gaming orbit": "Tu órbita de juegos",
+  "Larger circles mean more completed games. Select a month to explore it.": "Los círculos más grandes indican más juegos completados. Elegí un mes para explorarlo.",
+  "All months": "Todos los meses"
 }

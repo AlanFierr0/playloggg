@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { ProfileNavigation } from "@/components/profile-navigation";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { useMessages, useSitePreferences } from "@/components/site-preferences";
@@ -8,21 +8,23 @@ import { completionChart, completionTimeline } from "@/lib/completion-timeline";
 
 export function ProfileTimelineScreen() {
   const { games } = usePortfolio(), t = useMessages(), { locale } = useSitePreferences();
-  const chart = useRef<HTMLDivElement>(null);
+  const [selectedMonth, setSelectedMonth] = useState("");
   const [year, setYear] = useState(""), [limit, setLimit] = useState(12);
   const timeline = completionTimeline(games);
   const years = [...new Set(timeline.months.map(group => group.month.slice(0, 4)))];
   const months = timeline.months.filter(group => !year || group.month.startsWith(year));
-  const bars = completionChart(months, year);
-  const peak = Math.max(1, ...bars.map(bar => bar.count));
+  const points = completionChart(months);
+  const shownMonths = months.filter(group => !selectedMonth || group.month.endsWith(selectedMonth));
+  const peak = Math.max(1, ...points.map(point => point.count));
   const dated = months.flatMap(group => group.games);
   const recorded = dated.filter(game => game.hoursPlayed != null);
   const number = (value: number) => value.toLocaleString(locale, { maximumFractionDigits: 2 });
   const monthFormat = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "UTC" });
+  const orbitMonthFormat = new Intl.DateTimeFormat(locale, { month: "long", timeZone: "UTC" });
   const shortMonthFormat = new Intl.DateTimeFormat(locale, { month: "short", timeZone: "UTC" });
   const dayFormat = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", timeZone: "UTC" });
   const date = (value: string, format: Intl.DateTimeFormat) => format.format(new Date(`${value}T00:00:00Z`));
-  function chooseYear(value: string) { setYear(value); setLimit(12); if (chart.current) chart.current.scrollLeft = 0; }
+  function chooseYear(value: string) { setYear(value); setSelectedMonth(""); setLimit(12); }
   return <section className="site-container mx-auto w-full min-w-0 space-y-8 px-4 py-8 sm:px-6 lg:px-12">
     <ProfileNavigation />
     <header className="space-y-5 border-b border-outline-variant/30 pb-6">
@@ -38,24 +40,32 @@ export function ProfileTimelineScreen() {
       <p className="max-w-3xl text-body-sm text-on-surface-variant">{t("Playtime and scores are current values for games completed in each month, not a history of changes.")}</p>
     </header>
     {months.length > 0 && <figure className="space-y-4 rounded-2xl border border-outline-variant/20 bg-surface-container-low p-4 sm:p-6">
-      <figcaption className="space-y-1"><h2 className="font-headline-lg text-headline-lg">{t("Completion history")}</h2><p className="text-body-sm text-on-surface-variant">{t(year ? "Completed games by month" : "Completed games by year")}</p></figcaption>
-      <div className="flex min-w-0 gap-3">
-        <div aria-hidden="true" className="mt-8 flex h-40 w-7 shrink-0 flex-col justify-between text-body-sm tabular-nums text-on-surface-variant"><span className="-translate-y-1/2">{peak}</span><span className="translate-y-1/2">0</span></div>
-        <div ref={chart} role="region" aria-label={t("Completion chart")} tabIndex={0} className="min-w-0 flex-1 overflow-x-auto rounded-lg pb-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
-          <ol className="flex min-w-full gap-2 sm:gap-3">{bars.map(bar => {
-            const label = year ? date(`${bar.period}-01`, monthFormat) : bar.period;
-            return <li key={bar.period} className="min-w-11 flex-1" data-completion-period={bar.period} data-completion-count={bar.count}>
-              <button type="button" disabled={!bar.count} aria-label={`${label}: ${bar.count} ${t("Completed games")}`} onClick={() => { if (year) document.getElementById(`completion-${bar.period}`)?.scrollIntoView({ block: "start" }); else { chooseYear(bar.period); chart.current?.focus(); } }} className="group flex w-full flex-col items-center gap-2 rounded-lg px-1 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary disabled:cursor-default">
-                <span className="flex h-48 w-full flex-col items-center justify-end gap-1 border-b border-outline-variant/40"><span className="text-body-sm font-semibold tabular-nums text-on-surface">{bar.count}</span><span aria-hidden="true" className="w-full max-w-12 rounded-t-md bg-primary/80 transition-colors group-hover:bg-primary motion-reduce:transition-none" style={{ height: `${bar.count / peak * 160}px` }} /></span>
-                <span className="text-body-sm text-on-surface-variant">{year ? date(`${bar.period}-01`, shortMonthFormat) : bar.period}</span>
-              </button>
-            </li>;
-          })}</ol>
+      <figcaption className="space-y-1"><h2 className="font-headline-lg text-headline-lg">{t("Your gaming orbit")}</h2><p className="text-body-sm text-on-surface-variant">{t("Larger circles mean more completed games. Select a month to explore it.")}</p></figcaption>
+      <div role="region" aria-label={t("Completion chart")} className="relative mx-auto aspect-square w-full max-w-[520px] rounded-xl">
+        <div aria-hidden="true" className="absolute inset-[15%] rounded-full border border-dashed border-outline-variant/60" />
+        <div aria-hidden="true" className="absolute inset-[30%] rounded-full border border-outline-variant/20" />
+        <div className="absolute inset-[32%] flex flex-col items-center justify-center text-center">
+          {selectedMonth && <p className="text-body-sm text-on-surface-variant">{date(`2000-${selectedMonth}-01`, orbitMonthFormat)}</p>}
+          <p className="text-body-sm text-on-surface-variant">{year || t("All years")}</p>
+          <p className="text-[36px] font-semibold leading-tight tabular-nums text-primary sm:text-[52px]">{selectedMonth ? points.find(point => point.period === selectedMonth)!.count : dated.length}</p>
+          <p className="text-label-sm text-on-surface-variant">{t("Completed games")}</p>
         </div>
+        <ol>{points.map((point, index) => {
+          const angle = index * Math.PI / 6;
+          const label = date(`2000-${point.period}-01`, orbitMonthFormat);
+          const diameter = point.count ? Math.max(24, Math.sqrt(point.count / peak) * 42) : 18;
+          const selected = selectedMonth === point.period;
+          return <li key={point.period} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${50 + 35 * Math.sin(angle)}%`, top: `${50 - 35 * Math.cos(angle)}%` }} data-completion-period={point.period} data-completion-count={point.count}>
+            <button type="button" disabled={!point.count} aria-pressed={selected} aria-label={`${label}: ${point.count} ${t("Completed games")}`} onClick={() => { setSelectedMonth(selected ? "" : point.period); setLimit(12); }} className="group relative flex h-11 w-11 items-center justify-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-default">
+              <span style={{ width: `${diameter}px`, height: `${diameter}px` }} className={`inline-flex shrink-0 items-center justify-center rounded-full text-label-sm font-semibold tabular-nums motion-safe:transition-[transform,background-color] motion-safe:duration-150 ${point.count ? "bg-primary text-on-primary group-hover:bg-primary-container group-hover:text-on-primary-container motion-safe:group-hover:scale-110" : "border border-outline-variant/60 text-on-surface-variant"} ${selected ? "ring-2 ring-primary ring-offset-4 ring-offset-surface-container-low" : ""}`}>{point.count || ""}</span>
+              <span className={`absolute top-full mt-1 whitespace-nowrap text-label-sm ${selected ? "font-semibold text-primary" : "text-on-surface-variant"}`}>{date(`2000-${point.period}-01`, shortMonthFormat)}</span>
+            </button>
+          </li>;
+        })}</ol>
       </div>
-      <p className="text-center text-body-sm text-on-surface-variant">{t(year ? "Month" : "Year")}</p>
+      <div className="flex justify-center"><button type="button" aria-pressed={!selectedMonth} onClick={() => { setSelectedMonth(""); setLimit(12); }} className={`min-h-11 rounded-xl px-4 text-body-sm ${!selectedMonth ? "bg-primary/10 text-primary" : "text-on-surface-variant hover:bg-surface-container"}`}>{t("All months")}</button></div>
     </figure>}
-    {months.length ? <ol className="space-y-10 border-l border-outline-variant/40 pl-5 sm:pl-8">{months.slice(0, limit).map(group => <li key={group.month} id={`completion-${group.month}`} className="relative scroll-mt-24" data-timeline-month={group.month}>
+    {shownMonths.length ? <ol className="space-y-10 border-l border-outline-variant/40 pl-5 sm:pl-8">{shownMonths.slice(0, limit).map(group => <li key={group.month} id={`completion-${group.month}`} className="relative scroll-mt-24" data-timeline-month={group.month}>
       <span aria-hidden="true" className="absolute -left-[26px] top-2 h-3 w-3 rounded-full bg-primary sm:-left-[38px]" />
       <section className="space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -68,7 +78,7 @@ export function ProfileTimelineScreen() {
         </Link>)}</div>
       </section>
     </li>)}</ol> : <div className="rounded-2xl border border-outline-variant/20 bg-surface-container-low p-6 sm:p-8 space-y-3"><h2 className="font-headline-lg text-headline-lg">{t("Your timeline starts with a completion date.")}</h2><p className="text-body-md text-on-surface-variant">{t("Mark a game completed and add its completion date to see it here.")}</p><Link href="/log" className="ui-action bg-primary text-on-primary">{t("Log a game")}</Link></div>}
-    {months.length > limit && <button type="button" onClick={() => setLimit(value => value + 12)} className="ui-action bg-surface-container-high">{t("Load more")}</button>}
+    {shownMonths.length > limit && <button type="button" onClick={() => setLimit(value => value + 12)} className="ui-action bg-surface-container-high">{t("Load more")}</button>}
     {timeline.undated.length > 0 && <section className="space-y-4 border-t border-outline-variant/30 pt-6"><h2 className="font-headline-lg text-headline-lg">{t("Completed without a date")} <span className="text-on-surface-variant">({timeline.undated.length})</span></h2><p className="text-body-sm text-on-surface-variant">{t("Add a completion date to place these games on your timeline.")}</p><div className="flex flex-wrap gap-2">{timeline.undated.map(game => <Link key={game.slug} href={`/log?game=${encodeURIComponent(game.slug)}`} translate="no" className="inline-flex min-h-11 items-center rounded-xl border border-outline-variant/30 px-3 text-body-sm hover:bg-surface-container-low focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">{game.title}</Link>)}</div></section>}
   </section>;
 }
