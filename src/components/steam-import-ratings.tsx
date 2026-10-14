@@ -5,6 +5,7 @@ import { useMessages } from "@/components/site-preferences";
 import { TierBadge, ScoreStars } from "@/components/rating-controls";
 import { SteamGameCover } from "@/components/steam-game-cover";
 import { getSteamReviewSummary, saveSteamImportRating, type SteamReviewSummary, type LibraryRow, type ImportedSteamRating } from "@/app/actions/steam-library";
+import { PlaybackStatusPicker } from "@/components/playback-status-picker";
 import { playbackLabels } from "@/lib/playback-status";
 import type { Tier, PlaybackStatus } from "@/types/domain";
 
@@ -56,10 +57,7 @@ export function SteamRatingEditor({ game, draft, onDraft, onNext }: { game: Stea
     <fieldset disabled={saving} className="min-w-0 space-y-5 disabled:opacity-60">
       <div className="flex items-center justify-between gap-3"><span>{t("Tier")}</span><TierBadge value={tier} onChange={setTier}/></div>
       <div className="space-y-3"><label className="block text-center">{t("Score")}<span className="flex justify-center items-baseline gap-2"><input aria-label={t("Score")} inputMode="numeric" maxLength={3} style={{fontSize:"clamp(2rem, 6vw, 3rem)"}} value={score} placeholder="—" onChange={event=>{const value=event.target.value;if(/^\d{0,3}$/.test(value)&&(value===""||Number(value)<=100))setScore(value);}} className="w-[3ch] min-h-14 border-0 bg-transparent text-center font-display-lg text-display-lg text-primary focus:outline-none focus:ring-2 focus:ring-primary rounded"/><span className="text-on-surface-variant">/100</span></span></label>{score!=="" && <ScoreStars score={Number(score)}/>}<input type="range" aria-label={t("Numerical score from 0 to 100")} min={0} max={100} step={1} value={Number(score)} onChange={event=>setScore(event.target.value)} className="score-slider w-full"/>{score!=="" && <button type="button" className="block mx-auto min-h-11 text-primary" onClick={()=>setScore("")}>{t("Remove score")}</button>}</div>
-      <div role="group" aria-label={t("Playback status")} className="space-y-2">
-        <div className="flex items-center justify-between gap-2"><span>{t("Playback status")}</span>{!status&&<span className="text-body-sm text-on-surface-variant">{t("Not set")}</span>}</div>
-        <div className="flex w-full min-w-0 flex-wrap gap-2">{Object.entries(playbackLabels).map(([value,label])=><button key={value} type="button" aria-pressed={status===value} onClick={()=>setStatus(status===value ? null : value as PlaybackStatus)} className={`min-h-11 shrink-0 whitespace-nowrap rounded-xl px-3 py-2 text-xs sm:text-sm leading-snug focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary ${status===value ? "bg-primary-container text-on-primary-container font-semibold" : "bg-surface-container text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface"}`}>{t(label)}</button>)}</div>
-      </div>
+      <PlaybackStatusPicker key={game.slug} slug={game.slug} value={status} onChange={setStatus}/>
     </fieldset>
     {message && <p role="alert" className="text-error">{t(message)}</p>}
     <div className="flex flex-wrap justify-between gap-3"><button disabled={saving} className="min-h-11 text-primary px-3 disabled:opacity-50" onClick={onNext}>{t("Skip this game")}</button><button disabled={saving} className={button} onClick={save}>{t(saving ? "Saving…" : "Save and next")}</button></div>

@@ -54,6 +54,8 @@ features must not be inferred as available from historical documentation.
   existing logs. Rating order is descending playtime. Import queues and rating sessions
   are saved per profile in this browser. Leaving pauses work; Resume import retries
   safely when returning. Nothing runs while the browser is closed.
+- Playback choices distinguish campaigns from ongoing online games using catalog metadata.
+  Users can switch groups; manual group preferences are remembered per profile/game in this browser.
 - Played platforms include Nintendo consoles/handhelds, Sega, mobile and browser.
   Completion statistics exclude ongoing statuses and show a separate ongoing summary.
 - English/Spanish (Argentina), light/dark themes, keyboard access and reduced motion

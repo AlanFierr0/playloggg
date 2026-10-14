@@ -138,6 +138,10 @@ export async function startFixtureServer() {
       }
       if (url.pathname === "/__provider-games") {
         let body=""; for await (const part of req) body+=part;
+        if(body.includes("game_modes.name,keywords.name")){
+          const id=Number(body.match(/where id = (\d+)/)?.[1]);
+          return reply(200,[{id,game_modes:[{name:id===3?"Massively multiplayer online (MMO)":"Single player"},...(id===2?[{name:"Multiplayer"},{name:"Co-operative"}]:[])],keywords:[]}]);
+        }
         const candidate={id:9001,name:"Unified Fixture Adventure",slug:"unified-fixture-adventure",first_release_date:1577836800,platforms:[{name:"PC"}],genres:[{name:"Adventure"}]};
         if(body.includes("external_games.uid"))return reply(200,[{...candidate,id:1,name:"Hades",slug:"hades",genres:[{name:"RPG"}],external_games:[{uid:"101",external_game_source:1}]},{id:2,external_games:[{uid:"102",external_game_source:1}]},{...candidate,id:9004,name:"Steam Fixture Adventure",slug:"steam-fixture-adventure",genres:[{name:"Adventure"}],external_games:[{uid:"103",external_game_source:1}]},...Array.from({length:2},(_,index)=>({...candidate,id:9005+index,name:"ZZZ Fixture "+index,slug:"zzz-fixture-"+index,external_games:[{uid:String(200+index),external_game_source:1}]}))]);
         if(body.includes("where id = 9004"))return reply(200,[{...candidate,id:9004,name:"Steam Fixture Adventure",slug:"steam-fixture-adventure"}]);

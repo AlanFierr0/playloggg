@@ -2,7 +2,7 @@ import "server-only";
 import { createAuthAdmin } from "@/lib/supabase/auth-admin";
 
 export const operationLimits = {
- search: [30, 600], import: [120, 1500], steam: [120, 1500], avatar: [6, 30], translation: [60, 500],
+ metadata: [120, 1500], search: [30, 600], import: [120, 1500], steam: [120, 1500], avatar: [6, 30], translation: [60, 500],
 } as const;
 export async function checkOperationLimit(actor: string, operation: keyof typeof operationLimits) {
   const admin = createAuthAdmin();

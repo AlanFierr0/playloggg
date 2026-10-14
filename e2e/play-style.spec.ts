@@ -1,0 +1,33 @@
+import {test,expect} from "./test";
+// @ts-expect-error Test-only fixture identity.
+import {authCookie} from "./fixture-server.mjs";
+test("game types detect ongoing games, keep co-op campaigns and allow a manual status switch",async({page,context})=>{
+  await context.addCookies([authCookie]);
+  await page.goto("/log?game=fixture-game-0");
+  await expect(page.getByLabel("Game type",{exact:true})).toHaveValue("ongoing");
+  const statuses=page.getByRole("group",{name:"Playback status",exact:true});
+  await expect(statuses.getByRole("button",{name:"Currently playing",exact:true})).toBeVisible();
+  await expect(statuses.getByRole("button",{name:"Completed",exact:true})).toHaveCount(0);
+  await statuses.getByRole("button",{name:"Paused",exact:true}).click();
+  await page.locator("#commit-rating").click();await expect(page).toHaveURL(/\/profile$/);
+  await page.goto("/log?game=fixture-game-0");
+  await expect(statuses.getByRole("button",{name:"Paused",exact:true})).toHaveAttribute("aria-pressed","true");
+  await page.getByLabel("Game type",{exact:true}).selectOption("campaign");
+  await expect(statuses.getByRole("button",{name:"Paused",exact:true})).toHaveAttribute("aria-pressed","true");
+  await expect(statuses.getByRole("button",{name:"Completed",exact:true})).toBeVisible();
+  await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");
+  await expect(page.getByLabel("Game type",{exact:true})).toHaveValue("campaign");
+  await expect(statuses.getByRole("button",{name:"Currently playing",exact:true})).toHaveCount(0);
+  await page.getByLabel("Game type",{exact:true}).selectOption("ongoing");
+  await expect(statuses.getByRole("button",{name:"In Progress",exact:true})).toHaveAttribute("aria-pressed","true");
+  await statuses.getByRole("button",{name:"Stopped playing",exact:true}).click();
+  await page.locator("#commit-rating").click();await expect(page).toHaveURL(/\/profile$/);
+  await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");
+  await expect(page.getByLabel("Game type",{exact:true})).toHaveValue("ongoing");
+  await expect(statuses.getByRole("button",{name:"Stopped playing",exact:true})).toHaveAttribute("aria-pressed","true");
+  await statuses.getByRole("button",{name:"Backlog",exact:true}).click();
+  await page.locator("#commit-rating").click();await expect(page).toHaveURL(/\/profile$/);
+  await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");await page.reload();
+  await expect(page.getByLabel("Game type",{exact:true})).toHaveValue("ongoing");
+  await expect(statuses.getByRole("button",{name:"Backlog",exact:true})).toHaveAttribute("aria-pressed","true");
+});

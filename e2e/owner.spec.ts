@@ -67,6 +67,7 @@ test("live-service statuses save, reload and filter without changing scores or t
  await context.addCookies([authCookie]);
  for(const [status,label] of [["active","Currently playing"],["paused","Paused"],["stopped","Stopped playing"]]){
    await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");
+   await page.getByLabel("Game type",{exact:true}).selectOption("ongoing");
    await page.getByRole("group",{name:"Playback status",exact:true}).getByRole("button",{name:label,exact:true}).click();
    await page.locator("#commit-rating").click();
    await expect(page).toHaveURL(/\/profile$/);

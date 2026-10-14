@@ -24,6 +24,7 @@ test("Nintendo and other platform choices persist through the editor and stats",
 test("ongoing games have their own summary and do not lower completion",async({page,context})=>{
   await context.addCookies([authCookie]);
   await page.goto("/log?game=hades");
+  await page.getByLabel("Game type",{exact:true}).selectOption("ongoing");
   await page.locator("#status-group").getByRole("button",{name:"Currently playing",exact:true}).click();
   await page.locator("#commit-rating").click();
   await expect(page).toHaveURL(/\/profile$/);

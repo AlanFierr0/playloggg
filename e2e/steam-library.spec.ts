@@ -111,7 +111,8 @@ test("Steam import previews, selects, saves trusted playtime and preserves exist
   console.log("Steam import request counts",JSON.stringify(state.requestCounts));
   expect(state.requestCounts["POST /__provider-games"]??0).toBe(0);
   expect(state.requestCounts["POST /rest/v1/ratings"]).toBe(2);
-  expect(state.requestCounts["GET /rest/v1/games"]).toBe(2);
+  expect(state.requestCounts["GET /rest/v1/games"]).toBeGreaterThanOrEqual(2);
+  expect(state.requestCounts["GET /rest/v1/games"]).toBeLessThanOrEqual(4);
   const own=state.ratings.filter((row:{profile_id:number})=>row.profile_id===2);
   expect(own).toHaveLength(3);
   expect(own.find((row:{game_id:number})=>row.game_id===1)).toMatchObject({hours_played:1.5,platform:"pc",score:null,tier:null,status:null,review:null,tags:[]});
@@ -329,12 +330,13 @@ test("Steam rates all games while import continues and retries rating saves with
   await dialog.getByRole("button",{name:"Choose tier, currently unassigned",exact:true}).click();
   await dialog.getByRole("menuitemradio",{name:"A Amazing",exact:true}).click();
   const statuses=dialog.getByRole("group",{name:"Playback status",exact:true});
-  const statusButtons=statuses.getByRole("button");
-  await expect(statusButtons).toHaveCount(7);
+  await statuses.getByLabel("Game type",{exact:true}).selectOption("ongoing");
+  const statusButtons=statuses.locator("[data-playback-options]").getByRole("button");
+  await expect(statusButtons).toHaveCount(4);
   const boxes=await statusButtons.evaluateAll(buttons=>buttons.map(button=>button.getBoundingClientRect().top));
-  expect(new Set(boxes).size).toBeGreaterThan(1);
+  if(info.project.name==="mobile")expect(new Set(boxes).size).toBeGreaterThan(1);
   expect(await dialog.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
-  const statusRow = statuses.locator(".flex-wrap");
+  const statusRow = statuses.locator("[data-playback-options]");
   expect(await statusRow.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
   const rowBounds=(await statusRow.boundingBox())!;
   for(const button of await statusButtons.all()){

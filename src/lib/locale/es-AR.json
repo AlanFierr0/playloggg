@@ -1412,5 +1412,9 @@
   "Sort reviews": "Ordenar reseñas",
   "Newest reviews": "Reseñas más recientes",
   "Most helpful": "Más útiles",
-  "Review updated": "Reseña actualizada"
+  "Review updated": "Reseña actualizada",
+  "Game type": "Tipo de juego",
+  "Campaign": "Campaña",
+  "Ongoing online": "Online continuo",
+  "Game type preference could not be saved in this browser.": "No se pudo guardar el tipo de juego en este navegador."
 }
