@@ -16,7 +16,7 @@ function HomeGameCard({ game, continuing = false }: { game: HomeEntry; continuin
   return <article className="group/game flex h-full min-w-0 items-start gap-3 sm:gap-4">
     <Link href={`/game/${game.slug}`} aria-label={game.title} className={`shrink-0 rounded-xl ${continuing ? "w-20 sm:w-24" : "w-14 sm:w-16"}`}><img src={game.cover} alt="" width={96} height={128} className="aspect-[3/4] w-full rounded-xl object-cover bg-surface-container-high" loading="lazy" /></Link>
     <div className="flex min-h-40 min-w-0 flex-1 flex-col gap-2">
-      <Link href={`/game/${game.slug}`} translate="no" className="block min-h-12 font-headline-md text-body-md font-semibold line-clamp-2 hover:text-primary">{game.title}</Link>
+      <Link href={`/game/${game.slug}`} translate="no" className={`block ${game.score === null ? "" : "min-h-12"} font-headline-md text-body-md font-semibold line-clamp-2 hover:text-primary`}>{game.title}</Link>
       <div className="flex min-h-8 flex-wrap items-center gap-2 text-body-sm">
         <span className="text-primary">{game.score === null ? t("Unrated") : `${game.score} / 100`}</span>
         {game.tier && <span className={`rounded px-2 py-0.5 font-label-sm text-label-sm ${tierColors[game.tier]}`}>{game.tier} · {t(tierLabels[game.tier])}</span>}

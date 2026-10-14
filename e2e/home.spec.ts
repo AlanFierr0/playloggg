@@ -209,3 +209,19 @@ test("guest home offers direct search and stays readable in both languages and t
     await page.screenshot({path:`e2e-artifacts/home-guest-${testInfo.project.name}-${locale}-${theme}.png`,fullPage:true});
   }
 });
+
+
+test("unrated recent entries do not reserve a blank title row",async({page,context})=>{
+ await context.addCookies([authCookie]);
+ await page.goto("/log?game=hades");await page.locator("#commit-rating").click();await expect(page).toHaveURL(/\/profile$/);
+ await page.goto("/");
+ const recent=page.getByRole("region",{name:"Recently updated",exact:true});
+ const card=recent.getByRole("article").filter({has:page.getByRole("link",{name:"Hades",exact:true})});
+ const title=card.getByRole("link",{name:"Hades",exact:true}).last();
+ const unrated=card.getByText("Unrated",{exact:true});
+ await expect(unrated).toBeVisible();
+ const titleBox=(await title.boundingBox())!,scoreBox=(await unrated.boundingBox())!;
+ expect(titleBox.height).toBeLessThan(32);
+ expect(scoreBox.y-(titleBox.y+titleBox.height)).toBeLessThanOrEqual(16);
+ await expect(card.getByRole("link",{name:"Edit log entry",exact:true})).toBeVisible();
+});
