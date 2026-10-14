@@ -78,9 +78,15 @@ test("compact board clears a tier while preserving the log entry",async({page,co
   if(await page.evaluate(()=>matchMedia("(hover: hover)").matches)){
     await expect(remove).toHaveCSS("opacity","0");
     await remove.focus();await expect(remove).toHaveCSS("opacity","1");
-    await remove.blur();await page.locator('[data-tier-game="elden-ring-shadow-of-the-erdtree"]').hover();
+    await remove.blur();
   }
-  await expect(remove).toHaveCSS("opacity","1");await remove.click();
+  // Scroll before hovering; locator.click can scroll the card away from the pointer.
+  await remove.scrollIntoViewIfNeeded();
+  await page.locator('[data-tier-game="elden-ring-shadow-of-the-erdtree"]').hover();
+  await expect(remove).toHaveCSS("opacity","1");
+  await expect(remove).toHaveCSS("pointer-events","auto");
+  const clearButton=(await remove.boundingBox())!;
+  await page.mouse.click(clearButton.x+clearButton.width/2,clearButton.y+clearButton.height/2);
   await expect(page.locator('#tier-unassigned [data-tier-game="elden-ring-shadow-of-the-erdtree"]')).toBeVisible();
   await expect(page.getByRole("button",{name:/Clear tier for/})).toHaveCount(0);
   await expect(page.getByRole("status")).toHaveText("Tier saved.");
