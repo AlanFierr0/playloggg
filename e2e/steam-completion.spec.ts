@@ -97,3 +97,18 @@ test("anonymous replay cannot confirm an owned Steam completion",async({page,con
   expect(response.ok).toBe(true);expect(await response.text()).toContain("Reload before retrying");
   expect((await state()).ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===2).completed_on).toBeNull();
 });
+
+test("completion scan remains available while the catalog loads and a rating session is hidden",async({page,context})=>{
+  await context.addCookies([authCookie]);await fetch(`${fixture}/__steam-user`,{method:"POST"});
+  await page.route("**/profile/import/steam",async route=>{if(route.request().method()==="POST")await new Promise(resolve=>setTimeout(resolve,700));await route.continue();});
+  await page.goto("/profile/import/steam");
+  const scan=page.getByRole("button",{name:"Find completion dates",exact:true});await expect(page.getByRole("button",{name:"Loading…",exact:true})).toBeVisible();await expect(scan).toBeEnabled();
+  await page.getByRole("checkbox",{name:"Select game Hades",exact:true}).check();
+  await expect(page.getByRole("button",{name:"Refresh library",exact:true})).toBeEnabled();
+  await page.unrouteAll({behavior:"wait"});
+  await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
+  const dialog=page.getByRole("dialog",{name:"Rate imported games",exact:true});await expect(dialog.getByRole("button",{name:"Use this date",exact:true})).toHaveCount(2);
+  await expect(scan).toBeDisabled();await page.keyboard.press("Escape");await expect(dialog).not.toBeVisible();await expect(scan).toBeEnabled();
+  await page.reload();await expect(page.getByRole("button",{name:"Resume rating games (1)",exact:true})).toBeVisible();await expect(scan).toBeEnabled();
+  await scan.click();await expect(page.getByRole("region",{name:"Steam completion dates",exact:true}).getByText(/Scan finished/)).toBeVisible();
+});
