@@ -220,7 +220,9 @@ existing [disabled leaked-password protection](https://supabase.com/docs/guides/
 ## Achievement completion-date suggestions
 
 **Find completion dates**, beside playtime sync, checks existing PC / Steam logs
-with missing dates. The scan processes five games per batch and at most two
+with missing dates and at least five hours of verified Steam playtime. Games below
+five hours skip achievement requests in both import rating and existing-log scans;
+manual completion dates remain available. The scan processes five games per batch and at most two
 Steam reads simultaneously; Stop scan pauses after the current reads. Retry
 unfinished games preserves earlier results. Ongoing/live-service games and
 active, paused or stopped entries are excluded.

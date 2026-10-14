@@ -262,7 +262,9 @@ export async function getSteamCompletionSuggestions(appId:unknown,slug:unknown,r
     if(!account?.profile||!steamIdentity(steamId))return empty;
     await checkOperationLimit(account.user.id,"steam");
     const library=await readSteamImportContext(account.user.id,steamId);
-    if(!library.some(game=>game.appId===appId))return empty;
+    const owned=library.find(game=>game.appId===appId);
+    if(!owned)return empty;
+    if(owned.hours<5)return {...empty,ok:true,message:"Achievement checks require at least 5 hours of Steam playtime."};
     const {data:game,error}=await account.supabase.from("games").select("id,igdb_id,released_on").eq("slug",slug).single();
     if(error||!game||!igdbId(game.igdb_id))return empty;
     const records=await queryIgdb(`fields id,external_games.uid,external_games.external_game_source; where id = ${game.igdb_id}; limit 1;`);
@@ -279,7 +281,8 @@ export async function listSteamCompletionLogs():Promise<{ok:boolean;message:stri
     const account=await getAccount();const steamId=account?.user.app_metadata.playlogg_steam_id;
     if(!account?.profile||!steamIdentity(steamId))throw new Error("Account unavailable");
     await checkOperationLimit(account.user.id,"steam");
-    const logged=await loggedSteamGames(account,await readSteamImportContext(account.user.id,steamId));
+    const library=(await readSteamImportContext(account.user.id,steamId)).filter(game=>game.hours>=5);
+    const logged=await loggedSteamGames(account,library);
     const eligible=[...logged].filter(([,rating])=>rating.platform==="pc"&&!rating.completed_on&&!["active","paused","stopped"].includes(rating.status??""));
     const games:SteamCompletionLog[]=[];
     for(let offset=0;offset<eligible.length;offset+=100){

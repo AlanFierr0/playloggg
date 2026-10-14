@@ -5,7 +5,7 @@ import {authCookie} from "./fixture-server.mjs";
 const fixture="http://127.0.0.1:3101";
 async function state(){return (await fetch(`${fixture}/__state`)).json();}
 test("Steam import confirms a chosen ending, allows correction, and restores date drafts",async({page,context})=>{
-  await context.addCookies([authCookie]);await fetch(`${fixture}/__steam-user`,{method:"POST"});
+  await context.addCookies([authCookie]);await fetch(`${fixture}/__steam-user`,{method:"POST"});await fetch(`${fixture}/__steam-five-hours`,{method:"POST"});
   await page.goto("/profile/import/steam");await page.getByRole("checkbox",{name:"Select game Hades",exact:true}).check();
   await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
   const dialog=page.getByRole("dialog",{name:"Rate imported games",exact:true});
@@ -24,10 +24,10 @@ test("Steam import confirms a chosen ending, allows correction, and restores dat
   await dialog.getByRole("button",{name:"Save and next",exact:true}).click();
   await expect(dialog.getByRole("button",{name:"Done",exact:true})).toBeVisible();
   row=(await state()).ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===1);
-  expect(row.completed_on).toBe("2025-07-04");expect(row.status).toBe("completed");expect(row.hours_played).toBe(1.5);expect(row.score).toBeNull();
+  expect(row.completed_on).toBe("2025-07-04");expect(row.status).toBe("completed");expect(row.hours_played).toBe(5);expect(row.score).toBeNull();
 });
 test("existing Steam logs require confirmation and retain all other entry details",async({page,context},testInfo)=>{
-  await context.addCookies([authCookie]);await fetch(`${fixture}/__steam-user`,{method:"POST"});await fetch(`${fixture}/__steam-completion-log`,{method:"POST"});
+  await context.addCookies([authCookie]);await fetch(`${fixture}/__steam-user`,{method:"POST"});await fetch(`${fixture}/__steam-five-hours`,{method:"POST"});await fetch(`${fixture}/__steam-completion-log`,{method:"POST"});
   const before=(await state()).ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===2);
   await page.goto("/profile/import/steam");await page.getByRole("button",{name:"Find completion dates",exact:true}).click();
   const panel=page.getByRole("region",{name:"Steam completion dates",exact:true});
@@ -47,7 +47,7 @@ test("existing Steam logs require confirmation and retain all other entry detail
   await expect(page.locator('time[datetime="2025-07-02"]')).toBeVisible();
 });
 test("completion confirmation preserves dates added concurrently",async({page,context})=>{
-  await context.addCookies([authCookie]);await fetch(`${fixture}/__steam-user`,{method:"POST"});await fetch(`${fixture}/__steam-completion-log`,{method:"POST"});
+  await context.addCookies([authCookie]);await fetch(`${fixture}/__steam-user`,{method:"POST"});await fetch(`${fixture}/__steam-five-hours`,{method:"POST"});await fetch(`${fixture}/__steam-completion-log`,{method:"POST"});
   await page.goto("/profile/import/steam");await page.getByRole("button",{name:"Find completion dates",exact:true}).click();
   const panel=page.getByRole("region",{name:"Steam completion dates",exact:true});await expect(panel.getByText(/Scan finished/)).toBeVisible();
   await fetch(`${fixture}/__steam-sync-entry`,{method:"POST"});
@@ -56,7 +56,7 @@ test("completion confirmation preserves dates added concurrently",async({page,co
   expect((await state()).ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===2).completed_on).toBe("2026-09-01");
 });
 test("Steam unavailable achievements and ongoing mode leave manual import usable",async({page,context})=>{
-  await context.addCookies([authCookie]);await fetch(`${fixture}/__steam-user`,{method:"POST"});
+  await context.addCookies([authCookie]);await fetch(`${fixture}/__steam-user`,{method:"POST"});await fetch(`${fixture}/__steam-five-hours`,{method:"POST"});
   await page.goto("/profile/import/steam");await page.getByRole("checkbox",{name:"Select game Steam Fixture Adventure",exact:true}).check();await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
   const dialog=page.getByRole("dialog",{name:"Rate imported games",exact:true});
   await expect(dialog.getByText("Steam achievements unavailable. You can enter a date manually.",{exact:true})).toBeVisible();
@@ -66,7 +66,7 @@ test("Steam unavailable achievements and ongoing mode leave manual import usable
   const snapshot=await state();const game=snapshot.games.find((row:{igdb_id:number})=>row.igdb_id===9004);const row=snapshot.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===game.id);expect(row.completed_on).toBeNull();expect(row.status).toBe("active");
 });
 test("Spanish completion scan is translated and can be stopped",async({page,context})=>{
-  await context.addCookies([authCookie,{name:"playlogg_locale",value:"es-AR",domain:"127.0.0.1",path:"/"}]);await fetch(`${fixture}/__steam-user`,{method:"POST"});await fetch(`${fixture}/__steam-completion-log`,{method:"POST"});
+  await context.addCookies([authCookie,{name:"playlogg_locale",value:"es-AR",domain:"127.0.0.1",path:"/"}]);await fetch(`${fixture}/__steam-user`,{method:"POST"});await fetch(`${fixture}/__steam-five-hours`,{method:"POST"});await fetch(`${fixture}/__steam-completion-log`,{method:"POST"});
   await page.goto("/profile/import/steam");
   await page.route("**/profile/import/steam",async route=>{if(route.request().method()==="POST")await new Promise(resolve=>setTimeout(resolve,400));await route.continue();});
   await page.getByRole("button",{name:"Buscar fechas de finalización",exact:true}).click();
@@ -77,29 +77,29 @@ test("Spanish completion scan is translated and can be stopped",async({page,cont
 });
 
 test("old import drafts resume and mismatched Steam IDs cannot reveal achievements",async({page,context})=>{
-  await context.addCookies([authCookie]);await fetch(`${fixture}/__steam-user`,{method:"POST"});
+  await context.addCookies([authCookie]);await fetch(`${fixture}/__steam-user`,{method:"POST"});await fetch(`${fixture}/__steam-five-hours`,{method:"POST"});
   await page.goto("/profile/import/steam");await page.getByRole("checkbox",{name:"Select game Hades",exact:true}).check();await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
   const dialog=page.getByRole("dialog",{name:"Rate imported games",exact:true});await expect(dialog.getByRole("button",{name:"Use this date",exact:true})).toHaveCount(2);
   await page.keyboard.press("Escape");
-  await page.evaluate(()=>{const key="playlogg-steam-ratings:2";const value=JSON.parse(localStorage.getItem(key)!);delete value.draft.completedOn;value.games[0].appId=104;localStorage.setItem(key,JSON.stringify(value));});
+  await page.evaluate(()=>{const key="playlogg-steam-ratings:2";const value=JSON.parse(localStorage.getItem(key)!);delete value.draft.completedOn;value.games[0].appId=102;localStorage.setItem(key,JSON.stringify(value));});
   await page.reload();await page.getByRole("button",{name:"Resume rating games (1)",exact:true}).click();
   await expect(dialog.locator("#date-input")).toHaveValue("");
   await expect(dialog.getByText("Steam achievements unavailable. You can enter a date manually.",{exact:true})).toBeVisible();await expect(dialog.getByRole("button",{name:"Use this date",exact:true})).toHaveCount(0);
 });
 test("anonymous replay cannot confirm an owned Steam completion",async({page,context})=>{
-  await context.addCookies([authCookie]);await fetch(`${fixture}/__steam-user`,{method:"POST"});await fetch(`${fixture}/__steam-completion-log`,{method:"POST"});
+  await context.addCookies([authCookie]);await fetch(`${fixture}/__steam-user`,{method:"POST"});await fetch(`${fixture}/__steam-five-hours`,{method:"POST"});await fetch(`${fixture}/__steam-completion-log`,{method:"POST"});
   await page.goto("/profile/import/steam");await page.getByRole("button",{name:"Find completion dates",exact:true}).click();
   const panel=page.getByRole("region",{name:"Steam completion dates",exact:true});await expect(panel.getByText(/Scan finished/)).toBeVisible();
   const captured=page.waitForRequest(request=>request.method()==="POST"&&Boolean(request.headers()["next-action"])&&Boolean(request.postData()?.includes("ENDING_A")));
   await panel.getByRole("button",{name:"Confirm completion",exact:true}).first().click();const action=await captured;await expect(panel.getByText("Completion saved.",{exact:true})).toBeVisible();
-  await fetch(`${fixture}/__reset`,{method:"POST"});await fetch(`${fixture}/__steam-user`,{method:"POST"});await fetch(`${fixture}/__steam-completion-log`,{method:"POST"});
+  await fetch(`${fixture}/__reset`,{method:"POST"});await fetch(`${fixture}/__steam-user`,{method:"POST"});await fetch(`${fixture}/__steam-five-hours`,{method:"POST"});await fetch(`${fixture}/__steam-completion-log`,{method:"POST"});
   const response=await fetch(action.url(),{method:"POST",headers:{"next-action":action.headers()["next-action"],"content-type":action.headers()["content-type"],origin:"http://127.0.0.1:3100"},body:action.postData()});
   expect(response.ok).toBe(true);expect(await response.text()).toContain("Reload before retrying");
   expect((await state()).ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===2).completed_on).toBeNull();
 });
 
 test("completion scan remains available while the catalog loads and a rating session is hidden",async({page,context})=>{
-  await context.addCookies([authCookie]);await fetch(`${fixture}/__steam-user`,{method:"POST"});
+  await context.addCookies([authCookie]);await fetch(`${fixture}/__steam-user`,{method:"POST"});await fetch(`${fixture}/__steam-five-hours`,{method:"POST"});
   await page.route("**/profile/import/steam",async route=>{if(route.request().method()==="POST")await new Promise(resolve=>setTimeout(resolve,700));await route.continue();});
   await page.goto("/profile/import/steam");
   const scan=page.getByRole("button",{name:"Find completion dates",exact:true});await expect(page.getByRole("button",{name:"Loading…",exact:true})).toBeVisible();await expect(scan).toBeEnabled();
@@ -111,4 +111,21 @@ test("completion scan remains available while the catalog loads and a rating ses
   await expect(scan).toBeDisabled();await page.keyboard.press("Escape");await expect(dialog).not.toBeVisible();await expect(scan).toBeEnabled();
   await page.reload();await expect(page.getByRole("button",{name:"Resume rating games (1)",exact:true})).toBeVisible();await expect(scan).toBeEnabled();
   await scan.click();await expect(page.getByRole("region",{name:"Steam completion dates",exact:true}).getByText(/Scan finished/)).toBeVisible();
+});
+
+test("Steam achievement checks skip games below five hours but retain manual dates",async({page,context})=>{
+  await context.addCookies([authCookie]);await fetch(`${fixture}/__steam-user`,{method:"POST"});
+  await page.goto("/profile/import/steam");await fetch(`${fixture}/__reset-request-counts`,{method:"POST"});await page.getByRole("checkbox",{name:"Select game Hades",exact:true}).check();await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
+  const dialog=page.getByRole("dialog",{name:"Rate imported games",exact:true});
+  await expect(dialog.getByText("Achievement checks require at least 5 hours of Steam playtime.",{exact:true})).toBeVisible();await expect(dialog.getByRole("button",{name:"Use this date",exact:true})).toHaveCount(0);
+  await page.keyboard.press("Escape");await page.getByRole("button",{name:"Find completion dates",exact:true}).click();
+  await expect(page.getByRole("region",{name:"Steam completion dates",exact:true}).getByRole("status")).toContainText("0 / 0");
+  await page.evaluate(()=>{const key="playlogg-steam-ratings:2";const value=JSON.parse(localStorage.getItem(key)!);value.games[0].hours=5;localStorage.setItem(key,JSON.stringify(value));});
+  await page.reload();await expect(page.getByRole("button",{name:"Refresh library",exact:true})).toBeEnabled();
+  await page.getByRole("button",{name:"Resume rating games (1)",exact:true}).click();
+  await expect(dialog.getByText("Achievement checks require at least 5 hours of Steam playtime.",{exact:true})).toBeVisible();
+  await dialog.locator("#date-input").fill("2025-08-01");await dialog.getByRole("button",{name:"Completed",exact:true}).click();await dialog.getByRole("button",{name:"Save and next",exact:true}).click();await dialog.getByRole("button",{name:"Done",exact:true}).click();
+  await page.getByRole("button",{name:"Find completion dates",exact:true}).click();await expect(page.getByRole("region",{name:"Steam completion dates",exact:true}).getByText(/Scan finished/)).toBeVisible();
+  const snapshot=await state();expect(snapshot.requestCounts["GET /__steam-achievements"]??0).toBe(0);
+  expect(snapshot.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===1).completed_on).toBe("2025-08-01");
 });

@@ -35,6 +35,7 @@ let quotaMode="allow";
 let accountDeleted=false;let failAuthDelete=false;let failStorageDelete=false;
 let profileDeleted=false;
 let steamMinutes=90;
+let steamAdventureMinutes=0;
 let favorites;
 let rankings=[];let curated=[];let listItems=[];let follows=[];let blocks=[];let likes=[];
 let pictures = new Map();
@@ -47,7 +48,7 @@ function reset() {reviewTranslations=[];translateCalls=0;translatedCharacters=0;
  for (const game_id of Array.from({length:19},(_,i)=>i+8)) for (const profile_id of [3,4]) ratings.push({profile_id,game_id,score:profile_id===3 ? 50 : 40,tier:null,status:"playing",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  profiles.forEach(p=>p.tier_ranges=structuredClone(defaultTierRanges));
  ratings.forEach(row=>{row.updated_at="2026-09-29T12:00:00Z";row.review_updated_at=row.review?.trim()?row.updated_at:null;row.tier_manual=Boolean(row.tier);if(!row.tier_manual)row.tier=tierForScore(row.score);});
- failSave = false;steamMinutes=90;profileDeleted=false; }
+ failSave = false;steamMinutes=90;steamAdventureMinutes=0;profileDeleted=false; }
 reset();
 
 // Deliberately limited contract double, not an implementation/proof of Supabase RLS.
@@ -84,7 +85,7 @@ export async function startFixtureServer() {
       }
       if(url.pathname==="/__slow-ratings" && req.method==="POST"){ratingsDelay=4000;return reply(200,{ok:true});}
       if(url.pathname==="/__reset-request-counts"){requestCounts={};return reply(200,{ok:true});}
-      if(!url.pathname.startsWith("/__") || ["/__provider-games","/__steam-library"].includes(url.pathname)){const key=`${req.method} ${url.pathname}`;requestCounts[key]=(requestCounts[key]??0)+1;}
+      if(!url.pathname.startsWith("/__") || ["/__provider-games","/__steam-library","/__steam-achievements"].includes(url.pathname)){const key=`${req.method} ${url.pathname}`;requestCounts[key]=(requestCounts[key]??0)+1;}
       if(url.pathname==="/__quota-partial-imports"&&req.method==="POST"){quotaMode="partial";games=games.filter(game=>![9005,9006].includes(game.igdb_id));return reply(200,{ok:true});}
       if (url.pathname === "/__quota-denied" && req.method === "POST") {quotaMode="deny";return reply(200,{ok:true});}
       if (url.pathname === "/__quota-unavailable" && req.method === "POST") {quotaMode="unavailable";return reply(200,{ok:true});}
@@ -147,14 +148,15 @@ export async function startFixtureServer() {
         return reply(200,{success:1,query_summary:{review_score_desc:"Mostly Positive",total_positive:80,total_reviews:100}});
       }
       if(url.pathname==="/__steam-completion-log" && req.method==="POST") {Object.assign(ratings.find(row=>row.profile_id===2&&row.game_id===2),{platform:"pc",hours_played:5,completed_on:null,tags:["keep"]});return reply(200,{ok:true});}
+      if(url.pathname==="/__steam-five-hours" && req.method==="POST") {steamMinutes=300;steamAdventureMinutes=300;return reply(200,{ok:true});}
       if(url.pathname === "/__steam-achievements") {
         const appId=url.searchParams.get("appId");
         if(appId==="103"||steamMode==="private")return reply(403,{playerstats:{success:false}});
-        return reply(200,{playerstats:{success:true,gameID:appId,achievements:[{apiname:"ENDING_A",name:"Story complete",description:"Finish the main story.",achieved:1,unlocktime:1751414400},{apiname:"ENDING_B",name:"Another ending",description:"Reach the secret ending.",achieved:1,unlocktime:1751500800},{apiname:"LEVEL",name:"First steps",description:"Complete chapter one.",achieved:1,unlocktime:1751328000}]}});
+        return reply(200,{playerstats:{success:true,steamID:"76561198000000000",gameName:"Fixture game",achievements:[{apiname:"ENDING_A",name:"Story complete",description:"Finish the main story.",achieved:1,unlocktime:1751414400},{apiname:"ENDING_B",name:"Another ending",description:"Reach the secret ending.",achieved:1,unlocktime:1751500800},{apiname:"LEVEL",name:"First steps",description:"Complete chapter one.",achieved:1,unlocktime:1751328000}]}});
       }
       if (url.pathname === "/__steam-library") {
         if(steamMode==="private")return reply(200,{response:{}});
-        return reply(200,{response:{game_count:128,games:[{appid:101,name:"Hades",playtime_forever:steamMinutes},{appid:102,name:"Elden Ring",playtime_forever:300},{appid:103,name:"Steam Fixture Adventure",playtime_forever:0},{appid:104,name:"Unmatched Fixture",playtime_forever:45},...Array.from({length:124},(_,index)=>({appid:200+index,name:"ZZZ Fixture "+index,playtime_forever:index===123?6000:0}))]}});
+        return reply(200,{response:{game_count:128,games:[{appid:101,name:"Hades",playtime_forever:steamMinutes},{appid:102,name:"Elden Ring",playtime_forever:300},{appid:103,name:"Steam Fixture Adventure",playtime_forever:steamAdventureMinutes},{appid:104,name:"Unmatched Fixture",playtime_forever:45},...Array.from({length:124},(_,index)=>({appid:200+index,name:"ZZZ Fixture "+index,playtime_forever:index===123?6000:0}))]}});
       }
       if (url.pathname === "/__provider-games") {
         let body=""; for await (const part of req) body+=part;

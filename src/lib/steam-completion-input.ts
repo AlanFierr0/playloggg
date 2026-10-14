@@ -12,10 +12,10 @@ export function completionAchievement(name:string,description:string):boolean {
       || /\bdefeat(?:ed)?\b.{0,25}\bfinal boss\b/.test(clause);
   });
 }
-export function parseSteamCompletions(value:unknown,appId:number,releasedOn:string|null,now=Date.now()):SteamCompletionCandidate[] {
+export function parseSteamCompletions(value:unknown,appId:number,releasedOn:string|null,now=Date.now(),steamId?:string):SteamCompletionCandidate[] {
   if (!value||typeof value!=="object"||!("playerstats" in value)) throw new Error("Steam achievements unavailable");
   const stats=value.playerstats as Record<string,unknown>|null;
-  if (!stats||stats.success!==true||(typeof stats.gameID!=="string"&&typeof stats.gameID!=="number")||Number(stats.gameID)!==appId||!Array.isArray(stats.achievements)) throw new Error("Steam achievements unavailable");
+  if (!stats||stats.success!==true||(stats.gameID!==undefined&&Number(stats.gameID)!==appId)||(steamId!==undefined&&stats.steamID!==steamId)||!Array.isArray(stats.achievements)) throw new Error("Steam achievements unavailable");
   const candidates=new Map<string,SteamCompletionCandidate>();
   for(const raw of stats.achievements.slice(0,5000)) {
     if(!raw||typeof raw!=="object")continue;

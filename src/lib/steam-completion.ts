@@ -12,7 +12,7 @@ const achievements=recentRead(async(key:string)=>{
   const response=await fetch(url,{cache:"no-store",redirect:"error",signal:AbortSignal.timeout(10000)});
   if(!response.ok)throw new Error("Steam achievements unavailable");
   const data:unknown=await response.json();
-  return parseSteamCompletions(data,appId,null);
+  return parseSteamCompletions(data,appId,null,Date.now(),steamId);
 },900_000,250);
 export async function readSteamCompletions(ownerId:string,steamId:string,appId:number,releasedOn:string|null,refresh=false) {
   const candidates=await achievements(JSON.stringify([ownerId,steamId,appId]),refresh);

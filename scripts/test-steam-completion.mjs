@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {completionAchievement,parseSteamCompletions} from "../src/lib/steam-completion-input.ts";
 const now=Date.parse("2026-10-14T12:00:00Z");
 const achievement=(id,description,time=Date.parse("2025-06-01T23:59:00Z")/1000)=>({apiname:id,name:id,description,achieved:1,unlocktime:time});
-const payload=rows=>({playerstats:{success:true,gameID:"101",achievements:rows}});
+const payload=rows=>({playerstats:{success:true,steamID:"76561198000000000",gameName:"Fixture game",achievements:rows}});
 test("completion matching accepts story, campaign, endings and final bosses but rejects partial and multiplayer achievements",()=>{
   for(const description of ["Complete the game","Finished the main story","Beat the campaign","Complete the main quest","Reach the good ending","Unlock the secret ending","Defeat the final boss"])assert.equal(completionAchievement("Achievement",description),true,description);
   for(const description of ["Complete chapter 4","Complete a multiplayer match","Finish the tutorial","Complete the DLC campaign","Complete the first level of the game","Finish a round","Get all collectibles","Win 5 games","Do not complete the story","Complete the campaign chapter","Reach the ending of a DLC expansion"])assert.equal(completionAchievement("Achievement",description),false,description);
@@ -18,4 +18,10 @@ test("invalid, locked, zero, pre-release and future timestamps cannot become sug
   const rows=[valid,{...valid,apiname:"locked",achieved:0},{...valid,apiname:"old",unlocktime:0},{...valid,apiname:"future",unlocktime:now/1000+1},{...valid,apiname:"before",unlocktime:1},{...valid,apiname:"wrong",unlocktime:"100"},{...valid,apiname:"bad",description:null}];
   assert.deepEqual(parseSteamCompletions(payload(rows),101,"2020-01-01",now).map(row=>row.id),["valid"]);
   for(const value of [null,{playerstats:{success:false}},{playerstats:{success:true,gameID:"102",achievements:[]}}])assert.throws(()=>parseSteamCompletions(value,101,null,now));
+});
+
+test("real Steam response without gameID is accepted and the returned Steam identity is verified",()=>{
+  const response=payload([achievement("STORY","Complete the game")]);
+  assert.equal(parseSteamCompletions(response,101,null,now,"76561198000000000").length,1);
+  assert.throws(()=>parseSteamCompletions(response,101,null,now,"76561198000000001"));
 });
