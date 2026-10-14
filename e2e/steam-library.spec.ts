@@ -332,17 +332,21 @@ test("Steam rates all games while import continues and retries rating saves with
   const statusButtons=statuses.getByRole("button");
   await expect(statusButtons).toHaveCount(7);
   const boxes=await statusButtons.evaluateAll(buttons=>buttons.map(button=>button.getBoundingClientRect().top));
-  expect(new Set(boxes).size).toBe(1);
+  expect(new Set(boxes).size).toBeGreaterThan(1);
   expect(await dialog.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
-  const statusRow = statuses.locator(".overflow-x-auto");
-  expect(await statusRow.evaluate(element => element.scrollWidth > element.clientWidth)).toBe(true);
-  expect(await statusRow.evaluate(element => getComputedStyle(element).scrollbarWidth)).toBe("none");
+  const statusRow = statuses.locator(".flex-wrap");
+  expect(await statusRow.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
+  const rowBounds=(await statusRow.boundingBox())!;
+  for(const button of await statusButtons.all()){
+    const bounds=(await button.boundingBox())!;
+    expect(bounds.x).toBeGreaterThanOrEqual(rowBounds.x);
+    expect(bounds.x+bounds.width).toBeLessThanOrEqual(rowBounds.x+rowBounds.width+1);
+  }
   await statuses.getByRole("button", { name: "Stopped playing", exact: true }).click();
   expect(await dialog.evaluate(element => element.scrollLeft)).toBe(0);
   const panelBounds = (await dialog.boundingBox())!;
   const headingBounds = (await dialog.getByRole("heading", { name: "Hades", exact: true }).boundingBox())!;
   expect(headingBounds.x).toBeGreaterThanOrEqual(panelBounds.x);
-  await statusRow.evaluate(element => { element.scrollLeft = 0; });
 
   await statuses.getByRole("button",{name:"Currently playing",exact:true}).click();
   await expect(statuses.getByRole("button",{name:"Currently playing",exact:true})).toHaveAttribute("aria-pressed","true");
