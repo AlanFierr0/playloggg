@@ -6,7 +6,7 @@ import { usePortfolio } from "@/components/portfolio-provider";
 import { useMessages } from "@/components/site-preferences";
 import type { PlaybackStatus } from "@/types/domain";
 
-export function PlaybackStatusPicker({slug,value,onChange}:{slug:string;value:PlaybackStatus|null;onChange:(value:PlaybackStatus|null)=>void}) {
+export function PlaybackStatusPicker({slug,value,onChange,onStyleChange}:{slug:string;value:PlaybackStatus|null;onChange:(value:PlaybackStatus|null)=>void;onStyleChange?:(value:PlayStyle)=>void}) {
   const t=useMessages();
   const {profile}=usePortfolio();
   const storageKey=`playlogg-play-style:${profile.id}:${slug}`;
@@ -24,6 +24,7 @@ export function PlaybackStatusPicker({slug,value,onChange}:{slug:string;value:Pl
   },[slug,storageKey]);
   const savedStyle=statusPlayStyle(value);
   const style=chosen??(savedStyle==="ongoing"?"ongoing":detected??savedStyle??"campaign");
+  useEffect(()=>{onStyleChange?.(style);},[style,onStyleChange]);
   const choices=playbackGroups[style];
   // Keep an existing saved status visible when the user switches groups.
   const visible=value&&!choices.includes(value)?[...choices,value]:choices;

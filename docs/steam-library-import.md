@@ -216,3 +216,35 @@ They cover both windows, shared counters with individual imports, 25-game chargi
 invalid batches and server-only privileges; synthetic counters roll back. Security
 advisors reported the existing intentional no-policy private counter table and
 existing [disabled leaked-password protection](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection), with no new function/grant finding.
+
+## Achievement completion-date suggestions
+
+**Find completion dates**, beside playtime sync, checks existing PC / Steam logs
+with missing dates. The scan processes five games per batch and at most two
+Steam reads simultaneously; Stop scan pauses after the current reads. Retry
+unfinished games preserves earlier results. Ongoing/live-service games and
+active, paused or stopped entries are excluded.
+
+The Campaign import editor also checks the current game's achievements without
+blocking rating. Suggestions display the original English achievement name,
+description and UTC date in chronological order. **Use this date** chooses one
+candidate and marks the draft Completed; the existing calendar allows correction.
+Only **Save and next** persists the import draft. For existing logs,
+**Confirm completion** immediately saves that chosen date and Completed status.
+
+Detection uses conservative English text rules for story/campaign/game completion,
+endings and final bosses. It excludes chapter/level/tutorial/match/round and DLC
+completion. These are suggestions, not proof of finishing the game. Unsupported,
+private or unavailable achievements leave manual completion-date entry available.
+Zero, future and pre-release achievement timestamps are ignored. Multiple endings
+are never selected automatically. No dates are inferred from last played or hours.
+
+Server actions resolve the linked Steam ID from verified Auth metadata, validate
+ownership and the exact provider mapping, and use STEAM_WEB_API_KEY server-side.
+Achievement reads use a bounded, owner-and-app-keyed 15-minute warm-instance cache;
+rejected reads are not cached. No extra provider, key or database migration is needed.
+Confirmed dates use the existing guarded rating save with timestamp checks: existing
+dates and unrelated entry fields are preserved, concurrent edits require reloading.
+Confirmed Completed entries appear in the profile timeline. Older saved import drafts
+resume with a blank completion date. Scans stop when leaving the page and do not
+run as background jobs.

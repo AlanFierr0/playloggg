@@ -6,7 +6,11 @@ import { readSteamLibrary, readSteamImportContext, readSteamCatalogMatches } fro
 import { browseSteamLibrary, parseSteamBrowse, matchSteamGames, steamAppId, steamIdentity, type SteamGame } from "@/lib/steam-library-input";
 import { queryIgdb } from "@/lib/igdb";
 import { createCatalogAdmin } from "@/lib/supabase/catalog-admin";
+import { igdbId } from "@/lib/catalog-input";
 import { validateRating } from "@/lib/rating-input";
+import { readSteamCompletions } from "@/lib/steam-completion";
+import type { SteamCompletionCandidate } from "@/lib/steam-completion-input";
+import { getGamePlayStyle } from "@/app/actions/play-style";
 import { recentRead } from "@/lib/recent-read";
 import { readProfileRatings } from "@/lib/profile-ratings";
 
@@ -215,16 +219,17 @@ export async function saveSteamImportRating(input: unknown, updatedAt: unknown) 
   try {
     const account = await getAccount();
     if (!account?.profile || !steamIdentity(account.user.app_metadata.playlogg_steam_id)) return {ok:false,message:"Sign in with Steam to import your library."};
-    const {data:game,error:gameError} = await account.supabase.from("games").select("id").eq("slug",rating.slug).single();
+    const {data:game,error:gameError} = await account.supabase.from("games").select("id,released_on").eq("slug",rating.slug).single();
     if (gameError || !game) throw new Error("Unavailable game");
     const {data:previous,error:readError}=await account.supabase.from("ratings").select("score,tier,tier_manual,status,platform,hours_played,completed_on,tags,review,updated_at").eq("profile_id",account.profile.id).eq("game_id",game.id).eq("platform","pc").maybeSingle();
     if(readError)throw new Error("Save failed");
     if(!previous || previous.updated_at!==updatedAt)return {ok:false,message:"This entry changed elsewhere. Skip it and edit the latest entry from your profile."};
+    if(rating.completedOn && (previous.completed_on || (game.released_on && rating.completedOn<game.released_on)))return {ok:false,message:"Completion date could not be saved. Review the latest entry and release date."};
     const {error}=await account.supabase.rpc("save_rating",{p_game_id:game.id,p_expected_updated_at:updatedAt as string,
-      p_values:{...previous,score:rating.score,tier:rating.tier,tier_manual:rating.tierManual??rating.tier!==null,status:rating.status}});
+      p_values:{...previous,score:rating.score,tier:rating.tier,tier_manual:rating.tierManual??rating.tier!==null,status:rating.status,completed_on:rating.completedOn ?? previous.completed_on}});
     if(error?.code==="40001")return {ok:false,message:"This entry changed elsewhere. Skip it and edit the latest entry from your profile."};
     if(error)throw new Error("Save failed");
-    revalidatePath("/profile","layout");
+    revalidatePath("/","layout");
     return {ok:true,message:"Saved."};
   } catch { return {ok:false,message:"Your rating could not be saved. Please retry or skip this game."}; }
 }
@@ -245,4 +250,61 @@ export async function getSteamReviewSummary(input:unknown):Promise<SteamReviewSu
     if(typeof total!=="number" || !Number.isSafeInteger(total) || total<0 || typeof positive!=="number" || !Number.isSafeInteger(positive) || positive<0 || positive>total || typeof description!=="string" || description.length>100 || (total>0 && !description.trim()))return null;
     return {description:total ? description : "No user reviews",positive,total};
   } catch {return null;}
+}
+
+export type SteamCompletionResult = {ok:boolean;message:string;candidates:SteamCompletionCandidate[];releasedOn:string|null;updatedAt:string|null};
+export async function getSteamCompletionSuggestions(appId:unknown,slug:unknown,refresh=false):Promise<SteamCompletionResult> {
+  const empty:SteamCompletionResult={ok:false,message:"Steam achievements unavailable. You can enter a date manually.",candidates:[],releasedOn:null,updatedAt:null};
+  if(!steamAppId(appId)||typeof slug!=="string"||!/^[a-z0-9][a-z0-9-]{0,199}$/.test(slug)||typeof refresh!=="boolean")return empty;
+  let fallback=empty;
+  try {
+    const account=await getAccount();const steamId=account?.user.app_metadata.playlogg_steam_id;
+    if(!account?.profile||!steamIdentity(steamId))return empty;
+    await checkOperationLimit(account.user.id,"steam");
+    const library=await readSteamImportContext(account.user.id,steamId);
+    if(!library.some(game=>game.appId===appId))return empty;
+    const {data:game,error}=await account.supabase.from("games").select("id,igdb_id,released_on").eq("slug",slug).single();
+    if(error||!game||!igdbId(game.igdb_id))return empty;
+    const records=await queryIgdb(`fields id,external_games.uid,external_games.external_game_source; where id = ${game.igdb_id}; limit 1;`);
+    if(matchSteamGames(records,[appId]).get(appId)!==game.igdb_id)return empty;
+    const {data:rating,error:ratingError}=await account.supabase.from("ratings").select("updated_at,completed_on,status,platform").eq("profile_id",account.profile.id).eq("game_id",game.id).maybeSingle();
+    if(ratingError||!rating||rating.platform!=="pc"||rating.completed_on||["active","paused","stopped"].includes(rating.status??""))return {...empty,ok:true,message:"No eligible completion date."};
+    fallback={...empty,releasedOn:game.released_on,updatedAt:rating.updated_at};
+    return {ok:true,message:"",candidates:await readSteamCompletions(account.user.id,steamId,appId,game.released_on,refresh),releasedOn:game.released_on,updatedAt:rating.updated_at};
+  }catch(error){return {...fallback,message:operationFailure(error,empty.message)};}
+}
+export type SteamCompletionLog={appId:number;slug:string;title:string;updatedAt:string|null};
+export async function listSteamCompletionLogs():Promise<{ok:boolean;message:string;games:SteamCompletionLog[]}> {
+  try {
+    const account=await getAccount();const steamId=account?.user.app_metadata.playlogg_steam_id;
+    if(!account?.profile||!steamIdentity(steamId))throw new Error("Account unavailable");
+    await checkOperationLimit(account.user.id,"steam");
+    const logged=await loggedSteamGames(account,await readSteamImportContext(account.user.id,steamId));
+    const eligible=[...logged].filter(([,rating])=>rating.platform==="pc"&&!rating.completed_on&&!["active","paused","stopped"].includes(rating.status??""));
+    const games:SteamCompletionLog[]=[];
+    for(let offset=0;offset<eligible.length;offset+=100){
+      const batch=eligible.slice(offset,offset+100);
+      const {data,error}=await account.supabase.from("games").select("id,slug,title").in("id",batch.map(([,rating])=>rating.game_id));
+      if(error)throw new Error("Catalog unavailable");
+      for(const [appId,rating] of batch){const game=data.find(game=>game.id===rating.game_id);if(game)games.push({appId,slug:game.slug,title:game.title,updatedAt:rating.updated_at});}
+    }
+    return {ok:true,message:"",games};
+  }catch(error){return {ok:false,message:operationFailure(error,"Completion dates could not be loaded. Please retry."),games:[]};}
+}
+export async function confirmSteamCompletion(appId:unknown,slug:unknown,achievementId:unknown,updatedAt:unknown) {
+  if(typeof achievementId!=="string"||achievementId.length>256||typeof updatedAt!=="string"||!Number.isFinite(Date.parse(updatedAt)))return {ok:false,message:"Invalid completion suggestion."};
+  try {
+    const suggestion=await getSteamCompletionSuggestions(appId,slug);
+    const candidate=suggestion.candidates.find(candidate=>candidate.id===achievementId);
+    if(!suggestion.ok||!candidate||suggestion.updatedAt!==updatedAt)return {ok:false,message:"This entry changed or the suggestion is unavailable. Reload before retrying."};
+    if(await getGamePlayStyle(slug)==="ongoing")return {ok:false,message:"Ongoing online games are excluded from completion suggestions."};
+    const account=await getAccount();if(!account?.profile)return {ok:false,message:"Profile required"};
+    const {data:game,error}=await account.supabase.from("games").select("id").eq("slug",slug as string).single();
+    if(error||!game)throw new Error("Unavailable game");
+    const {data:previous,error:readError}=await account.supabase.from("ratings").select("score,tier,tier_manual,status,platform,hours_played,completed_on,tags,review,updated_at").eq("profile_id",account.profile.id).eq("game_id",game.id).single();
+    if(readError||!previous||previous.updated_at!==updatedAt||previous.completed_on||previous.platform!=="pc"||["active","paused","stopped"].includes(previous.status??""))return {ok:false,message:"This entry changed or the suggestion is unavailable. Reload before retrying."};
+    const {error:saveError}=await account.supabase.rpc("save_rating",{p_game_id:game.id,p_expected_updated_at:updatedAt,p_values:{...previous,status:"completed",completed_on:candidate.date}});
+    if(saveError)return {ok:false,message:saveError.code==="40001"?"This entry changed or the suggestion is unavailable. Reload before retrying.":"Completion could not be saved. Please retry."};
+    revalidatePath("/","layout");return {ok:true,message:"Completion saved."};
+  }catch{return {ok:false,message:"Completion could not be saved. Please retry."};}
 }
