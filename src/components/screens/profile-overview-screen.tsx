@@ -20,7 +20,7 @@ export function ProfileOverviewScreen({ hotTake }: { hotTake?: React.ReactNode }
   const totalHours = knownHours.reduce((sum, game) => sum + (game.hoursPlayed ?? 0), 0);
   const bySlug = new Map(games.map(game => [game.slug, game]));
   const featured = favorites.filter(f => f.featuredSlot !== null).sort((a, b) => a.featuredSlot! - b.featuredSlot!);
-  const recent = entries.filter(g => g.updatedAt && Number.isFinite(Date.parse(g.updatedAt))).sort((a, b) => b.updatedAt!.localeCompare(a.updatedAt!) || a.slug.localeCompare(b.slug)).slice(0, 6);
+  const recent = entries.filter(g => g.updatedAt && Number.isFinite(Date.parse(g.updatedAt))).sort((a, b) => b.updatedAt!.localeCompare(a.updatedAt!) || a.slug.localeCompare(b.slug)).slice(0, 20);
   const gameHref = (game: Game) => publicBase && game.logged ? `${base}/game/${game.slug}` : `/game/${game.slug}`;
   const panel = "min-w-0 rounded-2xl border border-outline-variant/20 bg-surface-container-low p-5 sm:p-6 space-y-5";
   const tools = [["Edit profile", "/settings", "edit"], ["Import from Steam", "/profile/import/steam", "download"], ["Manage favorites", "/profile/favorites", "favorite"], ["Following", "/profile/social", "group"]];
@@ -52,7 +52,7 @@ export function ProfileOverviewScreen({ hotTake }: { hotTake?: React.ReactNode }
           {[[t("Games rated"), rated.length], [t("Completed games"), entries.filter(g => g.status === "completed").length], [t("Average score"), averageScore(rated)], [t("Favorites"), favorites.length], [t("Total hours played"), knownHours.length ? totalHours.toLocaleString(locale, { maximumFractionDigits: 2 }) : "—"]].map(([label, value]) => <div key={label} className="min-w-0 space-y-1"><dt className="text-body-sm text-on-surface-variant">{label}</dt><dd className="font-headline-xl text-headline-xl text-primary tabular-nums"><span>{value}</span>{label === t("Total hours played") && <span className="block text-label-sm font-normal text-on-surface-variant">{knownHours.length} / {entries.length} {t("Games with recorded hours")}</span>}</dd></div>)}
         </dl>
       </header>
-      <div className="grid lg:grid-cols-3 items-start gap-6">
+      <div className="grid lg:grid-cols-3 items-start lg:items-stretch gap-6">
         <div className="min-w-0 space-y-6 lg:col-span-2">
         <section className={panel}>
           <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-headline-lg text-headline-lg">{t("Featured favorites")}</h2><Link className="inline-flex min-h-11 items-center gap-2 text-body-sm text-primary hover:underline" href={`${base}/favorites`}>{t("All favorites")}<span aria-hidden="true" className="material-symbols-outlined text-[18px]">arrow_forward</span></Link></div>
@@ -68,10 +68,11 @@ export function ProfileOverviewScreen({ hotTake }: { hotTake?: React.ReactNode }
         {hotTake}
         <div className={panel}><TasteSummary games={games} href={`${base}/stats`} /></div>
         </div>
-        <section className={panel}>
+        {/* Let the left panels determine the grid height; recent rows scroll inside. */}
+        <section className={`${panel} lg:flex lg:h-0 lg:min-h-full lg:flex-col`}>
           <h2 className="font-headline-lg text-headline-lg">{t("Recently updated entries")}</h2>
           <p className="text-body-sm text-on-surface-variant">{t("Latest saved entry updates, including rating, review or playback edits.")}</p>
-          {recent.length ? <div className="space-y-1">{recent.map(game => <Link href={gameHref(game)} key={game.slug} className="group flex min-w-0 items-center gap-3 rounded-xl p-2 -mx-2 hover:bg-surface-container transition-colors">
+          {recent.length ? <div className="space-y-1 [&>a:nth-child(n+7)]:hidden lg:[&>a:nth-child(n+7)]:flex lg:h-0 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:overflow-x-hidden lg:-mx-2 lg:px-2">{recent.map(game => <Link href={gameHref(game)} key={game.slug} className="group flex min-w-0 items-center gap-3 rounded-xl p-2 -mx-2 hover:bg-surface-container focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary transition-colors">
             <img loading="lazy" src={game.cover} alt="" className="w-12 h-[72px] shrink-0 object-cover rounded-lg bg-surface-container" />
             <div className="min-w-0 flex-1 space-y-1"><h3 translate="no" className="text-body-md font-semibold break-words group-hover:text-primary">{game.title}</h3><p className="text-primary text-body-sm">{t("Score")}: {game.score ?? t("Unrated")}</p><time className="block text-label-sm text-on-surface-variant" dateTime={game.updatedAt}>{game.updatedAt!.slice(0, 10)}</time></div>
           </Link>)}</div> : <p className="text-body-sm text-on-surface-variant">{t("No dated entry updates yet.")}</p>}

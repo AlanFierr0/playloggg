@@ -93,3 +93,35 @@ test("stats hide small groups until each section loads more", async ({ page }) =
     await expect(section.getByRole("button")).toHaveCount(0);
   }
 });
+
+
+test("recent profile entries fill the sidebar height without stretching the overview",async({page,context,request},info)=>{
+  await context.addCookies([authCookie]);
+  await request.post("http://127.0.0.1:3101/__tier-drag-board");
+  await page.goto("/profile");
+  const recent=page.getByRole("heading",{name:"Recently updated entries",exact:true}).locator("..");
+  const summary=recent.locator("..").locator(":scope > div").first();
+  if(info.project.name==="desktop"){
+    const left=(await summary.boundingBox())!,right=(await recent.boundingBox())!;
+    expect(right.y).toBeCloseTo(left.y,0);
+    expect(right.y+right.height).toBeCloseTo(left.y+left.height,0);
+    const lastPanel=(await summary.locator(":scope > *").last().boundingBox())!;
+    expect(right.y+right.height).toBeCloseTo(lastPanel.y+lastPanel.height,0);
+    await expect(recent.getByRole("link")).toHaveCount(16);
+    const list=recent.locator(":scope > div");
+    expect(await list.evaluate(node=>node.scrollHeight>node.clientHeight&&node.clientHeight>0)).toBe(true);
+    await recent.getByRole("link").last().scrollIntoViewIfNeeded();
+    const last=(await recent.getByRole("link").last().boundingBox())!;
+    const scrolledPanel=(await recent.boundingBox())!;
+    expect(last.y).toBeGreaterThanOrEqual(scrolledPanel.y);
+    expect(last.y+last.height).toBeLessThanOrEqual(scrolledPanel.y+scrolledPanel.height);
+    await list.evaluate(node=>{node.scrollTop=0;});
+    await page.evaluate(()=>window.scrollTo(0,0));
+  }else{
+    await expect(recent.getByRole("link")).toHaveCount(6);
+    const left=(await summary.boundingBox())!,right=(await recent.boundingBox())!;
+    expect(right.y).toBeGreaterThanOrEqual(left.y+left.height);
+  }
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.screenshot({path:`e2e-artifacts/profile-recent-height-${info.project.name}.png`,fullPage:true});
+});
