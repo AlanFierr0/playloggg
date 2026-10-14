@@ -150,12 +150,13 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
       ))}
       {reviews.length > 0 && <HomeCarousel>
         {reviews.map(review => <article key={`${review.profile_id}-${review.game_id}`} className="flex h-full flex-col gap-5 rounded-xl border border-outline-variant/30 bg-surface-container-low p-5 sm:p-6">
-          <div className="flex items-start gap-4">
-            <Link href={`/game/${review.game.slug}`} className="shrink-0"><img src={review.game.cover_url} alt={review.game.title} loading="lazy" className="h-24 w-16 rounded-md object-cover" /></Link>
-            <div className="min-w-0 space-y-2">
-              <h3 translate="no" className="font-headline-md text-headline-md line-clamp-2"><Link href={`/u/${review.profiles.handle}/game/${review.game.slug}`} className="hover:text-primary">{review.game.title}</Link></h3>
-              <Link translate="no" href={`/u/${review.profiles.handle}`} className="text-body-sm text-primary hover:underline">{review.profiles.display_name}</Link>
-            </div>
+          <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-4 gap-y-2">
+            <Link href={`/game/${review.game.slug}`} className="row-start-2 shrink-0"><img src={review.game.cover_url} alt={review.game.title} loading="lazy" className="h-[72px] w-12 rounded-md object-cover sm:h-24 sm:w-16" /></Link>
+            <Link href={`/u/${review.profiles.handle}`} aria-label={review.profiles.display_name} className="col-span-2 row-start-1 inline-flex min-h-11 max-w-full items-center justify-self-end gap-2 rounded-lg text-body-sm text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
+              <span translate="no" className="min-w-0 break-words text-right">{review.profiles.display_name}</span>
+              <ProfileAvatar src={`/avatars/${review.profile_id}`} name={review.profiles.display_name} className="h-10 w-10 rounded-xl" />
+            </Link>
+            <h3 translate="no" className="row-start-2 min-w-0 font-headline-md text-headline-md line-clamp-2"><Link href={`/u/${review.profiles.handle}/game/${review.game.slug}`} className="hover:text-primary">{review.game.title}</Link></h3>
           </div>
           <ReviewText text={review.review} slug={review.game.slug} profileId={String(review.profile_id)} className="line-clamp-5 text-body-md"/>
           <Link href={`/u/${review.profiles.handle}/game/${review.game.slug}`} className="mt-auto inline-flex min-h-11 items-center gap-2 text-primary text-body-sm hover:underline">{t("Read review")}<span aria-hidden="true" className="material-symbols-outlined text-[18px]">arrow_forward</span></Link>

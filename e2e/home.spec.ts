@@ -97,11 +97,20 @@ test("home uses owned entries, qualifying genre ratings and working filters", as
 
 test("home review carousel ranks net helpfulness and supports navigation", async ({ page, context, request }, testInfo) => {
   await request.post("http://127.0.0.1:3101/__best-reviews");
+  await page.route("**/avatars/3", route => route.fulfill({contentType:"image/svg+xml",body:`<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="40" height="40" fill="gold"/></svg>`}));
   await page.goto("/");
   const carousel = page.getByRole("region", { name: "Best reviews", exact: true });
   const cards = carousel.locator("article");
   await expect(cards).toHaveCount(10);
   await expect(cards.first()).toContainText("Carousel review 10");
+  const author=cards.first().locator(`a[href="/u/fixture_public"]`);
+  await expect(author).toContainText("Published Fixture");
+  await expect(author.getByRole("img",{name:"Published Fixture",exact:true})).toBeVisible();
+  const header=(await cards.first().locator(":scope > div").first().boundingBox())!,identity=(await author.boundingBox())!;
+  expect(identity.x+identity.width).toBeCloseTo(header.x+header.width,0);
+  expect(identity.y).toBeCloseTo(header.y,0);
+  await page.evaluate(()=>window.scrollTo(0,0));
+  await page.screenshot({path:`e2e-artifacts/home-review-authors-${testInfo.project.name}.png`,fullPage:true});
   await expect(cards.nth(1)).toContainText("Carousel review 1");
   await expect(carousel).not.toContainText("Private fixture review");
   await expect(cards.first().getByRole("button", { name: /^Helpful/ })).toBeDisabled();
