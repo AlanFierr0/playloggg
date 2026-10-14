@@ -5,7 +5,7 @@ import { useMessages } from "@/components/site-preferences";
 import { importSteamGames, previewSteamLibrary, syncSteamPlaytime, type LibraryPreview } from "@/app/actions/steam-library";
 import { browseSteamLibrary, parseSteamBrowse, type SteamBrowse } from "@/lib/steam-library-input";
 import { parseHours } from "@/lib/rating-input";
-import { SteamRatingPicker, SteamRatingEditor, emptySteamRatingDraft, readSteamRatingSession, type SteamRatingDraft, type SteamRatingGame } from "@/components/steam-import-ratings";
+import { SteamRatingEditor, emptySteamRatingDraft, readSteamRatingSession, type SteamRatingDraft, type SteamRatingGame } from "@/components/steam-import-ratings";
 import { readSteamImportWork, type SteamImportWork } from "@/lib/steam-import-work";
 import { SteamGameCover } from "@/components/steam-game-cover";
 
@@ -30,7 +30,6 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
   const [failures,setFailures] = useState<{appId:number;title:string;message:string}[]>([]);
   const [summary,setSummary]=useState<{imported:number;skipped:number;failed:number}|null>(null);
   const [importTotal,setImportTotal]=useState(0);
-  const [choice,setChoice] = useState<"ask"|"some"|null>(null);
   const [ratingSession,setRatingSession] = useState(false);
   const [ratingGames,setRatingGames] = useState<SteamRatingGame[]>([]);
   const [ratingIndex,setRatingIndex] = useState(0);
@@ -46,7 +45,7 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
   // ponytail: browser-local resume; use server persistence if cross-device resume is needed.
   const storageKey = `playlogg-steam-ratings:${profileId}`;
   const workKey = `playlogg-steam-import:${profileId}`;
-  const modalOpen = choice !== null || (importing && !ratingSession) || (ratingSession && !ratingHidden);
+  const modalOpen = (importing && !ratingSession) || (ratingSession && !ratingHidden);
   const detailsToast = useRef<HTMLElement>(null);
   const restoreSession = useEffectEvent(()=>{
     try {
@@ -153,7 +152,7 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
     let work:SteamImportWork=resume ? {...resume} : {version:1,rows,pending:queue,rateIds,total:queue.length,imported:0,skipped:0};
     // Save before the first request; an interrupted batch can be safely replayed.
     keepImport(work);pauseImport.current=false;
-    setChoice(null);setDetailsOpen(wanted.size>0);setRatingHidden(false);
+    setDetailsOpen(wanted.size>0);setRatingHidden(false);
     if(!resume){setDraft(emptySteamRatingDraft);setRatingGames([]);setRatingIndex(0);setRatingTarget(rateIds.length);}
     if(wanted.size){setRatingSession(true);setRatingTarget(work.rateIds.length);}
     setSelected(queue);
@@ -238,7 +237,7 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
     {importWork&&!importing&&<div className="flex flex-wrap items-center gap-3 rounded-xl bg-surface-container-low p-4"><button className={button} disabled={busy} onClick={()=>void importSelected(false,[],importWork)}>{t("Resume import")} ({importWork.pending.length})</button><button type="button" className="min-h-11 px-3 text-primary" disabled={busy} onClick={()=>keepImport(null)}>{t("Discard remaining import")}</button><p className="text-body-sm text-on-surface-variant">{t("Your unfinished import is saved in this browser. Already imported games are kept.")}</p></div>}
     {ratingSession&&ratingHidden&&<div className="flex flex-wrap items-center gap-3 rounded-xl bg-surface-container-low p-4"><button className={button} onClick={()=>{setRatingHidden(false);setDetailsOpen(importing);}}>{t("Resume rating games")} ({Math.max(0,ratingGames.length-ratingIndex)})</button><p className="text-body-sm text-on-surface-variant">{t("Your unfinished ratings are kept in this browser.")}</p></div>}
     <p className="text-body-sm text-on-surface-variant">{t("Steam Game details must be Public, including playtime. Your Playlogg profile visibility does not change.")}</p>
-    <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex flex-wrap gap-3"><button className={button} disabled={busy} onClick={()=>load(filters,amount,false,true)}>{t(loading ? "Loading…" : "Refresh library")}</button><button className={button} disabled={busy||!preview?.syncAppIds.length} onClick={syncPlaytime}>{t(syncing ? "Syncing playtime…" : "Sync Steam playtime")}</button><Link href="/profile" className="inline-flex min-h-11 items-center rounded-xl bg-surface-container text-primary px-5 py-3">{t("View profile")}</Link></div><button className={`${button} ml-auto`} disabled={busy||ratingSession||(Boolean(importWork)&&!failures.length)||!selected.length} onClick={()=>setChoice("ask")}>{t("Import selected games")} ({selected.length})</button></div>
+    <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex flex-wrap gap-3"><button className={button} disabled={busy} onClick={()=>load(filters,amount,false,true)}>{t(loading ? "Loading…" : "Refresh library")}</button><button className={button} disabled={busy||!preview?.syncAppIds.length} onClick={syncPlaytime}>{t(syncing ? "Syncing playtime…" : "Sync Steam playtime")}</button><Link href="/profile" className="inline-flex min-h-11 items-center rounded-xl bg-surface-container text-primary px-5 py-3">{t("View profile")}</Link></div><button className={`${button} ml-auto`} disabled={busy||ratingSession||(Boolean(importWork)&&!failures.length)||!selected.length} onClick={()=>void importSelected(false,selected)}>{t("Import selected games")} ({selected.length})</button></div>
     <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end rounded-xl bg-surface-container-low p-5">
       <label className="min-w-0 space-y-2"><span className="block">{t("Sort by")}</span><select aria-label={t("Sort by")} disabled={busy&&!loading} value={displaySort} onChange={event=>setDisplaySort(event.target.value as SteamBrowse["sort"])} className="w-full rounded-xl bg-surface-container p-3"><option value="title">{t("Title A–Z")}</option><option value="hours_desc">{t("Most played")}</option><option value="hours_asc">{t("Least played")}</option></select></label>
       <label className="min-w-0 space-y-2"><span className="block">{t("Minimum hours")}</span><input disabled={busy&&!loading} type="number" min="0" step="any" value={minHours} onChange={event=>{setMinHours(event.target.value);updateFilters(event.target.value,maxHours);}} className="w-full rounded-xl bg-surface-container p-3" /></label>
@@ -247,24 +246,20 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
       <button type="button" disabled={busy&&!loading} onClick={()=>{setMinHours("");setMaxHours("");updateFilters("","",filters.sort,amount,0);}} className="min-h-11 rounded-xl bg-surface-container text-primary px-4">{t("Clear filters")}</button>
     </div>
     <p role="status" aria-live="polite">{t(message)}{loading&&<span className="flex items-center gap-2"><span aria-hidden="true" className="w-5 h-5 rounded-full border-2 border-primary/25 border-t-primary motion-safe:animate-spin"/>{t("Loading library")}: {preview?.games.length ?? 0} / {preview?.total ?? "—"}</span>}</p>
-    <dialog ref={importDialog} tabIndex={-1} aria-labelledby="steam-import-title" onCancel={event=>{if(ratingSession){event.preventDefault();setRatingHidden(true);}else if(importing)event.preventDefault();else setChoice(null);}} className={`fixed inset-0 m-auto w-[calc(100%_-_2rem)] max-w-lg max-h-[calc(100dvh_-_2rem)] overflow-y-auto rounded-2xl bg-surface-container-high text-on-surface p-6 sm:p-8 shadow-2xl border border-primary/20 backdrop:bg-black/65 backdrop:backdrop-blur-sm ${detailsOpen ? "max-xl:!mt-4 max-xl:!mb-auto max-xl:!max-h-[calc(100dvh_-_13rem)]" : ""}`}>
+    <dialog ref={importDialog} tabIndex={-1} aria-labelledby="steam-import-title" onCancel={event=>{if(ratingSession){event.preventDefault();setRatingHidden(true);}else if(importing)event.preventDefault();}} className={`fixed inset-0 m-auto w-[calc(100%_-_2rem)] max-w-lg max-h-[calc(100dvh_-_2rem)] overflow-y-auto rounded-2xl bg-surface-container-high text-on-surface p-6 sm:p-8 shadow-2xl border border-primary/20 backdrop:bg-black/65 backdrop:backdrop-blur-sm ${detailsOpen ? "max-xl:!mt-4 max-xl:!mb-auto max-xl:!max-h-[calc(100dvh_-_13rem)]" : ""}`}>
       <div className="flex items-center gap-3">
         {importing&&!ratingSession&&<span aria-hidden="true" className="h-6 w-6 shrink-0 rounded-full border-[3px] border-primary/25 border-t-primary motion-safe:animate-spin"/>}
-        <h2 id="steam-import-title" className="font-headline-md text-headline-md">{t(choice ? "How would you like to rate your games?" : ratingSession ? "Rate imported games" : "Importing games")}</h2>
-        {ratingSession&&!choice&&<button aria-label={t("Close rating session")} className="ml-auto min-h-11 min-w-11 rounded-xl text-primary" onClick={()=>setRatingHidden(true)}>×</button>}
+        <h2 id="steam-import-title" className="font-headline-md text-headline-md">{t(ratingSession ? "Rate imported games" : "Importing games")}</h2>
+        {ratingSession&&<button aria-label={t("Close rating session")} className="ml-auto min-h-11 min-w-11 rounded-xl text-primary" onClick={()=>setRatingHidden(true)}>×</button>}
       </div>
-      {choice==="ask"&&<div className="mt-5 space-y-4"><p>{t("Import every selected game, then choose how many you want to rate.")}</p><div className="grid gap-3"><button className={button} onClick={()=>importSelected(false,selected)}>{t("Rate all games")}</button><button className={button} onClick={()=>setChoice("some")}>{t("Rate some games")}</button><button className={button} onClick={()=>importSelected()}>{t("Just import")}</button></div><button className="min-h-11 text-primary px-3" onClick={()=>setChoice(null)}>{t("Cancel")}</button></div>}
-      {choice==="some"&&<SteamRatingPicker games={preview?.games.filter(game=>selected.includes(game.appId))??[]} onBack={()=>setChoice("ask")} onStart={ids=>importSelected(false,ids)}/>}
-      {!choice&&<>
       {!ratingSession&&importProgress}
       {ratingSession&&<>{ratingGames[ratingIndex] ? <SteamRatingEditor key={ratingGames[ratingIndex].slug} game={ratingGames[ratingIndex]} draft={draft} onDraft={setDraft} onNext={nextRating}/> : importing ? <p role="status" className="mt-5">{t("Waiting for the next imported game…")}</p> : <div className="mt-5 space-y-4"><p>{t(progress<importTotal ? "Your imported games have been reviewed. Resume the import to continue." : "Your imports and rating session are complete.")}</p><button className={button} onClick={()=>setRatingSession(false)}>{t("Done")}</button></div>}</>}
-      </>}
       {modalOpen&&progressToast}
     </dialog>
     {!modalOpen&&progressToast}
     {loading&&<button type="button" onClick={()=>{stopLoading.current=true;}} className="min-h-11 rounded-xl bg-surface-container text-primary px-4">{t("Stop loading")}</button>}
     {summary&&<p role="status">{t("Imported")}: {summary.imported} · {t("Skipped")}: {summary.skipped} · {t("Failed")}: {summary.failed}</p>}
-    {!!failures.length&&<button disabled={busy||ratingSession} onClick={()=>importWork ? importSelected(false,[],importWork) : importSelected(true)} className={button}>{t("Retry failed games")}</button>}
+    {!!failures.length&&<button disabled={busy||ratingSession} onClick={()=>importWork ? importSelected(false,[],importWork) : importSelected(true,failures.map(failure=>failure.appId))} className={button}>{t("Retry failed games")}</button>}
     {!!failures.length&&<ul className="space-y-2 text-on-surface-variant">{failures.map(failure=><li key={failure.appId}><span translate="no">{failure.title}</span>: {t(failure.message)}</li>)}</ul>}
     {preview&&preview.total>0&&<>
       <div className="flex flex-wrap items-center justify-between gap-4"><p>{preview.games.length} / {preview.total} {t("Steam games")}</p><div className="flex flex-wrap gap-3"><button className="min-h-11 rounded-xl bg-surface-container text-primary px-4" disabled={(busy&&!loading)||!available.length} onClick={()=>setSelected(available.map(game=>game.appId))}>{t("Select available games")}</button><button className="min-h-11 rounded-xl bg-surface-container text-primary px-4" disabled={(busy&&!loading)||!selected.length} onClick={()=>setSelected([])}>{t("Clear selection")}</button></div></div>

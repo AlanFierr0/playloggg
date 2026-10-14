@@ -50,7 +50,7 @@ features must not be inferred as available from historical documentation.
 - Reviews are original text with clickable HTTP/HTTPS sources. Helpful votes are
   upvotes minus downvotes. Changing review text clears its votes; other edits keep them.
   Automatic translation is pending in TODO.md.
-- Steam import offers rating all/some/none, imports selected games in batches and keeps
+- Steam import opens ratings for all selected games directly, imports them in batches and keeps
   existing logs. Rating order is descending playtime. Import queues and rating sessions
   are saved per profile in this browser. Leaving pauses work; Resume import retries
   safely when returning. Nothing runs while the browser is closed.

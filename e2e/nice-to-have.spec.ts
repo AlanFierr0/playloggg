@@ -47,7 +47,6 @@ test("leaving during Steam import keeps its queue and rating selection for resum
     await route.continue().catch(()=>{});
   });
   await page.getByRole("button",{name:"Import selected games (2)",exact:true}).click();
-  await page.getByRole("button",{name:"Rate all games",exact:true}).click();
   await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem("playlogg-steam-import:2")??"null")?.pending.length)).toBe(2);
   await page.goto("/profile");
   await page.unroute("**/profile/import/steam");
@@ -65,7 +64,8 @@ test("Steam recovery replays acknowledged blank entries without overwriting manu
   await page.goto("/profile/import/steam");
   await page.getByRole("checkbox",{name:"Select game Hades",exact:true}).check();
   await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
-  await page.getByRole("button",{name:"Just import",exact:true}).click();
+  await page.getByRole("dialog").getByRole("button",{name:"Skip this game",exact:true}).click();
+  await page.getByRole("dialog").getByRole("button",{name:"Done",exact:true}).click();
   await expect(page.getByText("Import complete. Your games are saved in your profile.")).toBeVisible();
   await page.evaluate(()=>localStorage.setItem("playlogg-steam-import:2",JSON.stringify({version:1,rows:[{appId:101,title:"Hades",hours:1.5,matched:true,logged:false,cover:null,genres:["Action"]}],pending:[101],rateIds:[101],total:1,imported:0,skipped:0})));
   await page.reload();

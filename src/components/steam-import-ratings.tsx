@@ -5,12 +5,9 @@ import { useMessages } from "@/components/site-preferences";
 import { TierBadge, ScoreStars } from "@/components/rating-controls";
 import { SteamGameCover } from "@/components/steam-game-cover";
 import { getSteamReviewSummary, saveSteamImportRating, type SteamReviewSummary, type LibraryRow, type ImportedSteamRating } from "@/app/actions/steam-library";
-import { parseHours } from "@/lib/rating-input";
-import { browseSteamLibrary, parseSteamBrowse } from "@/lib/steam-library-input";
 import { playbackLabels } from "@/lib/playback-status";
 import type { Tier, PlaybackStatus } from "@/types/domain";
 
-const control = "catalog-control";
 const button = "min-h-11 rounded-xl bg-primary-container text-on-primary-container px-5 py-3 disabled:opacity-50";
 export type SteamRatingGame = LibraryRow & ImportedSteamRating;
 export type SteamRatingDraft = { score: string; tier: Tier|null; status: PlaybackStatus|null };
@@ -22,35 +19,6 @@ export function readSteamRatingSession(raw: string) {
   const draft = value.draft;
   if (!draft || typeof draft.score!=="string" || !/^\d{0,3}$/.test(draft.score) || Number(draft.score)>100 || (draft.tier!==null && !["S","A","B","C","D","F"].includes(draft.tier)) || (draft.status!==null && !Object.hasOwn(playbackLabels,draft.status))) return null;
   return value as {games:SteamRatingGame[];index:number;target:number;progress:number;total:number;draft:SteamRatingDraft};
-}
-
-export function SteamRatingPicker({ games, onStart, onBack }: { games: LibraryRow[]; onStart: (ids: number[]) => void; onBack: () => void }) {
-  const t = useMessages();
-  const [query,setQuery] = useState("");
-  const [genre,setGenre] = useState("");
-  const [min,setMin] = useState("");
-  const [max,setMax] = useState("");
-  const [sort,setSort] = useState<"title"|"hours_desc"|"hours_asc">("hours_desc");
-  const [selected,setSelected] = useState<number[]>([]);
-  const genres = [...new Set(games.flatMap(game=>game.genres))].sort();
-  const filter = parseSteamBrowse({offset:0,sort,minHours:parseHours(min),maxHours:parseHours(max)});
-  const matches = filter ? browseSteamLibrary(games,filter).filter(game=>(!genre||game.genres.includes(genre))&&game.title.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())) : [];
-  return <div className="mt-5 space-y-4">
-    <p>{t("Choose which imported games to rate. All selected import games will still be saved.")}</p>
-    <div className="grid sm:grid-cols-2 gap-3">
-      <label>{t("Search games")}<input className={control} value={query} onChange={event=>setQuery(event.target.value)} maxLength={100}/></label>
-      <label>{t("Genre")}<select aria-label={t("Genre")} className={control} value={genre} onChange={event=>setGenre(event.target.value)}><option value="">{t("All genres")}</option>{genres.map(value=><option key={value}>{value}</option>)}</select></label>
-      <label>{t("Minimum hours")}<input className={control} type="number" min="0" step="any" value={min} onChange={event=>setMin(event.target.value)}/></label>
-      <label>{t("Maximum hours")}<input className={control} type="number" min="0" step="any" value={max} onChange={event=>setMax(event.target.value)}/></label>
-      <label>{t("Sort by")}<select aria-label={t("Sort by")} className={control} value={sort} onChange={event=>setSort(event.target.value as typeof sort)}><option value="hours_desc">{t("Most played")}</option><option value="hours_asc">{t("Least played")}</option><option value="title">{t("Title A–Z")}</option></select></label>
-    </div>
-    {!filter && <p role="alert">{t("Use nonnegative hours and a minimum no greater than the maximum.")}</p>}
-    <div className="flex flex-wrap gap-3"><button className={button} disabled={!matches.length} onClick={()=>setSelected(current=>[...new Set([...current,...matches.map(game=>game.appId)])])}>{t("Select matching games")}</button><button className="min-h-11 text-primary px-3" onClick={()=>setSelected([])}>{t("Clear selection")}</button></div>
-    <p role="status">{t("Games to rate")}: {selected.length} / {games.length}</p>
-    <ul className="max-h-64 overflow-y-auto space-y-2 pr-1">{matches.map(game=><li key={game.appId}><label className="flex min-h-14 items-center gap-3 rounded-xl bg-surface-container p-3"><input type="checkbox" aria-label={`${t("Rate game")} ${game.title}`} checked={selected.includes(game.appId)} onChange={event=>setSelected(current=>event.target.checked ? [...current,game.appId] : current.filter(id=>id!==game.appId))} className="w-5 h-5 shrink-0 accent-primary"/><span className="min-w-0"><span translate="no" className="block break-words">{game.title}</span><span className="text-body-sm text-on-surface-variant">{game.hours} {t("hours")} · {game.genres.join(" · ") || t("Genre unavailable")}</span></span></label></li>)}</ul>
-    {!matches.length && filter && <p>{t("No games match these filters")}</p>}
-    <div className="flex flex-wrap justify-between gap-3"><button className="min-h-11 text-primary px-3" onClick={onBack}>{t("Back")}</button><button className={button} disabled={!selected.length} onClick={()=>onStart(selected)}>{t("Import and rate selected games")} ({selected.length})</button></div>
-  </div>;
 }
 
 export function SteamRatingEditor({ game, draft, onDraft, onNext }: { game: SteamRatingGame; draft: SteamRatingDraft; onDraft: (draft: SteamRatingDraft) => void; onNext: () => void }) {
