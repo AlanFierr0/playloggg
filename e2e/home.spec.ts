@@ -19,7 +19,8 @@ test("home uses owned entries, qualifying genre ratings and working filters", as
     await page.locator("#score-display").fill(score);
     await page.getByRole("button", { name: /^Choose tier, currently / }).click();
     await page.getByRole("menuitemradio", { name: "S God", exact: true }).click();
-    await page.getByRole("button", { name: /Completed$/ }).click();
+    await page.getByLabel("Game type", { exact: true }).selectOption("campaign");
+    await page.getByRole("button", { name: "Completed", exact: true }).click();
     await page.locator("#add-tag").click();
     await page.getByLabel("Tag label", { exact: true }).fill("Co-op & friends");
     await page.locator("#confirm-tag").click();
