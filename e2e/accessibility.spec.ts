@@ -40,7 +40,7 @@ test("Spanish HTML and metadata are translated before JavaScript runs", async ({
     await page.goto(`http://127.0.0.1:3100${route}`);
     await openNavigation(page);
     await expect(page.getByRole("navigation", { name: "Navegación principal" }).filter({ visible: true })).toBeVisible();
-    await expect(page.getByRole("navigation", { name: "Navegación principal" }).filter({ visible: true }).getByRole("link", { name: "Descubrir", exact: true })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Navegación principal" }).filter({ visible: true }).getByRole("link", { name: "Juegos", exact: true })).toBeVisible();
     await expect(page.locator('meta[name="description"]')).not.toHaveAttribute("content", /Browse|personal gaming|Game details|Public game/);
   }
   await page.goto("http://127.0.0.1:3100/games");
@@ -83,7 +83,15 @@ test("keyboard focus, search trapping and reduced motion remain usable", async (
   const last = dialog.locator('button:not([disabled]), a[href], input, [tabindex="0"]').last();
   await first.focus(); await first.press("Shift+Tab"); await expect(last).toBeFocused();
   await last.press("Tab"); await expect(first).toBeFocused();
-  await expect(page.locator("[inert]")).toHaveCount(1);
+  await expect(dialog).toHaveJSProperty("open", true);
+  const backgroundLink = page.locator("body > header a").first();
+  await backgroundLink.evaluate((node: HTMLElement) => node.focus());
+  await expect(first).toBeFocused();
+  await page.getByRole("button", { name: "Close search" }).click();
+  await expect(page).toHaveURL(/\/games$/);
+  await expect(dialog).toHaveCount(0);
+  await backgroundLink.focus();
+  await expect(backgroundLink).toBeFocused();
   await context.addCookies([authCookie]);
   await page.goto("/log?game=hades");
   const hours = page.locator("#hours-input"); await hours.focus();

@@ -1,7 +1,7 @@
 // A bounded warm-instance cache. Rejected reads are never reused; expiry starts at request time.
 export function recentRead<T>(load: (key: string) => Promise<T>, ttl: number, capacity: number, now = Date.now) {
   const entries = new Map<string, { expires: number; value: Promise<T> }>();
-  return (key: string, refresh = false): Promise<T> => {
+  const read = (key: string, refresh = false): Promise<T> => {
     const previous = entries.get(key);
     if (!refresh && previous && previous.expires > now()) return previous.value;
     entries.delete(key);
@@ -13,4 +13,5 @@ export function recentRead<T>(load: (key: string) => Promise<T>, ttl: number, ca
     void value.catch(() => { if (entries.get(key) === entry) entries.delete(key); });
     return value;
   };
+  return Object.assign(read,{invalidate:(key:string)=>{entries.delete(key);}});
 }

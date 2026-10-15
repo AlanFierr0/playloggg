@@ -1,7 +1,6 @@
 import {test} from "node:test";
 import assert from "node:assert/strict";
 import {recentRead} from "../src/lib/recent-read.ts";
-import {validateBulkRating} from "../src/lib/bulk-rating-input.ts";
 
 test("recent server reads expire, isolate identities, refresh and retry rejected reads",async()=>{
  let at=0,calls=0;
@@ -15,10 +14,12 @@ test("recent server reads expire, isolate identities, refresh and retry rejected
  await assert.rejects(read("fail"));await assert.rejects(read("fail"));assert.equal(calls,6);
  await read("other");await read("third");await read("owner-a:steam-a");assert.equal(calls,9);
 });
-test("bulk updates accept only bounded game selections and status/platform fields",()=>{
- assert.deepEqual(validateBulkRating({slugs:["hades","hades"],status:null,score:100}),{slugs:["hades"],status:null,platform:undefined});
- for(const input of [{slugs:[]},{slugs:["hades"]},{slugs:["hades"],status:"injected"},{slugs:["bad;sql"],platform:"pc"},{slugs:Array(101).fill("hades"),status:"playing"},{slugs:["hades"],platform:12}])assert.equal(validateBulkRating(input),null);
- assert.equal(validateBulkRating({slugs:["hades"],platform:"pc"}).platform,"pc");
- for(const platform of ["pc_battlenet","pc_gog","pc_epic","pc_ea","pc_ubisoft","pc_xbox","pc_other"]) assert.equal(validateBulkRating({slugs:["hades"],platform}).platform,platform);
- for(const platform of ["toString","__proto__","steam"]) assert.equal(validateBulkRating({slugs:["hades"],platform}),null);
+test("invalidating a server snapshot forces a fresh read only for that owner",async()=>{
+ let calls=0;
+ const read=recentRead(async()=>++calls,30_000,50);
+ const first=await read("a");const other=await read("b");
+ read.invalidate("a");
+ assert.notEqual(await read("a"),first);
+ assert.equal(await read("b"),other);
+ assert.equal(calls,3);
 });

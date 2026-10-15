@@ -43,8 +43,12 @@ function matches(query: string, content: string): boolean {
 export function getSearchMatches(query: string, portfolio: Portfolio) {
   return {
     titles: portfolio.games.filter((game) => matches(query, `${game.title} ${game.keywords} ${(game.genres ?? []).join(" ")} ${(game.tags ?? []).join(" ")}`)),
-    profiles: portfolio.profile.id && matches(query, `${portfolio.profile.displayName} ${portfolio.profile.handle}`) ? [portfolio.profile] : [],
-    lists: (portfolio.lists ?? []).filter((list) => matches(query, list.name)),
-    listMatches: (portfolio.lists ?? []).some((list) => matches(query, list.name)),
   };
+}
+
+export function largestScoreGap(games: Game[], scores: ReadonlyMap<string, { average: number; count: number }>) {
+  return ratedGames(games).flatMap(game => {
+    const community = scores.get(game.slug);
+    return community ? [{ game, community, difference: game.score - community.average }] : [];
+  }).filter(entry => entry.difference !== 0).sort((a, b) => Math.abs(b.difference) - Math.abs(a.difference) || a.game.slug.localeCompare(b.game.slug))[0];
 }

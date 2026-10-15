@@ -8,11 +8,11 @@ export async function discoverProfiles(limit = 24, offset = 0, query = "", exclu
   const client = createPublicClient();
   let request = client
     .from("profiles")
-    .select("id,handle,display_name,avatar_url,bio")
-    .eq("is_public", true)
-    .eq("is_discoverable", true);
+    .select("id,handle,display_name,avatar_url,bio,is_discoverable")
+    .eq("is_public", true);
   const search = profileSearch(query).replace(/_/g, "\\_");
   if (search) request = request.or(`handle.ilike.%${search}%,display_name.ilike.%${search}%`);
+  else request = request.eq("is_discoverable", true);
   const excluded = excludedIds.filter(id => Number.isSafeInteger(id) && id > 0);
   if (excluded.length) request = request.not("id", "in", `(${excluded.join(",")})`);
   const { data, error } = await request.order("handle").range(offset, offset + limit - 1);

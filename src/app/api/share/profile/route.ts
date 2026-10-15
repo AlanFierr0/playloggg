@@ -2,7 +2,7 @@ import { getCommunityScores } from "@/lib/community";
 import { NextRequest, NextResponse } from "next/server";
 import { getPublicPortfolio } from "@/lib/public-portfolio";
 import { getAccount } from "@/lib/owner";
-import { getPortfolio, getCatalog } from "@/lib/portfolio";
+import { getPortfolio, getCatalogRows } from "@/lib/portfolio";
 import { profileCard } from "@/lib/share-card";
 export async function GET(request: NextRequest) {
   const handle = request.nextUrl.searchParams.get("handle"),
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       { status: 404, headers },
     );
   if (kind === "takes") {
-    const rows=await getCatalog();
+    const rows=await getCatalogRows([],portfolio.games.filter(game=>game.logged&&game.score!==null).map(game=>game.slug));
     const bySlug = new Map(rows.map((row) => [row.slug, row.id]));
     const ids=portfolio.games.filter(game=>game.logged&&game.score!==null).flatMap(game=>bySlug.has(game.slug)?[bySlug.get(game.slug)!]:[]);
     const scores=await getCommunityScores(ids);

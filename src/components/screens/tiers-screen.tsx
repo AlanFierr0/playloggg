@@ -4,11 +4,12 @@ import { useMessages } from "@/components/site-preferences";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState, useTransition } from "react";
-import { updateGameTier } from "@/app/actions/tiers";
+import { Fragment, useEffect, useRef, useState, useTransition, type FormEvent } from "react";
+import { saveTierRanges, updateGameTier } from "@/app/actions/tiers";
 import { TierDragHandle } from "@/components/tier-drag-handle";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { groupTiers, loggedGames, tiers } from "@/lib/portfolio-view";
+import { defaultTierRanges, tierForScore } from "@/lib/tier-ranges";
 import type { Game, Tier } from "@/types/domain";
 
 
@@ -21,19 +22,86 @@ const router=useRouter();
 const [pending,startTransition]=useTransition();
 const saving=useRef(false);
 const [message,setMessage]=useState("");
+const [selectedTier,setSelectedTier]=useState<Tier|"all"|null>("all");
 const [dragged,setDragged]=useState<string|null>(null);
 const [over,setOver]=useState<string|null>(null);
-const logged = loggedGames(games);
+type Move = {slug: string; tier: Tier | null; automatic: boolean; id: number; saved?: boolean};
+const queue = useRef<Move[]>([]);
+const draining = useRef(false);
+const sequence = useRef(0);
+const confirmed = useRef(new Map<string, Pick<Move, "tier" | "automatic">>());
+const [queued, setQueued] = useState(0);
+const [overrides, setOverrides] = useState(new Map<string, Move>());
+const [previousGames, setPreviousGames] = useState(games);
+useEffect(() => {
+  if (!queued) return;
+  function preventLosingMoves(event: BeforeUnloadEvent) {event.preventDefault();}
+  window.addEventListener("beforeunload", preventLosingMoves);
+  return () => window.removeEventListener("beforeunload", preventLosingMoves);
+}, [queued]);
+if (previousGames !== games) {
+  setPreviousGames(games);
+  setOverrides(current => new Map([...current].filter(([slug, move]) => {
+    const game = games.find(game => game.slug === slug);
+    return !move.saved || game?.tier !== move.tier || game.tierManual !== !move.automatic;
+  })));
+}
+const displayGames = games.map(game => {
+  const move = overrides.get(game.slug);
+  return move ? {...game, tier: move.tier, tierManual: !move.automatic} : game;
+});
+const logged = loggedGames(displayGames);
 const groups = groupTiers(logged);
-function moveGame(slug:string,tier:Tier|null){
+const ranges = profile.tierRanges ?? defaultTierRanges;
+async function flushMoves() {
+  if (draining.current) return;
+  draining.current = true;
+  const failures = new Set<string>();
+  while (queue.current.length) {
+    const move = queue.current[0];
+    let result;
+    try {result = await updateGameTier(move.slug, move.tier, move.automatic);}
+    catch {result = {ok: false, message: "Tier could not be saved. Your game stayed in its previous tier. Please retry."};}
+    if (result.ok) {confirmed.current.set(move.slug, move); failures.delete(move.slug);}
+    else if (!queue.current.some(next => next.slug === move.slug && next.id > move.id)) {failures.add(move.slug); setMessage(result.message);}
+    const saved = confirmed.current.get(move.slug)!;
+    setOverrides(current => {
+      if (current.get(move.slug)?.id !== move.id) return current;
+      return new Map(current).set(move.slug, {...move, ...saved, saved: true});
+    });
+    queue.current.shift();
+    setQueued(queue.current.length);
+  }
+  draining.current = false;
+  if (!failures.size) setMessage("Tier saved.");
+  router.refresh();
+}
+function moveGame(slug:string,tier:Tier|null,automatic=false){
   const game=logged.find(game=>game.slug===slug);
-  if(!canEdit||saving.current||pending||!game||(game.tier??null)===tier)return;
+  if(!canEdit||saving.current||pending||!game||(!automatic&&(game.tier??null)===tier))return;
+  if (!queue.current.some(move => move.slug === slug)) confirmed.current.set(slug, {tier: game.tier ?? null, automatic: !game.tierManual});
+  const move = {slug, tier, automatic, id: ++sequence.current};
+  setOverrides(current => new Map(current).set(slug, move));
+  queue.current.push(move);
+  setQueued(queue.current.length);
+  if (!draining.current) setMessage("");
+  void flushMoves();
+}
+function saveRanges(event:FormEvent<HTMLFormElement>){
+  event.preventDefault();
+  if(!canEdit||saving.current||pending||queued)return;
+  const form=new FormData(event.currentTarget);
+  const next=Object.fromEntries(tiers.map(tier=>[tier,[Number(form.get(`min-${tier}`)),Number(form.get(`max-${tier}`))]]));
   saving.current=true;setMessage("");
   startTransition(async()=>{
-    try {const result=await updateGameTier(slug,tier);setMessage(result.message);if(result.ok)router.refresh();}
-    catch {setMessage("Tier could not be saved. Your game stayed in its previous tier. Please retry.");}
+    try {const result=await saveTierRanges(next);setMessage(result.message);if(result.ok){confirmed.current.clear();setOverrides(new Map());router.refresh();}}
+    catch {setMessage("Score ranges could not be saved. Please retry.");}
     finally {saving.current=false;}
   });
+}
+function dropGame(slug: string, tier: Tier | null) {
+  const game = games.find(game => game.slug === slug);
+  moveGame(slug, tier, Boolean(game && tier === tierForScore(game.score, ranges)));
 }
 function endDrag(){setDragged(null);setOver(null);}
 return (<>
@@ -56,78 +124,56 @@ return (<>
 
 <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold">{t("\n          Personal Tier Board\n        ")}</h1>
 
-<p className="font-body-md text-body-md text-on-surface-variant">{t(logged.length + " logged titles grouped by independently selected tiers.")}</p>
+<p className="font-body-md text-body-md text-on-surface-variant">{`${logged.length} ${t("logged titles grouped by score ranges and manual tiers.")}`}</p>
 
 </div>
 
 <div className="flex flex-wrap items-center gap-2 p-1.5 bg-surface-container rounded-lg self-start md:self-auto max-w-full">
-<a className="flex items-center gap-2 px-3 py-1.5 rounded bg-surface-container-high hover:bg-surface-bright transition-colors text-on-surface group" href="#tier-s">
-<span className="font-label-md text-label-md font-bold text-primary">{"S"}</span>
-
-<span className="font-label-sm text-label-sm text-on-surface-variant group-hover:text-on-surface">{groups.find((group) => group.tier === "S")!.games.length}</span>
-
-</a>
-
-<a className="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-surface-container-high transition-colors text-on-surface-variant hover:text-on-surface group" href="#tier-a">
-<span className="font-label-md text-label-md font-bold text-secondary">{"A"}</span>
-
-<span className="font-label-sm text-label-sm text-on-surface-variant group-hover:text-on-surface">{groups.find((group) => group.tier === "A")!.games.length}</span>
-
-</a>
-
-<a className="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-surface-container-high transition-colors text-on-surface-variant hover:text-on-surface group" href="#tier-b">
-<span className="font-label-md text-label-md font-bold text-tertiary">{"B"}</span>
-
-<span className="font-label-sm text-label-sm text-on-surface-variant group-hover:text-on-surface">{groups.find((group) => group.tier === "B")!.games.length}</span>
-
-</a>
-
-<a className="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-surface-container-high transition-colors text-on-surface-variant hover:text-on-surface group" href="#tier-c">
-<span className="font-label-md text-label-md font-bold text-outline">{"C"}</span>
-
-<span className="font-label-sm text-label-sm text-on-surface-variant group-hover:text-on-surface">{groups.find((group) => group.tier === "C")!.games.length}</span>
-
-</a>
-
-<a className="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-surface-container-high transition-colors text-on-surface-variant hover:text-on-surface group" href="#tier-d">
-<span className="font-label-md text-label-md font-bold text-on-surface-variant">{"D"}</span>
-
-<span className="font-label-sm text-label-sm text-on-surface-variant group-hover:text-on-surface">{groups.find((group) => group.tier === "D")!.games.length}</span>
-
-</a>
-
-<a className="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-surface-container-high transition-colors text-on-surface-variant hover:text-on-surface group" href="#tier-f">
-<span className="font-label-md text-label-md font-bold text-error">{"F"}</span>
-
-<span className="font-label-sm text-label-sm text-on-surface-variant group-hover:text-on-surface">{groups.find((group) => group.tier === "F")!.games.length}</span>
-
-</a>
+<button type="button" aria-pressed={selectedTier==="all"} onClick={()=>setSelectedTier("all")} className={`min-h-11 px-3 rounded text-body-sm transition-colors ${selectedTier==="all" ? "bg-surface-container-high text-on-surface" : "text-on-surface-variant hover:bg-surface-container-high"}`}>{t("All tiers")}</button>
+{groups.map(group=>{
+ const key=group.tier??"Unassigned";
+ const selected=selectedTier===group.tier;
+ return <button key={key} type="button" aria-label={group.tier ? `${t("Tier")} ${group.tier}` : t("Unassigned")} aria-pressed={selected} onClick={()=>setSelectedTier(group.tier)} className={`flex min-h-11 items-center gap-2 px-3 rounded transition-colors ${selected ? tierThemes[key].surface : "hover:bg-surface-container-high text-on-surface-variant"}`}>
+ <span className={`font-label-md text-label-md font-bold ${selected ? "" : tierThemes[key].color}`}>{group.tier??t("Unassigned")}</span>
+ <span className="font-label-sm text-label-sm">{group.games.length}</span>
+ </button>;
+})}
 
 </div>
 
 </section>
 
-{canEdit&&<p className="text-body-sm text-on-surface-variant">{t("Drag games between tiers, or use each game's tier selector. Changes save automatically.")}</p>}
-{canEdit&&<p role="status" aria-live="polite" className="text-body-sm text-primary">{t(pending ? "Saving tier…" : message)}</p>}
-<div className="flex flex-col gap-6 w-full" aria-busy={pending}>
-{groups.filter((group) => canEdit || group.tier !== null || group.games.length > 0).map((group) => {
+{canEdit&&<p role="status" aria-live="polite" className={pending || queued || message ? "fixed bottom-5 right-4 sm:right-6 z-50 flex max-w-[calc(100vw-2rem)] items-center gap-2 rounded-xl border border-outline-variant bg-surface-container-high px-4 py-3 text-body-sm text-primary shadow-xl" : "sr-only"}>{(pending||queued>0)&&<span aria-hidden="true" className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-primary/30 border-t-primary motion-reduce:animate-none"/>}{t(pending || queued ? "Saving…" : message)}{queued>0&&<span className="tabular-nums">({queued})</span>}</p>}
+{canEdit&&<p className="text-body-sm text-on-surface-variant">{t("Drag a game to a tier to keep it there. Drop it back into its score range to restore automatic placement.")}</p>}
+<form id="tier-range-form" onInvalidCapture={event=>{
+  event.preventDefault();setSelectedTier("all");setMessage("Check the highlighted score range. Enter whole numbers from 0 to 100.");
+  const field=event.target as HTMLInputElement;
+  requestAnimationFrame(()=>{field.focus();field.scrollIntoView({block:"center",behavior:"auto"});});
+}} onSubmit={saveRanges} className="flex flex-col gap-6 w-full" aria-busy={pending}>
+{groups.filter(group => (canEdit || group.tier!==null || group.games.length>0 || selectedTier===null)).map((group) => {
  const key = group.tier ?? "Unassigned";
  const theme = tierThemes[key];
- return <section key={key} data-tier-drop={group.tier??"unassigned"} className={`flex flex-col md:flex-row gap-4 p-4 lg:p-6 rounded-xl bg-surface-container-low shadow-sm ${over===key ? "ring-2 ring-primary bg-primary/10" : ""}`} id={"tier-" + key.toLowerCase()}
- onDragOver={event=>{if(canEdit&&dragged&&!pending){event.preventDefault();event.dataTransfer.dropEffect="move";setOver(key);}}}
- onDragLeave={event=>{if(!(event.relatedTarget instanceof Node)||!event.currentTarget.contains(event.relatedTarget))setOver(null);}}
- onDrop={event=>{if(!canEdit||!dragged||pending)return;event.preventDefault();const slug=dragged;endDrag();moveGame(slug,group.tier);}}>
- <div className="flex flex-wrap gap-2 md:flex-col justify-between items-center md:items-start w-full md:w-44 flex-shrink-0 p-4 rounded-lg bg-surface-container">
- <div className="flex items-center md:flex-col md:items-start gap-2"><span className={"font-display-lg text-display-lg font-bold leading-none " + theme.color}>{group.tier ?? "—"}</span><div className="flex flex-col"><span className="font-label-md text-label-md font-semibold uppercase tracking-wider text-on-surface">{t(theme.label)}</span>{!group.tier && <span className={"font-label-sm text-label-sm " + theme.color}>{t("No tier selected")}</span>}</div></div>
- <div className="flex items-center gap-1.5 pt-0 md:pt-6"><span className="font-label-sm text-label-sm text-on-surface-variant">{group.games.length} {group.games.length === 1 ? t("game") : t("games")}</span><span className={"w-1.5 h-1.5 rounded-full bg-current " + theme.color}></span></div>
+ return <section hidden={selectedTier!=="all"&&group.tier!==selectedTier} key={key} data-tier-drop={group.tier??"unassigned"} className={`${selectedTier!=="all"&&group.tier!==selectedTier ? "hidden" : "flex"} flex-col md:flex-row gap-4 p-4 lg:p-6 rounded-xl shadow-sm ${theme.surface} ${over===key ? "ring-2 ring-on-surface ring-offset-2 ring-offset-surface" : ""}`} id={"tier-" + key.toLowerCase()}>
+ <div className="flex flex-wrap gap-2 md:flex-col justify-between items-center md:items-start w-full md:w-44 flex-shrink-0 p-4 rounded-lg">
+ <div className="flex items-center md:flex-col md:items-start gap-2"><span className="font-display-lg text-display-lg font-bold leading-none">{group.tier ?? "—"}</span><div className="flex flex-col"><span className="font-label-md text-label-md font-semibold uppercase tracking-wider">{t(theme.label)}</span>{!group.tier && <span className="font-label-sm text-label-sm">{t("No tier selected")}</span>}</div></div>
+ {group.tier && (canEdit ? <div className="w-full max-w-[9rem] space-y-1.5" role="group" aria-label={`${t("Score range")} ${group.tier}`}><span className="block text-center font-label-sm text-label-sm font-semibold">{t("Range")}</span><div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5">
+ {([0,1] as const).map(bound=><Fragment key={`${group.tier}-${bound}-${ranges[group.tier!][bound]}`}><label className="min-w-0 overflow-hidden rounded-lg border border-black/50 bg-white/15 text-black transition-colors hover:bg-white/25 focus-within:border-black focus-within:ring-2 focus-within:ring-black motion-reduce:transition-none">
+ <input aria-label={`${t(bound===0 ? "Minimum score for tier" : "Maximum score for tier")} ${group.tier}`} name={`${bound===0 ? "min" : "max"}-${group.tier}`} type="number" min={0} max={100} step={1} required disabled={pending||queued>0} defaultValue={ranges[group.tier!][bound]} className="min-h-11 w-full min-w-0 bg-transparent px-1 text-center text-xl font-semibold tabular-nums text-black outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none disabled:opacity-50"/>
+ </label>{bound===0&&<span aria-hidden="true" className="text-lg font-semibold">–</span>}</Fragment>)}
+ </div></div> : <p className="inline-flex items-baseline gap-1.5 rounded-lg border border-black/20 bg-black/5 px-3 py-2 text-body-md font-semibold tabular-nums" aria-label={`${t("Score range")} ${ranges[group.tier][0]}–${ranges[group.tier][1]}`}><span>{ranges[group.tier][0]}–{ranges[group.tier][1]}</span><span className="text-body-sm font-normal">/ 100</span></p>)}
+ <div className="flex items-center gap-1.5 pt-0 md:pt-6"><span className="font-label-sm text-label-sm">{group.games.length} {group.games.length === 1 ? t("game") : t("games")}</span><span className="w-1.5 h-1.5 rounded-full bg-current"></span></div>
  </div>
- <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 flex-1 min-w-0">
- {group.games.map((game) => <TierCard key={game.slug} game={game} color={theme.color} publicBase={publicBase} editable={canEdit} disabled={pending} dragged={dragged===game.slug} onStart={()=>setDragged(game.slug)} onEnd={endDrag} onHover={tier=>setOver(tier===undefined ? null : tier??"Unassigned")} onMove={tier=>moveGame(game.slug,tier)} />)}
- {group.games.length === 0 && <p className="col-span-full py-8 font-body-sm text-body-sm text-on-surface-variant">{t("No games assigned to this tier.")}</p>}
+ <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-2 flex-1 min-w-0">
+ {group.games.map((game) => <TierCard key={game.slug} game={game} color={theme.color} publicBase={publicBase} editable={canEdit} disabled={pending} dragged={dragged===game.slug} onStart={()=>setDragged(game.slug)} onEnd={endDrag} onHover={tier=>setOver(tier===undefined ? null : tier??"Unassigned")} onMove={tier=>moveGame(game.slug,tier)} onDrop={tier=>dropGame(game.slug,tier)} />)}
+ {group.games.length === 0 && <p className="col-span-full py-8 font-body-sm text-body-sm">{t(over===key ? "Drop game here" : "No games assigned to this tier.")}</p>}
  </div>
  </section>;
 })}
-</div>
+{canEdit&&<div className="flex flex-wrap items-center justify-between gap-3">
+<p className="text-body-sm text-on-surface-variant">{t("Scores from 0 to 100. Ranges cannot overlap.")}</p>
+<button disabled={pending||queued>0} type="submit" className="min-h-11 rounded-xl bg-primary-container px-5 py-3 text-on-primary-container hover:bg-primary disabled:opacity-50">{t("Save score ranges")}</button>
+</div>}
+</form>
 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-xl bg-surface-container-low text-on-surface-variant mt-4">
 <div className="flex items-center gap-3">
 <span aria-hidden="true" className="material-symbols-outlined text-primary text-xl">{"auto_awesome"}</span>
@@ -147,14 +193,24 @@ return (<>
 </>);
 }
 
-const tierThemes: Record<string, { label: string; color: string }> = {"S":{"label":tierLabels.S,"color":"text-primary"},"A":{"label":tierLabels.A,"color":"text-secondary"},"B":{"label":tierLabels.B,"color":"text-tertiary"},"C":{"label":tierLabels.C,"color":"text-outline"},"D":{"label":tierLabels.D,"color":"text-on-surface-variant"},"F":{"label":tierLabels.F,"color":"text-error"},"Unassigned":{"label":"Unassigned","color":"text-on-surface-variant"}};
-function TierCard({ game, color, publicBase, editable, disabled, dragged, onStart, onEnd, onHover, onMove }: { game: Game; color: string; publicBase?: string; editable:boolean; disabled:boolean; dragged:boolean; onStart:()=>void; onEnd:()=>void; onHover:(tier:Tier|null|undefined)=>void; onMove:(tier:Tier|null)=>void }) {
+const tierThemes: Record<string, { label: string; color: string; surface: string }> = {
+ S:{label:tierLabels.S,color:"text-[#ff7f7f] [.light_&]:text-[#a32929]",surface:"bg-[#ff7f7f] text-black"},
+ A:{label:tierLabels.A,color:"text-[#ffbf7f] [.light_&]:text-[#854000]",surface:"bg-[#ffbf7f] text-black"},
+ B:{label:tierLabels.B,color:"text-[#ffdf7f] [.light_&]:text-[#735700]",surface:"bg-[#ffdf7f] text-black"},
+ C:{label:tierLabels.C,color:"text-[#ffff7f] [.light_&]:text-[#626200]",surface:"bg-[#ffff7f] text-black"},
+ D:{label:tierLabels.D,color:"text-[#bfff7f] [.light_&]:text-[#3c6200]",surface:"bg-[#bfff7f] text-black"},
+ F:{label:tierLabels.F,color:"text-[#7fff7f] [.light_&]:text-[#176117]",surface:"bg-[#7fff7f] text-black"},
+ Unassigned:{label:"Unassigned",color:"text-on-surface-variant",surface:"bg-surface-container-low text-on-surface-variant"},
+};
+function TierCard({ game, color, publicBase, editable, disabled, dragged, onStart, onEnd, onHover, onMove, onDrop }: { game: Game; color: string; publicBase?: string; editable:boolean; disabled:boolean; dragged:boolean; onStart:()=>void; onEnd:()=>void; onHover:(tier:Tier|null|undefined)=>void; onMove:(tier:Tier|null)=>void; onDrop:(tier:Tier|null)=>void }) {
   const t = useMessages();
 
- return <div data-tier-game={game.slug} draggable={editable&&!disabled} onDragStart={event=>{if(!editable||disabled){event.preventDefault();return;}event.dataTransfer.effectAllowed="move";event.dataTransfer.setData("text/plain",game.slug);onStart();}} onDragEnd={onEnd} className={`group relative rounded-lg overflow-hidden bg-surface-container transition-transform duration-200 hover:-translate-y-1 ${editable ? "cursor-grab" : ""} ${dragged ? "opacity-50 ring-2 ring-primary" : ""}`}>
- <div className="aspect-[3/4] w-full overflow-hidden bg-surface-container-high"><img draggable={false} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src={game.cover} alt={game.title} /></div>
+ const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => event.currentTarget.closest("[data-tier-game]")?.querySelector("select")?.focus();
+ const dragLabel = `${t("Drag to change tier")}: ${game.title}`;
+ return <TierDragHandle title={game.title} slug={game.slug} disabled={!editable||disabled} coverUrl={game.cover} onStart={onStart} onEnd={onEnd} onHover={onHover} onMove={onDrop} className={`group relative rounded-lg overflow-hidden bg-surface-container transition-transform duration-200 hover:-translate-y-1 ${editable ? "cursor-grab" : ""} ${dragged ? "opacity-50 ring-2 ring-primary" : ""}`}>
+ <div className="relative aspect-[3/4] w-full overflow-hidden bg-surface-container-high"><img draggable={false} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src={game.cover} alt={game.title} />{editable&&game.tier&&<button data-tier-drag-start type="button" disabled={disabled} aria-label={dragLabel} title={t("Drag to change tier")} onClick={handleClick} className="absolute inset-0 z-10 min-h-11 min-w-11 touch-none cursor-grab active:cursor-grabbing disabled:opacity-50"/>}{editable&&game.tier&&<button type="button" disabled={disabled} onClick={()=>onMove(null)} aria-label={`${t("Clear tier for")} ${game.title}`} title={t("Clear tier; keep log entry")} className="absolute top-0 left-0 z-20 min-h-11 min-w-11 rounded bg-surface/90 text-on-surface-variant transition-opacity [@media(hover:hover)]:[.group:not(:hover):not(:focus-within)_&]:opacity-0 [@media(hover:hover)]:[.group:not(:hover):not(:focus-within)_&]:pointer-events-none hover:bg-surface-container-high hover:text-error disabled:opacity-50"><span aria-hidden="true" className="material-symbols-outlined">close</span></button>}</div>
  <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-surface/90 backdrop-blur-md shadow"><span className={"font-label-sm text-label-sm font-bold " + color}>{game.score ?? "—"}</span></div>
- <div className="p-2.5 flex flex-col bg-surface-container"><h2 className="font-headline-md text-body-md font-semibold text-on-surface min-h-[2.5rem] line-clamp-2"><Link className="block after:absolute after:inset-0" href={(publicBase ?? "") + "/game/" + game.slug}>{game.title}</Link></h2><span className="font-label-sm text-label-sm text-on-surface-variant truncate">{game.year ?? t("Release year unavailable")}</span></div>
- {editable&&<div className="relative z-10 flex items-center gap-2 px-2.5 pb-2.5"><TierDragHandle title={game.title} disabled={disabled} onStart={onStart} onEnd={onEnd} onHover={onHover} onMove={onMove}/><select disabled={disabled} aria-label={`${t("Tier for")} ${game.title}`} value={game.tier??""} onChange={event=>onMove(event.target.value ? event.target.value as Tier : null)} className="relative z-10 min-h-11 min-w-0 w-full rounded bg-surface-container-high px-2 text-body-sm text-on-surface"><option value="">{t("Unassigned")}</option>{tiers.map(tier=><option key={tier} value={tier}>{tier} · {t(tierLabels[tier])}</option>)}</select></div>}
- </div>;
+ <div className="p-2.5 flex flex-col bg-surface-container"><h2 className="font-headline-md text-body-md font-semibold text-on-surface min-h-[2.5rem] line-clamp-2"><Link draggable={false} className="block after:absolute after:inset-0" href={(publicBase ?? "") + "/game/" + game.slug}>{game.title}</Link></h2><span className="font-label-sm text-label-sm text-on-surface-variant truncate">{game.year ?? t("Release year unavailable")}</span></div>
+ {editable&&<div className={game.tier ? "" : "relative z-10 flex flex-col gap-1 px-1 pb-1"}><div className="flex items-center justify-between">{!game.tier&&<button data-tier-drag-start type="button" disabled={disabled} aria-label={dragLabel} title={t("Drag to change tier")} onClick={handleClick} className="relative z-10 min-h-11 min-w-11 shrink-0 touch-none cursor-grab rounded bg-surface-container-high text-on-surface-variant active:cursor-grabbing disabled:opacity-50"><span aria-hidden="true" className="material-symbols-outlined">drag_indicator</span></button>}</div><select disabled={disabled} aria-label={`${t("Tier for")} ${game.title}`} value={game.tier??""} onChange={event=>{onMove(event.target.value ? event.target.value as Tier : null);event.currentTarget.blur();}} className={(game.tier ? "sr-only focus:not-sr-only focus:relative focus:z-20 focus:min-h-11 focus:w-full focus:rounded focus:px-1 focus:text-body-sm " : "relative z-10 min-h-11 min-w-0 w-full rounded px-1 text-body-sm ") + (game.tier ? tierThemes[game.tier].surface : "bg-surface-container-high text-on-surface")}><option value="" className="bg-surface-container-high text-on-surface">{t("Unassigned")}</option>{tiers.map(tier=><option key={tier} value={tier} className={tierThemes[tier].surface}>{tier} · {t(tierLabels[tier])}</option>)}</select></div>}
+ </TierDragHandle>;
 }

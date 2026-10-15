@@ -23,14 +23,30 @@
    Blank limits are unrestricted; zero includes unplayed games.
    Filters and sorting apply to the whole library before batches are chosen.
    Select individual matched games, or **Select available games** among loaded cards.
-6. Select **Import selected games** in the upper-right toolbar. Games are imported sequentially, with
+6. Select **Import selected games** in the upper-right toolbar, then choose
+   **Rate all games**, **Rate some games**, or **Just import**. Some games opens a
+   picker over the games selected for import: filter by genre, title and minimum/
+   maximum playtime, sort by title/playtime, then select individual or matching
+   games. Hidden selections stay selected until cleared. No writes happen until
+   you confirm an import mode or the picker.
+   Games are imported in batches of up to 25, with
    a centered modal over the library showing the current title, processed/total
    count, remaining count and progress bar. It keeps focus and disables interaction
    with the page behind it while saving. Its spinner
-   respects reduced-motion preferences. The indicator disappears on completion
+   respects reduced-motion preferences. In Just import mode, the indicator disappears on completion
    or failure, while errors remain available for retry. Successful imports stay saved if another
-   game fails; retry keeps only failed selections. Changing filters, sorting or
+   batch fails; retry keeps only failed selections. A rating write is atomic within its batch. Changing filters, sorting or
    the amount resets the loaded set and selection; loading more preserves them.
+   In rating modes, chosen games are imported first and enter a one-at-a-time
+   editor as each batch succeeds; the first rated game is imported separately so rating can begin promptly. Set an optional independent tier, 0–100 score
+   (typed or slider), and playback status; **Save and next** persists these three
+   fields, while **Skip this game** leaves them unset. Other selected games keep
+   importing while you edit. Import errors and rating errors are separate; failed
+   saves retain the draft for retry. Existing/concurrently logged entries are not
+   added to the rating queue. **Done** closes the session after the import ends.
+   Keep the page open until import finishes: this is an in-page workflow, not a
+   durable job that survives closing the tab. Import/rating skips leave the game
+   logged and editable later from the profile.
 7. **Sync Steam playtime** updates hours for existing PC / Steam entries, including
    manual PC entries with an exact Steam match. It works independently of the
    current filters or loaded amount, in requests of at most 25 games. The server
@@ -41,7 +57,7 @@
 
 Each new entry saves PC / Steam and playtime, rounded from minutes to two decimal
 hours. Zero hours remain zero. Score, tier, status, review and completion date
-stay unset; no favorites are created. Existing entries are skipped, including
+stay unset until explicitly supplied in the optional rating session; no favorites are created. Existing entries are skipped, including
 concurrent edits. Steam ownership is not treated as proof of completion.
 
 Only Steam sign-in accounts can use the first version. Connecting Steam to an
@@ -69,15 +85,21 @@ Steam failures and provider failures allow retries without exposing credentials.
 
 Every server action verifies Supabase Auth and database profile ownership. The
 Steam ID comes only from trusted `app_metadata.playlogg_steam_id` written by the
-existing verified OpenID bridge. The browser supplies an app ID only; the server
-fetches the owned library again to validate ownership and obtain trusted playtime.
+existing verified OpenID bridge. The browser supplies bounded app ID batches only; the server
+reads the owner-bound library to validate ownership and obtain trusted playtime.
 
 Game matches use Steam app IDs from the provider's external-game records,
 restricted to the Steam source. Ambiguous/missing matches are not selectable.
-Titles are never used for automatic matching. Missing shared metadata uses the
-existing trusted catalog import action. Personal entry insertion uses the
+Titles are never used for automatic matching. Missing shared metadata is normalized from verified provider matches and inserted
+by the same server-only catalog admin used for individual catalog imports. Personal entry insertion uses the
 authenticated client and existing RLS, with ON CONFLICT DO NOTHING on
 `profile_id,game_id`; the admin client never writes personal entries.
+The import returns the saved entry slug and update timestamp only for a newly
+created log. Rating saves re-verify Steam/Auth ownership and validate all inputs,
+then update score/tier/status on that existing PC entry with a timestamp check.
+No upsert, playtime/platform/review/tag/date overwrite, schema change or new grant
+is needed. A concurrent manual edit takes precedence and the rating screen tells
+the user to skip and edit the latest version from their profile.
 
 Preview covers use existing catalog artwork or the exactly matched provider
 cover. If unavailable or broken, try Steam's library capsule and then its header.
@@ -103,6 +125,9 @@ Only explicitly selected imported entries become visible if the profile is publi
   exclusion, inaccessible libraries, failed-save retry, accessibility and mobile.
   Also verifies imported games stay hidden after reopening, sync retry, unchanged
   non-playtime fields and other profiles, and idempotent sync without date changes.
+  Rating-flow checks cover all/some/no ratings, live editing during imports, genre/
+  title/playtime selection, independent tier/status, score zero, retry without lost
+  drafts, skips and concurrent manual edit protection.
 - The fixture provider intercepts only the isolated test process. It does not
   replace Steam authentication or production RLS verification.
 
@@ -110,3 +135,173 @@ API references: [Steam GetOwnedGames](https://partner.steamgames.com/doc/webapi/
 and [external-game matching](https://api-docs.igdb.com/#external-game).
 
 The review implementation reuses an owner-bound server library for at most 30 seconds between filters/pages/imports. Opening the page and Refresh force a fresh read; sync also re-fetches. Authorization remains fresh for every action. The cache is bounded to 50 warm-instance entries and does not guarantee cross-instance deduplication. See [the execution plan](review-execution-plan.md) for quotas, final import counts, retries and manual search behavior.
+
+
+The rating screen focuses on one game. Import progress and reviewed counts are
+automatically shown as a compact bottom-right toast when rating imports starts or resumes while importing. There is no Import details button. The native manual
+popover stays above the rating modal without a second backdrop or focus trap;
+users can continue scoring or dismiss it. The toast closes automatically when importing finishes; resuming a completed import does not reopen it. Close rating session hides the editor
+without stopping imports; Resume rating games reopens it. The queue, position and
+current score/tier/status draft are kept in localStorage scoped to the verified
+profile ID. Refreshing or leaving the page restores a closed session in the same
+browser. Completed sessions are removed when Done is clicked. Storage errors
+are reported, and invalid cached sessions are ignored. No credentials are stored.
+Server ownership and timestamp checks still run on every save.
+
+Imports only continue while the page is open. If a page is left mid-import,
+acknowledged successful imports remain available for rating; refresh the library
+to import remaining games. Pending requests are not a durable background job.
+
+Rating queues start with the most-played selected games (Steam hours descending),
+for both all-games and filtered some-games sessions, regardless of selection order.
+
+The rating popup places Game info to the right of the game name, opening the stored catalog game in a new
+tab so the current draft and running import stay on the original page. It loads
+Steam overall review summaries only for the displayed game. A verified Steam
+account and the existing operation limit are required. Fixed Steam URLs use a
+validated app ID, an eight-second timeout and a one-hour public fetch cache.
+Show Valve's description, positive percentage, review count and all-language
+scope for Steam purchases, using the default off-topic filtering. Review labels
+link to the Steam store reviews. Missing/failed reviews do not block ratings.
+No user score is inferred and no review text or reviewer identities are returned.
+Provider reference: https://partner.steamgames.com/doc/store/getreviews
+
+
+Import speed optimization (2026-10-06): the browser sends at most 25 Steam app
+IDs per server action. Each action validates the batch, verifies the current
+account and trusted Steam identity, checks the Steam request quota, and reads
+owner-bound Steam playtime. Browser metadata and hours are never accepted.
+The preview's exact, unambiguous provider matches and normalized public metadata
+are reused in a five-minute, 1,000-entry warm-instance cache. Provider failures
+are not cached; cold/expired/evicted matches are resolved in one bounded IGDB
+query, with the existing HTTP throttle intact. This cache contains no ownership
+or playtime data and cannot authorize an import.
+
+Catalog IDs/slugs are read together. Missing metadata is inserted together under
+the existing per-new-game import quota, with DO NOTHING and a read fallback for
+concurrent catalog imports. Ratings are inserted in one atomic batch under the
+owner's RLS, also with DO NOTHING. Existing entries retain every field and their
+timestamps. Results preserve request order and identify individual unmatched,
+unowned, skipped and imported entries. Successful earlier batches survive a
+later failure; failed rating batches can be retried safely. Catalog invalidation
+and page refresh happen once per batch, with no global catalog refresh for batches
+that only reuse stored games. Rating queues retain descending playtime order.
+
+The isolated two-game check originally made three extra IGDB requests, five
+catalog reads and two rating writes after preview. It now requires zero extra
+IGDB requests on a warm cache, one catalog read and one rating write. These are
+request-count measurements, not a production wall-clock speed guarantee.
+
+
+Further speed optimization (2026-10-06): logged-game resolution uses a 30-second,
+50-entry preview snapshot keyed by verified Auth ID, profile ID and Steam identity.
+Only app IDs and PC sync IDs are cached. Every preview still re-verifies ownership;
+the first page of each load/filter refresh resolves a fresh snapshot, and imports
+invalidate it. Subsequent pages reuse it while warm. Sync always reads fresh entry
+data. A cold/expired snapshot resolves normally; no browser snapshot is trusted.
+The 127-game fixture now reads logged ratings once across six pages, instead of six
+times. Logged-game matching also uses maps instead of repeated linear searches.
+
+New-game import quotas use consume_operation_limit_batch, restricted to service_role,
+with SECURITY INVOKER and an empty search_path. The additive migration is
+supabase/migrations/20261007001817_steam_import_batch_quota.sql. It reuses the existing
+atomic minute/day counters once for each admitted game, returning the allowed
+prefix and retry delay without increasing either limit. Up to 25 new games now
+require one quota RPC rather than 50. Existing catalog entries can still import
+when the new-game quota is exhausted; only the remainder is kept for retry.
+No profile/catalog write grants or Auth/RLS policies change.
+
+Supabase boundary checks are runnable via supabase/verify_steam_import_batch_quota.sql.
+They cover both windows, shared counters with individual imports, 25-game charging,
+invalid batches and server-only privileges; synthetic counters roll back. Security
+advisors reported the existing intentional no-policy private counter table and
+existing [disabled leaked-password protection](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection), with no new function/grant finding.
+
+## Achievement completion-date suggestions
+
+**Find completion dates**, beside playtime sync, checks existing PC / Steam logs
+with missing dates and at least five hours of verified Steam playtime. Games below
+five hours skip achievement requests in both import rating and existing-log scans;
+manual completion dates remain available. The scan processes five games per batch and at most two
+Steam reads simultaneously; Stop scan pauses after the current reads. Retry
+unfinished games preserves earlier results. Ongoing/live-service games and
+active, paused or stopped entries are excluded.
+
+The Campaign import editor also checks the current game's achievements without
+blocking rating. Suggestions display the original English achievement name,
+description and UTC date in chronological order. **Use this date** chooses one
+candidate and marks the draft Completed; the existing calendar allows correction.
+Only **Save and next** persists the import draft. For existing logs,
+**Confirm completion** immediately saves that chosen date and Completed status.
+
+Detection uses conservative English text rules for story/campaign/game completion,
+endings and final bosses. It excludes chapter/level/tutorial/match/round and DLC
+completion. These are suggestions, not proof of finishing the game. Unsupported,
+private or unavailable achievements leave manual completion-date entry available.
+Zero, future and pre-release achievement timestamps are ignored. Multiple endings
+are never selected automatically. No dates are inferred from last played or hours.
+
+Server actions resolve the linked Steam ID from verified Auth metadata, validate
+ownership and the exact provider mapping, and use STEAM_WEB_API_KEY server-side.
+Achievement reads use persistent Steam results and coalesce simultaneous requests; rejected reads are not cached. Manual dates need no extra provider or key.
+Confirmed dates use the existing guarded rating save with timestamp checks: existing
+dates and unrelated entry fields are preserved, concurrent edits require reloading.
+Confirmed Completed entries appear in the profile timeline. Older saved import drafts
+resume with a blank completion date. Scans stop when leaving the page and do not
+run as background jobs.
+
+## Gemini-assisted achievement detection
+
+Set **GEMINI_API_KEY** as a Production Secret in Vercel, then redeploy. Create the
+key in [Google AI Studio](https://aistudio.google.com/api-keys) using a free-tier
+project. Never put the key in NEXT_PUBLIC variables, chat or committed files.
+The default is Google's stable gemini-3.5-flash-lite model; no paid search tools
+or provider fallback are enabled. Google controls free-tier availability and
+quotas; billing-enabled projects can incur charges under Google's pricing.
+
+Gemini receives only the game's public English title and full public achievement
+schema, not Steam IDs, profiles, scores, hours, unlocked flags or unlock dates.
+It identifies clear main-story endings and final story bosses, including indirect
+wording, and excludes optional/DLC/collectible/multiplayer achievements. Unknown,
+duplicate or malformed IDs and incomplete model responses are rejected. Dates
+always come from actual unlocked Steam achievements; the AI never produces dates.
+The UI labels matching results **AI-assisted suggestion** and still requires
+explicit confirmation. The five-hour threshold and ongoing-game exclusions remain.
+
+Public classifications, including empty results, persist in a server-only Supabase
+cache per Steam app. A hash includes the public schema, model and detector version;
+a changed schema/version triggers a fresh classification. Steam schemas have a
+24-hour persistent cache, classifications a 15-minute warm-instance cache, and cold
+servers reuse the persisted classification. Provider failures are not stored
+as successful classifications. The global request cap is five new classifications
+per minute and 200 per UTC day; cache hits do not spend provider quota. Missing keys,
+quota errors, malformed responses or outages fall back to text rules without blocking
+rating or saving. Free-tier scans may use fallback rules after reaching a quota.
+
+The cache table has RLS and no anon/authenticated grants; only server service-role
+RPCs read/write it. A rolled-back Postgres check covers cache access, schema hashes,
+empty results and duplicate rejection in supabase/tests/audit-regression.sql.
+
+## Persistent Steam achievement reads
+
+Validated public achievement schemas are stored for 24 hours; each verified user's
+Steam achievement response is stored for 15 minutes. Both survive cold starts and
+deployments. Player cache keys include the verified owner, linked Steam ID, app and
+language; schemas contain public data and can be reused across owners. Refreshing
+a scan bypasses and replaces the private unlock cache while retaining the public
+schema and AI classification. Provider errors are never cached. Cache storage
+failures still allow a validated Steam response to be used.
+
+The private cache and its RPCs are service-role-only, with RLS as an additional
+guard. Player rows are removed with Auth account deletion. Expired rows are never
+read and are cleaned up on cache writes. Cache reads do not extend their lifetime.
+
+## Reviewing completion suggestions
+
+Confirmed games leave the scan results immediately after a successful save. Their
+saved date keeps them out of subsequent scans. **Skip game** dismisses a game from
+completion scans for that account across devices without editing its rating,
+review, playtime, status or date. Skips also suppress import-editor suggestions
+for that game; manual date entry remains available. Failed confirmations/skips
+keep the card visible with a retryable error. Skip preferences are server-only,
+owner-scoped and removed with account deletion.

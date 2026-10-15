@@ -8,7 +8,7 @@ The existing public Supabase Auth client sends `signInWithOtp` with automatic
 Auth registration allowed and a fixed `/auth/confirm` callback. No admin key or
 owner email allowlist is involved. A link must verify through Supabase before the
 session is accepted. Existing accounts open their profile; accounts without a
-profile enter the existing name setup and create an empty private profile.
+profile enter the existing name setup and create an empty public profile (owners can change visibility in Settings).
 Email/password, verification and password recovery remain available.
 
 Email is delivered through the project's existing Auth SMTP/template settings.

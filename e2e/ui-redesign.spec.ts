@@ -6,10 +6,13 @@ import { authCookie } from "./fixture-server.mjs";
 test("profile preview, responsive menu and catalog disclosure work in both themes", async ({ page }, testInfo) => {
   await page.goto("/");
   await expect(page.getByRole("figure", { name: "Profile preview" })).toBeVisible();
-  await expect(page.getByText("Illustrative layout. Your profile starts empty and private.")).toBeVisible();
+  await expect(page.getByText("Illustrative layout. Your profile starts empty and public.")).toBeVisible();
   const hero = page.locator("main header");
   await expect(hero.getByRole("link", {name:"Create your profile", exact:true})).toHaveAttribute("href", "/login?mode=register");
   await expect(hero.getByRole("figure").getByRole("link")).toHaveCount(4);
+  const previewLinks = await hero.getByRole("figure").getByRole("link").evaluateAll(links => links.map(link => link.getAttribute("href")));
+  const suggestions = page.getByRole("region", {name:"Games worth exploring"});
+  for (const href of previewLinks) await expect(suggestions.locator(`a[href="${href}"]`)).toHaveCount(0);
   await page.screenshot({path: `e2e-artifacts/ui-home-${testInfo.project.name}.png`, fullPage: true});
   const menu = page.getByRole("button", {name: "Navigation menu"});
   if (await menu.isVisible()) {
@@ -36,27 +39,32 @@ test("profile preview, responsive menu and catalog disclosure work in both theme
   await page.setViewportSize(testInfo.project.use.viewport!);
   await page.goto("/games");
   const filters = page.getByRole("button", {name:/Filtros y orden/});
-  if (testInfo.project.use.viewport!.width < 1024) {
-    await expect(filters).toBeVisible();
-    await expect(page.locator("#games-genre")).toBeHidden();
-    await filters.click();
-  }
+  await expect(filters).toBeVisible();
+  await expect(filters).toHaveAttribute("aria-expanded", "false");
+  await expect(page.locator("#games-genre")).toBeHidden();
+  await filters.click();
+  await expect(filters).toHaveAttribute("aria-expanded", "true");
   await page.locator("#games-genre").selectOption("Roguelike");
   await expect(page).toHaveURL(/genre=Roguelike/);
   await expect(page.getByRole("heading",{name:"Hades",exact:true})).toBeVisible();
   await page.reload();
-  if (testInfo.project.use.viewport!.width < 1024) {
-    await expect(filters).toBeVisible();
-    await expect(filters).toContainText("(1)");
-    await filters.click();
-  }
+  await expect(filters).toBeVisible();
+  await expect(filters).toContainText("(1)");
+  await page.screenshot({path: `e2e-artifacts/catalog-filter-button-${testInfo.project.name}.png`});
+  await filters.click();
   await expect(page.locator("#games-genre")).toHaveValue("Roguelike");
   await expect(page.locator("[data-catalog-game]").getByText("No registrado",{exact:true})).toHaveCount(0);
   await page.screenshot({path: `e2e-artifacts/ui-catalog-${testInfo.project.name}.png`, fullPage: true});
+  const themeMenu = page.locator("header summary");
+  if (await themeMenu.isVisible()) await themeMenu.click();
+  await page.getByRole("button", {name:"Cambiar a modo oscuro"}).click();
+  if (await themeMenu.isVisible()) await themeMenu.press("Escape");
+  await expect(page.locator("html")).toHaveClass(/dark/);
+  await page.screenshot({path: `e2e-artifacts/ui-catalog-dark-${testInfo.project.name}.png`, fullPage: true});
   expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
 });
 
-test("profile creation preserves registration intent and ordinary sign-in", async ({page,context}) => {
+test("profile creation preserves registration intent and ordinary sign-in", async ({page,context},testInfo) => {
   await page.goto("/");
   await page.locator("main header").getByRole("link", {name:"Create your profile",exact:true}).click();
   await expect(page).toHaveURL(/\/login\?mode=register$/);
@@ -70,6 +78,14 @@ test("profile creation preserves registration intent and ordinary sign-in", asyn
   await context.addCookies([authCookie]);
   await page.goto("/");
   await expect(page.locator("main header").getByRole("link",{name:"Open your profile",exact:true})).toHaveAttribute("href","/profile");
+  await expect(page.getByRole("heading",{name:"Welcome back, Fixture Owner."})).toBeVisible();
+  await expect(page.locator("main header").getByRole("link",{name:"Log a game",exact:true})).toHaveAttribute("href","/log");
+  await expect(page.locator("main header").getByRole("link",{name:"Tier List",exact:true})).toHaveAttribute("href","/tiers");
+  await expect(page.getByRole("region",{name:"Continue playing"}).getByRole("link",{name:"Elden Ring: Shadow of the Erdtree",exact:true})).toHaveCount(2);
+  await expect(page.getByRole("region",{name:"Continue playing"}).getByRole("link",{name:"Edit log entry",exact:true})).toHaveAttribute("href","/log?game=elden-ring-shadow-of-the-erdtree");
+  await expect(page.getByRole("figure",{name:"Profile preview"})).toHaveCount(0);
+  await page.screenshot({path:`e2e-artifacts/ui-home-owner-${testInfo.project.name}.png`,fullPage:true});
+  expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
 });
 
 test("comparison and game details prioritize useful actions without inventing data", async ({page},testInfo) => {

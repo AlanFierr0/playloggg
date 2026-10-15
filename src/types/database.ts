@@ -328,16 +328,19 @@ export type Database = {
       profile_rankings: {
         Row: {
           game_ids: number[]
+          manual_positions: Json
           profile_id: number
           revision: number
         }
         Insert: {
           game_ids?: number[]
+          manual_positions?: Json
           profile_id: number
           revision?: number
         }
         Update: {
           game_ids?: number[]
+          manual_positions?: Json
           profile_id?: number
           revision?: number
         }
@@ -364,6 +367,7 @@ export type Database = {
           location: string | null
           owner_user_id: string | null
           platform_preference: string | null
+          tier_ranges: Json
           updated_at: string
         }
         Insert: {
@@ -378,6 +382,7 @@ export type Database = {
           location?: string | null
           owner_user_id?: string | null
           platform_preference?: string | null
+          tier_ranges?: Json
           updated_at?: string
         }
         Update: {
@@ -392,6 +397,7 @@ export type Database = {
           location?: string | null
           owner_user_id?: string | null
           platform_preference?: string | null
+          tier_ranges?: Json
           updated_at?: string
         }
         Relationships: []
@@ -405,10 +411,12 @@ export type Database = {
           platform: string | null
           profile_id: number
           review: string | null
+          review_updated_at: string | null
           score: number | null
           status: string | null
           tags: string[]
           tier: string | null
+          tier_manual: boolean
           updated_at: string
         }
         Insert: {
@@ -419,10 +427,12 @@ export type Database = {
           platform?: string | null
           profile_id: number
           review?: string | null
+          review_updated_at?: string | null
           score?: number | null
           status?: string | null
           tags?: string[]
           tier?: string | null
+          tier_manual?: boolean
           updated_at?: string
         }
         Update: {
@@ -433,10 +443,12 @@ export type Database = {
           platform?: string | null
           profile_id?: number
           review?: string | null
+          review_updated_at?: string | null
           score?: number | null
           status?: string | null
           tags?: string[]
           tier?: string | null
+          tier_manual?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -456,6 +468,57 @@ export type Database = {
           },
         ]
       }
+      review_votes: {
+        Row: {
+          game_id: number
+          reviewer_profile_id: number
+          value: number
+          voter_profile_id: number
+        }
+        Insert: {
+          game_id: number
+          reviewer_profile_id: number
+          value: number
+          voter_profile_id: number
+        }
+        Update: {
+          game_id?: number
+          reviewer_profile_id?: number
+          value?: number
+          voter_profile_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_votes_reviewer_profile_id_game_id_fkey"
+            columns: ["reviewer_profile_id", "game_id"]
+            isOneToOne: false
+            referencedRelation: "ratings"
+            referencedColumns: ["profile_id", "game_id"]
+          },
+          {
+            foreignKeyName: "review_votes_voter_profile_id_fkey"
+            columns: ["voter_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      steam_accounts: {
+        Row: {
+          steam_id: string
+          user_id: string
+        }
+        Insert: {
+          steam_id: string
+          user_id: string
+        }
+        Update: {
+          steam_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -468,6 +531,20 @@ export type Database = {
           object_name: string
         }[]
       }
+      anonymous_game_scores: {
+        Args: { p_ids?: number[] }
+        Returns: {
+          average: number
+          deviation: number
+          game_id: number
+          sample_count: number
+        }[]
+      }
+      catalog_page: {
+        Args: { p_filters: Json; p_page: number; p_profile_id: number | null }
+        Returns: Json
+      }
+      catalog_platform_family: { Args: { name: string }; Returns: string }
       clear_account_operation_limits: {
         Args: { p_owner: string }
         Returns: undefined
@@ -497,15 +574,117 @@ export type Database = {
         }
         Returns: number
       }
+      consume_operation_limit_batch: {
+        Args: {
+          p_actor: string
+          p_count: number
+          p_daily_limit: number
+          p_minute_limit: number
+          p_operation: string
+        }
+        Returns: {
+          allowed_count: number
+          retry_after: number
+        }[]
+      }
       delete_owned_profile: {
         Args: { p_handle: string; p_owner: string }
         Returns: Json
+      }
+      discover_games: {
+        Args: { p_amount: number; p_seed: string }
+        Returns: {
+          artwork_image_ids: string[]
+          cover_image_id: string | null
+          cover_url: string
+          genres: string[]
+          id: number
+          igdb_id: number | null
+          igdb_metadata: Json
+          igdb_synced_at: string | null
+          igdb_url: string | null
+          release_year: number | null
+          released_on: string | null
+          screenshot_image_ids: string[]
+          search_keywords: string
+          slug: string
+          title: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "games"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      explore_games: {
+        Args: {
+          p_amount: number
+          p_genres: string[]
+          p_profile_id: number
+          p_seed: string
+        }
+        Returns: {
+          artwork_image_ids: string[]
+          cover_image_id: string | null
+          cover_url: string
+          genres: string[]
+          id: number
+          igdb_id: number | null
+          igdb_metadata: Json
+          igdb_synced_at: string | null
+          igdb_url: string | null
+          release_year: number | null
+          released_on: string | null
+          screenshot_image_ids: string[]
+          search_keywords: string
+          slug: string
+          title: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "games"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      home_reviews: {
+        Args: { p_limit?: number }
+        Returns: {
+          display_name: string
+          downvotes: number
+          game_id: number
+          handle: string
+          profile_id: number
+          review: string
+          updated_at: string
+          upvotes: number
+          viewer_vote: number
+        }[]
+      }
+      home_taste: { Args: never; Returns: Json }
+      platform_game_scores: {
+        Args: never
+        Returns: {
+          average: number
+          sample_count: number
+          slug: string
+        }[]
       }
       public_list_like_counts: {
         Args: never
         Returns: {
           likes: number
           list_id: number
+        }[]
+      }
+      review_helpfulness: {
+        Args: { p_profile_id: number }
+        Returns: {
+          downvotes: number
+          game_slug: string
+          upvotes: number
+          viewer_vote: number
         }[]
       }
       save_curated_list: {
@@ -535,6 +714,66 @@ export type Database = {
         Args: { p_ids: number[]; p_revision: number }
         Returns: number
       }
+      save_preference_ranking_v2: {
+        Args: { p_ids: number[]; p_manual: Json; p_revision: number }
+        Returns: number
+      }
+      read_steam_completion_skips: {Args:{p_owner:string};Returns:number[]}
+      skip_steam_completion_game: {Args:{p_owner:string;p_game:number};Returns:undefined}
+      read_steam_achievement_cache: {Args:{p_key:string;p_owner:string|null};Returns:Json}
+      store_steam_achievement_cache: {Args:{p_key:string;p_owner:string|null;p_data:Json;p_seconds:number};Returns:undefined}
+      read_steam_completion_classification: {Args:{p_app_id:number;p_hash:string};Returns:Json}
+      store_steam_completion_classification: {Args:{p_app_id:number;p_hash:string;p_ids:Json};Returns:undefined}
+      reserve_review_translation: {Args:{p_characters:number};Returns:boolean}
+      read_review_translation: {Args:{p_profile_id:number;p_game_id:number;p_hash:string;p_target:string};Returns:Json}
+      store_review_translation: {Args:{p_profile_id:number;p_game_id:number;p_hash:string;p_target:string;p_original:string;p_translation:string;p_source_language:string};Returns:boolean}
+      game_reviews: {
+        Args: {p_game_id:number;p_offset?:number}
+        Returns: {profile_id:number;handle:string;display_name:string;avatar_url:string|null;review:string;score:number|null;tier:string|null;updated_at:string;upvotes:number;downvotes:number;viewer_vote:number}[]
+      }
+      remove_rating: {
+        Args: { p_game_id: number; p_expected_updated_at: string }
+        Returns: boolean
+      }
+      save_rating: {
+        Args: {
+          p_expected_updated_at: string | null
+          p_game_id: number
+          p_values: Json
+        }
+        Returns: string
+      }
+      search_catalog: {
+        Args: {
+          p_hide_rated: boolean
+          p_offset: number
+          p_profile_id: number | null
+          p_query: string
+        }
+        Returns: {
+          artwork_image_ids: string[]
+          cover_image_id: string | null
+          cover_url: string
+          genres: string[]
+          id: number
+          igdb_id: number | null
+          igdb_metadata: Json
+          igdb_synced_at: string | null
+          igdb_url: string | null
+          release_year: number | null
+          released_on: string | null
+          screenshot_image_ids: string[]
+          search_keywords: string
+          slug: string
+          title: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "games"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       set_profile_favorite: {
         Args: {
           p_favorite: boolean
@@ -544,6 +783,7 @@ export type Database = {
         Returns: undefined
       }
       valid_rating_tags: { Args: { value: string[] }; Returns: boolean }
+      valid_tier_ranges: { Args: { ranges: Json }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

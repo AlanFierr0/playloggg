@@ -1,6 +1,6 @@
 export type Tier = "S" | "A" | "B" | "C" | "D" | "F";
-export type PlayedPlatform = "pc" | "pc_battlenet" | "pc_gog" | "pc_epic" | "pc_ea" | "pc_ubisoft" | "pc_xbox" | "pc_other" | "ps5" | "xbox_series_x" | "steam_deck";
-export type PlaybackStatus = "completed" | "playing" | "backlog" | "shelved";
+export type PlayedPlatform = "pc" | "pc_battlenet" | "pc_gog" | "pc_epic" | "pc_ea" | "pc_ubisoft" | "pc_xbox" | "pc_other" | "ps1" | "ps2" | "ps3" | "ps4" | "ps5" | "psp" | "ps_vita" | "xbox" | "xbox_360" | "xbox_one" | "xbox_series_x" | "xbox_series_s" | "steam_deck" | "nintendo_switch" | "nintendo_switch_2" | "nintendo_wii_u" | "nintendo_wii" | "nintendo_gamecube" | "nintendo_64" | "nintendo_snes" | "nintendo_nes" | "nintendo_3ds" | "nintendo_ds" | "nintendo_gba" | "nintendo_gbc" | "nintendo_gb" | "other_dreamcast" | "other_saturn" | "other_genesis" | "other_master_system" | "other_game_gear" | "other_android" | "other_ios" | "other_browser" | "other_platform";
+export type PlaybackStatus = "completed" | "playing" | "backlog" | "shelved" | "active" | "paused" | "stopped";
 
 // Screen shape: shared game metadata plus the selected profile's sample rating.
 export interface Game {
@@ -9,6 +9,8 @@ export interface Game {
   cover: string;
   year: number | null;
   score: number | null;
+  platformScore?: number | null;
+  platformRatingCount?: number;
   review?: string | null;
   status?: PlaybackStatus | null;
   logged?: boolean;
@@ -17,10 +19,12 @@ export interface Game {
   completedOn?: string | null;
   tags?: string[];
   updatedAt?: string;
+  reviewUpdatedAt?: string | null;
   keywords: string;
   releasedOn?: string | null;
   genres?: string[];
   tier?: Tier | null;
+  tierManual?: boolean;
   artwork?: string | null;
   screenshots?: string[];
   isSampleCatalog?: boolean;
@@ -41,17 +45,25 @@ export interface Profile {
   location?: string | null;
   platformPreference?: string | null;
   isSample?: boolean;
+  tierRanges?: Record<Tier, [number, number]>;
   isPublic?: boolean;
   isDiscoverable?: boolean;
 }
 
+export interface ReviewHelpfulnessData {
+  signedIn: boolean;
+  canVote: boolean;
+  reviews: Record<string, { upvotes: number; downvotes: number; vote: number }>;
+}
+
 export interface Portfolio {
+  reviewHelpfulness?: ReviewHelpfulnessData;
   games: Game[];
   profile: Profile;
   publicBase?: string;
   lists?: CuratedListSummary[];
   favorites?: Favorite[];
-  ranking?: {slugs:string[];revision:number};
+  ranking?: {slugs:string[];revision:number;manualPositions?:Record<string,number>};
   access?: { signedIn: boolean; canEdit: boolean; canImportCatalog?: boolean };
 }
 

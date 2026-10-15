@@ -167,8 +167,8 @@ export function ReferenceGame2({ game, query, mode }: { game: Game; query: strin
 </Link>
 ); }
 
-export function ReferenceProfile0({ profile, count, average }: { profile: Profile; count: number; average: string }) {
-  const t = useMessages(); return (<Link data-search-result className="group flex items-center gap-3 p-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors" href="/profile">
+export function ReferenceProfile0({ profile }: { profile: Profile }) {
+  const t = useMessages(); return (<Link data-search-result className="group flex items-center gap-3 p-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors" href={`/u/${profile.handle}`}>
 <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-surface-container-highest shadow">
 <ProfileAvatar className="w-full h-full object-cover" src={profile.avatarUrl} name={profile.displayName} />
 
@@ -178,11 +178,11 @@ export function ReferenceProfile0({ profile, count, average }: { profile: Profil
 <div className="flex items-center gap-1.5">
 <span className="font-headline-md text-body-lg font-bold text-on-surface truncate group-hover:text-primary transition-colors">{profile.displayName}</span>
 
-<span className="font-label-sm text-label-sm text-primary bg-primary/10 px-1 rounded uppercase font-semibold">{profile.isSample ? t("Sample") : profile.isPublic ? t("Public") : t("Private")}</span>
+{(profile.isSample || !profile.isPublic) && <span className="font-label-sm text-label-sm text-primary bg-primary/10 px-1 rounded uppercase font-semibold">{t(profile.isSample ? "Sample" : "Private")}</span>}
 
 </div>
 
-<div className="font-body-sm text-body-sm text-on-surface-variant truncate">{"@" + profile.handle + " · " + count + " " + t("rated titles") + " · " + average + " " + t("avg score")}</div>
+<div className="font-body-sm text-body-sm text-on-surface-variant truncate">{"@" + profile.handle}</div>
 
 </div>
 

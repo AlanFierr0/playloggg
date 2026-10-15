@@ -1,4 +1,4 @@
-import type { Game } from "../types/domain.ts";
+import type { Game, PlaybackStatus } from "../types/domain.ts";
 import { matchesCatalogPlatform } from "./catalog-platforms.ts";
 import { loggedGames } from "./portfolio-view.ts";
 
@@ -9,12 +9,12 @@ export interface GamesFilters {
   platform: string;
   year: string;
   library: "all" | "logged" | "unlogged";
-  status: "all" | "completed" | "playing" | "backlog" | "shelved" | "unset";
+  status: "all" | PlaybackStatus | "unset";
   tier: "all" | "S" | "A" | "B" | "C" | "D" | "F" | "unset";
   rating: "all" | "rated" | "unrated";
   minScore: string;
   maxScore: string;
-  sort: "title" | "newest" | "oldest" | "score-desc" | "score-asc";
+  sort: "title" | "newest" | "oldest" | "score-desc" | "score-asc" | "platform-desc" | "platform-asc";
 }
 
 export const defaultGamesFilters: GamesFilters = { query: "", genre: "", tag: "", platform: "", year: "", library: "all", status: "all", tier: "all", rating: "all", minScore: "", maxScore: "", sort: "title" };
@@ -52,6 +52,11 @@ export function filterGames(games: Game[], filters: GamesFilters): Game[] {
   });
   const compareTitle = (a: Game, b: Game) => a.title.localeCompare(b.title) || a.slug.localeCompare(b.slug);
   return result.sort((a, b) => {
+    if (filters.sort === "platform-desc" || filters.sort === "platform-asc") {
+      const scoreA = a.platformScore ?? null, scoreB = b.platformScore ?? null;
+      if (scoreA === null || scoreB === null) return scoreA === scoreB ? compareTitle(a, b) : scoreA === null ? 1 : -1;
+      return (filters.sort === "platform-desc" ? scoreB - scoreA : scoreA - scoreB) || compareTitle(a, b);
+    }
     if (filters.sort === "score-desc" || filters.sort === "score-asc") {
       if (a.score === null || b.score === null) return a.score === b.score ? compareTitle(a, b) : a.score === null ? 1 : -1;
       return (filters.sort === "score-desc" ? b.score - a.score : a.score - b.score) || compareTitle(a, b);

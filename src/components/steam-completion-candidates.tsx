@@ -1,0 +1,7 @@
+"use client";
+import { useMessages } from "@/components/site-preferences";
+import type { SteamCompletionCandidate } from "@/lib/steam-completion-input";
+export function SteamCompletionCandidates({candidates,onAccept,disabled=false,existing=false}:{candidates:SteamCompletionCandidate[];onAccept:(candidate:SteamCompletionCandidate)=>void;disabled?:boolean;existing?:boolean}) {
+  const t=useMessages();
+  return <div className="min-w-0 space-y-3"><p className="font-semibold text-body-md">{t("Suggested completion date from Steam")}</p><p className="text-body-sm text-on-surface-variant">{t("Check that this achievement finishes the main story. Confirming also marks the game Completed.")}</p>{candidates.map(candidate=><div key={candidate.id} className="rounded-xl border border-outline-variant/40 bg-surface-container p-3 space-y-2">{candidate.source==="ai"&&<p className="text-body-sm text-primary">{t("AI-assisted suggestion")}</p>}<p translate="no" className="font-semibold break-words">{candidate.name}</p><p translate="no" className="text-body-sm text-on-surface-variant break-words">{candidate.description}</p><div className="flex flex-wrap items-center justify-between gap-2"><time dateTime={candidate.date} className="tabular-nums text-primary">{candidate.date}</time><button type="button" disabled={disabled} onClick={()=>onAccept(candidate)} className="min-h-11 rounded-xl px-4 py-2 bg-primary-container text-on-primary-container disabled:opacity-50">{t(existing?"Confirm completion":"Use this date")}</button></div></div>)}</div>;
+}

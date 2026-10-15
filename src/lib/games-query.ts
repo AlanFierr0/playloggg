@@ -1,11 +1,12 @@
+import { playbackLabels } from "./playback-status.ts";
 import { defaultGamesFilters, type GamesFilters } from "./games-view.ts";
 export type GamesPageSize = 25 | 50 | 100 | "all";
 const choices = {
   library: ["all", "logged", "unlogged"],
-  status: ["all", "completed", "playing", "backlog", "shelved", "unset"],
+  status: ["all", ...Object.keys(playbackLabels), "unset"],
   tier: ["all", "S", "A", "B", "C", "D", "F", "unset"],
   rating: ["all", "rated", "unrated"],
-  sort: ["title", "newest", "oldest", "score-desc", "score-asc"],
+  sort: ["title", "newest", "oldest", "score-desc", "score-asc", "platform-desc", "platform-asc"],
 } as const;
 export function parseGamesQuery(params: Pick<URLSearchParams, "get">): { filters: GamesFilters; page: number; pageSize: GamesPageSize } {
   const filters = { ...defaultGamesFilters };

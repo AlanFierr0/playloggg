@@ -9,10 +9,10 @@ export default async function ComparePage({searchParams}:{searchParams:Promise<R
   const handle=(value:string|string[]|undefined) => (typeof value === "string" ? value : "").trim().toLowerCase().slice(0,100);
   const requestedLeft=handle(query.left), requestedRight=handle(query.right);
   const ownHandle=account?.profile?.handle;
-  const left=ownHandle ?? requestedLeft;
-  const right=ownHandle && requestedRight===ownHandle && requestedLeft && requestedLeft!==ownHandle ? requestedLeft : requestedRight;
-  const [comparison,friends]=await Promise.all([left && right ? (ownHandle ? getOwnerComparison(right) : getPublicComparison(left,right)) : null,getCompareFriends(account)]);
+  const left=requestedLeft || ownHandle || "";
+  const right=requestedRight;
+  const [comparison,friends]=await Promise.all([left && right ? (ownHandle ? getOwnerComparison(left,right) : getPublicComparison(left,right)) : null,getCompareFriends(account)]);
   const rawPage=typeof query.page === "string" ? query.page : "";
   const page=/^[1-9]\d{0,6}$/.test(rawPage) ? Number(rawPage) : 1;
-  return <CompareScreen friends={friends} left={left} right={right} comparison={comparison} requestedPage={page} ownProfile={Boolean(ownHandle)} />;
+  return <CompareScreen friends={friends} left={left} right={right} comparison={comparison} requestedPage={page} ownHandle={ownHandle} />;
 }

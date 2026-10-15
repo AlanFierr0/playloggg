@@ -1,31 +1,45 @@
 "use client";
+import { validateRating } from "@/lib/rating-input";
 import { useMessages } from "@/components/site-preferences";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { BackLink, useReturnNavigation } from "@/components/return-navigation";
+import { ConsolePlatformSelector } from "@/components/console-platform-selector";
+import { CompletionDate } from "@/components/completion-date";
 import { TagEditor } from "@/components/tag-editor";
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { tierForScore } from "@/lib/tier-ranges";
 import { usePortfolio } from "@/components/portfolio-provider";
+import { RemoveLog } from "@/components/remove-log";
 import { saveRating } from "@/app/actions/ratings";
 import { normalizeTags } from "@/lib/collection-input";
-import { parseHours } from "@/lib/rating-input";
+import { maximumPlaytime, parseHours } from "@/lib/rating-input";
+import { PlaybackStatusPicker } from "@/components/playback-status-picker";
 import { playedPlatformLabels } from "@/lib/played-platforms";
 import type { Game, PlaybackStatus, PlayedPlatform, Tier } from "@/types/domain";
 import { TierBadge, ScoreStars } from "@/components/rating-controls";
 
 export function ReviewScreen({ game }: { game: Game }) {
   const t = useMessages();
-  const router = useRouter();
-const { access } = usePortfolio();
+  const { goBack } = useReturnNavigation();
+const { access, profile } = usePortfolio();
 const canEdit = access?.canEdit ?? false;
 const [pending, startTransition] = useTransition();
 const [saveMessage, setSaveMessage] = useState("");
+const [expectedUpdatedAt, setExpectedUpdatedAt] = useState(game.updatedAt ?? null);
+const [conflict, setConflict] = useState(false);
+const [draftReady, setDraftReady] = useState(false);
+const cleared = useRef(false);
+const draftKey = `playlogg_draft:${profile.id}:${game.slug}`;
 const [saved, setSaved] = useState({ score: game.score, tier: game.tier ?? null, status: game.status ?? null, review: game.review ?? "", platform: game.platform ?? null, hoursPlayed: game.hoursPlayed ?? null, completedOn: game.completedOn ?? null, tags: game.tags ?? [] });
 const [score, setScore] = useState<number | null>(game.score);
 const scoreInput = useRef<HTMLInputElement>(null);
 const invalidScore = score !== null && (!Number.isInteger(score) || score < 0 || score > 100);
+const scoreDescription = score === null || invalidScore ? null : score < 25 ? "Terrible" : score < 50 ? "Poor" : score < 75 ? "Average" : score < 100 ? "Great" : "Masterpiece";
 const [tier, setTier] = useState<Tier | null>(game.tier ?? null);
+const [tierManual,setTierManual] = useState(game.tierManual ?? Boolean(game.tier));
 const [platform, setPlatform] = useState<PlayedPlatform | null>(game.platform ?? null);
+const isPC = platform?.startsWith("pc") ?? false;
 const [status, setStatus] = useState<PlaybackStatus | null>(game.status ?? null);
 const [hours, setHours] = useState(game.hoursPlayed == null ? "" : String(game.hoursPlayed));
 const [date, setDate] = useState(game.completedOn ?? "");
@@ -33,23 +47,58 @@ const dateInput = useRef<HTMLInputElement>(null);
 const [tags, setTags] = useState<string[]>(game.tags ?? []);
 const [tagVersion, setTagVersion] = useState(0);
 const [review, setReview] = useState(game.review ?? "");
-function resetDraft() { setScore(saved.score); setTier(saved.tier); setPlatform(saved.platform); setStatus(saved.status); setHours(saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)); setDate(saved.completedOn ?? ""); setReview(saved.review); setTags(saved.tags); setTagVersion((value) => value + 1); setSaveMessage(""); router.push("/profile"); }
+const dirty = score !== saved.score || tier !== saved.tier || status !== saved.status || review !== saved.review || platform !== saved.platform
+  || hours !== (saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)) || (date || null) !== saved.completedOn || JSON.stringify(tags) !== JSON.stringify(saved.tags)
+  || tierManual !== (game.tierManual ?? Boolean(game.tier));
+useEffect(() => {
+  let cancelled = false;
+  queueMicrotask(() => {
+  if (cancelled) return;
+  if (canEdit) try {
+    const stored = sessionStorage.getItem(draftKey);
+    const raw = stored ? JSON.parse(stored) : null;
+    const draft = raw ? validateRating({...raw, hoursPlayed:null, completedOn:null}) : null;
+    if (draft?.slug === game.slug) {
+      setScore(draft.score); setTier(draft.tier); setTierManual(draft.tierManual ?? false);
+      setPlatform(draft.platform); setStatus(draft.status); setHours(typeof raw.rawHours === "string" && raw.rawHours.length <= 100 ? raw.rawHours : "");
+      setDate(typeof raw.rawDate === "string" && raw.rawDate.length <= 10 ? raw.rawDate : ""); setReview(draft.review); setTags(draft.tags); setTagVersion(value => value + 1);
+      setExpectedUpdatedAt(draft.expectedUpdatedAt ?? null);
+      setSaveMessage("Your unfinished draft has been restored.");
+    }
+  } catch { setSaveMessage("Draft storage is unavailable. Save before leaving this page."); }
+  setDraftReady(true);
+  });
+  return () => { cancelled = true; };
+}, [canEdit, draftKey, game.slug]);
+useEffect(() => {
+  if (!canEdit || !draftReady || cleared.current) return;
+  try {
+    if (!dirty) { sessionStorage.removeItem(draftKey); return; }
+    sessionStorage.setItem(draftKey, JSON.stringify({slug: game.slug, score, tier, tierManual, status, review, platform,
+      hoursPlayed: parseHours(hours) ?? null, completedOn: date || null, rawHours:hours, rawDate:date, tags, expectedUpdatedAt}));
+  } catch { queueMicrotask(() => setSaveMessage("Draft storage is unavailable. Save before leaving this page.")); }
+}, [canEdit, draftReady, dirty, draftKey, game.slug, score, tier, tierManual, status, review, platform, hours, date, tags, expectedUpdatedAt]);
+function clearStoredDraft() { cleared.current = true; try { sessionStorage.removeItem(draftKey); } catch {} }
+function resetDraft() { clearStoredDraft(); setScore(saved.score); setTier(saved.tier); setPlatform(saved.platform); setStatus(saved.status); setHours(saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)); setDate(saved.completedOn ?? ""); setReview(saved.review); setTags(saved.tags); setTagVersion((value) => value + 1); setSaveMessage(""); goBack(); }
 function commit() {
+  if ((date || null) !== saved.completedOn && date && date > new Date().toISOString().slice(0, 10)) { setSaveMessage("Completion date cannot be in the future. Your draft has been kept."); return; }
   if (invalidScore || (scoreInput.current && !scoreInput.current.validity.valid)) { setSaveMessage("Use a whole-number score from 0 to 100."); scoreInput.current?.focus(); return; }
-  if (dateInput.current && !dateInput.current.validity.valid) { setSaveMessage("Complete a valid calendar date, or clear it. Your draft has been kept."); return; }
+  if ((date || null) !== saved.completedOn && dateInput.current && !dateInput.current.validity.valid) { setSaveMessage("Complete a valid calendar date, or clear it. Your draft has been kept."); return; }
   const hoursPlayed = parseHours(hours);
   if (hoursPlayed === undefined) { setSaveMessage("Enter nonnegative decimal hours, or leave playtime blank. Your draft has been kept."); return; }
+  const maxHours = maximumPlaytime(game.releasedOn);
+  if (hoursPlayed !== saved.hoursPlayed && hoursPlayed !== null && maxHours !== null && hoursPlayed > maxHours) { setSaveMessage("Playtime cannot exceed the hours elapsed since the game’s release. Your draft has been kept."); return; }
   const completedOn = date || null;
-  const draft = { slug: game.slug, score, tier, status, review, platform, hoursPlayed, completedOn, tags };
+  const draft = { slug: game.slug, score, tier, tierManual, status, review, platform, hoursPlayed, completedOn, tags, expectedUpdatedAt };
   startTransition(async () => {
     try {
       const result = await saveRating(draft);
-      setSaveMessage(result.message);
-      if (result.ok) { setSaved({ score, tier, status, review: review.trim(), platform, hoursPlayed, completedOn, tags: normalizeTags(tags)! }); setReview(review.trim()); setHours(hoursPlayed == null ? "" : String(hoursPlayed)); router.push("/profile"); }
+      setSaveMessage(result.message); setConflict(!result.ok && result.message.startsWith("This entry changed"));
+      if (result.ok) { clearStoredDraft(); setExpectedUpdatedAt(result.updatedAt ?? null); setSaved({ score, tier, status, review: review.trim(), platform, hoursPlayed, completedOn, tags: normalizeTags(tags)! }); setReview(review.trim()); setHours(hoursPlayed == null ? "" : String(hoursPlayed)); goBack(); }
     } catch { setSaveMessage("Saving is unavailable right now. Your draft has been kept; please try again."); }
   });
 }
-return (<><fieldset disabled={pending} className="contents">
+return (<>{conflict && <div role="alert" className="site-container mx-auto p-4"><p>{t(saveMessage)}</p><button type="button" onClick={() => { clearStoredDraft(); window.location.reload(); }} className="mt-3 min-h-11 rounded-lg bg-surface-container px-4 text-primary">{t("Discard draft and reload latest entry")}</button></div>}<fieldset disabled={pending} className="contents">
 <div className="w-full  bg-surface"><div className="flex flex-col w-full">
 <div className="relative w-full min-h-[calc(100dvh-var(--site-header-height))] flex items-stretch p-4 sm:p-6 lg:p-8 overflow-hidden">
 <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -75,17 +124,17 @@ return (<><fieldset disabled={pending} className="contents">
 </div>
 
 <div className="flex items-center gap-3">
-<Link className="group flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors" title={t("Change Title")} type="button" href="/search?mode=log&from=/log">
+<Link className="group flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors" title={t("Change Title")} type="button" href={`/search?mode=log&from=${encodeURIComponent(`/log?game=${game.slug}`)}`}>
 <span aria-hidden="true" className="material-symbols-outlined text-[15px]">{"swap_horiz"}</span>
 
 <span className="font-label-sm text-label-sm uppercase tracking-wider">{t("Switch Game")}</span>
 
 </Link>
 
-<Link aria-label={t("Close modal")} className="p-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="/profile">
+<BackLink aria-label={t("Close modal")} className="p-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="/profile">
 <span aria-hidden="true" className="material-symbols-outlined text-[20px]">{"close"}</span>
 
-</Link>
+</BackLink>
 
 </div>
 
@@ -128,9 +177,19 @@ return (<><fieldset disabled={pending} className="contents">
 <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{t("Platform Played")}</span>
 
 <div className="flex flex-wrap gap-2" id="platform-selector">
-{(Object.entries(playedPlatformLabels) as [PlayedPlatform, string][]).map(([value, label]) => <button key={value} type="button" onClick={() => setPlatform(platform === value ? null : value)} title={t("Select platform; click again to clear")} aria-pressed={platform === value} className={`platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider flex items-center gap-1.5 ${platform === value ? "bg-primary/15 text-primary shadow-sm" : "bg-surface-container-highest text-on-surface-variant transition-all hover:bg-surface-bright hover:text-on-surface"}`}>
-<span aria-hidden="true" className="material-symbols-outlined text-[14px]">{value.startsWith("pc") ? "desktop_windows" : value === "steam_deck" ? "tablet" : "sports_esports"}</span>
-{t(label)}</button>)}
+<button type="button" onClick={() => setPlatform(isPC ? null : "pc")} title={t("Select platform; click again to clear")} aria-pressed={isPC} aria-expanded={isPC} aria-controls="pc-store-selector" className={`platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider flex items-center gap-1.5 ${isPC ? "bg-primary/15 text-primary shadow-sm" : "bg-surface-container-highest text-on-surface-variant hover:bg-surface-bright hover:text-on-surface"}`}><span aria-hidden="true" className="material-symbols-outlined text-[14px]">desktop_windows</span>PC</button>
+<ConsolePlatformSelector family="PlayStation" value={platform} onChange={setPlatform} />
+<ConsolePlatformSelector family="Xbox" value={platform} onChange={setPlatform} />
+<ConsolePlatformSelector family="Nintendo" value={platform} onChange={setPlatform} />
+<ConsolePlatformSelector family="Other platforms" value={platform} onChange={setPlatform} />
+<button type="button" onClick={() => setPlatform(platform === "steam_deck" ? null : "steam_deck")} aria-pressed={platform === "steam_deck"} title={t("Select platform; click again to clear")} className={`platform-btn flex items-center gap-1.5 rounded px-3 py-1 font-label-sm text-label-sm uppercase tracking-wider ${platform === "steam_deck" ? "bg-primary/15 text-primary" : "bg-surface-container-highest text-on-surface-variant hover:bg-surface-bright hover:text-on-surface"}`}><span aria-hidden="true" className="material-symbols-outlined text-[14px]">tablet</span>Steam Deck</button>
+</div>
+{platform && !platform.startsWith("pc") && platform !== "steam_deck" && <p className="font-body-sm text-body-sm text-primary">{t(platform.startsWith("ps") || platform.startsWith("xbox") ? "Console" : "Platform")}: {t(playedPlatformLabels[platform])}</p>}
+<div id="pc-store-selector" hidden={!isPC}>
+  {isPC && <div className="ml-3 border-l-2 border-primary/30 pl-3 space-y-2" role="group" aria-label={t("PC store")}>
+    <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{t("PC store")}</span>
+    <div className="flex flex-wrap gap-2">{(Object.entries(playedPlatformLabels) as [PlayedPlatform, string][]).filter(([value]) => value.startsWith("pc")).map(([value,label]) => <button key={value} type="button" aria-label={t(label)} aria-pressed={platform === value} onClick={() => setPlatform(platform === value ? null : value)} title={t("Select platform; click again to clear")} className={`platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider ${platform === value ? "bg-primary/15 text-primary shadow-sm" : "bg-surface-container-highest text-on-surface-variant hover:bg-surface-bright hover:text-on-surface"}`}>{t(label).replace(/^PC \/ /, "")}</button>)}</div>
+  </div>}
 </div>
 
 </div>
@@ -143,19 +202,18 @@ return (<><fieldset disabled={pending} className="contents">
 <div className="w-full flex flex-wrap gap-2 items-center justify-between">
 <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{t("Score")}</span>
 
-<TierBadge value={tier} onChange={setTier} />
+<TierBadge value={tierManual ? tier : tierForScore(score, profile.tierRanges)} onChange={value=>{setTier(value);setTierManual(true);}} />
 </div>
 
 <div className="flex flex-col items-center justify-center gap-1 my-2">
 <div className="flex items-baseline gap-2">
-<input ref={scoreInput} id="score-display" type="text" inputMode="numeric" maxLength={3} pattern="[0-9]{0,3}" value={score ?? ""} placeholder="—" aria-label={t("Numerical score from 0 to 100")} aria-invalid={invalidScore} aria-describedby={invalidScore ? "score-error" : undefined} onFocus={event => event.currentTarget.select()} onChange={event => { const value = event.target.value; if (!/^[0-9]{0,3}$/.test(value)) return; setScore(value === "" ? null : Number(value)); setSaveMessage(""); }} style={{ width: `${Math.max(1, String(score ?? "").length)}ch` }} className="min-w-0 appearance-none rounded-none border-0 border-b border-transparent bg-transparent p-0 text-center font-display-lg text-display-lg font-bold tracking-tighter text-primary font-headline-xl placeholder:text-primary placeholder:opacity-100 focus:border-primary/50 focus:outline-none" />
+<input ref={scoreInput} id="score-display" type="text" inputMode="numeric" maxLength={3} pattern="[0-9]{0,3}" value={score ?? ""} placeholder="—" aria-label={t("Numerical score from 0 to 100")} aria-invalid={invalidScore} onFocus={event => event.currentTarget.select()} onChange={event => { const value = event.target.value; if (!/^[0-9]{0,3}$/.test(value) || Number(value) > 100) return; setScore(value === "" ? null : Number(value)); setSaveMessage(""); }} style={{ width: `${Math.max(1, String(score ?? "").length)}ch` }} className="min-w-0 appearance-none rounded-none border-0 border-b border-transparent bg-transparent p-0 text-center font-display-lg text-display-lg font-bold tracking-tighter text-primary font-headline-xl placeholder:text-primary placeholder:opacity-100 focus:border-primary/50 focus:outline-none" />
 
 <span className="font-headline-md text-headline-md text-on-surface-variant">{"/100"}</span>
 
 </div>
 
 {score === null ? <p className="font-body-sm text-body-sm text-on-surface-variant">{t("Unrated · a score is optional")}</p> : <ScoreStars score={score} />}
-{invalidScore && <p id="score-error" className="text-body-sm text-error">{t("Use a whole-number score from 0 to 100.")}</p>}
 <button id="toggle-score" type="button" className="mt-2 rounded bg-surface-container px-3 py-1.5 font-label-sm text-label-sm text-on-surface-variant hover:text-primary" onClick={() => setScore(score === null ? 0 : null)}>{score === null ? t("Add score") : t("Remove score")}</button>
 </div>
 
@@ -165,15 +223,8 @@ return (<><fieldset disabled={pending} className="contents">
 
 </div>
 
-<div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-on-surface-variant font-label-sm text-label-sm px-1">
-<span>{t("0 (Terrible)")}</span>
-
-<span>{t("50 (Average)")}</span>
-
-<span>{t("75 (Great)")}</span>
-
-<span className="text-primary font-bold">{t("100 (Masterpiece)")}</span>
-
+<div id="score-descriptions" className="relative mx-[11px] h-8 text-on-surface-variant font-label-sm text-label-sm">
+{["Terrible", "Poor", "Average", "Great", "Masterpiece"].map((description, index) => <span key={description} style={{ left: `${index * 25}%` }} aria-current={scoreDescription === description ? "true" : undefined} className={`absolute w-1/4 -translate-x-1/2 text-center ${scoreDescription === description ? "text-primary font-bold" : ""}`}>{t(description)}</span>)}
 </div>
 
 <div className="flex items-center justify-center gap-2 mt-2">
@@ -195,26 +246,7 @@ return (<><fieldset disabled={pending} className="contents">
 
 <div className="min-w-0 grid grid-cols-1 md:grid-cols-12 gap-6">
 <div className="md:col-span-12 flex flex-col gap-2.5">
-<div className="flex flex-wrap items-center justify-between gap-2"><span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{t("Playback status")}</span><button id="clear-status" type="button" className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary" onClick={() => setStatus(null)}>{status === null ? t("Not set") : t("Clear status")}</button></div>
-
-<div className="grid grid-cols-2 sm:grid-cols-4 gap-2" id="status-group" role="group" aria-label={t("Playback status")}>
-<button type="button" onClick={() => setStatus("completed")} aria-pressed={status === "completed"} className={status === "completed" ? "status-btn px-4 py-2.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" : "status-btn px-4 py-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-all flex items-center justify-center gap-2"}>
-<span aria-hidden="true" className="material-symbols-outlined text-[16px]" style={{"fontVariationSettings": "'FILL' 1"}}>{"check_circle"}</span>
-{t(" Completed\n              ")}</button>
-
-<button type="button" onClick={() => setStatus("playing")} aria-pressed={status === "playing"} className={status === "playing" ? "status-btn px-4 py-2.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" : "status-btn px-4 py-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-all flex items-center justify-center gap-2"}>
-<span aria-hidden="true" className="material-symbols-outlined text-[16px]">{"hourglass_top"}</span>
-{t(" In Progress\n              ")}</button>
-
-<button type="button" onClick={() => setStatus("backlog")} aria-pressed={status === "backlog"} className={status === "backlog" ? "status-btn px-4 py-2.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" : "status-btn px-4 py-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-all flex items-center justify-center gap-2"}>
-<span aria-hidden="true" className="material-symbols-outlined text-[16px]">{"bookmark"}</span>
-{t(" Backlog\n              ")}</button>
-
-<button type="button" onClick={() => setStatus("shelved")} aria-pressed={status === "shelved"} className={status === "shelved" ? "status-btn px-4 py-2.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md uppercase tracking-wider font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" : "status-btn px-4 py-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-all flex items-center justify-center gap-2"}>
-<span aria-hidden="true" className="material-symbols-outlined text-[16px]">{"cancel"}</span>
-{t(" Shelved\n              ")}</button>
-
-</div>
+<PlaybackStatusPicker key={game.slug} slug={game.slug} value={status} onChange={setStatus}/>
 
 </div>
 
@@ -224,7 +256,7 @@ return (<><fieldset disabled={pending} className="contents">
 <div className="relative flex items-center">
 <span aria-hidden="true" className="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">{"schedule"}</span>
 
-<input className="min-w-0 w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="hours-input" placeholder={t("Hours, e.g. 45.5")} type="text" inputMode="decimal" value={hours} onChange={(event) => setHours(event.target.value)} />
+<input className="min-w-0 w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="hours-input" placeholder={t("Hours, e.g. 45.5")} type="text" inputMode="decimal" value={hours} onChange={(event) => { const value = event.target.value; const maxHours = maximumPlaytime(game.releasedOn); if (!value.trimStart().startsWith("-") && (maxHours === null || !value.trim() || Number.isNaN(Number(value)) || Number(value) <= maxHours)) setHours(value); }} />
 
 </div>
 
@@ -233,24 +265,19 @@ return (<><fieldset disabled={pending} className="contents">
 <div className="md:col-span-6 flex flex-col gap-2">
 <label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" htmlFor="date-input">{t("Completion date")}</label>
 
-<div className="relative flex items-center">
-<span aria-hidden="true" className="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">{"calendar_today"}</span>
-
-<input key={tagVersion} className="min-w-0 w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="date-input" ref={dateInput} type="date" min="0001-01-01" max="9999-12-31" value={date} onChange={(event) => setDate(event.target.value)} />
-
-</div>
+<CompletionDate minDate={game.releasedOn ?? undefined} value={date} onChange={setDate} inputRef={dateInput} />
 
 </div>
 
 <div className="md:col-span-12 flex flex-col gap-2">
 <div className="flex flex-wrap gap-2 items-center justify-between">
-<label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" htmlFor="dispatch-textarea">{t("Critical Dispatch / Review")}</label>
+<label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" htmlFor="dispatch-textarea">{t("Review")}</label>
 
 <span className="font-label-sm text-label-sm text-on-surface-variant">{t("Plain text · 20,000 characters max")}</span>
 
 </div>
 
-<textarea className="w-full bg-surface-container p-4 rounded text-on-surface font-body-md text-body-md placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-high transition-colors resize-none leading-relaxed" id="dispatch-textarea" placeholder={t("Write a dispatch or critical thoughts (optional)...")} rows={4} maxLength={20000} value={review} onChange={(event) => setReview(event.target.value)}></textarea>
+<textarea className="w-full bg-surface-container p-4 rounded text-on-surface font-body-md text-body-md placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-high transition-colors resize-none leading-relaxed" id="dispatch-textarea" placeholder={t("Write a review (optional)...")} rows={4} maxLength={20000} value={review} onChange={(event) => setReview(event.target.value)}></textarea>
 
 </div>
 
@@ -262,7 +289,7 @@ return (<><fieldset disabled={pending} className="contents">
 </div>
 
 <div className="w-full bg-surface-container-lowest px-4 py-4 sm:px-10 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 mt-auto">
-<div className="min-w-0 space-y-2"><p className="font-label-sm text-label-sm text-on-surface-variant">{t("Updates appear in feeds only while your profile is public and discoverable.")}</p></div>
+{canEdit && game.logged ? <RemoveLog slug={game.slug} title={game.title} updatedAt={expectedUpdatedAt} onRemoved={clearStoredDraft} /> : <div />}
 
 <div className="flex flex-col min-[360px]:flex-row items-center gap-3 w-full sm:w-auto justify-end">
 <button id="discard-rating" className="w-full sm:w-auto px-4 py-2 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-colors" type="button" onClick={resetDraft}>{t("\n            Discard Draft\n          ")}</button>

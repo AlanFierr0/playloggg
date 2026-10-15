@@ -1,0 +1,30 @@
+import assert from "node:assert/strict";
+import {execFileSync} from "node:child_process";
+import {readFileSync,writeFileSync,mkdtempSync} from "node:fs";
+import {tmpdir} from "node:os";
+import {join} from "node:path";
+import {createHash} from "node:crypto";
+assert.equal(process.env.CI,"true","Recovery rehearsal runs only in isolated CI.");
+const container="supabase_db_playlogg";
+const sql=file=>execFileSync("docker",["exec","-i",container,"psql","-U","postgres","-d","postgres","-v","ON_ERROR_STOP=1"],{input:readFileSync(file),stdio:["pipe","pipe","pipe"]});
+sql("supabase/tests/recovery-fixture.sql");
+const config=JSON.parse(execFileSync("supabase",["status","--output","json"],{encoding:"utf8",stdio:["ignore","pipe","pipe"]}));
+const api=new URL(config.API_URL);
+assert.ok(["127.0.0.1","localhost"].includes(api.hostname)&&api.protocol==="http:","Only the isolated local Storage API is allowed.");
+assert.ok(config.SERVICE_ROLE_KEY,"Local Storage credential missing.");
+const path=execFileSync("docker",["exec",container,"psql","-U","postgres","-d","postgres","-Atc","select avatar_url from public.profiles where handle='sql_recovery_owner'"],{encoding:"utf8"}).trim();
+assert.match(path,/^\d+\/55555555-5555-4555-8555-555555555555\.webp$/);
+const root=api.href.replace(/\/$/,"")+"/storage/v1/object/profile-pictures",object=`${root}/${path}`;
+const auth={apikey:config.SERVICE_ROLE_KEY,Authorization:`Bearer ${config.SERVICE_ROLE_KEY}`};
+async function upload(bytes){const response=await fetch(object,{method:"POST",headers:{...auth,"Content-Type":"image/webp","x-upsert":"true"},body:bytes,signal:AbortSignal.timeout(30000)});assert.ok(response.ok,`Local picture upload failed: ${response.status}`);}
+async function download(){const response=await fetch(object,{headers:auth,signal:AbortSignal.timeout(30000)});assert.ok(response.ok,`Local picture download failed: ${response.status}`);return Buffer.from(await response.arrayBuffer());}
+const original=readFileSync("public/images/backlog-404.webp");await upload(original);
+const archive=join(mkdtempSync(join(tmpdir(),"playlogg-recovery-")),"picture.webp");writeFileSync(archive,await download());
+execFileSync("docker",["exec",container,"pg_dump","-U","postgres","-d","postgres","--format=custom","--file=/tmp/playlogg-recovery.dump"],{stdio:"pipe"});
+execFileSync("docker",["exec",container,"createdb","-U","postgres","-T","template0","playlogg_recovery_test"],{stdio:"pipe"});
+execFileSync("docker",["exec",container,"pg_restore","-U","supabase_admin","--no-owner","--exit-on-error","-d","playlogg_recovery_test","/tmp/playlogg-recovery.dump"],{stdio:"pipe"});
+execFileSync("docker",["exec","-i",container,"psql","-U","postgres","-d","playlogg_recovery_test","-v","ON_ERROR_STOP=1"],{input:readFileSync("supabase/tests/recovery-verify.sql"),stdio:"pipe"});
+const removed=await fetch(root,{method:"DELETE",headers:{...auth,"Content-Type":"application/json"},body:JSON.stringify({prefixes:[path]}),signal:AbortSignal.timeout(30000)});assert.ok(removed.ok,"Local fixture picture removal failed.");
+await upload(readFileSync(archive));const recovered=await download();
+const hash=bytes=>createHash("sha256").update(bytes).digest("hex");assert.equal(hash(recovered),hash(original),"Restored picture bytes changed.");
+console.log("Isolated database restore, owned/private data checks and real Storage object recovery passed.");

@@ -7,6 +7,12 @@ cancellation keeps the original tier. Target rows highlight during dragging.
 Each card also has a labeled native tier selector for keyboard and touch use.
 Game title links remain available. Published boards are read-only.
 
+Cards use a compact responsive grid. The clear-tier button on an assigned game
+moves it to Unassigned; it preserves the log and all other saved fields.
+Assigned cards hide the dropdown and dot grip. Drag from the cover, or activate
+the cover to focus and reveal the tier selector. Keyboard focus also reveals it;
+choosing a tier collapses it again. Unassigned cards keep their visible controls.
+
 Changes save automatically. The action verifies Auth ownership, resolves the
 catalog slug and updates only the tier and update timestamp of an existing owned
 entry. It cannot create a log or overwrite score, status, review, platform,

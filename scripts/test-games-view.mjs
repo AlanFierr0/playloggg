@@ -49,3 +49,12 @@ test("sorts put unknown scores/dates last in either direction without mutating t
   assert.equal(select({ sort: "oldest" }).at(-1), "unset");
   assert.deepEqual(catalog, before);
 });
+
+test("platform averages sort independently, keep zero, leave unknowns last and preserve filters", () => {
+  const games = [game("unknown"), game("high", {score: 0, platformScore: 90}), game("low", {score: 100, platformScore: 0}), game("tie", {platformScore: 90}), game("absent")];
+  const before = structuredClone(games);
+  assert.deepEqual(filterGames(games, {...defaultGamesFilters, sort: "platform-desc"}).map(game => game.slug), ["high", "tie", "low", "absent", "unknown"]);
+  assert.deepEqual(filterGames(games, {...defaultGamesFilters, sort: "platform-asc"}).map(game => game.slug), ["low", "high", "tie", "absent", "unknown"]);
+  assert.deepEqual(filterGames(games, {...defaultGamesFilters, sort: "platform-desc", query: "low"}).map(game => game.slug), ["low"]);
+  assert.deepEqual(games, before);
+});

@@ -1,9 +1,11 @@
+import * as tierRanges from "../src/lib/tier-ranges.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import ts from "typescript";
 import { profileSettings, publicProfilePath } from "../src/lib/profile-settings.ts";
+import { profileNames } from "../src/lib/steam-openid.ts";
 
 const form = (values) => { const data = new FormData(); for (const [key, value] of Object.entries(values)) data.set(key, value); return data; };
 function load(relative, dependencies) {
@@ -13,6 +15,23 @@ function load(relative, dependencies) {
   vm.runInNewContext(compiled, context);
   return context.exports;
 }
+
+test("new profiles are public, discoverable and owned by the verified account", async () => {
+  let account = null, inserted;
+  const { createProfile } = load("../src/app/actions/profile.ts", {
+    "next/navigation": { redirect(path) { assert.equal(path, "/profile"); } },
+    "next/cache": { revalidatePath() {} },
+    "@/lib/owner": { getAccount: async () => account },
+    "@/lib/steam-openid": { profileNames }, "@/lib/profile-settings": { profileSettings },
+    "@/lib/supabase/auth-admin": { createAuthAdmin: () => ({ from(table) { assert.equal(table, "profiles"); return { async insert(value) { inserted = value; return { error: null }; } }; } }) },
+  });
+  const input = form({ handle: "new_player", displayName: "New Player", owner_user_id: "forged", is_public: "false", is_discoverable: "false" });
+  assert.match((await createProfile({}, input)).message, /Sign in/);
+  assert.equal(inserted, undefined);
+  account = { user: { id: "verified-user" }, profile: null };
+  await createProfile({}, input);
+  assert.deepEqual(JSON.parse(JSON.stringify(inserted)), { handle: "new_player", display_name: "New Player", owner_user_id: "verified-user", is_public: true, is_discoverable: true });
+});
 
 test("settings require explicit operations and whitelist names or visibility independently", () => {
   assert.deepEqual(profileSettings(form({ setting: "names", handle: "valid_user", displayName: "  Player  ", is_public: "true", owner_user_id: "other" })), { setting: "names", values: { handle: "valid_user", display_name: "Player" } });
@@ -67,9 +86,9 @@ test("public portfolios use anonymous fresh reads, paginate entries and hide unp
     return query;
   } };
   const { getPublicPortfolio } = load("../src/lib/public-portfolio.ts", {
-    "@/lib/avatar-input": {avatarSource: () => null}, "server-only": {}, "react": { cache: (fn) => fn },
+    "@/lib/tier-ranges":tierRanges, "@/lib/avatar-input": {avatarSource: () => null}, "server-only": {}, "react": { cache: (fn) => fn },
     "@/lib/supabase/public": { createPublicClient: () => client },
-    "@/lib/portfolio": { getCatalog: async () => [], portfolioGames: (_rows, entries) => entries },
+    "@/lib/portfolio": { getCatalogRows: async () => [], portfolioGames: (_rows, entries) => entries },
     "@/lib/profile-settings": { publicProfilePath },
     "@/lib/preference-ranking":{readPreferenceRanking:async()=>undefined},
     "@/lib/favorites": {readFavorites: async () => []},
@@ -87,4 +106,18 @@ test("public portfolios use anonymous fresh reads, paginate entries and hide unp
   assert.equal(await getPublicPortfolio("player"), null);
   assert.equal(await getPublicPortfolio("unknown"), null);
   assert.equal(await getPublicPortfolio("../../login"), null);
+});
+
+test("tier range settings require verified ownership and reject overlapping ranges before writing",async()=>{
+ let account=null,calls=0,filters=[];
+ const {saveTierRanges}=load("../src/app/actions/tiers.ts",{
+  "next/cache":{revalidatePath(){}},"@/lib/owner":{getAccount:async()=>account},"@/lib/tier-ranges":tierRanges,
+  "@/lib/portfolio-view":{tiers:["S","A","B","C","D","F"]},
+  "@/lib/supabase/auth-admin":{createAuthAdmin:()=>{calls++;return{from:()=>({update(){return this},eq(key,value){filters.push([key,value]);return this},async select(){return{data:[{id:2}],error:null}}})}}}
+ });
+ assert.equal((await saveTierRanges(tierRanges.defaultTierRanges)).ok,false);assert.equal(calls,0);
+ account={user:{id:"verified"},profile:{id:2}};
+ assert.equal((await saveTierRanges({...tierRanges.defaultTierRanges,S:[90,100]})).ok,false);assert.equal(calls,0);
+ assert.equal((await saveTierRanges(tierRanges.defaultTierRanges)).ok,true);
+ assert.deepEqual(filters,[["id",2],["owner_user_id","verified"]]);
 });

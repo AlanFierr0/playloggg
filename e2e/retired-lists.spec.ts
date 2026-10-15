@@ -12,7 +12,7 @@ test("lists have no visible entry points and saved list pages are unavailable", 
   }
   for (const path of ["/lists", "/lists/10", "/u/fixture_public/lists", "/u/fixture_public/lists/10"]) {
     await page.goto(path);
-    await expect(page.getByRole("heading", { name: "This page isn’t available.", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Nothing to play here.", exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Public fixture list", exact: true })).toHaveCount(0);
   }
 });

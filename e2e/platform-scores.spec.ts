@@ -1,0 +1,42 @@
+import {test,expect} from "./test";
+// @ts-expect-error Local fixture cookie.
+import {authCookie} from "./fixture-server.mjs";
+
+test("platform sorting uses anonymous all-profile averages and survives filtering and reloads",async({page,context},testInfo)=>{
+  await page.goto("/game/fixture-game-0");
+  await expect(page.getByText("45 / 100",{exact:true})).toBeVisible();
+  await expect(page.getByText("2 ratings",{exact:true})).toBeVisible();
+  await page.goto("/game/hades");
+  await expect(page.getByText("33.3 / 100",{exact:true})).toBeVisible();
+  await page.goto("/game/fixture-game-40");
+  await expect(page.getByText("No ratings yet",{exact:true})).toBeVisible();
+  await fetch("http://127.0.0.1:3101/__platform-scores",{method:"POST"});
+  await page.goto("/games?sort=platform-desc");
+  const cards=page.locator("[data-catalog-game]");
+  await expect(cards.first()).toHaveAttribute("data-catalog-game","fixture-game-0");
+  await expect(cards.nth(2)).toHaveAttribute("data-catalog-game","hades");
+  await expect(cards.nth(2)).toContainText("50.0 / 100");
+  await expect(cards.nth(2)).toContainText("5 ratings");
+  await expect(page.getByText("Private fixture review",{exact:true})).toHaveCount(0);
+  await expect(cards.filter({has:page.getByRole("heading",{name:"Fixture Game 00",exact:true})})).toContainText("100.0 / 100");
+  await page.getByRole("button",{name:/^Filters/}).click();
+  await page.locator("#games-sort").selectOption("platform-asc");
+  await expect(page).toHaveURL(/sort=platform-asc/);
+  await expect(cards.first()).toHaveAttribute("data-catalog-game","fixture-game-1");
+  await expect(cards.first()).toContainText("0.0 / 100");
+  await page.reload();
+  await expect(cards.first()).toHaveAttribute("data-catalog-game","fixture-game-1");
+  await page.goto("/games?q=hades&sort=platform-desc");
+  await expect(cards).toHaveCount(1);
+  await expect(cards.first()).toContainText("50.0 / 100");
+  await context.addCookies([authCookie]);
+  await page.reload();
+  await expect(cards.first()).toContainText("50.0 / 100");
+  await expect(cards.first()).toContainText("25 / 100");
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await expect(page.getByRole("heading",{name:"Games",exact:true})).toBeVisible();
+  await cards.first().scrollIntoViewIfNeeded();
+  await expect(cards).toHaveCount(1);
+  await expect(cards.first()).toContainText("50.0 / 100");
+  await page.screenshot({path:`e2e-artifacts/platform-scores-${testInfo.project.name}.png`,fullPage:true});
+});

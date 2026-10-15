@@ -1,5 +1,4 @@
-import { getPortfolio } from "@/lib/portfolio";
-import { gamesPage } from "@/lib/games-page";
+import { getCatalogPage } from "@/lib/catalog-page";
 import { parseGamesQuery } from "@/lib/games-query";
 import { localizeMetadata } from "@/lib/locale/server";
 import { GamesScreen } from "@/components/screens/games-screen";
@@ -15,6 +14,6 @@ export default async function GamesPage({ searchParams }: { searchParams: Promis
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(await searchParams)) if (value !== undefined) params.set(key, Array.isArray(value) ? value[0] : value);
   const { filters, page } = parseGamesQuery(params);
-  const portfolio = await getPortfolio();
-  return <GamesScreen data={gamesPage(portfolio.games, filters, page, 25)} profile={portfolio.profile} access={portfolio.access} />;
+  const result = await getCatalogPage(filters, page);
+  return <GamesScreen {...result} />;
 }

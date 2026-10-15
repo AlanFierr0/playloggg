@@ -65,7 +65,12 @@ export function tasteStats(games: Game[]) {
   const completed = entries.filter(
     (game) => game.status === "completed",
   ).length;
+  // Ongoing statuses describe games without a completion goal; don't infer this from genre.
+  const ongoing = entries.filter(game => game.status === "active" || game.status === "paused" || game.status === "stopped").length;
+  const finishable = entries.length - ongoing;
   return {
+    ongoing,
+    finishable,
     rated: rated.length,
     logged: entries.length,
     average: average === null ? null : round(average),
@@ -75,12 +80,15 @@ export function tasteStats(games: Game[]) {
     preferredGenres: preferred(genres),
     preferredStudios: preferred(studios),
     completed,
-    completionRate: entries.length
-      ? round((completed / entries.length) * 100)
+    completionRate: finishable
+      ? round((completed / finishable) * 100)
       : null,
     shelved: entries.filter((game) => game.status === "shelved").length,
+    active: entries.filter(game => game.status === "active").length,
+    paused: entries.filter(game => game.status === "paused").length,
+    stopped: entries.filter(game => game.status === "stopped").length,
     highScores: rated.filter((game) => game.score >= 90).length,
-    eras: [...eras].sort(([a], [b]) => a.localeCompare(b)),
+    eras: [...eras].sort(([a], [b]) => b.localeCompare(a)),
     platforms: [...platforms].sort(
       (a, b) => b[1] - a[1] || a[0].localeCompare(b[0]),
     ),

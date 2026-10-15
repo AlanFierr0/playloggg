@@ -1,3 +1,9 @@
+import { BackLink } from "@/components/return-navigation";
+import {CommunityGameReviews} from "@/components/community-game-reviews";
+import { ReviewText } from "@/components/review-text";
+import { FriendsGameRatings } from "@/components/friends-game-ratings";
+import { Suspense } from "react";
+import { ReviewHelpfulnessSummary } from "@/components/review-helpfulness-summary";
 import { GameGenres } from "@/components/game-genres";
 import {GameTags} from "@/components/game-tags";
 import {GameFavorite} from "@/components/game-favorite";
@@ -12,12 +18,12 @@ import { playbackLabels } from "@/lib/playback-status";
 // The Stitch sample reviews/community statistics belong to the original samples.
 export async function CatalogGameScreen({ game, isSample, publicProfile }: { game: Game; isSample: boolean; publicProfile?: Profile }) {
   const [t,row] = await Promise.all([getMessages(),getCatalogGame(game.slug)]);
-  const communityScore=row ? await getCommunityGameScore(row.id) : undefined;
+  const communityScore=row ? await getCommunityGameScore(row.id).catch(() => null) : undefined;
   return <div className="relative overflow-hidden bg-surface-container-lowest">
     {game.artwork && <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[620px] bg-cover bg-top opacity-25" style={{ backgroundImage: `url(${game.artwork})`, maskImage: "linear-gradient(to bottom, black 0%, black 45%, transparent 100%)" }} />}
     <div className="absolute inset-0 bg-gradient-to-b from-surface/70 via-surface/90 to-surface pointer-events-none" />
     <div className="relative site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-12 space-y-8">
-      <nav aria-label={t("Game navigation")}><Link href={publicProfile ? `/u/${publicProfile.handle}` : "/games"} className="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary font-body-md text-body-md">{publicProfile ? t(`← ${publicProfile.displayName}'s portfolio`) : t("← Game catalog")}</Link></nav>
+      <nav aria-label={t("Game navigation")}><BackLink href={publicProfile ? `/u/${publicProfile.handle}` : "/games"} className="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary font-body-md text-body-md">← {t("Back")}</BackLink></nav>
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-start">
         <div className="sm:col-span-4 xl:col-span-3 w-full max-w-[240px] sm:max-w-none mx-auto"><img src={game.cover} alt={t(`${game.title} cover`)} className="w-full aspect-[3/4] rounded-lg object-cover bg-surface-container-high shadow-2xl" /></div>
         <div className="sm:col-span-8 xl:col-span-9 min-w-0 space-y-5">
@@ -37,20 +43,23 @@ export async function CatalogGameScreen({ game, isSample, publicProfile }: { gam
             <h2 className="font-headline-md text-headline-md font-bold">{publicProfile ? t(`${publicProfile.displayName}'s log entry`) : isSample ? t("Sample profile entry") : t("Your log entry")}</h2>
             {game.logged ? <>
               <div className="flex flex-wrap items-center gap-3 font-label-md text-label-md"><span className="text-primary">{game.score === null ? t("Unrated") : t(`${game.score} / 100`)}</span><span>{game.tier ? t(`Tier ${game.tier}`) : t("Tier unassigned")}</span>{game.status && <span>{t(playbackLabels[game.status])}</span>}{game.hoursPlayed != null && <span>{game.hoursPlayed} {t("hrs")}</span>}{game.completedOn && <span>{t("Completed ")}{game.completedOn}</span>}</div>
-              {game.review && <p translate="no" className="whitespace-pre-wrap break-words text-on-surface-variant font-body-md text-body-md">{game.review}</p>}
+              {game.review && <ReviewText text={game.review} slug={game.slug} profileId={publicProfile?.id} />}
+              {publicProfile && game.review?.trim() && <Suspense fallback={null}><ReviewHelpfulnessSummary profileId={Number(publicProfile.id)} slug={game.slug} /></Suspense>}
               <GameTags tags={game.tags} />
             </> : <p className="text-on-surface-variant">{publicProfile || isSample ? t("This profile has not logged this game.") : t("This game is in the catalog. Add a log entry to save your status, rating or review.")}</p>}
             {!publicProfile && <>
             <Link href={isSample ? "/login" : `/log?game=${encodeURIComponent(game.slug)}`} className="inline-flex rounded px-5 py-2.5 bg-primary-container text-on-primary-container font-body-md text-body-md">{isSample ? t("Sign in") : game.logged ? t("Edit log entry") : t("Log this game")}</Link>
             </>}
           </section>
+          {row && <Suspense fallback={null}><FriendsGameRatings gameId={row.id} slug={game.slug} /></Suspense>}
           <div className="text-body-sm text-on-surface-variant flex flex-wrap gap-x-3 gap-y-1">
             <span>{t("Community score")}</span>
-            <span>{communityScore ? `${communityScore.average} / 100` : t("Not enough ratings")}</span>
+            <span>{communityScore === null ? t("Community score could not be loaded.") : communityScore ? `${communityScore.average} / 100` : t("No ratings yet")}</span>
             {communityScore && <span>{communityScore.count} {t("ratings")}</span>}
           </div>
         </div>
       </div>
+      {!publicProfile&&<Suspense fallback={null}><CommunityGameReviews slug={game.slug}/></Suspense>}
       <section className="space-y-4"><h2 className="font-headline-lg text-headline-lg font-bold">{t("About this game")}</h2><p className="max-w-3xl whitespace-pre-wrap break-words text-on-surface-variant font-body-lg text-body-lg leading-relaxed">{game.summary || t("No overview is available from IGDB yet.")}</p></section>
       {Boolean(game.screenshots?.length) && <section className="space-y-4"><h2 className="font-headline-lg text-headline-lg font-bold">{t("Screenshots")}</h2><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">{game.screenshots!.map((src, index) => <img key={src} src={src} alt={t(`${game.title} screenshot ${index + 1}`)} loading="lazy" className="w-full aspect-video object-cover rounded-lg bg-surface-container" />)}</div></section>}
     </div>

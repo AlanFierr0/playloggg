@@ -14,12 +14,12 @@ test('email login options, recovery and verified profile routing work without sa
   await expect(page.getByLabel('Password',{exact:true})).toHaveCount(0);
   await page.getByLabel('Email',{exact:true}).fill('new-player@example.com');
   await page.getByRole('button',{name:'Send sign-in link',exact:true}).click();
-  await expect(page.getByText('Check your inbox for a sign-in link. New accounts start with a private profile.')).toBeVisible();
+  await expect(page.getByText('Check your inbox for a sign-in link. New accounts start with a public profile.')).toBeVisible();
   await page.getByRole('button',{name:'Create account',exact:true}).first().click();
   await page.getByLabel('Email',{exact:true}).first().fill('new-player@example.com');
   await page.getByLabel('Password',{exact:true}).fill('fixture-password-123');
   await page.getByRole('button',{name:'Create account',exact:true}).last().click();
-  await expect(page.getByText('Check your inbox to verify your email, then sign in and create your private profile.')).toBeVisible();
+  await expect(page.getByText('Check your inbox to verify your email, then sign in and create your public profile.')).toBeVisible();
   await page.getByRole('button',{name:'Forgot password?',exact:true}).click();
   await page.getByLabel('Email',{exact:true}).first().fill('owner@fixture.test');
   await page.getByRole('button',{name:'Send reset link',exact:true}).click();
@@ -62,7 +62,7 @@ test('guest routes contain no demo player and missing-game search asks for sign-
   await page.goto('/games?q=absent-game');
   await expect(page.getByRole('link',{name:'Sign in to search more games and import a game.'})).toBeVisible();
   await expect(page.getByText(/Sample Player|Sample profile/)).toHaveCount(0);
-  await page.goto('/u/alexvance');await expect(page.getByRole('heading',{name:'This page isn’t available.'})).toBeVisible();
+  await page.goto('/u/alexvance');await expect(page.getByRole('heading',{name:'Nothing to play here.'})).toBeVisible();
   await page.goto('/profile');await expect(page).toHaveURL(/\/login$/);
 });
 

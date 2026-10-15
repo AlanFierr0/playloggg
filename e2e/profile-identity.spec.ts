@@ -57,19 +57,60 @@ test("owner favorites stay independent, feature atomically, persist and follow p
   expect(state.ratings.find((r: { profile_id: number; game_id: number }) => r.profile_id === 2 && r.game_id === 2)).toMatchObject({ score: 80, tier: "B", status: "playing" });
 });
 
-test("public profile sections use real zero scores, review text and independent favorites", async ({ page }) => {
+test("public profile sections use real zero scores, review text and independent favorites", async ({ page, context }, testInfo) => {
   await page.goto("/u/fixture_public");
   await expect(page.getByRole("heading", { name: "Published Fixture", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Featured favorites" })).toBeVisible();
+  await page.screenshot({ path: `e2e-artifacts/public-profile-redesign-${testInfo.project.name}.png`, fullPage: true });
+  const viewedProfile = page.getByRole("link", { name: "Viewing profile Published Fixture", exact: true });
+  await expect(viewedProfile).toHaveCount(0);
   const navigation = page.getByRole("navigation", { name: "Profile sections" });
   for (const [name, suffix] of [["Ranking", "ranking"], ["Reviews", "reviews"], ["Stats", "stats"], ["Tier List", "tiers"]]) {
     await navigation.getByRole("link", { name, exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`/u/fixture_public/${suffix}$`));
+    await expect(viewedProfile).toBeVisible();
+    await expect(viewedProfile).toContainText("@fixture_public");
+    await expect(viewedProfile).toHaveAttribute("href", "/u/fixture_public");
+    const identityBox = (await viewedProfile.boundingBox())!;
+    const tabsBox = (await navigation.boundingBox())!;
+    expect(tabsBox.y + tabsBox.height).toBeLessThan(identityBox.y);
+    expect(identityBox.x + identityBox.width).toBeCloseTo(tabsBox.x + tabsBox.width, 0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
   }
+  await navigation.getByRole("link", { name: "Overview", exact: true }).click();
+  await expect(viewedProfile).toHaveCount(0);
+  await navigation.getByRole("link", { name: "Ranking", exact: true }).click();
+  await expect(viewedProfile).toBeVisible();
+  await context.addCookies([authCookie]);
+  await page.reload();
+  await expect(viewedProfile).toContainText("Published Fixture");
+  await expect(viewedProfile).not.toContainText("Fixture Owner");
+  await page.screenshot({ path: `e2e-artifacts/viewed-profile-${testInfo.project.name}.png` });
   await navigation.getByRole("link", { name: "Stats", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Rating distribution" })).toBeVisible();
   await expect(page.getByText("1 (4.2%)", { exact: true })).toBeVisible();
+  const distributionBox = (await page.getByRole("heading", { name: "Rating distribution", exact: true }).locator("..").boundingBox())!;
+  const statsTabsBox = (await navigation.boundingBox())!;
+  expect(distributionBox.x).toBeCloseTo(statsTabsBox.x, 0);
+  expect(distributionBox.width).toBeCloseTo(statsTabsBox.width, 0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: `e2e-artifacts/public-stats-layout-${testInfo.project.name}.png`, fullPage: true });
   await navigation.getByRole("link", { name: "Reviews", exact: true }).click();
   await expect(page.getByText("Public fixture review", { exact: true })).toBeVisible();
+});
+
+
+test("profile total hours includes unscored games and updates after saving playtime",async({page,context},info)=>{
+ await context.addCookies([authCookie]);await page.goto("/profile");
+ const stat=page.locator("dl > div").filter({has:page.locator("dt").filter({hasText:/^Total hours played$/})});
+ await expect(stat.locator("dd > span").first()).toHaveText("—");
+ for(const [slug,hours,total] of [["hades","12.5","12.5"],["elden-ring-shadow-of-the-erdtree","3.25","15.75"]]){
+  await page.goto(`/log?game=${slug}`);await page.getByLabel("Hours played",{exact:true}).fill(hours);
+  await page.locator("#commit-rating").click();await expect(page).toHaveURL(/\/profile$/);
+  await expect(stat.locator("dd > span").first()).toHaveText(total);
+ }
+ await page.reload();await expect(stat.locator("dd > span").first()).toHaveText("15.75");
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.locator("header dl").screenshot({path:`e2e-artifacts/profile-hours-${info.project.name}.png`});
+ await page.goto("/u/fixture_public");await expect(stat.locator("dd > span").first()).toHaveText("0");
 });

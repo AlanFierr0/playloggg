@@ -1,0 +1,40 @@
+import { test, expect } from "./test";
+// @ts-expect-error Local fixture identity only.
+import { authCookie } from "./fixture-server.mjs";
+
+test("review helpfulness can switch, persist and remove a single vote", async ({ page, context, request }) => {
+  await context.addCookies([authCookie]);
+  await page.goto("/u/fixture_public/reviews");
+  const form = page.getByRole("form", { name: "Review helpfulness" });
+  const up = form.getByRole("button", { name: /^Helpful/ });
+  const down = form.getByRole("button", { name: /^Not helpful/ });
+  await up.click();
+  await expect(up).toHaveAttribute("aria-pressed", "true");
+  await expect(up).toHaveText(/Helpful1/);
+  await request.post("http://127.0.0.1:3101/__fail-save");
+  await down.click();
+  await expect(page.getByRole("status").filter({ hasText: "Your vote could not be saved." })).toBeVisible();
+  await expect(up).toHaveAttribute("aria-pressed", "true");
+  await expect(up).toHaveText(/Helpful1/);
+  await down.click();
+  await expect(down).toHaveAttribute("aria-pressed", "true");
+  await expect(up).toHaveText(/Helpful0/);
+  const state = await (await request.get("http://127.0.0.1:3101/__state")).json();
+  expect(state.reviewVotes).toHaveLength(1);
+  expect(state.reviewVotes[0].value).toBe(-1);
+  await page.reload();
+  await expect(down).toHaveAttribute("aria-pressed", "true");
+  await request.post("http://127.0.0.1:3101/__fail-save");
+  await up.click();
+  await expect(page.getByRole("status").filter({ hasText: "Your vote could not be saved." })).toBeVisible();
+  await expect(down).toHaveAttribute("aria-pressed", "true");
+  await page.goto("/u/fixture_public/game/hades");
+  await expect(down).toHaveAttribute("aria-pressed", "true");
+  await down.click();
+  await expect(down).toHaveAttribute("aria-pressed", "false");
+  await expect(down).toHaveText(/Not helpful0/);
+  await context.clearCookies();
+  await page.reload();
+  await expect(up).toBeDisabled();
+  await expect(page.getByRole("link", { name: "Sign in to vote on reviews." })).toBeVisible();
+});

@@ -25,7 +25,6 @@ export function communityStats(
   }
   const scores = [...groups].flatMap(([gameId, group]) => {
     const values = [...group.values()];
-    if (values.length < 5) return [];
     const average =
       values.reduce((sum, value) => sum + value, 0) / values.length;
     return [
@@ -61,7 +60,7 @@ export function communityStats(
     .sort((a, b) => b.count - a.count || a.gameId - b.gameId);
   return {
     scores,
-    controversial: [...scores].sort(
+    controversial: scores.filter(score => score.count >= 5).sort(
       (a, b) =>
         b.deviation - a.deviation || b.count - a.count || a.gameId - b.gameId,
     ),

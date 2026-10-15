@@ -1,21 +1,21 @@
-// Authorized initial production catalog expansion. No profiles/ratings are touched.
+// Authorized production catalog expansion to 3,000 released main games. No profiles/ratings are touched.
 // Production builds resume idempotently; local/preview builds never run this import.
 import { createClient } from '@supabase/supabase-js';
 import { createIgdbClient } from './igdb-client.mjs';
 import { normalizeImport } from '../src/lib/catalog-input.ts';
 
-export const bootstrapFields = 'id,name,slug,first_release_date,cover.image_id,genres.name,platforms.name,artworks.image_id,screenshots.image_id,url,summary,game_type.type,involved_companies.company.name,involved_companies.developer,involved_companies.publisher';
+export const bootstrapFields = 'id,name,slug,total_rating_count,first_release_date,cover.image_id,genres.name,platforms.name,artworks.image_id,screenshots.image_id,url,summary,game_type.type,involved_companies.company.name,involved_companies.developer,involved_companies.publisher';
 export function bootstrapQuery(offset, now = Math.floor(Date.now()/1000)) {
   if (!Number.isSafeInteger(offset) || offset < 0) throw new Error('Invalid catalog offset.');
-  return `fields ${bootstrapFields}; where first_release_date > 0 & first_release_date <= ${now} & cover != null & total_rating >= 75 & total_rating_count >= 10; sort total_rating_count desc; limit 100; offset ${offset};`;
+  return `fields ${bootstrapFields}; where first_release_date > 0 & first_release_date <= ${now} & cover != null & version_parent = null & game_type.type = "Main Game" & total_rating_count >= 10; sort total_rating_count desc; limit 500; offset ${offset};`;
 }
-export async function bootstrapCatalog({admin, query, target = 1000, progress = console.log}) {
+export async function bootstrapCatalog({admin, query, target = 3000, progress = console.log}) {
   const {count, error} = await admin.from('games').select('id',{count:'exact',head:true});
   if (error || count === null) throw new Error('Catalog count could not be checked.');
   if (count >= target) {progress(`Catalog bootstrap complete: ${count} games already stored.`); return count;}
   let total = count;
   // Bounded scan and idempotent batches; duplicate IDs keep existing reviewed rows.
-  for (let offset = 0; offset < 5000 && total < target; offset += 100) {
+  for (let offset = 0; offset < 5000 && total < target; offset += 500) {
     const records = await query(bootstrapQuery(offset));
     if (!records.length) break;
     const candidates = records.map(normalizeImport).filter(Boolean);
@@ -25,6 +25,7 @@ export async function bootstrapCatalog({admin, query, target = 1000, progress = 
     const ids = new Set(existing.map(g => g.igdb_id));
     const batch = candidates.filter(g => !ids.has(g.igdb_id) && ids.add(g.igdb_id)).slice(0,target-total);
     if (batch.length) {
+      progress(`Catalog batch: ${batch.length} released main games; sample: ${batch.slice(0,5).map(game => game.title).join(" · ")}`);
       const {error: writeError} = await admin.from('games').upsert(batch,{onConflict:'igdb_id',ignoreDuplicates:true});
       if (writeError) throw new Error('Catalog bootstrap batch could not be stored. Existing records were preserved.');
     }

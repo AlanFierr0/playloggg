@@ -1,4 +1,4 @@
-import { timingSafeEqual } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const steamEndpoint = "https://steamcommunity.com/openid/login";
 const namespace = "http://specs.openid.net/auth/2.0";
@@ -39,4 +39,15 @@ export function profileNames(input: { handle: unknown; displayName: unknown }) {
   const handle = typeof input.handle === "string" ? input.handle.trim().toLowerCase() : "";
   const displayName = typeof input.displayName === "string" ? input.displayName.trim() : "";
   return /^[a-z0-9][a-z0-9_]{2,29}$/.test(handle) && displayName.length > 0 && displayName.length <= 80 && !/[\u0000-\u001f\u007f]/.test(displayName) ? { handle, display_name: displayName } : null;
+}
+
+// Bind the Steam callback to the verified account that started linking.
+export function steamLinkCookie(state: string, userId: string, secret: string) {
+  return `${userId}.${createHmac("sha256", secret).update(`${state}:${userId}`).digest("hex")}`;
+}
+export function steamLinkActor(cookie: string, state: string | undefined, secret: string) {
+  const [userId, signature, extra] = cookie.split(".");
+  if (!state || !/^[a-f0-9]{64}$/.test(state) || !/^[a-f0-9-]{36}$/.test(userId) || !/^[a-f0-9]{64}$/.test(signature ?? "") || extra !== undefined) return null;
+  const expected = steamLinkCookie(state, userId, secret).split(".")[1];
+  return timingSafeEqual(Buffer.from(signature), Buffer.from(expected)) ? userId : null;
 }

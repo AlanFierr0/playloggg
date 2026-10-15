@@ -6,8 +6,8 @@ create temporary table details_test_context as
 grant select on details_test_context to authenticated, anon;
 insert into auth.users (id, aud, role, email)
   select user_id, 'authenticated', 'authenticated', 'details-owner@example.invalid' from details_test_context;
-insert into public.profiles (handle, display_name, owner_user_id)
-  select 'test_' || left(replace(user_id::text,'-',''),16), 'Details test owner', user_id from details_test_context;
+insert into public.profiles (handle, display_name, owner_user_id, is_public, is_discoverable)
+  select 'test_' || left(replace(user_id::text,'-',''),16), 'Details test owner', user_id, false, false from details_test_context;
 alter table details_test_context add column profile_id bigint;
 update details_test_context set profile_id = (select id from public.profiles where owner_user_id = user_id);
 set local role authenticated;
@@ -15,7 +15,7 @@ select set_config('request.jwt.claim.sub', user_id::text, true),
   set_config('request.jwt.claims', json_build_object('sub', user_id, 'role', 'authenticated')::text, true)
   from details_test_context;
 do $$
-declare c record; invalid_hours double precision; changed integer;
+declare c record; invalid_hours double precision; changed integer; console_platform text;
 begin
   select * into c from details_test_context;
   insert into public.ratings (profile_id, game_id, score, tier, status, platform, hours_played, completed_on)
@@ -30,6 +30,12 @@ begin
   if not exists (select 1 from public.ratings where profile_id = c.profile_id and platform = 'pc'
     and hours_played = 0 and completed_on is null and tier = 'B' and status = 'playing')
     then raise exception 'Upsert lost zero hours or changed independent fields'; end if;
+  foreach console_platform in array array['ps1','ps2','ps3','ps4','ps5','psp','ps_vita','xbox','xbox_360','xbox_one','xbox_series_x','xbox_series_s'] loop
+    update public.ratings set platform=console_platform where profile_id=c.profile_id;
+    if not exists(select 1 from public.ratings where profile_id=c.profile_id and platform=console_platform) then
+      raise exception 'Console platform did not persist';
+    end if;
+  end loop;
   update public.ratings set platform = null, hours_played = null, completed_on = null where profile_id = c.profile_id;
   if not exists (select 1 from public.ratings where profile_id = c.profile_id and platform is null
     and hours_played is null and completed_on is null) then raise exception 'Clear play details failed'; end if;

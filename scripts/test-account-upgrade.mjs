@@ -40,7 +40,7 @@ test('catalog bootstrap reuses IDs without replacing reviewed metadata and resum
     in(_key,ids){return Promise.resolve({data:rows.filter(row=>ids.includes(row.igdb_id)),error:null});},
     upsert(batch,options){assert.equal(options.ignoreDuplicates,true);assert.equal(options.onConflict,'igdb_id');rows.push(...batch);mutations++;return Promise.resolve({error:null});}
   };}};
-  const query=async body=>{assert.match(body,/total_rating >= 75/);return [1,2,3].map(id=>({id,name:`Game ${id}`,slug:`game-${id}`,cover:{image_id:'cover'},first_release_date:1500000000}));};
+  const query=async body=>{assert.match(body,/total_rating_count >= 10/);assert.match(body,/sort total_rating_count desc/);assert.match(body,/version_parent = null/);assert.match(body,/game_type.type = "Main Game"/);assert.doesNotMatch(body,/total_rating >=/);return [1,2,3].map(id=>({id,name:`Game ${id}`,slug:`game-${id}`,cover:{image_id:'cover'},first_release_date:1500000000}));};
   assert.equal(await bootstrapCatalog({admin,query,target:3,progress:()=>{}}),3);
   assert.equal(rows[0].title,'Reviewed name');assert.equal(mutations,1);for (const column of ["is_sample", "created_at", "updated_at"]) assert.ok(!(column in rows[1]));
   assert.equal(await bootstrapCatalog({admin,query:()=>assert.fail('Unnecessary provider call'),target:3,progress:()=>{}}),3);

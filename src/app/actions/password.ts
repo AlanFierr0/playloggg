@@ -18,7 +18,7 @@ export async function emailPassword(_previous: {message: string}, form: FormData
       const {error} = await supabase.auth.signInWithOtp({email, options: {
         shouldCreateUser: true, emailRedirectTo: callback,
       }});
-      return {message: error ? "We couldn't send an email. Please try again shortly." : "Check your inbox for a sign-in link. New accounts start with a private profile."};
+      return {message: error ? "We couldn't send an email. Please try again shortly." : "Check your inbox for a sign-in link. New accounts start with a public profile."};
     }
     if (mode === "recover") {
       const {error} = await supabase.auth.resetPasswordForEmail(email, {redirectTo: `${callback}?flow=recovery`});
@@ -33,7 +33,7 @@ export async function emailPassword(_previous: {message: string}, form: FormData
       if (error) return {message: "Registration couldn't be completed. Please retry, or sign in if you already have an account."};
       // Fail closed if project email confirmations were accidentally disabled.
       if (data.session) await supabase.auth.signOut();
-      return {message: "Check your inbox to verify your email, then sign in and create your private profile."};
+      return {message: "Check your inbox to verify your email, then sign in and create your public profile."};
     }
     const {data, error} = await supabase.auth.signInWithPassword({email, password});
     if (error || !data.user || !eligibleAccount(data.user)) {

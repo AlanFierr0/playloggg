@@ -1,29 +1,53 @@
 "use client";
 import { useMessages } from "@/components/site-preferences";
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, use, useEffect, useRef, useState, type ComponentProps } from "react";
+import { useReturnNavigation } from "@/components/return-navigation";
 import { SearchResults, type SearchScope } from "@/components/search-results";
 
-import { getSearchMatches } from "@/lib/portfolio-view";
-import { usePortfolio } from "@/components/portfolio-provider";
+import { PortfolioProvider } from "@/components/portfolio-provider";
+import type { Portfolio, Profile } from "@/types/domain";
 
-export function SearchScreen({ initialQuery, returnPath, mode }: { initialQuery: string; returnPath: string; mode: "browse" | "log" }) {
+
+export function SearchScreen({ initialQuery, returnPath, mode, portfolio }: { initialQuery: string; returnPath: string; mode: "browse" | "log"; portfolio: Promise<Portfolio & {hasMore: boolean; excludedSlugs: string[]}> }) {
   const t = useMessages();
 
-const portfolio = usePortfolio();
-const [query, setQuery] = useState(initialQuery);
-const [scope, setScope] = useState<SearchScope>("all");
-const dialog = useRef<HTMLDivElement>(null);
-const input = useRef<HTMLInputElement>(null);
-const router = useRouter();
-const matchCounts = getSearchMatches(query, portfolio);
 
-function close() { router.push(returnPath); }
+const [query, setQuery] = useState(initialQuery);
+const [offset, setOffset] = useState(0);
+const [scope, setScope] = useState<SearchScope>("all");
+const dialog = useRef<HTMLDialogElement>(null);
+const input = useRef<HTMLInputElement>(null);
+const { goBack } = useReturnNavigation(returnPath);
+const [profileSearch, setProfileSearch] = useState<{ query: string; profiles: Profile[]; hasMore?: boolean; error?: boolean } | null>(null);
+const profiles = profileSearch?.query === query ? profileSearch.profiles : [];
+const profilesLoading = mode !== "log" && profileSearch?.query !== query;
+useEffect(() => {
+  if (mode === "log") return;
+  const controller = new AbortController();
+  const timer = setTimeout(async () => {
+    try {
+      const response = await fetch(`/api/profiles/search?q=${encodeURIComponent(query)}`, { signal: controller.signal, cache: "no-store" });
+      if (!response.ok) throw new Error("Profile search failed.");
+      const data: { profiles: Profile[]; hasMore: boolean } = await response.json();
+      if (!controller.signal.aborted) setProfileSearch({ query, profiles: data.profiles, hasMore: data.hasMore });
+    } catch {
+      if (!controller.signal.aborted) setProfileSearch({ query, profiles: [], error: true });
+    }
+  }, 250);
+  return () => { clearTimeout(timer); controller.abort(); };
+}, [query, mode]);
+const categories: { scope: SearchScope; label: string }[] = [{ scope: "all", label: "All Results" }, { scope: "games", label: "Games" }, { scope: "curators", label: "Profiles" }];
+
+function close() { goBack(); }
+useEffect(() => {
+  const element = dialog.current;
+  element?.showModal();
+  return () => element?.close();
+}, []);
 useEffect(() => { input.current?.focus(); input.current?.setSelectionRange(initialQuery.length, initialQuery.length); }, [initialQuery]);
-function onKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-  if (event.key === "Escape") { event.preventDefault(); close(); }
-  const links = Array.from(dialog.current?.querySelectorAll<HTMLElement>("[data-search-result]:not([disabled])") ?? []);
+function onKeyDown(event: React.KeyboardEvent<HTMLDialogElement>) {
+  const links = Array.from(dialog.current?.querySelectorAll<HTMLElement>("[data-search-result]:not([disabled])") ?? []).filter(link => link.getClientRects().length > 0);
   if ((event.key === "ArrowDown" || event.key === "ArrowUp") && links.length) {
     event.preventDefault();
     const current = links.findIndex((link) => link === document.activeElement);
@@ -40,154 +64,61 @@ function onKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
     else if (!event.shiftKey && event.target === last) { event.preventDefault(); first?.focus(); }
   }
 }
-return (<div onKeyDown={onKeyDown}>
-<h1 className="sr-only">{t("Search the game catalog")}</h1>
-<div className="w-full  bg-surface"><div className="flex flex-col w-full relative min-h-[calc(100dvh-var(--site-header-height))]">
+return (
+  <dialog ref={dialog} onKeyDown={onKeyDown} onCancel={event => { event.preventDefault(); close(); }} aria-label={t("Search the game catalog")} className="fixed inset-x-0 bottom-0 top-[var(--site-header-height)] m-0 h-[calc(100dvh-var(--site-header-height))] w-full max-w-none max-h-none border-0 open:flex items-center justify-center bg-surface/90 text-on-surface backdrop-blur-sm backdrop:bg-transparent p-3 sm:p-6" onClick={event => { if (event.target === event.currentTarget) close(); }}>
+    <div id="palette-dialog" className="search-dialog flex w-full max-w-3xl min-w-0 min-h-0 flex-col overflow-hidden rounded-2xl border border-outline-variant/30 bg-surface-container-low shadow-2xl">
+      <header className="shrink-0 px-4 pt-5 sm:px-6 sm:pt-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 space-y-1">
+            <h1 className="font-headline-lg text-headline-lg">{t(mode === "log" ? "Choose a game" : "Search the game catalog")}</h1>
+            <p className="text-body-sm text-on-surface-variant">{t(mode === "log" ? "Search for a game, then select it to open its log options." : "Browse games in the Playlogg catalog.")}</p>
+          </div>
+          <button type="button" onClick={close} aria-label={t("Close search")} title={t("Close search")} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"><span aria-hidden="true" className="material-symbols-outlined text-[20px]">close</span></button>
+        </div>
+        <div className="mt-5 flex min-h-14 items-center gap-3 rounded-xl border border-outline-variant/40 bg-surface-container-lowest px-4 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition-colors">
+          <span aria-hidden="true" className="material-symbols-outlined text-primary text-[22px] shrink-0">search</span>
+          <input ref={input} id="command-input" type="text" value={query} onChange={event => {setQuery(event.target.value); setOffset(0);}} placeholder={t("Search games…")} maxLength={100} aria-label={t("Search titles and profiles")} className="min-w-0 flex-1 bg-transparent py-4 text-body-lg text-on-surface placeholder:text-on-surface-variant caret-primary focus:outline-none" />
+        </div>
+        {mode !== "log" && <nav aria-label={t("Search categories")} className="mt-4 flex flex-wrap gap-1 border-b border-outline-variant/20 pb-4">
+          {categories.map(category => <button key={category.scope} type="button" onClick={() => setScope(category.scope)} aria-pressed={scope === category.scope} className={`min-h-11 rounded-lg px-3 sm:px-4 text-body-sm font-medium transition-colors ${scope === category.scope ? "bg-primary/10 text-primary" : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"}`}>{t(category.label)}{category.scope === "curators" && <span className="ml-1.5 text-label-sm">({profilesLoading ? "…" : `${profiles.length}${profileSearch?.hasMore ? "+" : ""}`})</span>}</button>)}
+        </nav>}
+      </header>
+      <Suspense fallback={<p role="status" className="px-6 py-8 text-on-surface-variant">{t("Loading…")}</p>}>
+      <SearchData portfolio={portfolio} initialQuery={initialQuery} offset={offset} onLoadMore={() => setOffset(value => value + 24)} query={query} scope={mode === "log" ? "games" : scope} mode={mode} profiles={profiles} profilesHasMore={profileSearch?.query === query && profileSearch.hasMore} profilesLoading={profilesLoading} profilesError={profileSearch?.query === query && profileSearch.error} />
+      </Suspense>
+    </div>
+  </dialog>
+);
+}
 
-<div inert aria-hidden="true" className="w-full site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 opacity-25 filter blur-[3px] pointer-events-none select-none">
-<div className="flex items-center justify-between pb-6">
-<div className="space-y-1">
-<span className="font-label-sm text-label-sm uppercase tracking-widest text-primary">{t("Search")}</span>
-
-<h2 className="font-headline-xl text-headline-xl text-on-surface">{t("Curated Database")}</h2>
-
-</div>
-
-<div className="flex gap-2">
-<span className="px-3 py-1 bg-surface-container rounded font-label-md text-label-md text-on-surface-variant">{t(portfolio.games.length + " Titles Tracked")}</span>
-
-</div>
-
-</div>
-
-<div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-<div className="aspect-[3/4] bg-surface-container rounded flex flex-col justify-end p-3">
-<div className="h-3 w-3/4 bg-surface-container-highest rounded mb-1"></div>
-
-<div className="h-2 w-1/2 bg-surface-container-high rounded"></div>
-
-</div>
-
-<div className="aspect-[3/4] bg-surface-container rounded flex flex-col justify-end p-3">
-<div className="h-3 w-3/4 bg-surface-container-highest rounded mb-1"></div>
-
-<div className="h-2 w-1/2 bg-surface-container-high rounded"></div>
-
-</div>
-
-<div className="aspect-[3/4] bg-surface-container rounded flex flex-col justify-end p-3">
-<div className="h-3 w-3/4 bg-surface-container-highest rounded mb-1"></div>
-
-<div className="h-2 w-1/2 bg-surface-container-high rounded"></div>
-
-</div>
-
-<div className="aspect-[3/4] bg-surface-container rounded flex flex-col justify-end p-3">
-<div className="h-3 w-3/4 bg-surface-container-highest rounded mb-1"></div>
-
-<div className="h-2 w-1/2 bg-surface-container-high rounded"></div>
-
-</div>
-
-<div className="aspect-[3/4] bg-surface-container rounded flex flex-col justify-end p-3">
-<div className="h-3 w-3/4 bg-surface-container-highest rounded mb-1"></div>
-
-<div className="h-2 w-1/2 bg-surface-container-high rounded"></div>
-
-</div>
-
-<div className="aspect-[3/4] bg-surface-container rounded flex flex-col justify-end p-3">
-<div className="h-3 w-3/4 bg-surface-container-highest rounded mb-1"></div>
-
-<div className="h-2 w-1/2 bg-surface-container-high rounded"></div>
-
-</div>
-
-</div>
-
-</div>
-
-<div className="fixed inset-0 top-[var(--site-header-height)] z-40 bg-surface-container-lowest/80 backdrop-blur-md flex items-start justify-center p-3 sm:p-6 overflow-hidden" onClick={(event) => { if (event.target === event.currentTarget) close(); }}>
-
-<div className="search-dialog w-full min-w-0 min-h-0 bg-surface-container-low shadow-2xl rounded-xl overflow-hidden flex flex-col my-auto transition-all animate-in fade-in duration-200" id="palette-dialog" ref={dialog} role={"dialog"} aria-modal={true} aria-label={t("Search the game catalog")}>
-
-{mode === "log" && <div className="shrink-0 px-4 sm:px-5 py-4 space-y-2"><h2 className="font-headline-lg text-headline-lg text-on-surface">{t("Choose a game")}</h2><p className="text-body-sm text-on-surface-variant">{t("Search for a game, then select it to open its log options.")}</p></div>}
-
-<div className="relative flex shrink-0 items-center px-3 sm:px-5 py-3 sm:py-4 bg-surface-container">
-<span aria-hidden="true" className="material-symbols-outlined text-primary text-[22px] mr-3.5 flex-shrink-0 animate-pulse">{"search"}</span>
-
-<div className="min-w-0 flex-1 relative flex items-center">
-<input className="w-full bg-transparent text-on-surface font-headline-md text-headline-md tracking-tight focus:outline-none placeholder:text-on-surface-variant/40 caret-primary" id="command-input" placeholder={t("Search games…")} type="text" ref={input} value={query} onChange={(event) => setQuery(event.target.value)} aria-label={t("Search titles, profiles and commands")} />
-
-<span className="hidden sm:inline-block w-2 h-5 bg-primary/80 ml-0.5 animate-pulse"></span>
-
-</div>
-
-<div className="flex shrink-0 items-center gap-2 ml-2 sm:ml-4">
-<button className="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm tracking-widest uppercase transition-colors" title={t("Close search")} onClick={close}>{"\n            ESC\n          "}</button>
-
-</div>
-
-</div>
-
-{mode !== "log" && <div className="flex shrink-0 flex-wrap items-center gap-2 px-3 sm:px-5 py-2.5 bg-surface-container-low text-on-surface-variant">
-<span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mr-1 flex items-center gap-1">
-<span aria-hidden="true" className="material-symbols-outlined text-[14px]">{"tune"}</span>
-{t(" Scope:\n        ")}</span>
-
-<button onClick={() => setScope("all")} aria-pressed={scope === "all"} className={"px-2.5 py-1 rounded font-label-sm text-label-sm tracking-wide transition-colors whitespace-nowrap flex items-center gap-1.5 " + (scope === "all" ? "bg-surface-container-high text-primary font-semibold shadow-sm" : "hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface")}><span>{t("All Results")}</span></button>
-
-<button onClick={() => setScope("games")} aria-pressed={scope === "games"} className={"px-2.5 py-1 rounded font-label-sm text-label-sm tracking-wide transition-colors whitespace-nowrap " + (scope === "games" ? "bg-surface-container-high text-primary font-semibold shadow-sm" : "hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface")}>{t("Games")}</button>
-
-<button onClick={() => setScope("curators")} aria-pressed={scope === "curators"} className={"px-2.5 py-1 rounded font-label-sm text-label-sm tracking-wide transition-colors whitespace-nowrap " + (scope === "curators" ? "bg-surface-container-high text-primary font-semibold shadow-sm" : "hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface")}>{t("Profiles (")}{matchCounts.profiles.length})</button>
-
-
-<button onClick={() => setScope("actions")} aria-pressed={scope === "actions"} className={"px-2.5 py-1 rounded font-label-sm text-label-sm tracking-wide transition-colors whitespace-nowrap " + (scope === "actions" ? "bg-surface-container-high text-primary font-semibold shadow-sm" : "hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface")}>{t("Actions (2)")}</button>
-
-</div>}
-
-<SearchResults query={query} scope={mode === "log" ? "games" : scope} mode={mode} />
-
-<div className="search-help flex shrink-0 flex-wrap gap-3 items-center justify-between px-3 sm:px-5 py-3 bg-surface-container-lowest text-on-surface-variant font-label-sm text-label-sm">
-<div className="flex items-center gap-2 sm:gap-4 flex-wrap">
-<span className="flex items-center gap-1.5">
-<kbd className="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-semibold">{"↵"}</kbd>
-
-<span>{t("Select title")}</span>
-
-</span>
-
-<span className="flex items-center gap-1.5">
-<kbd className="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-semibold">{"↑↓"}</kbd>
-
-<span>{t("Navigate")}</span>
-
-</span>
-
-{mode !== "log" && <span className="hidden sm:flex items-center gap-1.5">
-<kbd className="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-semibold">{t("Tab")}</kbd>
-
-<span>{t("Switch category")}</span>
-
-</span>}
-
-</div>
-
-<div className="flex items-center gap-1.5">
-<kbd className="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-semibold">{"ESC"}</kbd>
-
-<span>{t("Dismiss")}</span>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-</div>);
+function SearchData({ portfolio, initialQuery, offset, onLoadMore, ...props }: Omit<ComponentProps<typeof SearchResults>, "gamesLoading" | "gamesError" | "hasMore" | "onLoadMore" | "onRetry" | "excludedSlugs"> & { portfolio: Promise<Portfolio & {hasMore: boolean; excludedSlugs: string[]}>; initialQuery: string; offset: number; onLoadMore: () => void }) {
+  const initial = use(portfolio);
+  type Batch = Pick<Portfolio, "games"> & {hasMore: boolean};
+  const [results, setResults] = useState(() => new Map<string, Batch>([[`0:${initialQuery}`, initial]]));
+  const [failed, setFailed] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
+  const key = `${offset}:${props.query}`;
+  const visible = results.get(key);
+  const previous = offset ? results.get(`${offset - 24}:${props.query}`) : undefined;
+  useEffect(() => {
+    if ((props.scope !== "all" && props.scope !== "games") || results.has(key)) return;
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/games/search?q=${encodeURIComponent(props.query)}&offset=${offset}&mode=${props.mode}`, {signal: controller.signal, cache: "no-store"});
+        if (!response.ok) throw new Error("Game search failed.");
+        const data: Batch = await response.json();
+        if (!controller.signal.aborted) setResults(cached => {
+          const next = new Map(cached);
+          if (next.size >= 20) next.delete(next.keys().next().value!);
+          next.set(key, {...data, games: [...(previous?.games ?? []), ...data.games]});
+          return next;
+        });
+      } catch {
+        if (!controller.signal.aborted) setFailed(key);
+      }
+    }, 250);
+    return () => {clearTimeout(timer); controller.abort();};
+  }, [props.query, props.scope, props.mode, offset, retry, results, key, previous]);
+  return <PortfolioProvider portfolio={{...initial, games: visible?.games ?? previous?.games ?? []}}><SearchResults {...props} excludedSlugs={initial.excludedSlugs} gamesLoading={!visible && failed !== key} gamesError={!visible && failed === key} hasMore={visible?.hasMore ?? false} onLoadMore={onLoadMore} onRetry={() => {setFailed(null); setRetry(value => value + 1);}} /></PortfolioProvider>;
 }

@@ -104,3 +104,29 @@ layout. Hero, directory and community sections now explicitly fill the shared
 container width; a desktop/mobile browser assertion checks hero/catalog alignment.
 Production smoke checks cover guest redirects, unavailable private export APIs,
 unknown public handles, catalog, search, login, Compare and the opt-in directory.
+
+
+## Personal Home improvements (2026-10-06)
+
+Home keeps the existing navigation, typography, cover art and amber accent.
+Owners see up to four In Progress games with platform/playtime and direct edit
+links, followed by up to four recently updated entries not already shown there.
+Cards show optional score, independent colored tier and saved playback status.
+Only card fields enter the Home client component; reviews remain server-side.
+
+A compact taste summary reuses `tasteStats`: genres need three scored games,
+including zero, and are ordered by their average score. Explore your taste shows
+up to five unlogged catalog games matching the top three eligible genres, with
+clickable explanations. This is genre browsing, not a predicted game score or a
+change to community recommendation formulas. Without eligible matches, Home
+uses general unlogged suggestions. Genre and tag shortcuts open existing Games
+filters; no new persistence or permissions are introduced.
+
+Guest preview covers and catalog suggestions use disjoint samples. Public-default
+copy matches signup. Empty personal shelves and unavailable taste summaries stay
+quiet. Browser checks cover selection thresholds, zero playtime, filters, editing,
+guest isolation, both languages/themes, and desktop/mobile including 320px.
+
+Personal ranking now saves each position edit, drag/drop, arrow move or pairwise choice immediately through the existing revision-checked owner action. Failed saves retain the local order and offer Retry saving ranking. The game-management subsection and bulk controls are removed from Ranking; its search, played-platform and hours filters now narrow the personal order without changing hidden games or absolute positions. The separate score-sorted cards and their existing category/tag filters remain unchanged.
+
+Home catalog exploration now keeps a per-browser random seed for ten minutes, capped by the verified current login token expiry. The proxy sets an HttpOnly, SameSite=Lax cookie; catalog sampling uses stable SHA-256 ordering without copying personal data into the cookie. Reloads and return visits retain the selection. A client timer refreshes Home at expiry so an open page gets a fresh selection too. Auth refresh cookies and no-store response headers remain intact. Genre-based personalized recommendations retain their existing selection rules.

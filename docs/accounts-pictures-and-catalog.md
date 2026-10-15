@@ -1,7 +1,7 @@
 # Accounts, profile pictures and catalog expansion
 
 The user approved 1,000 well-rated released catalog games, IGDB search/import
-for any signed-in profile owner, and separate private profiles for verified
+for any signed-in profile owner, and separate public profiles for verified
 email/password registrations. Steam and email/password remain. The user subsequently removed the owner
 email-link form and its sending action; verification/recovery emails still work.
 The user then enabled [public magic links](public-magic-links.md), available to
@@ -14,7 +14,7 @@ backup/recovery milestone.
 1. Open `/login` and choose Steam, email sign-in or Create account.
 2. Email registration requires a 12–128 character password. Verify the email
    using the inbox link, then choose a unique handle/display name at `/signup`.
-3. New profiles start private and empty. Existing records are never transferred.
+3. New profiles start public and empty. Owners can make them private in Settings. Existing records are never transferred.
 4. Forgot password sends a generic recovery response, then the verified callback
    opens `/reset-password`. The original owner may use a reset link to set an
    email password as well. Steam's synthetic email cannot be used for this flow.
@@ -22,7 +22,7 @@ backup/recovery milestone.
 Only Auth-verified server identity and confirmed email/server-owned Steam metadata
 enable account access. Editable user metadata cannot grant access. Profile ownership
 is resolved by `owner_user_id`; profile creation whitelists names and forces the
-private default. Passwords go to Supabase Auth, never application tables or logs.
+public default. Passwords go to Supabase Auth, never application tables or logs.
 Production's public Auth settings were checked: email enabled, registration enabled,
 email confirmation required. Browser fixtures verify forms and routing; delivery of
 a real registration/recovery email still requires a user inbox check.
@@ -108,3 +108,8 @@ Vercel, exactly 1,000 distinct IGDB IDs are stored, 18 smoke checks passed and
 or browser exceptions. Real profiles/ratings remained at 2/1. Post-cleanup verification found zero sample profiles, ratings or catalog flags,
 1,000 games, two real profiles and one real saved entry. All 18 live smoke checks
 passed again after cleanup; `/u/alexvance` returns 404.
+
+On 2026-10-06 the user approved publishing all existing profiles once and setting
+`is_public` to true by default. Migration `20261006192335_public_profile_defaults.sql`
+records the change. Discovery stays opt-in; owner permissions and RLS are unchanged.
+The empty Community discovery prompt is removed from Home.

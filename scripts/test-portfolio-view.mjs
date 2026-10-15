@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { averageScore, filterRankings, getSearchMatches, groupTiers, loggedGames, ratedGames } from "../src/lib/portfolio-view.ts";
+import { largestScoreGap, averageScore, filterRankings, getSearchMatches, groupTiers, loggedGames, ratedGames } from "../src/lib/portfolio-view.ts";
 
 const game = (slug, score, tier = null) => ({ slug, title: slug, score, tier, cover: "/cover.jpg", year: null, keywords: "" });
 
@@ -34,17 +34,15 @@ test("empty portfolios have no fabricated average or results", () => {
   assert.ok(groupTiers([]).every(({ games }) => games.length === 0));
 });
 
-test("search uses the supplied catalog and profile, including unrated titles", () => {
+test("local search uses the catalog without substituting the selected profile for public results", () => {
   const portfolio = {
     profile: { id: "1", displayName: "Alex Vance", handle: "alexvance" },
     games: [{ ...game("catalog-only", null), title: "New Adventure", keywords: "space", genres: ["RPG"] }],
   };
   assert.equal(getSearchMatches(" ADVENTURE rpg ", portfolio).titles.length, 1);
   assert.equal(getSearchMatches("space", portfolio).titles[0].score, null);
-  assert.equal(getSearchMatches("alexvance", portfolio).profiles.length, 1);
-  assert.equal(getSearchMatches("kojima", portfolio).profiles.length, 0);
+  assert.equal("profiles" in getSearchMatches("alexvance", portfolio), false);
   assert.equal(getSearchMatches("Cyberpunk", portfolio).titles.length, 0);
-  assert.equal(getSearchMatches("", portfolio).listMatches, false);
 });
 test("real backlog includes unrated entries and responds to status changes without altering scored rankings", () => {
   const backlog = { ...game("next-game", null), status: "backlog", logged: true };
@@ -65,4 +63,13 @@ test("tier board includes logged unrated games without pulling unlogged catalog 
   assert.deepEqual(groups.find(g => g.tier === null).games.map(g => g.slug), ["unassigned-backlog"]);
   assert.equal(groups.reduce((total,g) => total + g.games.length, 0), 2);
   assert.equal(averageScore(ratedGames([logged,backlog])), "—");
+});
+
+test("hot take selects the largest absolute gap, includes zero and single ratings, and breaks ties by slug", () => {
+  const scores = new Map([["a", {average:80,count:1}], ["b", {average:20,count:2}], ["same", {average:50,count:1}]]);
+  const games = [game("b",100),game("a",0),game("same",50),game("unrated",null),game("unknown",100)];
+  assert.equal(largestScoreGap(games,scores).game.slug,"a");
+  assert.equal(largestScoreGap(games,scores).difference,-80);
+  assert.equal(largestScoreGap([game("b",100)],scores).difference,80);
+  assert.equal(largestScoreGap([game("same",50),game("a",null),game("unknown",100)],scores),undefined);
 });

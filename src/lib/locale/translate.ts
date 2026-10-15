@@ -25,7 +25,7 @@ export function translateText(source: string, locale: SiteLocale): string {
       [/^(\d+(?:\.\d+)?) out of 5 equivalent$/, (m) => `${m[1]} de 5, equivalente`],
       [/^Add catalog games · (\d+)\/500$/, (m) => `Agregar juegos del catálogo · ${m[1]}/500`],
       [/^Displaying entries (\d+)–(\d+) of (\d+)$/, (m) => `Se muestran los registros ${m[1]}–${m[2]} de ${m[3]}`],
-      [/^(\d+) matching profiles$/, (m) => `${m[1]} perfiles coincidentes`],
+      [/^(\d+\+?) matching profiles$/, (m) => `${m[1]} perfiles coincidentes`],
       [/^(\d+) matches(?: for “(.*)”)?$/, (m) => `${m[1]} coincidencias${m[2] ? ` para “${m[2]}”` : ""}`],
       [/^Tier ([SABCDF])$/, (m) => `Nivel ${m[1]}`],
       [/^(.*) artwork$/, (m) => `Imagen de ${m[1]}`],

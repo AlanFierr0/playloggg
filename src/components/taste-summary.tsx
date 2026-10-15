@@ -33,11 +33,11 @@ export function TasteSummary({ games, href }: { games: Game[]; href: string }) {
             <h3 className="font-headline-md text-headline-md">{t(label)}</h3>
             {groups.length ? (
               groups.slice(0, 3).map((group) => (
-                <div key={group.name} className="flex flex-wrap justify-between gap-x-4 gap-y-1">
+                <div key={group.name} className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4">
                   <span translate="no" className="min-w-0 break-words">
                     {group.name}
                   </span>
-                  <span className="shrink-0 text-primary">
+                  <span className="whitespace-nowrap text-right tabular-nums text-primary">
                     {group.average} / 100{" "}
                     <span className="text-on-surface-variant">
                       · {group.count} {t("Games")}

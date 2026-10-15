@@ -32,11 +32,11 @@ test("a failed later rating page fails the read rather than returning a partial 
   const db = client(Array.from({ length: 1001 }, (_, i) => ({ game_id: i + 1 })), 500);
   await assert.rejects(readProfileRatings(db, 7), /ratings could not be loaded/);
 });
-test("guest catalog above 1000 never reads sample profiles or ratings", async () => {
+test("guest portfolio does not preload the catalog or sample ratings", async () => {
   const calls = [];
   const rows = Array.from({ length: 1001 }, (_, i) => ({ id: i + 1, slug: `game-${i}`, title: `Game ${i}`, cover_url: "/icon.svg", release_year: 2020, released_on: null, genres: [], artwork_image_ids: [], screenshot_image_ids: [], search_keywords: "", igdb_metadata: {}, igdb_url: null }));
   const ratings = rows.map((row) => ({ game_id: row.id, score: row.id === 1001 ? 0 : null, tier: null, review: null, status: "backlog", platform: null, hours_played: 0, completed_on: null, tags: [] }));
-  const { getPortfolio } = load("../src/lib/portfolio.ts", { react: { cache: (fn) => fn }, "@/lib/owner": { getAccount: async () => null }, "@/lib/collections": { getLists: async () => [] }, "@/lib/favorites": { readFavorites: async () => [] }, "@/lib/supabase/server": { createClient: async () => ({}) } }, {
+  const { getPortfolio } = load("../src/lib/portfolio.ts", { react: { cache: (fn) => fn }, "@/lib/owner": { getAccount: async () => null }, "@/lib/favorites": { readFavorites: async () => [] }, "@/lib/supabase/server": { createClient: async () => ({}) } }, {
     process: { env: { NEXT_PUBLIC_SUPABASE_URL: "https://fixture.invalid", NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "local-test" } }, AbortSignal,
     fetch: async (input) => {
       const url = new URL(input); const offset = Number(url.searchParams.get("offset") ?? 0); const limit = Number(url.searchParams.get("limit") ?? 500);
@@ -51,9 +51,8 @@ test("guest catalog above 1000 never reads sample profiles or ratings", async ()
     },
   });
   const portfolio = await getPortfolio();
-  assert.equal(portfolio.games.length, 1001);
+  assert.equal(portfolio.games.length, 0);
   assert.equal(portfolio.games.filter((game) => game.logged).length, 0);
   assert.equal(portfolio.profile.id, "");
-  assert.equal(portfolio.games.find((game) => game.slug === "game-1000").score, null);
   assert.deepEqual(calls, []);
 });

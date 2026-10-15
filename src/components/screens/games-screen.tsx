@@ -4,6 +4,7 @@ import { useMessages } from "@/components/site-preferences";
 import Link from "next/link";
 import { GameGenres } from "@/components/game-genres";
 import { GameTags } from "@/components/game-tags";
+import { GameLogAction } from "@/components/game-actions";
 import { IgdbSearch } from "@/components/igdb-search";
 import { useCallback, useEffect, useRef, useOptimistic, useTransition, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
@@ -16,29 +17,60 @@ import type { Game, Portfolio } from "@/types/domain";
 const control = "catalog-control";
 const button = "inline-flex items-center justify-center rounded px-4 py-2.5 font-body-md text-body-md bg-surface-container-high text-on-surface disabled:opacity-40";
 
-export function GamesScreen({ data, profile, access }: { data: GamesPageData; profile: Portfolio["profile"]; access: Portfolio["access"] }) {
+export function GamesScreen({ data, access }: { data: GamesPageData; profile: Portfolio["profile"]; access: Portfolio["access"] }) {
   const t = useMessages();
   const router = useRouter();
-  const [filters, updateFilters] = useOptimistic(data.filters);
+  const [interactive, setInteractive] = useState(false);
+  useEffect(() => { queueMicrotask(() => setInteractive(true)); }, []);
+  const [optimisticFilters, updateFilters] = useOptimistic(data.filters);
+  const [draftFilters,setDraftFilters]=useState<GamesFilters|null>(null);
+  const filters=draftFilters??optimisticFilters;
+  const typingTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
+  const loadRequest=useRef<AbortController|null>(null);
+  const [loaded,setLoaded]=useState<GamesPageData|null>(null);
+  const [loadingMore,setLoadingMore]=useState(false);
+  const [loadError,setLoadError]=useState(false);
+  const dataKey=JSON.stringify(data.filters);
+  const batches=loaded&&JSON.stringify(loaded.filters)===dataKey ? loaded : data;
+  useEffect(()=>{
+    queueMicrotask(()=>setDraftFilters(current=>current&&JSON.stringify(current)===dataKey?null:current));
+  },[dataKey]);
+  useEffect(()=>{
+    function resetTyping(){if(typingTimer.current)clearTimeout(typingTimer.current);typingTimer.current=null;setDraftFilters(null);loadRequest.current?.abort();setLoaded(null);}
+    window.addEventListener("popstate",resetTyping);
+    return ()=>{window.removeEventListener("popstate",resetTyping);if(typingTimer.current)clearTimeout(typingTimer.current);loadRequest.current?.abort();};
+  },[]);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const sentinel = useRef<HTMLDivElement>(null);
-  const activeFilters = Object.entries(filters).filter(([key, value]) => key !== "query" && key !== "sort" && value !== defaultGamesFilters[key as keyof GamesFilters]).length;
+  const activeKeys = (Object.keys(filters) as (keyof GamesFilters)[]).filter(key => key !== "query" && filters[key] !== defaultGamesFilters[key]);
+  const activeFilters = activeKeys.length;
   const [pending, startTransition] = useTransition();
-  const { games: visible, total, matched, genres, tags, platforms, years, page: currentPage, pageCount, offset } = data;
-  function navigate(next: GamesFilters, page = 1) {
+  const { games: visible, genres, tags, platforms, years, page: currentPage, pageCount } = batches;
+  function navigate(next: GamesFilters, page = 1, replace = false) {
+    if(typingTimer.current)clearTimeout(typingTimer.current);
+    typingTimer.current=null;loadRequest.current?.abort();setLoadError(false);
     window.scrollTo({ top: 0 });
-    startTransition(() => { updateFilters(next); const query = gamesQuery(next, page); router.push(`/games${query ? `?${query}` : ""}`, { scroll: false }); });
+    startTransition(() => { updateFilters(next); const query = gamesQuery(next, page); router[replace?"replace":"push"](`/games${query ? `?${query}` : ""}`, { scroll: false }); });
   }
-  const loadMore = useCallback(() => {
-    if (pending || currentPage >= pageCount) return;
-    startTransition(() => {
-      const query = gamesQuery(data.filters, currentPage + 1);
-      router.replace(`/games?${query}`, { scroll: false });
-    });
-  }, [pending, currentPage, pageCount, data.filters, router]);
+  const loadMore = useCallback(async () => {
+    if (pending || draftFilters || loadingMore || currentPage >= pageCount) return;
+    const controller=new AbortController();loadRequest.current=controller;
+    setLoadingMore(true);setLoadError(false);
+    try{
+      const query=gamesQuery(data.filters,currentPage+1);
+      const response=await fetch(`/api/games/batch?${query}`,{signal:controller.signal,cache:"no-store"});
+      if(!response.ok)throw new Error("Catalog batch unavailable");
+      const batch:GamesPageData=await response.json();
+      if(controller.signal.aborted)return;
+      const games=[...new Map([...visible,...batch.games].map(game=>[game.slug,game])).values()];
+      setLoaded({...batch,games,offset:0});
+      window.history.replaceState(null,"",`/games?${query}`);
+    }catch{if(!controller.signal.aborted)setLoadError(true);}
+    finally{if(loadRequest.current===controller){loadRequest.current=null;setLoadingMore(false);}}
+  }, [pending, draftFilters, loadingMore, currentPage, pageCount, data.filters, visible]);
   useEffect(() => {
     const target = sentinel.current;
-    if (!target || pending || currentPage >= pageCount || !('IntersectionObserver' in window)) return;
+    if (!target || pending || draftFilters || loadingMore || loadError || currentPage >= pageCount || !('IntersectionObserver' in window)) return;
     const observer = new IntersectionObserver(entries => {
       if (entries.some(entry => entry.isIntersecting)) {
         observer.disconnect();
@@ -47,55 +79,75 @@ export function GamesScreen({ data, profile, access }: { data: GamesPageData; pr
     }, { rootMargin: '300px 0px' });
     observer.observe(target);
     return () => observer.disconnect();
-  }, [loadMore, pending, currentPage, pageCount]);
-  function change<K extends keyof GamesFilters>(key: K, value: GamesFilters[K]) { navigate({ ...filters, [key]: value }); }
-  function clear() { navigate(defaultGamesFilters); }
-  return <div aria-busy={pending} className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-10 space-y-6">
+  }, [loadMore, pending, draftFilters, loadingMore, loadError, currentPage, pageCount]);
+  function change<K extends keyof GamesFilters>(key: K, value: GamesFilters[K]) {
+    const next={...filters,[key]:value};setDraftFilters(next);
+    if(typingTimer.current)clearTimeout(typingTimer.current);
+    if(key==="query"||key==="minScore"||key==="maxScore")typingTimer.current=setTimeout(()=>navigate(next,1,true),300);
+    else navigate(next);
+  }
+  function clear() { setDraftFilters(null);setLoaded(null);navigate(defaultGamesFilters); }
+  return <div aria-busy={pending || loadingMore} onClickCapture={event=>{if((event.target as HTMLElement).closest("a[href]")){if(typingTimer.current)clearTimeout(typingTimer.current);typingTimer.current=null;loadRequest.current?.abort();setDraftFilters(null);}}} className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-10 space-y-6">
     <header className="flex flex-wrap items-end justify-between gap-4"><div className="min-w-0 space-y-2"><h1 className="font-headline-xl text-headline-xl font-semibold tracking-tight">{t("Games")}</h1></div>{access?.canImportCatalog && <Link href="/search?q=&from=/games" className="inline-flex items-center rounded px-4 py-2.5 bg-primary-container text-on-primary-container font-label-md text-label-md">{t("Search games →")}</Link>}</header>
-    <section aria-label={t("Catalog filters")} className="space-y-4">
-      <Field label={t("Search titles")}><input id="games-query" type="search" className={control} value={filters.query} placeholder={t("Search the catalog…")} onChange={(event) => change("query", event.target.value)} /></Field>
-      <div className="rounded-xl border border-outline-variant/40 p-4">
-        <button type="button" aria-expanded={filtersOpen} aria-controls="catalog-filter-fields" onClick={() => setFiltersOpen(!filtersOpen)} className="lg:hidden w-full text-left cursor-pointer font-body-md text-body-lg text-on-surface">{t("Filters and sorting")} {activeFilters > 0 && <span className="text-primary">({activeFilters})</span>}</button>
-      <div id="catalog-filter-fields" className={`${filtersOpen ? "grid" : "hidden"} lg:grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 lg:pt-0`}>
+    <fieldset disabled={!interactive} aria-label={t("Catalog filters")} className="min-w-0 space-y-4">
+      <div className="grid sm:grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+        <Field label={t("Search titles")}><input id="games-query" type="search" className={control} value={filters.query} placeholder={t("Search the catalog…")} onChange={event => change("query", event.target.value)} /></Field>
+        <button type="button" aria-expanded={filtersOpen} aria-controls="catalog-filter-fields" onClick={() => setFiltersOpen(open => !open)} className={`flex min-h-12 items-center justify-center gap-3 rounded-xl border px-4 py-3 font-body-md text-body-md font-medium transition-colors ${filtersOpen || activeFilters ? "border-primary/40 bg-primary/10 text-primary hover:bg-primary/20" : "border-outline-variant/40 bg-surface-container-low text-on-surface hover:bg-surface-container"}`}>
+          <span aria-hidden="true" className="material-symbols-outlined text-[20px]">tune</span>
+          <span>{t("Filters and sorting")}</span>
+          {activeFilters > 0 && <span data-active-filter-count className="inline-flex min-w-6 h-6 items-center justify-center rounded-md bg-primary text-on-primary px-1.5 text-label-sm font-semibold">({activeFilters})</span>}
+          <span aria-hidden="true" className="material-symbols-outlined text-[20px]">{filtersOpen ? "expand_less" : "expand_more"}</span>
+        </button>
+      </div>
+      {activeKeys.length > 0 && <div aria-label={t("Active filters")} className="flex flex-wrap gap-2">{activeKeys.map(key => <button key={key} type="button" aria-label={`${t("Remove filter")}: ${t(filterLabels[key])}`} onClick={()=>change(key,defaultGamesFilters[key])} className="inline-flex min-h-11 max-w-full items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 text-body-sm text-primary hover:bg-primary/20">
+        <span className="break-words">{t(filterLabels[key])}: {t(["library","status","tier","rating","year","sort"].includes(key) ? filterValues[filters[key]] ?? filters[key] : filters[key])}</span><span aria-hidden="true" className="material-symbols-outlined shrink-0 text-[18px]">close</span>
+      </button>)}</div>}
+      <div id="catalog-filter-fields" hidden={!filtersOpen} className="rounded-2xl border border-outline-variant/30 bg-surface-container-low p-4 sm:p-5 space-y-5">
+      <fieldset className="min-w-0"><legend className="mb-3 font-semibold text-body-md text-on-surface">{t("Game details")}</legend><div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-4 gap-4">
         <Field label={t("Genre")}><select id="games-genre" className={control} value={filters.genre} onChange={(event) => change("genre", event.target.value)}><option value="">{t("All genres")}</option>{genres.map((genre) => <option key={genre} value={genre}>{genre}</option>)}</select></Field>
-        {access?.canEdit && <Field label={t("Tag")}><select id="games-tag" className={control} value={tags.find(tag => tag.toLowerCase() === filters.tag.toLowerCase()) ?? filters.tag} onChange={event => change("tag",event.target.value)}><option value="">{t("All tags")}</option>{tags.map(tag => <option key={tag.toLowerCase()} value={tag}>{tag}</option>)}</select></Field>}
         <Field label={t("Platform")}><select id="games-platform" className={control} value={filters.platform} onChange={(event) => change("platform", event.target.value)}><option value="">{t("All platforms")}</option>{filters.platform && !platforms.some(platform => platform === filters.platform) && <option value={filters.platform} hidden>{filters.platform}</option>}{platforms.map((platform) => <option key={platform} value={platform}>{t(platform)}</option>)}</select></Field>
         <Field label={t("Release year")}><select id="games-year" className={control} value={filters.year} onChange={(event) => change("year", event.target.value)}><option value="">{t("All years")}</option>{years.map((year) => <option key={year} value={year}>{year}</option>)}<option value="unknown">{t("Unknown year")}</option></select></Field>
-        <Field label={t("Sort by")}><select id="games-sort" className={control} value={filters.sort} onChange={(event) => change("sort", event.target.value as GamesFilters["sort"])}><option value="title">{t("Title A–Z")}</option><option value="newest">{t("Newest release")}</option><option value="oldest">{t("Oldest release")}</option><option value="score-desc">{t("Profile score: highest")}</option><option value="score-asc">{t("Profile score: lowest")}</option></select></Field>
+        <Field label={t("Sort by")}><select id="games-sort" className={control} value={filters.sort} onChange={(event) => change("sort", event.target.value as GamesFilters["sort"])}><option value="title">{t("Title A–Z")}</option><option value="newest">{t("Newest release")}</option><option value="oldest">{t("Oldest release")}</option><option value="platform-desc">{t("Community score: highest")}</option><option value="platform-asc">{t("Community score: lowest")}</option><option value="score-desc">{t("Profile score: highest")}</option><option value="score-asc">{t("Profile score: lowest")}</option></select></Field>
       </div>
-      </div>
-      {access?.canEdit && <details className="rounded bg-surface-container/40 p-3 sm:p-4"><summary className="cursor-pointer break-words font-label-md text-label-md text-primary">{t("Profile filters · ")}{profile.displayName}{profile.isSample ? t(" (sample)") : ""}</summary><p className="my-3 text-on-surface-variant font-body-sm text-body-sm">{t("Status, scores and tiers come from this profile’s saved entries.")}</p><div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 gap-4">
+      </fieldset>
+      {access?.canEdit && <fieldset className="min-w-0 border-t border-outline-variant/30 pt-4"><legend className="px-1 font-semibold text-body-md text-on-surface">{t("Your log")}</legend><div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 gap-4">
         <Field label={t("Log entries")}><select id="games-library" className={control} value={filters.library} onChange={(event) => change("library", event.target.value as GamesFilters["library"])}><option value="all">{t("All catalog games")}</option><option value="logged">{t("Logged games")}</option><option value="unlogged">{t("Not logged")}</option></select></Field>
-        <Field label={t("Playback status")}><select id="games-status" className={control} value={filters.status} onChange={(event) => change("status", event.target.value as GamesFilters["status"])}><option value="all">{t("Any status")}</option><option value="backlog">{t("Backlog")}</option><option value="playing">{t("In Progress")}</option><option value="completed">{t("Completed")}</option><option value="shelved">{t("Shelved")}</option><option value="unset">{t("Logged with no status")}</option></select></Field>
+        <Field label={t("Playback status")}><select id="games-status" className={control} value={filters.status} onChange={(event) => change("status", event.target.value as GamesFilters["status"])}><option value="all">{t("Any status")}</option>{Object.entries(playbackLabels).map(([value,label])=><option key={value} value={value}>{t(label)}</option>)}<option value="unset">{t("Logged with no status")}</option></select></Field>
         <Field label={t("Tier")}><select id="games-tier" className={control} value={filters.tier} onChange={(event) => change("tier", event.target.value as GamesFilters["tier"])}><option value="all">{t("Any tier")}</option>{["S", "A", "B", "C", "D", "F"].map((tier) => <option key={tier} value={tier}>{tier}</option>)}<option value="unset">{t("No assigned tier")}</option></select></Field>
         <Field label={t("Rating")}><select id="games-rating" className={control} value={filters.rating} onChange={(event) => change("rating", event.target.value as GamesFilters["rating"])}><option value="all">{t("Rated and unrated")}</option><option value="rated">{t("Rated")}</option><option value="unrated">{t("Unrated")}</option></select></Field>
         <Field label={t("Minimum score")}><input id="games-min-score" className={control} type="number" min={0} max={100} step={1} placeholder={"0"} value={filters.minScore} onChange={(event) => change("minScore", event.target.value)} /></Field>
         <Field label={t("Maximum score")}><input id="games-max-score" className={control} type="number" min={0} max={100} step={1} placeholder={"100"} value={filters.maxScore} onChange={(event) => change("maxScore", event.target.value)} /></Field>
-      </div></details>}
-      <div className="flex flex-wrap items-center justify-between gap-3"><p role="status" aria-live="polite" className="text-on-surface-variant font-body-sm text-body-sm">{validScoreRange(filters) ? t(`${matched} of ${total} games${matched ? ` · Showing ${offset + 1}–${offset + visible.length}` : ""}`) : t("Use whole-number scores from 0 to 100, with minimum no greater than maximum.")}</p><button type="button" className={button} onClick={clear}>{t("Clear filters")}</button></div>
-    </section>
+        <Field label={t("Tag")}><select id="games-tag" className={control} value={tags.find(tag => tag.toLowerCase() === filters.tag.toLowerCase()) ?? filters.tag} onChange={event => change("tag",event.target.value)}><option value="">{t("All tags")}</option>{tags.map(tag => <option key={tag.toLowerCase()} value={tag}>{tag}</option>)}</select></Field>
+      </div></fieldset>}
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-3">{!validScoreRange(filters) && <p role="status" aria-live="polite" className="text-on-surface-variant font-body-sm text-body-sm">{t("Use whole-number scores from 0 to 100, with minimum no greater than maximum.")}</p>}<button type="button" className="ml-auto inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors" onClick={clear}><span aria-hidden="true" className="material-symbols-outlined text-[18px]">restart_alt</span>{t("Clear filters")}</button></div>
+    </fieldset>
     {filters.query.trim().length >= 2 && <section className="rounded-xl bg-surface-container-low p-5 space-y-3"><h2 className="font-headline-md text-headline-md">{t("Missing a game?")}</h2>{access?.canImportCatalog ? <IgdbSearch query={filters.query} excludeSlugs={visible.map(game => game.slug)} /> : <Link href="/login" className="text-primary underline">{t("Sign in to search more games and import a game.")}</Link>}</section>}
     <section aria-label={t("Game catalog results")}><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-3 gap-y-6 sm:gap-x-5">{visible.map((game) => <CatalogCard key={game.slug} game={game} logged={Boolean(game.logged)} canEdit={Boolean(access?.canEdit)} filters={filters} />)}</div>{!visible.length && <div className="py-12 text-center space-y-4"><h2 className="font-headline-lg text-headline-lg">{t("No games match these filters")}</h2><p className="text-on-surface-variant">{t("Try a broader search or clear the filters.")}</p><button className={button} onClick={clear}>{t("Show all games")}</button></div>}</section>
+    {loadError && <p role="alert" className="text-error">{t("The game catalog could not be loaded.")} {t("Try again.")}</p>}
     {currentPage < pageCount && <div ref={sentinel} data-infinite-scroll className="flex min-h-14 justify-center items-center">
-      {pending ? <p role="status" className="inline-flex items-center gap-2 text-on-surface-variant"><span aria-hidden="true" className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />{t("Loading…")}</p> : <button type="button" className={button} onClick={loadMore}>{t("Load more")}</button>}
+      {pending || loadingMore ? <p role="status" className="inline-flex items-center gap-2 text-on-surface-variant"><span aria-hidden="true" className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />{t("Loading…")}</p> : <button type="button" className={button} onClick={loadMore}>{t("Load more")}</button>}
     </div>}
   </div>;
 }
+
+const filterLabels: Record<keyof GamesFilters,string> = {query:"Search titles",genre:"Genre",tag:"Tag",platform:"Platform",year:"Release year",library:"Log entries",status:"Playback status",tier:"Tier",rating:"Rating",minScore:"Minimum score",maxScore:"Maximum score",sort:"Sort by"};
+const filterValues: Record<string,string> = {logged:"Logged games",unlogged:"Not logged",...playbackLabels,unset:"Not set",rated:"Rated",unrated:"Unrated",unknown:"Unknown year",newest:"Newest release",oldest:"Oldest release","platform-desc":"Community score: highest","platform-asc":"Community score: lowest","score-desc":"Profile score: highest","score-asc":"Profile score: lowest"};
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   const t = useMessages(); return <label className="block min-w-0 space-y-2"><span className="block font-body-md text-body-md text-on-surface-variant">{t(label)}</span>{children}</label>; }
 
 function CatalogCard({ game, logged, canEdit, filters }: { game: Game; logged: boolean; canEdit: boolean; filters: GamesFilters }) {
   const t = useMessages();
-  return <article data-catalog-game={game.slug} className="min-w-0 flex flex-col rounded-lg bg-surface-container-low overflow-hidden">
-    <Link href={`/game/${encodeURIComponent(game.slug)}`} aria-label={game.title} className="group block"><div className="relative aspect-[3/4] overflow-hidden bg-surface-container-high"><img src={game.cover} alt={t(`${game.title} cover`)} loading="lazy" className="w-full h-full object-cover group-hover:opacity-90 transition-opacity" />{game.score !== null && <span className="absolute top-2 right-2 rounded bg-surface/90 px-2 py-1 text-primary font-label-sm text-label-sm">{game.score} / 100</span>}</div></Link>
+  return <article data-catalog-game={game.slug} className="group/game min-w-0 flex flex-col rounded-lg bg-surface-container-low overflow-hidden">
+    <div className="relative aspect-[3/4] overflow-hidden bg-surface-container-high"><Link href={`/game/${encodeURIComponent(game.slug)}`} aria-label={game.title} className="group block h-full"><img src={game.cover} alt={t(`${game.title} cover`)} loading="lazy" className="w-full h-full object-cover group-hover:opacity-90 transition-opacity" />{game.score !== null && <span className="absolute top-2 right-2 rounded bg-surface/90 px-2 py-1 text-primary font-label-sm text-label-sm">{game.score} / 100</span>}</Link>{canEdit && <GameLogAction slug={game.slug} logged={logged} />}</div>
     <div className="p-3 space-y-2 flex-1">
       <h2 className="font-headline-md text-headline-md break-words"><Link href={`/game/${encodeURIComponent(game.slug)}`} className="hover:text-primary">{game.title}</Link></h2>
+      {(game.platformScore != null || filters.sort.startsWith("platform-")) && <p className="font-body-sm text-body-sm text-on-surface-variant">{t("Community score")}: {game.platformScore != null ? <><span className="font-semibold tabular-nums text-primary">{game.platformScore.toFixed(1)} / 100</span><span className="block">{game.platformRatingCount} {t("ratings")}</span></> : t("No ratings yet")}</p>}
       <p className="font-body-sm text-body-sm text-on-surface-variant">{game.year ?? t("Year unknown")}</p>
       <p className="font-body-sm text-body-sm text-on-surface-variant break-words"><GameGenres genres={game.genres?.slice(0, 2)} filters={filters} fallback={t("Genre unknown")} /></p>
       <p className="font-body-sm text-body-sm text-on-surface-variant break-words">{logged ? `${t(game.status ? playbackLabels[game.status] : "Logged")}${game.tier ? ` · ${t("Tier")} ${game.tier}` : ""}${game.score === null ? ` · ${t("Unrated")}` : ""}` : canEdit ? t("Not logged") : null}</p>
     </div>
     {logged && Boolean(game.tags?.length) && <div className="px-3 pb-3"><GameTags tags={game.tags} filters={filters} /></div>}
-    {canEdit && <Link href={`/log?game=${encodeURIComponent(game.slug)}`} className="inline-flex justify-center items-center border-t border-outline-variant/20 p-3 text-primary hover:bg-surface-container font-body-md text-body-md">{logged ? t("Edit log entry") : t("Log this game")}</Link>}
   </article>;
 }
