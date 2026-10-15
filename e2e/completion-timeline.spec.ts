@@ -3,7 +3,7 @@ import AxeBuilder from "@axe-core/playwright";
 // @ts-expect-error Test-only session.
 import {authCookie} from "./fixture-server.mjs";
 
-test("completion timeline uses saved dates, loads more, filters years and keeps unknown dates separate",async({page,context,request},info)=>{
+test("completion timeline uses saved dates, browses horizontally, filters years and keeps unknown dates separate",async({page,context,request},info)=>{
  await request.post("http://127.0.0.1:3101/__completion-timeline");
  await context.addCookies([authCookie]);
  await page.goto("/profile");
@@ -26,23 +26,40 @@ test("completion timeline uses saved dates, loads more, filters years and keeps 
  await chart.getByRole("button",{name:"March: 2 Completed games",exact:true}).click();
  await page.getByRole("button",{name:"All months",exact:true}).click();
  const months=page.locator("[data-timeline-month]");
- await expect(months).toHaveCount(12);
+ await expect(months).toHaveCount(1);
+ const tabs=page.getByRole("tablist",{name:"Completion months",exact:true});
+ await expect(tabs.getByRole("tab")).toHaveCount(15);
+ await expect(tabs.getByRole("tab").first()).toHaveAttribute("aria-selected","true");
+ expect(await tabs.evaluate(el=>el.scrollWidth>el.clientWidth)).toBe(true);
+ const boxes=await tabs.getByRole("tab").evaluateAll(nodes=>nodes.slice(0,2).map(node=>{const box=node.getBoundingClientRect();return {x:box.x,y:box.y};}));
+ expect(boxes[1].x).toBeGreaterThan(boxes[0].x);expect(boxes[1].y).toBe(boxes[0].y);
  await expect(months.first()).toHaveAttribute("data-timeline-month","2025-03");
  const march=page.locator(`[data-timeline-month="2025-03"]`);
  await expect(march).toContainText("0 / 100");await expect(march).toContainText("12.5 hrs");await expect(march).toContainText("45");
  expect((await months.allTextContents()).join("")).not.toContain("2026");
- await page.getByRole("button",{name:"Load more",exact:true}).click();await expect(months).toHaveCount(15);
+ await page.getByRole("button",{name:"Older month",exact:true}).click();await expect(months.first()).toHaveAttribute("data-timeline-month","2024-02");
+ await page.emulateMedia({reducedMotion:"reduce"});
+ await tabs.getByRole("tab",{name:"February 2024",exact:true}).focus();await page.keyboard.press("End");
+ await expect(months.first()).toHaveAttribute("data-timeline-month","2010-01");await expect(tabs.getByRole("tab").last()).toBeFocused();
+ await expect.poll(()=>tabs.evaluate(el=>el.scrollLeft)).toBeGreaterThan(0);
+ await page.keyboard.press("Home");await expect(months.first()).toHaveAttribute("data-timeline-month","2025-03");await expect(tabs.getByRole("tab").first()).toBeFocused();
+ await page.emulateMedia({reducedMotion:"no-preference"});
+ await page.keyboard.press("ArrowRight");await expect(months.first()).toHaveAttribute("data-timeline-month","2024-02");
+ await page.getByRole("button",{name:"Newer month",exact:true}).click();await expect(months.first()).toHaveAttribute("data-timeline-month","2025-03");
+ const history=page.getByRole("region",{name:"Timeline",exact:true});const historyBox=await history.boundingBox(),orbitBox=await chart.boundingBox();
+ expect(orbitBox!.y).toBeGreaterThan(historyBox!.y+historyBox!.height);
+
  await page.getByLabel("Year",{exact:true}).selectOption("2024");await expect(months).toHaveCount(1);
  await expect(months.first()).toHaveAttribute("data-timeline-month","2024-02");
  await expect(chart.locator(`[data-completion-period="03"]`)).toHaveAttribute("data-completion-count","0");
- await page.getByLabel("Year",{exact:true}).selectOption("");await expect(months).toHaveCount(12);
+ await page.getByLabel("Year",{exact:true}).selectOption("");await expect(months).toHaveCount(1);await expect(tabs.getByRole("tab")).toHaveCount(15);
  const undated=page.getByRole("heading",{name:/Completed without a date/}).locator("..");
  await expect(undated.getByRole("link")).toHaveCount(2);
  await expect(undated.getByRole("link").first()).toHaveAttribute("href","/log?game=fixture-game-1");
  await page.getByLabel("Year",{exact:true}).selectOption("2025");
  for(const [locale,theme] of [["en","dark"],["es-AR","light"]]){
   await context.addCookies([{name:"playlogg_locale",value:locale,url:"http://127.0.0.1:3100"},{name:"playlogg_theme",value:theme,url:"http://127.0.0.1:3100"}]);await page.reload();
-  await page.getByRole("combobox").selectOption("2025");
+  await page.getByRole("combobox").selectOption(locale==="en"?"":"2025");
   if(locale==="es-AR")await expect(page.getByRole("heading",{name:"Historial de juegos completados",exact:true})).toBeVisible();
   expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
