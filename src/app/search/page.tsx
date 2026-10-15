@@ -11,7 +11,7 @@ async function safeReturnPath(value?: string): Promise<string> {
   const query = new URLSearchParams();
   if (path === "/games") {
     const state = parseGamesQuery(url.searchParams);
-    const params = gamesQuery(state.filters, state.page);
+    const params = gamesQuery(state.filters, state.page, state.pageSize);
     return `/games${params ? `?${params}` : ""}`;
   }
   if (path === "/compare") {

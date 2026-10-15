@@ -1,10 +1,10 @@
 "use client";
 import {useRef,useState,useTransition,useEffect} from "react";
-import {useRouter} from "next/navigation";
+import {useReturnNavigation} from "@/components/return-navigation";
 import {useMessages} from "@/components/site-preferences";
 import {removeRating} from "@/app/actions/remove-rating";
 export function RemoveLog({slug,title,updatedAt,onRemoved}:{slug:string;title:string;updatedAt:string|null;onRemoved:()=>void}){
- const t=useMessages(),router=useRouter(),dialog=useRef<HTMLDialogElement>(null);
+ const t=useMessages(),{goBack}=useReturnNavigation(),dialog=useRef<HTMLDialogElement>(null);
  const [pending,startTransition]=useTransition(),[message,setMessage]=useState("");
  useEffect(()=>{const element=dialog.current;return ()=>element?.close();},[]);
  return <>
@@ -18,7 +18,7 @@ export function RemoveLog({slug,title,updatedAt,onRemoved}:{slug:string;title:st
     <button type="button" disabled={pending} onClick={()=>dialog.current?.close()} className="min-h-11 rounded-lg bg-surface-container px-4">{t("Cancel")}</button>
     <button type="button" disabled={pending} onClick={()=>startTransition(async()=>{
      const result=await removeRating(slug,updatedAt);setMessage(result.message);
-     if(result.ok){onRemoved();dialog.current?.close();router.push("/profile");}
+     if(result.ok){onRemoved();dialog.current?.close();goBack();}
     })} className="min-h-11 rounded-lg bg-error text-on-error px-4 disabled:opacity-50">{t(pending?"Deleting…":"Remove permanently")}</button>
    </div>
   </dialog>

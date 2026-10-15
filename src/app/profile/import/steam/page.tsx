@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { BackLink } from "@/components/return-navigation";
 import { redirect } from "next/navigation";
 import { SteamLibraryImport } from "@/components/steam-library-import";
 import { getMessages, localizeMetadata } from "@/lib/locale/server";
@@ -13,7 +13,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ e
   if (!account.profile) redirect("/signup");
   const eligible = steamIdentity(account.user.app_metadata.playlogg_steam_id);
   return <section className="w-full site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-12 space-y-6">
-    <Link href="/profile" className="inline-flex min-h-11 items-center text-primary">{t("← My portfolio")}</Link>
+    <BackLink href="/profile" className="inline-flex min-h-11 items-center text-primary">← {t("Back")}</BackLink>
     <h1 className="font-headline-xl text-headline-xl">{t("Import from Steam")}</h1>
     <p className="text-on-surface-variant">{t("Choose games to import with Steam playtime, then rate all, some or none of them. Existing entries are kept unchanged.")}</p>
     {params.error && <p role="alert" className="rounded-xl bg-surface-container-low p-4">{t(params.error === "steam-linked" ? "This Steam account is already connected to another Playlogg account. Sign in to that account instead." : params.error === "steam-config" ? "Steam sign-in is not configured yet." : "Steam could not be connected. Please try again while signed into the same Playlogg account.")}</p>}

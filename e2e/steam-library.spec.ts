@@ -106,7 +106,7 @@ test("Steam import previews, selects, saves trusted playtime and preserves exist
   await fetch("http://127.0.0.1:3101/__reset-request-counts",{method:"POST"});
   await page.getByRole("button",{name:"Import selected games (2)",exact:true}).click();
   await skipImportedRatings(page);
-  await expect(page.getByText("Import complete. Your games are saved in your profile.")).toBeVisible();
+  await expect(page).toHaveURL(/\/profile$/);
   state=await (await fetch("http://127.0.0.1:3101/__state")).json();
   console.log("Steam import request counts",JSON.stringify(state.requestCounts));
   // Each current rating editor independently checks its exact Steam achievement mapping.
@@ -119,6 +119,7 @@ test("Steam import previews, selects, saves trusted playtime and preserves exist
   expect(own.find((row:{game_id:number})=>row.game_id===1)).toMatchObject({hours_played:1.5,platform:"pc",score:null,tier:null,status:null,review:null,tags:[]});
   expect(own.find((row:{game_id:number})=>row.game_id===2)).toMatchObject({score:80,tier:"B",status:"playing",review:"Private fixture review",hours_played:null});
   expect(own.filter((row:{game_id:number})=>row.game_id!==1&&row.game_id!==2)[0]).toMatchObject({hours_played:0,platform:"pc",score:null,tier:null,status:null});
+  await page.getByRole("link",{name:"Import from Steam",exact:true}).click();
   await page.getByRole("button",{name:"Refresh library"}).click();
   await expect(page.getByText("125 Steam games",{exact:false})).toBeVisible();
   await expect(page.getByRole("checkbox",{name:"Select game Hades",exact:true})).toHaveCount(0);

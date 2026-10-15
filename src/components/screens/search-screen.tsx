@@ -2,7 +2,7 @@
 import { useMessages } from "@/components/site-preferences";
 
 import { Suspense, use, useEffect, useRef, useState, type ComponentProps } from "react";
-import { useRouter } from "next/navigation";
+import { useReturnNavigation } from "@/components/return-navigation";
 import { SearchResults, type SearchScope } from "@/components/search-results";
 
 import { PortfolioProvider } from "@/components/portfolio-provider";
@@ -18,7 +18,7 @@ const [offset, setOffset] = useState(0);
 const [scope, setScope] = useState<SearchScope>("all");
 const dialog = useRef<HTMLDialogElement>(null);
 const input = useRef<HTMLInputElement>(null);
-const router = useRouter();
+const { goBack } = useReturnNavigation(returnPath);
 const [profileSearch, setProfileSearch] = useState<{ query: string; profiles: Profile[]; hasMore?: boolean; error?: boolean } | null>(null);
 const profiles = profileSearch?.query === query ? profileSearch.profiles : [];
 const profilesLoading = mode !== "log" && profileSearch?.query !== query;
@@ -39,7 +39,7 @@ useEffect(() => {
 }, [query, mode]);
 const categories: { scope: SearchScope; label: string }[] = [{ scope: "all", label: "All Results" }, { scope: "games", label: "Games" }, { scope: "curators", label: "Profiles" }];
 
-function close() { router.push(returnPath); }
+function close() { goBack(); }
 useEffect(() => {
   const element = dialog.current;
   element?.showModal();

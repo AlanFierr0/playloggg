@@ -3,7 +3,7 @@ import { validateRating } from "@/lib/rating-input";
 import { useMessages } from "@/components/site-preferences";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { BackLink, useReturnNavigation } from "@/components/return-navigation";
 import { ConsolePlatformSelector } from "@/components/console-platform-selector";
 import { CompletionDate } from "@/components/completion-date";
 import { TagEditor } from "@/components/tag-editor";
@@ -21,7 +21,7 @@ import { TierBadge, ScoreStars } from "@/components/rating-controls";
 
 export function ReviewScreen({ game }: { game: Game }) {
   const t = useMessages();
-  const router = useRouter();
+  const { goBack } = useReturnNavigation();
 const { access, profile } = usePortfolio();
 const canEdit = access?.canEdit ?? false;
 const [pending, startTransition] = useTransition();
@@ -79,7 +79,7 @@ useEffect(() => {
   } catch { queueMicrotask(() => setSaveMessage("Draft storage is unavailable. Save before leaving this page.")); }
 }, [canEdit, draftReady, dirty, draftKey, game.slug, score, tier, tierManual, status, review, platform, hours, date, tags, expectedUpdatedAt]);
 function clearStoredDraft() { cleared.current = true; try { sessionStorage.removeItem(draftKey); } catch {} }
-function resetDraft() { clearStoredDraft(); setScore(saved.score); setTier(saved.tier); setPlatform(saved.platform); setStatus(saved.status); setHours(saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)); setDate(saved.completedOn ?? ""); setReview(saved.review); setTags(saved.tags); setTagVersion((value) => value + 1); setSaveMessage(""); router.push("/profile"); }
+function resetDraft() { clearStoredDraft(); setScore(saved.score); setTier(saved.tier); setPlatform(saved.platform); setStatus(saved.status); setHours(saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)); setDate(saved.completedOn ?? ""); setReview(saved.review); setTags(saved.tags); setTagVersion((value) => value + 1); setSaveMessage(""); goBack(); }
 function commit() {
   if ((date || null) !== saved.completedOn && date && date > new Date().toISOString().slice(0, 10)) { setSaveMessage("Completion date cannot be in the future. Your draft has been kept."); return; }
   if (invalidScore || (scoreInput.current && !scoreInput.current.validity.valid)) { setSaveMessage("Use a whole-number score from 0 to 100."); scoreInput.current?.focus(); return; }
@@ -94,7 +94,7 @@ function commit() {
     try {
       const result = await saveRating(draft);
       setSaveMessage(result.message); setConflict(!result.ok && result.message.startsWith("This entry changed"));
-      if (result.ok) { clearStoredDraft(); setExpectedUpdatedAt(result.updatedAt ?? null); setSaved({ score, tier, status, review: review.trim(), platform, hoursPlayed, completedOn, tags: normalizeTags(tags)! }); setReview(review.trim()); setHours(hoursPlayed == null ? "" : String(hoursPlayed)); router.push("/profile"); }
+      if (result.ok) { clearStoredDraft(); setExpectedUpdatedAt(result.updatedAt ?? null); setSaved({ score, tier, status, review: review.trim(), platform, hoursPlayed, completedOn, tags: normalizeTags(tags)! }); setReview(review.trim()); setHours(hoursPlayed == null ? "" : String(hoursPlayed)); goBack(); }
     } catch { setSaveMessage("Saving is unavailable right now. Your draft has been kept; please try again."); }
   });
 }
@@ -131,10 +131,10 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 
 </Link>
 
-<Link aria-label={t("Close modal")} className="p-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="/profile">
+<BackLink aria-label={t("Close modal")} className="p-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="/profile">
 <span aria-hidden="true" className="material-symbols-outlined text-[20px]">{"close"}</span>
 
-</Link>
+</BackLink>
 
 </div>
 

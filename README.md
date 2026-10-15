@@ -25,6 +25,11 @@ in Supabase; the production site is https://playloggg.vercel.app.
 | `/u/[handle]` | Public overview with ranking/tiers/reviews/stats/favorites and entry pages |
 | `/login`, `/signup`, `/reset-password` | Verified email/Steam authentication and profile setup |
 
+Back/close controls, saved or discarded logs, removed logs and finished Steam rating
+sessions return to the preceding in-app page. A tab-local, account-scoped trail
+survives refresh, keeps catalog URL filters and skips logging pickers after saving.
+Direct visits use a safe fallback; authentication routes clear the trail.
+
 Lists, quick-rate, yearly wrapped and `/profile/activity` are retired. Their legacy
 pages return 404; stored lists and trusted activity records are preserved. Removed
 features must not be inferred as available from historical documentation.

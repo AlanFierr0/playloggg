@@ -1,3 +1,4 @@
+import { BackLink } from "@/components/return-navigation";
 import { GameGenres } from "@/components/game-genres";
 import { getMessages } from "@/lib/locale/server";
 import { ShelfLink } from "@/components/game-actions";
@@ -24,12 +25,12 @@ return (<>
 <div className="relative z-10 site-container mx-auto px-4 sm:px-6 lg:px-12 pt-8 lg:pt-28 pb-8 sm:pb-12">
 
 <nav className="flex min-w-0 items-center gap-2 mb-6 sm:mb-8">
-<Link className="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md uppercase tracking-wider group" data-path="discover" href="/">
+<BackLink className="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md uppercase tracking-wider group" data-path="discover" href="/">
 <span aria-hidden="true" className="material-symbols-outlined text-[15px] group-hover:-translate-x-0.5 transition-transform">{"arrow_back"}</span>
 
-<span>{t("Discover")}</span>
+<span>{t("Back")}</span>
 
-</Link>
+</BackLink>
 
 <span className="text-surface-variant font-label-sm">{"/"}</span>
 

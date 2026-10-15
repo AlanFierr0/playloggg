@@ -1,3 +1,4 @@
+import { ReturnNavigationProvider } from "@/components/return-navigation";
 import { getMessages, localizeMetadata } from "@/lib/locale/server";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -35,12 +36,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <link rel="preload" href="/fonts/material-symbols-outlined.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       </head>
       <body className="flex min-h-dvh flex-col bg-surface font-body-md text-on-surface antialiased">
-        <PortfolioProvider portfolio={portfolio}><SitePreferences initialLocale={locale} initialTheme={theme}><PreviewNoticeProvider>
+        <PortfolioProvider portfolio={portfolio}><SitePreferences initialLocale={locale} initialTheme={theme}><PreviewNoticeProvider><ReturnNavigationProvider key={`${portfolio.access?.signedIn}:${portfolio.profile.id}`} account={`${portfolio.access?.signedIn}:${portfolio.profile.id}`}>
           <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded focus:bg-surface-container-high focus:px-4 focus:py-3">{t("Skip to content")}</a>
           <SiteHeader />
           <main id="main-content" tabIndex={-1} className="w-full min-w-0 flex-1 pt-[var(--site-header-height)] bg-surface">{children}</main>
           <SiteFooter />
-        </PreviewNoticeProvider></SitePreferences></PortfolioProvider>
+        </ReturnNavigationProvider></PreviewNoticeProvider></SitePreferences></PortfolioProvider>
       </body>
     </html>
   );

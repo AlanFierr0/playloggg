@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import Link from "next/link";
+import { useReturnNavigation } from "@/components/return-navigation";
 import { useMessages } from "@/components/site-preferences";
 import { importSteamGames, previewSteamLibrary, syncSteamPlaytime, type LibraryPreview } from "@/app/actions/steam-library";
 import { browseSteamLibrary, parseSteamBrowse, type SteamBrowse } from "@/lib/steam-library-input";
@@ -13,6 +14,7 @@ import { SteamGameCover } from "@/components/steam-game-cover";
 const button = "inline-flex min-h-11 items-center justify-center rounded-xl bg-primary-container text-on-primary-container px-5 py-3 disabled:opacity-50";
 export function SteamLibraryImport({configured,profileId}:{configured:boolean;profileId:number}) {
   const t = useMessages();
+  const { goBack } = useReturnNavigation("/profile/import/steam");
   const [preview,setPreview] = useState<LibraryPreview|null>(null);
   const [selected,setSelected] = useState<number[]>([]);
   const [busy,setBusy] = useState(configured);
@@ -256,7 +258,7 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
         {ratingSession&&<button aria-label={t("Close rating session")} className="ml-auto min-h-11 min-w-11 rounded-xl text-primary" onClick={()=>setRatingHidden(true)}>×</button>}
       </div>
       {!ratingSession&&importProgress}
-      {ratingSession&&<>{ratingGames[ratingIndex] ? <SteamRatingEditor key={ratingGames[ratingIndex].slug} game={ratingGames[ratingIndex]} draft={draft} onDraft={setDraft} onNext={nextRating}/> : importing ? <p role="status" className="mt-5">{t("Waiting for the next imported game…")}</p> : <div className="mt-5 space-y-4"><p>{t(progress<importTotal ? "Your imported games have been reviewed. Resume the import to continue." : "Your imports and rating session are complete.")}</p><button className={button} onClick={()=>setRatingSession(false)}>{t("Done")}</button></div>}</>}
+      {ratingSession&&<>{ratingGames[ratingIndex] ? <SteamRatingEditor key={ratingGames[ratingIndex].slug} game={ratingGames[ratingIndex]} draft={draft} onDraft={setDraft} onNext={nextRating}/> : importing ? <p role="status" className="mt-5">{t("Waiting for the next imported game…")}</p> : <div className="mt-5 space-y-4"><p>{t(progress<importTotal ? "Your imported games have been reviewed. Resume the import to continue." : "Your imports and rating session are complete.")}</p><button className={button} onClick={()=>{setRatingSession(false);try{localStorage.removeItem(storageKey);}catch{}if(progress>=importTotal&&!failures.length)goBack();}}>{t("Done")}</button></div>}</>}
       {modalOpen&&progressToast}
     </dialog>
     {!modalOpen&&progressToast}

@@ -9,7 +9,7 @@ const dependencies={"@/lib/games-query":{gamesQuery,parseGamesQuery},"@/lib/loca
 const context={exports:{},require:name=>dependencies[name],URLSearchParams,URL};
 vm.runInNewContext(code+"\nexports.returnPath=safeReturnPath",context);
 test("search returns to public profiles, personal subpages, directory filters and comparison handles",async()=>{
- for(const path of ["/u/tiempo_de_videojuegos","/u/fixture_public/ranking","/profile/stats","/profile/timeline","/profile/import/steam","/settings","/people?q=Tiempo&page=2","/compare?left=fixture_owner&right=fixture_public&page=2"])
+ for(const path of ["/u/tiempo_de_videojuegos","/u/fixture_public/ranking","/profile/stats","/games?q=Hades&size=50","/profile/timeline","/profile/import/steam","/settings","/people?q=Tiempo&page=2","/compare?left=fixture_owner&right=fixture_public&page=2"])
   assert.equal(await context.exports.returnPath(path),path);
 });
 
