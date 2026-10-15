@@ -14,6 +14,8 @@ Cloudflare retains registration and authoritative DNS; Vercel hosts Playlogg.
   `/auth/confirm` and `/auth/confirm?flow=recovery` on that origin, while retaining
   the existing development and former production callback entries.
 - Canonical metadata, robots and sitemap URLs use the new origin.
+- The former `playloggg.vercel.app` address permanently redirects (308) to the
+  new domain, preserving paths and query parameters.
 - Accounts and saved data stay in the existing Supabase project. Browser sessions
   are domain-specific, so users must sign in again on the new address.
 
@@ -23,14 +25,24 @@ Cloudflare Email Routing forwards `support@alanfierro.dev` to the owner's verifi
 existing inbox. Catch-all routing stays disabled. Forwarding does not configure
 Gmail to send replies from the custom address.
 
-Outgoing authentication email setup is in progress. It requires a verified sending
-domain and SMTP credentials in Supabase. Do not replace Cloudflare's apex MX
-records when verifying a sending service; use its supplied bounce-subdomain
-records and DKIM records. Never commit SMTP credentials or API keys.
+Resend's free plan is selected for outgoing authentication email. The sending
+domain is verified with `resend._domainkey` TXT, DNS-only `rsend` and `send`
+CNAMEs, and a monitoring-only `_dmarc` TXT record. Resend receiving stays disabled;
+Cloudflare's apex MX records continue handling incoming mail.
+
+Supabase SMTP is prepared with sender `support@alanfierro.dev`, name `Playlogg`,
+host `smtp.resend.com`, port `465`, username `resend`, and its existing 60-second
+per-user interval. Credential entry and saving are pending user completion.
+Use a Resend sending-only key restricted to `alanfierro.dev`. Never commit SMTP
+credentials or API keys.
 
 ## Verification on 2026-10-15
 
 Vercel reports valid DNS configuration, and the new address returns HTTPS 200.
-Cloudflare shows the support forwarding rule as Active. Inbox delivery and
-authentication on the new domain still require end-to-end verification.
-`pnpm build` passed, including typecheck, lint and all 84 existing tests.
+Cloudflare shows the support forwarding rule as Active, and Resend reports the
+sending domain as Verified. Inbox delivery and authentication on the new domain
+still require end-to-end verification after the SMTP credential is saved.
+`pnpm build` passed after merging current GitHub main, including typecheck, lint
+and all 127 tests. All 28 production route smoke checks passed. The old address
+redirect preserves path/query, and the Steam POST handshake uses the new origin
+for its realm and callback. A full Steam sign-in was not performed.
