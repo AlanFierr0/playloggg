@@ -52,3 +52,44 @@ been tested in this run.
 and all 127 tests. All 28 production route smoke checks passed. The old address
 redirect preserves path/query, and the Steam POST handshake uses the new origin
 for its realm and callback. A full Steam sign-in was not performed.
+
+## Branded account emails
+
+All six Supabase authentication templates use the Playlogg wordmark, charcoal
+surfaces, amber actions and the site's light-mode colors. The email treatment
+keeps the existing identity with low visual variance (3), no motion (1), and
+comfortable content density (3). Each message has one primary action, short
+context, a security note and a support link. Reauthentication displays the
+provider's one-time code instead of a link.
+
+The shared source is `scripts/build-auth-emails.mjs`. Run
+`node scripts/build-auth-emails.mjs` to regenerate `supabase/templates/*.html`
+and `subjects.json`. `supabase/config.toml` selects the same files and subjects
+for local Auth. Hosted templates must be saved separately in Supabase's
+Authentication > Emails dashboard; a Vercel deployment does not synchronize them.
+
+The templates use presentation tables, inline CSS, system-font fallbacks,
+hidden inbox preview text, and 320px-friendly spacing. They do not fetch images,
+web fonts or tracking assets. Clients supporting light-mode media queries receive
+the light palette; inline dark colors remain the fallback. Outlook receives a
+fixed-width table fallback. The production templates contain no JavaScript.
+
+Existing hosted `{{ .ConfirmationURL }}` links are preserved for sign-in,
+confirmation, recovery, invitation and email change. Reauthentication preserves
+`{{ .Token }}`, and email change preserves `{{ .NewEmail }}`. No authentication
+routes, expiration settings, SMTP credentials or notification switches changed.
+The old local owner-only sign-in copy is replaced with the current public-account
+wording and the same confirmation URL behavior as the hosted project.
+
+On 2026-10-15, all six hosted bodies were copied back through the dashboard editor
+and matched the versioned HTML after newline normalization. All seven optional
+security notifications remained disabled. The branded sign-in email sent through
+the production form to the already approved owner inbox was reported Delivered
+by Resend. No other message types were sent as tests.
+
+The production build, typecheck, lint and all 130 tests passed. Three template
+tests check generated-file consistency, provider placeholders, safe static
+markup, local configuration and WCAG AA text contrast. Browser checks covered
+all six messages in both palettes at desktop and 320px widths (24 layouts), with
+no horizontal overflow. Native Gmail/Apple Mail/Outlook rendering and complete
+sign-in/reset actions were not verified in this design run.
