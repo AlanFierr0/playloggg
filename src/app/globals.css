@@ -36,6 +36,7 @@
 .score-slider::-moz-range-track { height: 8px; border-radius: 999px; background: rgb(var(--color-surface-container-highest)); }
 .score-slider::-webkit-slider-thumb { appearance: none; width: 22px; height: 22px; margin-top: -7px; border-radius: 50%; background: rgb(var(--color-primary)); }
 .score-slider::-moz-range-thumb { width: 22px; height: 22px; border: 0; border-radius: 50%; background: rgb(var(--color-primary)); }
+.completion-date-input::-webkit-calendar-picker-indicator { display: none; opacity: 0; width: 0; padding: 0; pointer-events: none; }
 /* Native option menus need their own font and a sans-serif fallback. */
 select option, select optgroup { font-family: "Hanken Grotesk", Arial, sans-serif; font-size: inherit; }
 .scroll-region { scrollbar-width: thin; scrollbar-color: #504535 #1b1b1f; }
