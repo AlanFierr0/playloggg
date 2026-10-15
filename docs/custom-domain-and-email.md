@@ -42,7 +42,12 @@ credentials or API keys.
 Vercel reports valid DNS configuration, and the new address returns HTTPS 200.
 Cloudflare shows the support forwarding rule as Active, and Resend reports the
 sending domain as Verified. Inbox delivery and authentication on the new domain
-still require end-to-end verification; the SMTP credential is saved.
+still require end-to-end verification. The first authorized sign-in email test
+for an existing account failed with SMTP `535 Authentication credentials invalid`
+before reaching Resend's sent-mail log. Host, port and username match Resend's
+documented settings; the owner must replace the saved SMTP password with the
+complete API key before delivery can be retried. Outgoing email is not operational
+until this succeeds.
 `pnpm build` passed after merging current GitHub main, including typecheck, lint
 and all 127 tests. All 28 production route smoke checks passed. The old address
 redirect preserves path/query, and the Steam POST handshake uses the new origin
