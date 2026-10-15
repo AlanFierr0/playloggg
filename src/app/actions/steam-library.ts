@@ -2,6 +2,7 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { checkOperationLimit, operationFailure, reserveImportQuota } from "@/lib/operation-limits";
 import { getAccount } from "@/lib/owner";
+import { createAuthAdmin } from "@/lib/supabase/auth-admin";
 import { readSteamLibrary, readSteamImportContext, readSteamCatalogMatches } from "@/lib/steam-library";
 import { browseSteamLibrary, parseSteamBrowse, matchSteamGames, steamAppId, steamIdentity, type SteamGame } from "@/lib/steam-library-input";
 import { queryIgdb } from "@/lib/igdb";
@@ -267,6 +268,9 @@ export async function getSteamCompletionSuggestions(appId:unknown,slug:unknown,r
     if(owned.hours<5)return {...empty,ok:true,message:"Achievement checks require at least 5 hours of Steam playtime."};
     const {data:game,error}=await account.supabase.from("games").select("id,igdb_id,released_on").eq("slug",slug).single();
     if(error||!game||!igdbId(game.igdb_id))return empty;
+    const skips=await createAuthAdmin().rpc("read_steam_completion_skips",{p_owner:account.user.id});
+    if(skips.error)throw new Error("Preferences unavailable");
+    if(skips.data?.includes(game.id))return {...empty,ok:true,message:"No eligible completion date."};
     const records=await queryIgdb(`fields id,external_games.uid,external_games.external_game_source; where id = ${game.igdb_id}; limit 1;`);
     if(matchSteamGames(records,[appId]).get(appId)!==game.igdb_id)return empty;
     const {data:rating,error:ratingError}=await account.supabase.from("ratings").select("updated_at,completed_on,status,platform").eq("profile_id",account.profile.id).eq("game_id",game.id).maybeSingle();
@@ -283,7 +287,10 @@ export async function listSteamCompletionLogs():Promise<{ok:boolean;message:stri
     await checkOperationLimit(account.user.id,"steam");
     const library=(await readSteamImportContext(account.user.id,steamId)).filter(game=>game.hours>=5);
     const logged=await loggedSteamGames(account,library);
-    const eligible=[...logged].filter(([,rating])=>rating.platform==="pc"&&!rating.completed_on&&!["active","paused","stopped"].includes(rating.status??""));
+    const skips=await createAuthAdmin().rpc("read_steam_completion_skips",{p_owner:account.user.id});
+    if(skips.error)throw new Error("Preferences unavailable");
+    const skipped=new Set(skips.data??[]);
+    const eligible=[...logged].filter(([,rating])=>!skipped.has(rating.game_id)&&rating.platform==="pc"&&!rating.completed_on&&!["active","paused","stopped"].includes(rating.status??""));
     const games:SteamCompletionLog[]=[];
     for(let offset=0;offset<eligible.length;offset+=100){
       const batch=eligible.slice(offset,offset+100);
@@ -310,4 +317,17 @@ export async function confirmSteamCompletion(appId:unknown,slug:unknown,achievem
     if(saveError)return {ok:false,message:saveError.code==="40001"?"This entry changed or the suggestion is unavailable. Reload before retrying.":"Completion could not be saved. Please retry."};
     revalidatePath("/","layout");return {ok:true,message:"Completion saved."};
   }catch{return {ok:false,message:"Completion could not be saved. Please retry."};}
+}
+
+export async function skipSteamCompletion(slug:unknown) {
+  const failure={ok:false,message:"Game could not be skipped. Please retry."};
+  if(typeof slug!=="string"||!/^[a-z0-9][a-z0-9-]{0,199}$/.test(slug))return failure;
+  try {
+    const account=await getAccount();if(!account?.profile)return failure;
+    await checkOperationLimit(account.user.id,"steam");
+    const {data:game,error}=await account.supabase.from("games").select("id").eq("slug",slug).single();
+    if(error||!game)return failure;
+    const {error:saveError}=await createAuthAdmin().rpc("skip_steam_completion_game",{p_owner:account.user.id,p_game:game.id});
+    return saveError?failure:{ok:true,message:"Game skipped. It will not appear in future completion scans."};
+  }catch{return failure;}
 }

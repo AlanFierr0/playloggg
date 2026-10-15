@@ -295,3 +295,13 @@ failures still allow a validated Steam response to be used.
 The private cache and its RPCs are service-role-only, with RLS as an additional
 guard. Player rows are removed with Auth account deletion. Expired rows are never
 read and are cleaned up on cache writes. Cache reads do not extend their lifetime.
+
+## Reviewing completion suggestions
+
+Confirmed games leave the scan results immediately after a successful save. Their
+saved date keeps them out of subsequent scans. **Skip game** dismisses a game from
+completion scans for that account across devices without editing its rating,
+review, playtime, status or date. Skips also suppress import-editor suggestions
+for that game; manual date entry remains available. Failed confirmations/skips
+keep the card visible with a retryable error. Skip preferences are server-only,
+owner-scoped and removed with account deletion.

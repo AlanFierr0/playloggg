@@ -1454,5 +1454,8 @@
   "No eligible completion date.": "No hay una fecha de finalización disponible.",
   "Invalid completion suggestion.": "Sugerencia de finalización inválida.",
   "Achievement checks require at least 5 hours of Steam playtime.": "La búsqueda de logros requiere al menos 5 horas de juego en Steam.",
+  "Skip game": "Omitir juego",
+  "Game skipped. It will not appear in future completion scans.": "Juego omitido. No volverá a aparecer en las búsquedas de finalización.",
+  "Game could not be skipped. Please retry.": "No se pudo omitir el juego. Reintentá.",
   "AI-assisted suggestion": "Sugerencia asistida por IA"
 }

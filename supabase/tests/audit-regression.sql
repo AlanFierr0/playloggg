@@ -265,3 +265,34 @@ do $$begin
  if exists(select 1 from private.steam_achievement_cache where cache_key=repeat('e',64)) then raise exception 'Deleted owner retained achievements';end if;
 end;$$;
 rollback;
+-- Completion skips are private preferences, never rating edits.
+begin;
+insert into auth.users(id,email,email_confirmed_at) values
+('55555555-5555-4555-8555-555555555555','skip-owner@example.invalid',now()),
+('66666666-6666-4666-8666-666666666666','skip-other@example.invalid',now());
+insert into public.profiles(handle,display_name,owner_user_id,is_public,is_discoverable)
+ values('sql_skip_owner','Skip owner','55555555-5555-4555-8555-555555555555',false,false);
+insert into public.games(slug,title,cover_url,released_on) values('sql-skip-game','Skip game','/icon.svg','2000-01-01');
+insert into public.ratings(profile_id,game_id,score,status,platform,review)
+ select p.id,g.id,83,'backlog','pc','Keep this review' from public.profiles p cross join public.games g where p.handle='sql_skip_owner' and g.slug='sql-skip-game';
+do $$begin
+ if has_function_privilege('authenticated','public.read_steam_completion_skips(uuid)','execute')
+ or has_function_privilege('anon','public.skip_steam_completion_game(uuid,bigint)','execute')
+ or has_table_privilege('authenticated','private.steam_completion_skips','select') then raise exception 'Skip preferences exposed';end if;
+end;$$;
+set local role service_role;
+do $$declare g bigint;original jsonb;begin
+ select id into g from public.games where slug='sql-skip-game';
+ select to_jsonb(r) into original from public.ratings r join public.profiles p on p.id=r.profile_id where p.handle='sql_skip_owner' and r.game_id=g;
+ perform public.skip_steam_completion_game('55555555-5555-4555-8555-555555555555',g);
+ perform public.skip_steam_completion_game('55555555-5555-4555-8555-555555555555',g);
+ if public.read_steam_completion_skips('55555555-5555-4555-8555-555555555555') is distinct from array[g] then raise exception 'Skip not persisted idempotently';end if;
+ if public.read_steam_completion_skips('66666666-6666-4666-8666-666666666666') is distinct from '{}'::bigint[] then raise exception 'Skip leaked to another owner';end if;
+ if (select to_jsonb(r) from public.ratings r join public.profiles p on p.id=r.profile_id where p.handle='sql_skip_owner' and r.game_id=g) is distinct from original then raise exception 'Skipping edited rating';end if;
+ begin
+  perform public.skip_steam_completion_game('66666666-6666-4666-8666-666666666666',g);
+  raise exception 'Unowned log accepted';
+ exception when raise_exception then if sqlerrm<>'Owned PC log required' then raise;end if;end;
+end;$$;
+reset role;
+rollback;

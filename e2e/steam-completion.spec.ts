@@ -38,10 +38,13 @@ test("existing Steam logs require confirmation and retain all other entry detail
   const axe=await new AxeBuilder({page}).include("main").analyze();expect(axe.violations).toEqual([]);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await panel.getByRole("button",{name:"Confirm completion",exact:true}).first().click();
-  await expect(panel.getByText("Completion saved.",{exact:true})).toBeVisible();
+  await expect(panel.getByRole("status")).toContainText("Completion saved.");
   const after=(await state()).ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===2);
   const {completed_on:date,status,updated_at:timestamp,...unchanged}=after;void timestamp;
   expect(date).toBe("2025-07-02");expect(status).toBe("completed");
+  await expect(panel.getByRole("article")).toHaveCount(0);
+  await page.getByRole("button",{name:"Find completion dates",exact:true}).click();await expect(panel.getByText(/Scan finished/)).toBeVisible();
+  await expect(panel.getByRole("article")).toHaveCount(0);
   const {completed_on:oldDate,status:oldStatus,updated_at:oldTimestamp,...original}=before;void oldDate;void oldStatus;void oldTimestamp;expect(unchanged).toEqual(original);
   await page.goto("/profile/timeline");
   await expect(page.locator('time[datetime="2025-07-02"]')).toBeVisible();
@@ -91,7 +94,7 @@ test("anonymous replay cannot confirm an owned Steam completion",async({page,con
   await page.goto("/profile/import/steam");await page.getByRole("button",{name:"Find completion dates",exact:true}).click();
   const panel=page.getByRole("region",{name:"Steam completion dates",exact:true});await expect(panel.getByText(/Scan finished/)).toBeVisible();
   const captured=page.waitForRequest(request=>request.method()==="POST"&&Boolean(request.headers()["next-action"])&&Boolean(request.postData()?.includes("ENDING_A")));
-  await panel.getByRole("button",{name:"Confirm completion",exact:true}).first().click();const action=await captured;await expect(panel.getByText("Completion saved.",{exact:true})).toBeVisible();
+  await panel.getByRole("button",{name:"Confirm completion",exact:true}).first().click();const action=await captured;await expect(panel.getByRole("status")).toContainText("Completion saved.");
   await fetch(`${fixture}/__reset`,{method:"POST"});await fetch(`${fixture}/__steam-user`,{method:"POST"});await fetch(`${fixture}/__steam-five-hours`,{method:"POST"});await fetch(`${fixture}/__steam-completion-log`,{method:"POST"});
   const response=await fetch(action.url(),{method:"POST",headers:{"next-action":action.headers()["next-action"],"content-type":action.headers()["content-type"],origin:"http://127.0.0.1:3100"},body:action.postData()});
   expect(response.ok).toBe(true);expect(await response.text()).toContain("Reload before retrying");
@@ -140,4 +143,25 @@ test("Gemini recognizes an indirect ending without inventing dates or sending pl
   await dialog.getByRole("button",{name:"Use this date",exact:true}).click();await expect(dialog.locator("#date-input")).toHaveValue("2025-07-04");
   await dialog.getByRole("button",{name:"Save and next",exact:true}).click();await expect(dialog.getByRole("button",{name:"Done",exact:true})).toBeVisible();
   const after=await state();const game=after.games.find((row:{igdb_id:number})=>row.igdb_id===9006);expect(after.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===game.id)).toMatchObject({completed_on:"2025-07-04",status:"completed",hours_played:10});expect(after.geminiCalls).toBe(snapshot.geminiCalls);
+});
+
+test("skipped completion games disappear across reloads without changing their log, and failed skips stay visible",async({page,context})=>{
+  await context.addCookies([authCookie]);await fetch(`${fixture}/__steam-user`,{method:"POST"});await fetch(`${fixture}/__steam-five-hours`,{method:"POST"});await fetch(`${fixture}/__steam-completion-log`,{method:"POST"});
+  await page.goto("/profile/import/steam");await page.getByRole("button",{name:"Find completion dates",exact:true}).click();
+  const panel=page.getByRole("region",{name:"Steam completion dates",exact:true});await expect(panel.getByText(/Scan finished/)).toBeVisible();
+  const game=(await state()).games.find((row:{id:number})=>row.id===2);
+  const card=panel.getByRole("article").filter({has:page.getByRole("heading",{name:game.title,exact:true})});await expect(card).toBeVisible();
+  const before=(await state()).ratings;await fetch(`${fixture}/__fail-completion-skip`,{method:"POST"});await card.getByRole("button",{name:"Skip game",exact:true}).click();
+  await expect(card.getByRole("alert")).toHaveText("Game could not be skipped. Please retry.");expect((await state()).completionSkips).toEqual([]);
+  await fetch(`${fixture}/__fail-completion-skip`,{method:"POST"});
+  const captured=page.waitForRequest(request=>request.method()==="POST"&&Boolean(request.headers()["next-action"])&&Boolean(request.postData()?.includes(game.slug)));
+  await card.getByRole("button",{name:"Skip game",exact:true}).click();const action=await captured;
+  await expect(card).toHaveCount(0);await expect(panel.getByRole("status")).toContainText("Game skipped. It will not appear in future completion scans.");
+  expect((await state()).ratings).toEqual(before);expect((await state()).completionSkips).toHaveLength(1);
+  const calls=(await state()).requestCounts["GET /__steam-achievements"]??0;
+  await page.reload();await page.getByRole("button",{name:"Find completion dates",exact:true}).click();await expect(panel.getByText(/Scan finished/)).toBeVisible();await expect(card).toHaveCount(0);
+  expect((await state()).requestCounts["GET /__steam-achievements"]??0).toBe(calls);
+  await fetch(`${fixture}/__reset`,{method:"POST"});await fetch(`${fixture}/__steam-user`,{method:"POST"});await fetch(`${fixture}/__steam-completion-log`,{method:"POST"});
+  const response=await fetch(action.url(),{method:"POST",headers:{"next-action":action.headers()["next-action"],"content-type":action.headers()["content-type"],origin:"http://127.0.0.1:3100"},body:action.postData()});
+  expect(await response.text()).toContain("Game could not be skipped");expect((await state()).completionSkips).toEqual([]);
 });
