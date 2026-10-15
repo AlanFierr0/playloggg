@@ -1470,5 +1470,11 @@
   "Playtime and scores are current values for games completed in each year, not a history of changes.": "Las horas y puntuaciones son los valores actuales de los juegos completados en cada año, no un historial de cambios.",
   "Select a year to revisit your finished games.": "Elegí un año para volver a ver los juegos que completaste.",
   "Newer year": "Año más reciente",
-  "Older year": "Año más antiguo"
+  "Older year": "Año más antiguo",
+  "Monthly completions": "Completados por mes",
+  "Select a pin to explore a month.": "Elegí un marcador para explorar un mes.",
+  "Whole year": "Todo el año",
+  "Scroll to explore all twelve months.": "Deslizá para explorar los doce meses.",
+  "Showing the whole year": "Mostrando todo el año",
+  "Select a year, then explore its monthly pins.": "Elegí un año y explorá sus marcadores mensuales."
 }
