@@ -211,3 +211,26 @@ do $$ begin
  if exists(select 1 from private.review_translations where profile_id=(select id from public.profiles where handle='sql_test_owner')) then raise exception 'Removed review retained translation';end if;
 end $$;
 rollback;
+
+-- AI classifications contain only public game/achievement IDs and are server-only.
+begin;
+do $$begin
+ if has_function_privilege('authenticated','public.read_steam_completion_classification(bigint,text)','execute')
+ or has_function_privilege('anon','public.store_steam_completion_classification(bigint,text,jsonb)','execute') then raise exception 'AI cache exposed to public roles';end if;
+end;$$;
+set local role service_role;
+do $$declare saved jsonb;begin
+ perform public.store_steam_completion_classification(4294967000,repeat('a',64),'["ENDING"]'::jsonb);
+ saved:=public.read_steam_completion_classification(4294967000,repeat('a',64));
+ if saved is distinct from '["ENDING"]'::jsonb then raise exception 'AI cache did not persist';end if;
+ if public.read_steam_completion_classification(4294967000,repeat('b',64)) is not null then raise exception 'AI cache ignored schema hash';end if;
+ perform public.store_steam_completion_classification(4294967000,repeat('b',64),'[]'::jsonb);
+ if public.read_steam_completion_classification(4294967000,repeat('b',64)) is distinct from '[]'::jsonb then raise exception 'Empty classification was not cached';end if;
+ begin
+  perform public.store_steam_completion_classification(4294967000,repeat('a',64),'["ENDING","ENDING"]'::jsonb);
+  raise exception 'Duplicate classification IDs accepted';
+ exception when raise_exception then
+  if sqlerrm<>'Invalid achievement IDs' then raise;end if;
+ end;
+end;$$;
+rollback;

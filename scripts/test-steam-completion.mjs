@@ -25,3 +25,7 @@ test("real Steam response without gameID is accepted and the returned Steam iden
   assert.equal(parseSteamCompletions(response,101,null,now,"76561198000000000").length,1);
   assert.throws(()=>parseSteamCompletions(response,101,null,now,"76561198000000001"));
 });
+
+test("a completion achievement named explicitly can retain an empty Steam description",()=>{
+ const row={...achievement("NAME_ONLY",""),name:"Complete the game"};assert.equal(parseSteamCompletions(payload([row]),101,null,now).length,1);
+});

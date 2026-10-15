@@ -129,3 +129,15 @@ test("Steam achievement checks skip games below five hours but retain manual dat
   const snapshot=await state();expect(snapshot.requestCounts["GET /__steam-achievements"]??0).toBe(0);
   expect(snapshot.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===1).completed_on).toBe("2025-08-01");
 });
+
+test("Gemini recognizes an indirect ending without inventing dates or sending player data",async({page,context})=>{
+  await context.addCookies([authCookie]);await fetch(`${fixture}/__steam-user`,{method:"POST"});await fetch(`${fixture}/__steam-ai`,{method:"POST"});
+  await page.goto("/profile/import/steam");await page.getByRole("checkbox",{name:"Select game ZZZ Fixture 1",exact:true}).check();await page.getByRole("button",{name:"Import selected games (1)",exact:true}).click();
+  const dialog=page.getByRole("dialog",{name:"Rate imported games",exact:true});
+  await expect(dialog.getByText("AI-assisted suggestion",{exact:true})).toBeVisible();await expect(dialog.getByText("A new dawn",{exact:true})).toBeVisible();await expect(dialog.getByText("Another dawn",{exact:true})).toHaveCount(0);
+  const snapshot=await state();expect(snapshot.geminiCalls).toBeLessThanOrEqual(1);expect(snapshot.achievementClassifications.filter((row:{appId:number})=>row.appId===201)).toHaveLength(1);
+  const request=JSON.stringify(snapshot.geminiInputs[0]??{});expect(request).not.toContain("76561198000000000");expect(request).not.toContain("unlocktime");expect(request).not.toContain("1751587200");
+  await dialog.getByRole("button",{name:"Use this date",exact:true}).click();await expect(dialog.locator("#date-input")).toHaveValue("2025-07-04");
+  await dialog.getByRole("button",{name:"Save and next",exact:true}).click();await expect(dialog.getByRole("button",{name:"Done",exact:true})).toBeVisible();
+  const after=await state();const game=after.games.find((row:{igdb_id:number})=>row.igdb_id===9006);expect(after.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===game.id)).toMatchObject({completed_on:"2025-07-04",status:"completed",hours_played:10});expect(after.geminiCalls).toBe(snapshot.geminiCalls);
+});

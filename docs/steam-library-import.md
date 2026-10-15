@@ -250,3 +250,35 @@ dates and unrelated entry fields are preserved, concurrent edits require reloadi
 Confirmed Completed entries appear in the profile timeline. Older saved import drafts
 resume with a blank completion date. Scans stop when leaving the page and do not
 run as background jobs.
+
+## Gemini-assisted achievement detection
+
+Set **GEMINI_API_KEY** as a Production Secret in Vercel, then redeploy. Create the
+key in [Google AI Studio](https://aistudio.google.com/api-keys) using a free-tier
+project. Never put the key in NEXT_PUBLIC variables, chat or committed files.
+The default is Google's stable gemini-3.5-flash-lite model; no paid search tools
+or provider fallback are enabled. Google controls free-tier availability and
+quotas; billing-enabled projects can incur charges under Google's pricing.
+
+Gemini receives only the game's public English title and full public achievement
+schema, not Steam IDs, profiles, scores, hours, unlocked flags or unlock dates.
+It identifies clear main-story endings and final story bosses, including indirect
+wording, and excludes optional/DLC/collectible/multiplayer achievements. Unknown,
+duplicate or malformed IDs and incomplete model responses are rejected. Dates
+always come from actual unlocked Steam achievements; the AI never produces dates.
+The UI labels matching results **AI-assisted suggestion** and still requires
+explicit confirmation. The five-hour threshold and ongoing-game exclusions remain.
+
+Public classifications, including empty results, persist in a server-only Supabase
+cache per Steam app. A hash includes the public schema, model and detector version;
+a changed schema/version triggers a fresh classification. Steam schemas have a
+bounded 24-hour warm-instance cache, classifications a 15-minute warm-instance cache,
+and cold servers reuse the persisted classification. Provider failures are not stored
+as successful classifications. The global request cap is five new classifications
+per minute and 200 per UTC day; cache hits do not spend provider quota. Missing keys,
+quota errors, malformed responses or outages fall back to text rules without blocking
+rating or saving. Free-tier scans may use fallback rules after reaching a quota.
+
+The cache table has RLS and no anon/authenticated grants; only server service-role
+RPCs read/write it. A rolled-back Postgres check covers cache access, schema hashes,
+empty results and duplicate rejection in supabase/tests/audit-regression.sql.

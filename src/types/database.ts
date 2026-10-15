@@ -718,6 +718,8 @@ export type Database = {
         Args: { p_ids: number[]; p_manual: Json; p_revision: number }
         Returns: number
       }
+      read_steam_completion_classification: {Args:{p_app_id:number;p_hash:string};Returns:Json}
+      store_steam_completion_classification: {Args:{p_app_id:number;p_hash:string;p_ids:Json};Returns:undefined}
       reserve_review_translation: {Args:{p_characters:number};Returns:boolean}
       read_review_translation: {Args:{p_profile_id:number;p_game_id:number;p_hash:string;p_target:string};Returns:Json}
       store_review_translation: {Args:{p_profile_id:number;p_game_id:number;p_hash:string;p_target:string;p_original:string;p_translation:string;p_source_language:string};Returns:boolean}

@@ -1453,5 +1453,6 @@
   "Completion date could not be saved. Review the latest entry and release date.": "No se pudo guardar la fecha de finalización. Revisá la entrada actual y la fecha de lanzamiento.",
   "No eligible completion date.": "No hay una fecha de finalización disponible.",
   "Invalid completion suggestion.": "Sugerencia de finalización inválida.",
-  "Achievement checks require at least 5 hours of Steam playtime.": "La búsqueda de logros requiere al menos 5 horas de juego en Steam."
+  "Achievement checks require at least 5 hours of Steam playtime.": "La búsqueda de logros requiere al menos 5 horas de juego en Steam.",
+  "AI-assisted suggestion": "Sugerencia asistida por IA"
 }
