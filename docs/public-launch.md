@@ -2,7 +2,7 @@
 
 ## Approved scope
 
-The canonical origin is `https://playloggg.vercel.app`. Discover remains curated,
+The canonical origin is `https://playlogg.alanfierro.dev`. Discover remains curated,
 using the existing selected game slugs and stored catalog metadata. Missing picks
 are omitted; an empty selection links to the catalog. No invented editorial
 scores, quote, community counts or dates are displayed. Its selection is labeled

@@ -1,9 +1,9 @@
 // Read-only production check: no credentials, sign-ins, writes or cleanup.
-const base = "https://playloggg.vercel.app";
+const base = "https://playlogg.alanfierro.dev";
 const checks = [
   ["/", 200, "Build your gaming identity."],
-  ["/robots.txt", 200, "Sitemap: https://playloggg.vercel.app/sitemap.xml"],
-  ["/sitemap.xml", 200, "https://playloggg.vercel.app/games"],
+  ["/robots.txt", 200, "Sitemap: https://playlogg.alanfierro.dev/sitemap.xml"],
+  ["/sitemap.xml", 200, "https://playlogg.alanfierro.dev/games"],
   ["/games", 200, "Catalog filters"],
   ["/people",200,"Explore profiles"],
   ["/quick-rate",404,null],
