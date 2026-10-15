@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { CompletionMonthTrack } from "@/components/completion-month-track";
+import { CompletionMonthSections } from "@/components/completion-month-sections";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ProfileNavigation } from "@/components/profile-navigation";
 import { usePortfolio } from "@/components/portfolio-provider";
@@ -66,19 +66,25 @@ export function ProfileTimelineScreen() {
     </header>
     {activeGroup ? <section ref={history} tabIndex={-1} aria-label={t("Timeline")} className="min-w-0 scroll-mt-24 space-y-5 rounded-2xl border border-outline-variant/30 bg-surface-container-low p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="space-y-1"><h2 className="font-headline-lg text-headline-lg">{t("Timeline")}</h2><p className="text-body-sm text-on-surface-variant">{t("Select a year, then explore its monthly pins.")}</p></div>
+        <div className="space-y-1"><h2 className="font-headline-lg text-headline-lg">{t("Timeline")}</h2><p className="text-body-sm text-on-surface-variant">{t("Select a year pin, then choose a month.")}</p></div>
         <div className="flex flex-wrap items-center gap-2">
           {selectedMonth && <button type="button" onClick={()=>setSelectedMonth("")} className="min-h-11 rounded-xl px-3 text-body-sm text-primary hover:bg-surface-container">{t("Clear month filter")}</button>}
           {shownYears.length>1&&<><button type="button" disabled={activeIndex===0} aria-label={t("Newer year")} onClick={()=>chooseTimelineYear(activeIndex-1)} className="inline-flex min-h-11 items-center gap-1 rounded-xl border border-outline-variant/40 px-3 text-body-sm hover:bg-surface-container disabled:opacity-30"><span aria-hidden="true" className="material-symbols-outlined text-[20px]">chevron_left</span><span className="hidden sm:inline">{t("Newer")}</span></button>
           <button type="button" disabled={activeIndex===shownYears.length-1} aria-label={t("Older year")} onClick={()=>chooseTimelineYear(activeIndex+1)} className="inline-flex min-h-11 items-center gap-1 rounded-xl border border-outline-variant/40 px-3 text-body-sm hover:bg-surface-container disabled:opacity-30"><span className="hidden sm:inline">{t("Older")}</span><span aria-hidden="true" className="material-symbols-outlined text-[20px]">chevron_right</span></button></>}
         </div>
       </div>
-      <div ref={rail} role="tablist" aria-label={t("Completion years")} aria-orientation="horizontal" className="relative flex min-w-0 overflow-x-auto overscroll-x-contain gap-2 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" onKeyDown={event=>{
+      <div ref={rail} role="tablist" aria-label={t("Completion years")} aria-orientation="horizontal" className="relative flex min-w-0 overflow-x-auto overscroll-x-contain p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" onKeyDown={event=>{
         const index=event.key==="ArrowRight"?Math.min(activeIndex+1,shownYears.length-1):event.key==="ArrowLeft"?Math.max(activeIndex-1,0):event.key==="Home"?0:event.key==="End"?shownYears.length-1:null;
         if(index!==null){event.preventDefault();chooseTimelineYear(index,true);}
       }}>
-        {shownYears.map((group,index)=><button key={group.year} type="button" role="tab" id={`completion-tab-${group.year}`} data-year-choice={group.year} aria-label={group.year} aria-selected={index===activeIndex} aria-controls="completion-year-panel" tabIndex={index===activeIndex?0:-1} onClick={()=>chooseTimelineYear(index)} className={`inline-flex min-h-11 shrink-0 items-center gap-3 rounded-lg border px-4 py-3 text-body-md motion-safe:transition-colors ${index===activeIndex?"border-primary/60 bg-primary/10 font-semibold text-primary":"border-outline-variant/30 text-on-surface-variant hover:bg-surface-container hover:text-on-surface"}`}>
-          <span>{group.year}</span><span aria-hidden="true" title={`${group.games.length} ${t("Completed games")}`} className="rounded bg-surface-container px-2 py-0.5 text-label-sm font-normal tabular-nums text-on-surface-variant">{group.games.length}</span>
+        {shownYears.map((group,index)=><button key={group.year} type="button" role="tab" id={`completion-tab-${group.year}`} data-year-choice={group.year} data-year-pin={group.year} data-year-count={group.games.length} aria-label={group.year} aria-describedby={`completion-count-${group.year}`} aria-selected={index===activeIndex} aria-controls="completion-year-panel" tabIndex={index===activeIndex?0:-1} onClick={()=>chooseTimelineYear(index)} className="group relative flex min-h-40 w-32 shrink-0 flex-col items-center rounded-xl px-3 pb-3 pt-4 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary">
+          <span id={`completion-count-${group.year}`} className="sr-only">{group.games.length} {t(group.games.length===1?"Completed game":"Completed games")}</span>
+          <span aria-hidden="true" className="absolute inset-x-0 top-[5.5rem] h-px bg-outline-variant/60"/>
+          <span aria-hidden="true" className={`relative z-10 flex h-12 w-12 -rotate-45 items-center justify-center rounded-[50%_50%_50%_0] border-2 motion-safe:transition-transform motion-safe:duration-150 motion-safe:group-hover:-translate-y-1 ${index===activeIndex?"border-primary bg-primary text-on-primary":"border-primary/70 bg-surface-container text-primary"}`}><span className="rotate-45 text-body-lg font-semibold tabular-nums">{group.games.length}</span></span>
+          <span aria-hidden="true" className="h-5 w-px bg-primary/70"/>
+          <span aria-hidden="true" className="relative h-2 w-2 rounded-full bg-primary ring-4 ring-surface-container-low"/>
+          <span className={`mt-3 text-body-lg font-semibold ${index===activeIndex?"text-primary":"text-on-surface"}`}>{group.year}</span>
+          <span aria-hidden="true" className="mt-1 text-label-sm text-on-surface-variant">{t(group.games.length===1?"Completed game":"Completed games")}</span>
         </button>)}
       </div>
       <section id="completion-year-panel" role="tabpanel" aria-labelledby={`completion-tab-${activeGroup.year}`} data-timeline-year={activeGroup.year} tabIndex={0} className="min-w-0 space-y-5 border-t border-outline-variant/30 pt-5">
@@ -86,8 +92,9 @@ export function ProfileTimelineScreen() {
           <div className="space-y-2"><h3 aria-live="polite" aria-atomic="true" className="font-headline-lg text-headline-lg"><time dateTime={activeGroup.year}>{activeGroup.year}</time></h3><div className="flex flex-wrap gap-2">{activeGroup.genres.map(genre=><span key={genre} translate="no" className="rounded-lg bg-surface-container px-2.5 py-1 text-body-sm text-on-surface-variant">{genre}</span>)}</div></div>
           <dl className="flex flex-wrap gap-x-5 gap-y-2 text-body-sm"><div><dt className="text-on-surface-variant">{t("Completed games")}</dt><dd className="font-semibold tabular-nums">{activeGroup.games.length}</dd></div><div><dt className="text-on-surface-variant">{t("Average score")}</dt><dd className="font-semibold tabular-nums text-primary">{activeGroup.average??"—"}</dd></div><div><dt className="text-on-surface-variant">{t("Recorded playtime")}</dt><dd className="font-semibold tabular-nums">{activeGroup.hours===null?"—":number(activeGroup.hours)} {t("hrs")}</dd></div></dl>
         </div>
-        <CompletionMonthTrack year={activeGroup.year} months={yearMonths} selectedMonth={selectedMonth} onSelect={setSelectedMonth}/>
+        <CompletionMonthSections year={activeGroup.year} months={yearMonths} selectedMonth={selectedMonth} onSelect={setSelectedMonth}/>
         <p role="status" className="text-body-sm text-on-surface-variant">{selectedMonth?`${date(`2000-${selectedMonth}-01`,orbitMonthFormat)} · ${visibleGames.length} ${t(visibleGames.length===1?"Completed game":"Completed games")}`:t("Showing the whole year")}</p>
+        {!visibleGames.length && <p className="rounded-xl border border-outline-variant/30 bg-surface-container p-4 text-body-sm text-on-surface-variant">{t("No games were completed in this month.")}</p>}
         <div id="completion-year-games" className={`grid gap-3 ${visibleGames.length>1?"sm:grid-cols-2":""} ${visibleGames.length>2?"xl:grid-cols-3":""}`}>{visibleGames.map(game=><Link key={game.slug} href={`/game/${game.slug}`} className="group flex min-w-0 items-start gap-3 rounded-xl border border-outline-variant/20 bg-surface-container p-3 transition-colors hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
           <img src={game.cover} alt="" loading="lazy" className="h-24 w-16 shrink-0 rounded-lg object-cover bg-surface-container-high"/>
           <div className="min-w-0 space-y-2"><h4 translate="no" className="line-clamp-2 text-body-md font-semibold group-hover:text-primary">{game.title}</h4><time dateTime={game.completedOn!} className="block text-body-sm text-on-surface-variant">{date(game.completedOn!,dayFormat)}</time><p className="text-body-sm"><span className="font-semibold tabular-nums text-primary">{game.score===null?t("Unrated"):`${game.score} / 100`}</span>{game.hoursPlayed!=null&&<span className="text-on-surface-variant"> · {number(game.hoursPlayed)} {t("hrs")}</span>}</p></div>

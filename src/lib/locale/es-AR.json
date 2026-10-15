@@ -1476,5 +1476,8 @@
   "Whole year": "Todo el año",
   "Scroll to explore all twelve months.": "Deslizá para explorar los doce meses.",
   "Showing the whole year": "Mostrando todo el año",
-  "Select a year, then explore its monthly pins.": "Elegí un año y explorá sus marcadores mensuales."
+  "Select a year, then explore its monthly pins.": "Elegí un año y explorá sus marcadores mensuales.",
+  "Select a year pin, then choose a month.": "Elegí el marcador de un año y después un mes.",
+  "Choose a month to see its completed games.": "Elegí un mes para ver los juegos que completaste.",
+  "No games were completed in this month.": "No completaste juegos en este mes."
 }

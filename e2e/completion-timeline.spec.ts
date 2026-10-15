@@ -30,6 +30,10 @@ test("completion timeline groups all completions by year, browses horizontally, 
  const tabs=page.getByRole("tablist",{name:"Completion years",exact:true});
  await expect(tabs.getByRole("tab")).toHaveCount(15);
  await expect(tabs.getByRole("tab").first()).toHaveAttribute("aria-selected","true");
+ await expect(tabs.locator("[data-year-pin]")).toHaveCount(15);
+ await expect(tabs.locator('[data-year-pin="2025"]')).toHaveAttribute("data-year-count","3");
+ await expect(tabs.locator('[data-year-pin="2025"]')).toHaveAccessibleDescription("3 Completed games");
+ await expect(tabs.locator('[data-year-pin="2024"]')).toHaveAttribute("data-year-count","1");
  expect(await tabs.evaluate(el=>el.scrollWidth>el.clientWidth)).toBe(true);
  const boxes=await tabs.getByRole("tab").evaluateAll(nodes=>nodes.slice(0,2).map(node=>{const box=node.getBoundingClientRect();return {x:box.x,y:box.y};}));
  expect(boxes[1].x).toBeGreaterThan(boxes[0].x);expect(boxes[1].y).toBe(boxes[0].y);
@@ -37,17 +41,21 @@ test("completion timeline groups all completions by year, browses horizontally, 
  const year2025=page.locator(`[data-timeline-year="2025"]`);
  await expect(year2025.getByRole("link")).toHaveCount(3);
  await expect(year2025).toContainText("0 / 100");await expect(year2025).toContainText("14.5 hrs");await expect(year2025).toContainText("50");
- const pins=page.getByRole("group",{name:"Monthly completions · 2025",exact:true});
- await expect(pins.locator("[data-month-pin]")).toHaveCount(12);
- await expect(pins.locator('[data-month-pin="01"]')).toHaveAttribute("data-month-count","1");
- await expect(pins.locator('[data-month-pin="03"]')).toHaveAttribute("data-month-count","2");
- await expect(pins.locator('[data-month-pin="04"]')).toBeDisabled();
- await expect(pins.locator('[data-month-pin="04"]')).toContainText("0");
- await pins.getByRole("button",{name:"January 2025: 1 Completed game",exact:true}).click();
+ const monthSections=page.getByRole("group",{name:"Monthly completions · 2025",exact:true});
+ await expect(monthSections.locator("[data-month-section]")).toHaveCount(12);
+ await expect(monthSections.locator('[data-month-section="01"]')).toHaveAttribute("data-month-count","1");
+ await expect(monthSections.locator('[data-month-section="03"]')).toHaveAttribute("data-month-count","2");
+ await expect(monthSections.locator('[data-month-section="04"]')).toBeEnabled();
+ await expect(monthSections.locator('[data-month-section="04"]')).toContainText("0");
+ await monthSections.getByRole("button",{name:"January 2025: 1 Completed game",exact:true}).click();
  await expect(year2025.getByRole("link")).toHaveCount(1);
  await expect(year2025).toContainText("60 / 100");
- await expect(pins.locator('[data-month-pin="01"]')).toHaveAttribute("aria-pressed","true");
- await page.keyboard.press("End");await expect(pins.locator('[data-month-pin="03"]')).toBeFocused();
+ await expect(monthSections.locator('[data-month-section="01"]')).toHaveAttribute("aria-pressed","true");
+ await page.keyboard.press("End");await expect(monthSections.locator('[data-month-section="12"]')).toBeFocused();
+ await page.keyboard.press("Space");await expect(year2025.getByRole("link")).toHaveCount(0);
+ await expect(year2025).toContainText("No games were completed in this month.");
+ await page.keyboard.press("Home");await expect(monthSections.locator('[data-month-section="01"]')).toBeFocused();
+ await page.keyboard.press("ArrowRight");await page.keyboard.press("ArrowRight");
  await page.keyboard.press("Space");await expect(year2025.getByRole("link")).toHaveCount(2);
  await expect(year2025.getByRole("status")).toHaveText("March · 2 Completed games");
  await year2025.screenshot({path:`e2e-artifacts/completion-pins-selected-${info.project.name}.png`});
@@ -55,8 +63,8 @@ test("completion timeline groups all completions by year, browses horizontally, 
  await expect(year2025.getByRole("link")).toHaveCount(3);
  expect((await panels.allTextContents()).join("")).not.toContain("2026");
  await page.getByRole("button",{name:"Older year",exact:true}).click();await expect(panels.first()).toHaveAttribute("data-timeline-year","2024");
- await expect(page.getByRole("group",{name:"Monthly completions · 2024",exact:true}).locator('[data-month-pin="02"]')).toHaveAttribute("data-month-count","1");
- await page.getByRole("group",{name:"Monthly completions · 2024",exact:true}).locator('[data-month-pin="02"]').click();
+ await expect(page.getByRole("group",{name:"Monthly completions · 2024",exact:true}).locator('[data-month-section="02"]')).toHaveAttribute("data-month-count","1");
+ await page.getByRole("group",{name:"Monthly completions · 2024",exact:true}).locator('[data-month-section="02"]').click();
  await page.getByRole("button",{name:"Clear month filter",exact:true}).click();
  await expect(panels.first()).toHaveAttribute("data-timeline-year","2024");
  await chart.getByRole("button",{name:"March: 2 Completed games",exact:true}).click();
@@ -94,12 +102,12 @@ test("completion timeline groups all completions by year, browses horizontally, 
  }
  if(info.project.name==="mobile"){
   await page.setViewportSize({width:320,height:812});
-  const pins=page.locator("[data-month-pin]");
-  await expect(pins).toHaveCount(12);
-  for(const target of await pins.all()){
+  const monthSections=page.locator("[data-month-section]");
+  await expect(monthSections).toHaveCount(12);
+  for(const target of await monthSections.all()){
    const size=await target.boundingBox();expect(size!.width).toBeGreaterThanOrEqual(44);expect(size!.height).toBeGreaterThanOrEqual(44);
   }
-  expect(await pins.first().locator("..").evaluate(el=>el.scrollWidth>el.clientWidth)).toBe(true);
+  expect(await monthSections.first().locator("..").evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
   const targets=page.locator("[data-completion-period] button");
   const boxes=await targets.evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height,radius:Number.parseFloat(getComputedStyle(node).borderRadius)};}));
   for(let i=0;i<boxes.length;i++){
