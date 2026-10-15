@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { completionChart, completionTimeline } from "../src/lib/completion-timeline.ts";
+import { completionChart, completionTimeline, completionYears } from "../src/lib/completion-timeline.ts";
 const game = (slug, date, extra = {}) => ({slug, title:slug, logged:true, status:"completed", completedOn:date, score:null, hoursPlayed:null, genres:[], ...extra});
 test("completion timeline groups real dates newest first and preserves zero and unknown values", () => {
  const input=[game("older","2024-02-29",{score:0,hoursPlayed:0,genres:["Puzzle","Puzzle"]}),game("newer","2025-03-02",{score:90,hoursPlayed:12.5,genres:["Adventure"]}),game("same-month","2025-03-01",{score:70,hoursPlayed:null,genres:["Adventure","Puzzle"]}),game("no-date",null),game("bad-date","2025-02-29"),game("ongoing","2025-03-03",{status:"active"}),game("not-logged","2025-03-03",{logged:false})];
@@ -29,4 +29,16 @@ test("completion orbit aggregates each month across years and retains empty mont
  assert.equal(chart[11].period,"12");assert.equal(chart.reduce((sum,point)=>sum+point.count,0),4);
  assert.equal(completionChart(months.filter(group=>group.month.startsWith("2025")))[2].count,2);
  assert.equal(completionChart([]).reduce((sum,point)=>sum+point.count,0),0);
+});
+
+test("year navigation combines every month and computes stats from games rather than monthly averages",()=>{
+ const timeline=completionTimeline([game("a","2025-03-02",{score:100,hoursPlayed:0,genres:["Puzzle"]}),game("b","2025-03-01",{score:80,hoursPlayed:10}),game("c","2025-01-15",{score:0,hoursPlayed:2}),game("d","2024-12-31"),game("undated",null)]);
+ const before=JSON.stringify(timeline),years=completionYears(timeline.months);
+ assert.deepEqual(years.map(group=>group.year),["2025","2024"]);
+ assert.deepEqual(years[0].games.map(game=>game.slug),["a","b","c"]);
+ assert.equal(years[0].average,60);assert.equal(years[0].hours,12);
+ assert.deepEqual(years[0].genres,["Puzzle"]);
+ assert.equal(years[1].average,null);assert.equal(years[1].hours,null);
+ assert.equal(JSON.stringify(timeline),before);
+ assert.deepEqual(completionYears([]),[]);
 });

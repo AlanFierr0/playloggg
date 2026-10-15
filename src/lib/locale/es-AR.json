@@ -1464,5 +1464,11 @@
   "Skip game": "Omitir juego",
   "Game skipped. It will not appear in future completion scans.": "Juego omitido. No volverá a aparecer en las búsquedas de finalización.",
   "Game could not be skipped. Please retry.": "No se pudo omitir el juego. Reintentá.",
-  "AI-assisted suggestion": "Sugerencia asistida por IA"
+  "AI-assisted suggestion": "Sugerencia asistida por IA",
+  "Your finished games, year by year.": "Tus juegos completados, año a año.",
+  "Completion years": "Años con juegos completados",
+  "Playtime and scores are current values for games completed in each year, not a history of changes.": "Las horas y puntuaciones son los valores actuales de los juegos completados en cada año, no un historial de cambios.",
+  "Select a year to revisit your finished games.": "Elegí un año para volver a ver los juegos que completaste.",
+  "Newer year": "Año más reciente",
+  "Older year": "Año más antiguo"
 }
