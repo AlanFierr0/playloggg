@@ -2,17 +2,24 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { createAuthAdmin } from "@/lib/supabase/auth-admin";
 import { checkOperationLimit } from "@/lib/operation-limits";
+import { cachedSteamAchievementRead } from "@/lib/steam-achievement-cache";
+import type { Json } from "@/types/database";
 import { recentRead } from "@/lib/recent-read";
 import { parseSteamAchievementSchema,parseCompletionAchievementIds,parseGeminiCompletion,completionClassificationRequest } from "@/lib/steam-completion-ai-input";
 const model="gemini-3.5-flash-lite";
-const schemas=recentRead(async(appId:string)=>{
-  const key=process.env.STEAM_WEB_API_KEY;if(!key)throw new Error("Steam unavailable");
-  const url=new URL("https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/");
-  url.searchParams.set("key",key);url.searchParams.set("appid",appId);url.searchParams.set("l","english");
-  const response=await fetch(url,{cache:"no-store",redirect:"error",signal:AbortSignal.timeout(10000)});
-  if(!response.ok)throw new Error("Steam schema unavailable");
-  return parseSteamAchievementSchema(await response.json());
-},86_400_000,250);
+async function schemas(appId:string){
+  const data=await cachedSteamAchievementRead(`schema:english:v1:${appId}`,null,86400,async()=>{
+    const key=process.env.STEAM_WEB_API_KEY;if(!key)throw new Error("Steam unavailable");
+    const url=new URL("https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/");
+    url.searchParams.set("key",key);url.searchParams.set("appid",appId);url.searchParams.set("l","english");
+    const response=await fetch(url,{cache:"no-store",redirect:"error",signal:AbortSignal.timeout(10000)});
+    if(!response.ok)throw new Error("Steam schema unavailable");
+    const data:unknown=await response.json();
+    parseSteamAchievementSchema(data);
+    return data as Json;
+  });
+  return parseSteamAchievementSchema(data);
+}
 // Only public schemas and classifications are shared. Never include player IDs or unlock data.
 const classifications=recentRead(async(appId:string)=>{
   const schema=await schemas(appId);

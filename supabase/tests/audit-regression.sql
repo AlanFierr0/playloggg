@@ -234,3 +234,34 @@ do $$declare saved jsonb;begin
  end;
 end;$$;
 rollback;
+-- Durable Steam reads are server-only, bounded and deleted with the owner.
+begin;
+insert into auth.users(id,email,email_confirmed_at) values('44444444-4444-4444-8444-444444444444','achievement-cache@example.invalid',now());
+do $$begin
+ if has_function_privilege('authenticated','public.read_steam_achievement_cache(text,uuid)','execute')
+ or has_function_privilege('anon','public.store_steam_achievement_cache(text,uuid,jsonb,integer)','execute')
+ or has_table_privilege('authenticated','private.steam_achievement_cache','select') then raise exception 'Achievement data exposed';end if;
+end;$$;
+set local role service_role;
+do $$declare owner uuid:='44444444-4444-4444-8444-444444444444';begin
+ perform public.store_steam_achievement_cache(repeat('e',64),owner,'{"playerstats":{"achievements":[]}}',900);
+ if public.read_steam_achievement_cache(repeat('e',64),owner) is null then raise exception 'Private results not saved';end if;
+ if public.read_steam_achievement_cache(repeat('e',64),null) is not null
+ or public.read_steam_achievement_cache(repeat('e',64),'55555555-5555-4555-8555-555555555555') is not null then raise exception 'Owner isolation failed';end if;
+ update private.steam_achievement_cache set expires_at=now()-interval '1 second' where cache_key=repeat('e',64);
+ if public.read_steam_achievement_cache(repeat('e',64),owner) is not null then raise exception 'Expired data returned';end if;
+ perform public.store_steam_achievement_cache(repeat('f',64),null,'{"game":{"achievements":[]}}',86400);
+ if exists(select 1 from private.steam_achievement_cache where cache_key=repeat('e',64)) then raise exception 'Expired data not cleaned';end if;
+ perform public.store_steam_achievement_cache(repeat('e',64),owner,'{"updated":true}',900);
+ if public.read_steam_achievement_cache(repeat('e',64),owner) is distinct from '{"updated":true}'::jsonb then raise exception 'Refresh did not replace results';end if;
+ begin
+  perform public.store_steam_achievement_cache(repeat('e',64),owner,'{}',86400);
+  raise exception 'Private lifetime accepted';
+ exception when raise_exception then if sqlerrm<>'Invalid achievement cache lifetime' then raise;end if;end;
+end;$$;
+reset role;
+delete from auth.users where id='44444444-4444-4444-8444-444444444444';
+do $$begin
+ if exists(select 1 from private.steam_achievement_cache where cache_key=repeat('e',64)) then raise exception 'Deleted owner retained achievements';end if;
+end;$$;
+rollback;

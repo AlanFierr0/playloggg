@@ -36,12 +36,13 @@ let accountDeleted=false;let failAuthDelete=false;let failStorageDelete=false;
 let profileDeleted=false;
 let steamMinutes=90;
 let steamAdventureMinutes=0;
-let steamAiMinutes=0;let geminiMode="off",geminiCalls=0,geminiInputs=[];let achievementClassifications=[];
+let steamAiMinutes=0;let geminiMode="off",geminiCalls=0,geminiInputs=[];let achievementClassifications=[];const achievementReads=new Map();
 let favorites;
 let rankings=[];let curated=[];let listItems=[];let follows=[];let blocks=[];let likes=[];
 let pictures = new Map();
 // Shared catalog imports persist between tests, like the application cache; personal data resets.
-function reset() {steamAiMinutes=0;geminiMode="off";geminiCalls=0;geminiInputs=[];reviewTranslations=[];translateCalls=0;translatedCharacters=0;failTranslation=false;for(let i=profiles.length-1;i>=0;i--)if(profiles[i].id>=1000)profiles.splice(i,1);catalogBatches=[];rankingDelay=0;failHome=false;failScore=false; alternateToken=undefined; reviewVotes=[]; ratingsDelay=0; showTrending=false; accountDeleted=false;failAuthDelete=false;failStorageDelete=false; quotaMode="allow";user.app_metadata={};steamMode="public";rankings=[];follows=[];blocks=[];likes=[];curated=[{id:10,profile_id:3,name:"Public fixture list",revision:1,description:"Fixture description",is_public:true,is_ranked:true}];listItems=[{list_id:10,game_id:1,position:0}];pictures.clear(); Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false,is_discoverable:false,bio:null,location:null,platform_preference:null,avatar_url:null}); favorites=[{profile_id:3,game_id:1,featured_slot:1,created_at:"2026-09-29T12:00:00Z"}]; ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
+function reset() {
+  achievementReads.clear();steamAiMinutes=0;geminiMode="off";geminiCalls=0;geminiInputs=[];reviewTranslations=[];translateCalls=0;translatedCharacters=0;failTranslation=false;for(let i=profiles.length-1;i>=0;i--)if(profiles[i].id>=1000)profiles.splice(i,1);catalogBatches=[];rankingDelay=0;failHome=false;failScore=false; alternateToken=undefined; reviewVotes=[]; ratingsDelay=0; showTrending=false; accountDeleted=false;failAuthDelete=false;failStorageDelete=false; quotaMode="allow";user.app_metadata={};steamMode="public";rankings=[];follows=[];blocks=[];likes=[];curated=[{id:10,profile_id:3,name:"Public fixture list",revision:1,description:"Fixture description",is_public:true,is_ranked:true}];listItems=[{list_id:10,game_id:1,position:0}];pictures.clear(); Object.assign(profiles[1], {handle:"fixture_owner",display_name:"Fixture Owner",is_public:false,is_discoverable:false,bio:null,location:null,platform_preference:null,avatar_url:null}); favorites=[{profile_id:3,game_id:1,featured_slot:1,created_at:"2026-09-29T12:00:00Z"}]; ratings = [{ profile_id: 2, game_id: 2, score: 80, tier: "B", status: "playing", review: "Private fixture review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 1, game_id: 1, score: 90, tier: "A", status: "completed", review: "Sample review", tags: [], hours_played: null, platform: null, completed_on: null }, { profile_id: 3, game_id: 1, score: 0, tier: "S", status: "backlog", review: "Public fixture review", tags: [], hours_played: 0, platform: null, completed_on: null } ];
  for (const game_id of [3,4,5,6]) ratings.push({profile_id:3,game_id,score:50,tier:null,status:"playing",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  for (const game_id of [1,3,4,5,6]) ratings.push({profile_id:4,game_id,score:game_id===1 ? 10 : 40,tier:"A",status:"completed",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  ratings.push({profile_id:3,game_id:7,score:null,tier:"S",status:"backlog",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
@@ -340,6 +341,13 @@ export async function startFixtureServer() {
         const groups=new Map();
         for(const row of ratings){const profile=profiles.find(p=>p.id===row.profile_id);if((resource==="rpc/community_game_scores"&&(!profile?.is_public||!profile.is_discoverable))||row.score==null||(input.p_ids&&!input.p_ids.includes(row.game_id)))continue;const values=groups.get(row.game_id)??[];values.push(row.score);groups.set(row.game_id,values);}
         return reply(200,[...groups].filter(([,values])=>values.length>=Number(url.searchParams.get("sample_count")?.replace("gte.","")??1)).map(([game_id,values])=>{const average=values.reduce((a,b)=>a+b,0)/values.length;return {game_id,sample_count:values.length,average:Math.round(average*10)/10,deviation:Math.sqrt(values.reduce((sum,value)=>sum+(value-average)**2,0)/values.length)};}));
+      }
+      if(["rpc/read_steam_achievement_cache","rpc/store_steam_achievement_cache"].includes(resource)){
+        if(!admin)return reply(403,{message:"Server only"});
+        let body="";for await(const part of req)body+=part;const input=JSON.parse(body);
+        const key=JSON.stringify([input.p_owner,input.p_key]);
+        if(resource==="rpc/read_steam_achievement_cache"){const row=achievementReads.get(key);return reply(200,row&&row.expires>Date.now()?row.data:null);}
+        achievementReads.set(key,{data:input.p_data,expires:Date.now()+input.p_seconds*1000});return reply(200,null);
       }
       if(["rpc/read_steam_completion_classification","rpc/store_steam_completion_classification"].includes(resource)){
         if(!admin)return reply(403,{message:"Server only"});

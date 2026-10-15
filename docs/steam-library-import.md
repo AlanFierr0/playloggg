@@ -243,8 +243,7 @@ are never selected automatically. No dates are inferred from last played or hour
 
 Server actions resolve the linked Steam ID from verified Auth metadata, validate
 ownership and the exact provider mapping, and use STEAM_WEB_API_KEY server-side.
-Achievement reads use a bounded, owner-and-app-keyed 15-minute warm-instance cache;
-rejected reads are not cached. No extra provider, key or database migration is needed.
+Achievement reads use persistent Steam results and coalesce simultaneous requests; rejected reads are not cached. Manual dates need no extra provider or key.
 Confirmed dates use the existing guarded rating save with timestamp checks: existing
 dates and unrelated entry fields are preserved, concurrent edits require reloading.
 Confirmed Completed entries appear in the profile timeline. Older saved import drafts
@@ -272,8 +271,8 @@ explicit confirmation. The five-hour threshold and ongoing-game exclusions remai
 Public classifications, including empty results, persist in a server-only Supabase
 cache per Steam app. A hash includes the public schema, model and detector version;
 a changed schema/version triggers a fresh classification. Steam schemas have a
-bounded 24-hour warm-instance cache, classifications a 15-minute warm-instance cache,
-and cold servers reuse the persisted classification. Provider failures are not stored
+24-hour persistent cache, classifications a 15-minute warm-instance cache, and cold
+servers reuse the persisted classification. Provider failures are not stored
 as successful classifications. The global request cap is five new classifications
 per minute and 200 per UTC day; cache hits do not spend provider quota. Missing keys,
 quota errors, malformed responses or outages fall back to text rules without blocking
@@ -282,3 +281,17 @@ rating or saving. Free-tier scans may use fallback rules after reaching a quota.
 The cache table has RLS and no anon/authenticated grants; only server service-role
 RPCs read/write it. A rolled-back Postgres check covers cache access, schema hashes,
 empty results and duplicate rejection in supabase/tests/audit-regression.sql.
+
+## Persistent Steam achievement reads
+
+Validated public achievement schemas are stored for 24 hours; each verified user's
+Steam achievement response is stored for 15 minutes. Both survive cold starts and
+deployments. Player cache keys include the verified owner, linked Steam ID, app and
+language; schemas contain public data and can be reused across owners. Refreshing
+a scan bypasses and replaces the private unlock cache while retaining the public
+schema and AI classification. Provider errors are never cached. Cache storage
+failures still allow a validated Steam response to be used.
+
+The private cache and its RPCs are service-role-only, with RLS as an additional
+guard. Player rows are removed with Auth account deletion. Expired rows are never
+read and are cleaned up on cache writes. Cache reads do not extend their lifetime.
