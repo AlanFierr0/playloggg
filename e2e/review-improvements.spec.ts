@@ -49,11 +49,11 @@ test("Compare finds a followed public profile and keeps its owner first",async({
  await context.addCookies([authCookie]);await page.goto("/people",{waitUntil:"domcontentloaded"});
  await page.getByRole("button",{name:"Follow",exact:true}).first().click();
  await page.goto("/compare");
- await expect(page.getByLabel("First profile handle",{exact:true})).toHaveValue("fixture_owner");
- await page.getByLabel("Second profile handle",{exact:true}).fill("Published Fixture");
+ await expect(page.getByRole("combobox",{name:"First profile handle",exact:true})).toHaveValue("fixture_owner");
+ await page.getByRole("combobox",{name:"Second profile handle",exact:true}).fill("Published Fixture");
  await page.getByRole("option",{name:/@fixture_public/}).click();
- await expect(page.getByLabel("Second profile handle",{exact:true})).toHaveValue("fixture_public");
- await expect(page.getByLabel("First profile handle",{exact:true})).toHaveValue("fixture_owner");
+ await expect(page.getByRole("combobox",{name:"Second profile handle",exact:true})).toHaveValue("fixture_public");
+ await expect(page.getByRole("combobox",{name:"First profile handle",exact:true})).toHaveValue("fixture_owner");
  await page.getByRole("button",{name:"Compare profiles",exact:true}).click();
  await expect(page.getByText("More shared scored games needed",{exact:false})).toContainText("5");
 });

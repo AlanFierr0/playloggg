@@ -10,9 +10,9 @@ test("bounded profile searches expose the rest of the directory",async({page,con
  await expect(page.getByRole("button",{name:/^Profiles\s*\(24\+\)$/})).toBeVisible();
  await page.getByRole("link",{name:"View all matching profiles"}).click();await expect(page).toHaveURL(/\/people\?q=directory/);
  await page.getByRole("link",{name:"Next",exact:true}).click();await expect(page.getByText("Directory Player 29",{exact:true})).toBeVisible();
- await page.goto("/compare");await page.getByLabel("Second profile handle",{exact:true}).fill("directory");
+ await page.goto("/compare");await page.getByRole("combobox",{name:"Second profile handle",exact:true}).fill("directory");
  await expect(page.getByRole("option")).toHaveCount(24);await expect(page.getByRole("link",{name:"View all matching profiles"})).toHaveAttribute("href","/people?q=directory");
- await page.getByLabel("Second profile handle",{exact:true}).press("ArrowDown");await page.getByLabel("Second profile handle",{exact:true}).press("Enter");await expect(page.getByLabel("Second profile handle",{exact:true})).toHaveValue("directory_00");
+ await page.getByRole("combobox",{name:"Second profile handle",exact:true}).press("ArrowDown");await page.getByRole("combobox",{name:"Second profile handle",exact:true}).press("Enter");await expect(page.getByRole("combobox",{name:"Second profile handle",exact:true})).toHaveValue("directory_00");
 });
 
 test("footer and profile tabs stay compact and accessible in both themes",async({page,context},info)=>{

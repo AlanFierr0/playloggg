@@ -5,8 +5,8 @@ import {authCookie} from "./fixture-server.mjs";
 test("published comparisons show real affinity, independent tiers and reloadable handles",async ({page,context},info)=>{
  await page.goto("/compare");
  await page.screenshot({path:`e2e-artifacts/compare-picker-${info.project.name}.png`,fullPage:true});
- await page.getByLabel("First profile handle").fill("fixture_public");
- await page.getByLabel("Second profile handle").fill("fixture_peer");
+ await page.getByRole("combobox",{name:"First profile handle",exact:true}).fill("fixture_public");
+ await page.getByRole("combobox",{name:"Second profile handle",exact:true}).fill("fixture_peer");
  await page.getByRole("button",{name:"Compare profiles"}).click();
  await expect(page.locator("[data-affinity]")).toHaveText("90%");
  const legend=page.getByRole("list",{name:"Games on this chart",exact:true});
@@ -45,7 +45,7 @@ test("published comparisons show real affinity, independent tiers and reloadable
    await page.screenshot({path:`e2e-artifacts/compare-results-${theme}-${info.project.name}.png`,fullPage:true});
  }
 
- await page.reload(); await expect(page.getByLabel("First profile handle")).toHaveValue("fixture_public");
+ await page.reload(); await expect(page.getByRole("combobox",{name:"First profile handle",exact:true})).toHaveValue("fixture_public");
  await expect(page.getByRole("table").locator("tbody tr")).toHaveCount(20);
  await page.getByRole("link",{name:"Next",exact:true}).click();
  await expect(page).toHaveURL(/page=2$/);
@@ -75,8 +75,8 @@ test("other users private and missing profiles stay unavailable even to a signed
 test("signed-in comparisons default to the owner but allow either profile to change",async ({page,context})=>{
  await context.addCookies([authCookie]);
  await page.goto("/compare");
- const first=page.getByLabel("First profile handle");
- const second=page.getByLabel("Second profile handle");
+ const first=page.getByRole("combobox",{name:"First profile handle",exact:true});
+ const second=page.getByRole("combobox",{name:"Second profile handle",exact:true});
  await expect(first).toHaveValue("fixture_owner");
  await expect(first).toBeEditable();
  await second.fill("fixture_peer");
@@ -111,7 +111,7 @@ test("signed-in comparisons default to the owner but allow either profile to cha
 
 test("compare fields search public profiles live and support pointer and keyboard selection", async ({page,context},info) => {
  await context.addCookies([authCookie]);await page.goto("/compare");
- const first=page.getByLabel("First profile handle",{exact:true}),second=page.getByLabel("Second profile handle",{exact:true});
+ const first=page.getByRole("combobox",{name:"First profile handle",exact:true}),second=page.getByRole("combobox",{name:"Second profile handle",exact:true});
  await expect(first).toHaveValue("fixture_owner");
  await first.fill("Published");
  await expect(page.getByRole("option",{name:/Published Fixture/})).toBeVisible();

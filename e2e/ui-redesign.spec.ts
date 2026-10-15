@@ -91,9 +91,9 @@ test("profile creation preserves registration intent and ordinary sign-in", asyn
 test("comparison and game details prioritize useful actions without inventing data", async ({page},testInfo) => {
   await page.goto("/compare");
   await expect(page.getByRole("region",{name:"What a comparison shows"})).toBeVisible();
-  await expect(page.getByLabel("First profile handle")).toHaveCSS("border-top-style","solid");
-  await page.getByLabel("First profile handle").fill("fixture_public");
-  await page.getByLabel("Second profile handle").fill("fixture_peer");
+  await expect(page.getByRole("combobox",{name:"First profile handle",exact:true})).toHaveCSS("border-top-style","solid");
+  await page.getByRole("combobox",{name:"First profile handle",exact:true}).fill("fixture_public");
+  await page.getByRole("combobox",{name:"Second profile handle",exact:true}).fill("fixture_peer");
   await page.getByRole("button",{name:"Compare profiles"}).click();
   await expect(page.getByRole("table")).toContainText("Fixture Game 00");
   await expect(page.getByRole("region",{name:"What a comparison shows"})).toHaveCount(0);
