@@ -16,8 +16,12 @@ a published fixture entry and curated list remain readable.
 
 `pnpm test` runs the existing domain/rendering checks. The main checks workflow
 prepares route types, checks TypeScript and lint, and runs these tests without
-production credentials. A separate browser job runs both desktop (1440 px) and mobile (375 px) projects
-on every push to `main`. No production secrets are configured in either job.
+production credentials. Four parallel browser jobs split the full desktop (1440 px)
+and mobile (375 px) suite on every push to `main`, using Playwright's built-in
+`--shard=N/4`. Each job has its own fixture backend and one worker because tests
+reset shared in-memory state. Each shard stops on its first failure; GitHub cancels
+the other shards when a job fails. Browser jobs have an eight-minute ceiling and
+separate `browser-results-N` artifacts. No production secrets are configured in these jobs.
 
 ## Post-deploy smoke
 

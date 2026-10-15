@@ -5,11 +5,11 @@ test("launch metadata indexes only public catalog pages and excludes profiles fr
  for(const [path,index,canonical] of [["/",true,"/"],["/games",true,"/games"],["/games?q=Hades",false,"/games"],["/game/hades",true,"/game/hades"],["/search?q=Hades",false,null],["/login",false,null],["/compare",false,null],["/u/fixture_public",false,"/u/fixture_public"],["/u/fixture_public/game/hades",false,"/u/fixture_public/game/hades"],["/u/fixture_public/tiers",false,"/u/fixture_public/tiers"]] as const){
   await page.goto(path);
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content",index ? /^index,/ : /noindex/);
-  if(canonical) await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href",canonical === "/" ? "https://playloggg.vercel.app" : `https://playloggg.vercel.app${canonical}`);
+  if(canonical) await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href",canonical === "/" ? "https://playlogg.alanfierro.dev" : `https://playlogg.alanfierro.dev${canonical}`);
  }
  const sitemap=await request.get("/sitemap.xml");expect(sitemap.status()).toBe(200);
- const xml=await sitemap.text();expect(xml).toContain("https://playloggg.vercel.app/game/hades");expect(xml).not.toContain("/u/");expect(xml).not.toContain("/settings");
- expect((await (await request.get("/robots.txt")).text())).toContain("Sitemap: https://playloggg.vercel.app/sitemap.xml");
+ const xml=await sitemap.text();expect(xml).toContain("https://playlogg.alanfierro.dev/game/hades");expect(xml).not.toContain("/u/");expect(xml).not.toContain("/settings");
+ expect((await (await request.get("/robots.txt")).text())).toContain("Sitemap: https://playlogg.alanfierro.dev/sitemap.xml");
  await context.addCookies([authCookie]);await page.goto("/game/elden-ring-shadow-of-the-erdtree");
  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content",/noindex/);
  await expect(page.locator('meta[property="og:description"]')).not.toHaveAttribute("content",/Private fixture review/);
