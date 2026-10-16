@@ -27,6 +27,7 @@ test("completion timeline groups all completions by year, browses horizontally, 
  await page.getByRole("button",{name:"All months",exact:true}).click();
  const panels=page.locator("[data-timeline-year]");
  await expect(panels).toHaveCount(1);
+ await expect(page.getByRole("button",{name:/^(Newer|Older) year$/})).toHaveCount(0);
  const tabs=page.getByRole("tablist",{name:"Completion years",exact:true});
  await expect(tabs.getByRole("tab")).toHaveCount(15);
  await expect(tabs.getByRole("tab").first()).toHaveAttribute("aria-selected","true");
@@ -62,7 +63,7 @@ test("completion timeline groups all completions by year, browses horizontally, 
  await year2025.getByRole("button",{name:"Whole year",exact:true}).click();
  await expect(year2025.getByRole("link")).toHaveCount(3);
  expect((await panels.allTextContents()).join("")).not.toContain("2026");
- await page.getByRole("button",{name:"Older year",exact:true}).click();await expect(panels.first()).toHaveAttribute("data-timeline-year","2024");
+ await tabs.getByRole("tab",{name:"2024",exact:true}).click();await expect(panels.first()).toHaveAttribute("data-timeline-year","2024");
  await expect(page.getByRole("group",{name:"Monthly completions · 2024",exact:true}).locator('[data-month-section="02"]')).toHaveAttribute("data-month-count","1");
  await page.getByRole("group",{name:"Monthly completions · 2024",exact:true}).locator('[data-month-section="02"]').click();
  await page.getByRole("button",{name:"Clear month filter",exact:true}).click();
@@ -71,7 +72,7 @@ test("completion timeline groups all completions by year, browses horizontally, 
  await expect(panels.first()).toHaveAttribute("data-timeline-year","2025");
  await expect(panels.first().getByRole("link")).toHaveCount(2);
  await year2025.getByRole("button",{name:"Whole year",exact:true}).click();
- await page.getByRole("button",{name:"Older year",exact:true}).click();
+ await tabs.getByRole("tab",{name:"2024",exact:true}).click();
  await page.emulateMedia({reducedMotion:"reduce"});
  await tabs.getByRole("tab",{name:"2024",exact:true}).focus();await page.keyboard.press("End");
  await expect(panels.first()).toHaveAttribute("data-timeline-year","2010");await expect(tabs.getByRole("tab").last()).toBeFocused();
@@ -79,7 +80,7 @@ test("completion timeline groups all completions by year, browses horizontally, 
  await page.keyboard.press("Home");await expect(panels.first()).toHaveAttribute("data-timeline-year","2025");await expect(tabs.getByRole("tab").first()).toBeFocused();
  await page.emulateMedia({reducedMotion:"no-preference"});
  await page.keyboard.press("ArrowRight");await expect(panels.first()).toHaveAttribute("data-timeline-year","2024");
- await page.getByRole("button",{name:"Newer year",exact:true}).click();await expect(panels.first()).toHaveAttribute("data-timeline-year","2025");
+ await tabs.getByRole("tab",{name:"2025",exact:true}).click();await expect(panels.first()).toHaveAttribute("data-timeline-year","2025");
  const history=page.getByRole("region",{name:"Timeline",exact:true});const historyBox=await history.boundingBox(),orbitBox=await chart.boundingBox();
  expect(orbitBox!.y).toBeGreaterThan(historyBox!.y+historyBox!.height);
 
