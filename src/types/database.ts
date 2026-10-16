@@ -725,6 +725,7 @@ export type Database = {
         Returns: number
       }
       read_steam_completion_skips: {Args:{p_owner:string};Returns:number[]}
+      restore_steam_completion_game: {Args:{p_owner:string;p_game:number};Returns:undefined}
       skip_steam_completion_game: {Args:{p_owner:string;p_game:number};Returns:undefined}
       read_steam_achievement_cache: {Args:{p_key:string;p_owner:string|null};Returns:Json}
       store_steam_achievement_cache: {Args:{p_key:string;p_owner:string|null;p_data:Json;p_seconds:number};Returns:undefined}

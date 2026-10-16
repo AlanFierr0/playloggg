@@ -1,6 +1,6 @@
 # Application audit fixes — October 16, 2026
 
-Scope: audit items 1–16. Items 17–19 remain outside this change.
+Scope: audit items 1–19. Items 17–19 were added in the follow-up; item 14 remains dependent on private backup storage.
 
 | Item | Result |
 |---|---|
@@ -20,6 +20,9 @@ Scope: audit items 1–16. Items 17–19 remain outside this change.
 | 14 | Partially complete: authenticated production inspection found no listed backups and PITR disabled. Scheduled off-site database/picture backups and a real isolated restore still require a private storage destination and credentials. |
 | 15 | Removed the unreachable prototype game screen and unused search exports/image helper. Original design-reference assets remain. |
 | 16 | Updated current developer instructions, production domain, timeline/import/translation/persistence and recovery documentation. |
+| 17 | Save game / Save changes uses a compact sticky mobile row; save feedback stays alongside the action. Inputs, optional tags/review, deletion and guarded drafts remain available. |
+| 18 | Screenshot galleries initially show two images; native keyboard-accessible View all / Show fewer controls reveal the remainder. |
+| 19 | Completion scans offer immediate Undo skip and a private Skipped games list for later restoration. Restoring changes only the current owner's skip preference. |
 
 Migration: `20261016113940_persist_game_type_and_claim_translations.sql`. The nullable game-type field is compatible with existing records; older save payloads preserve an existing choice. Translation claim functions are executable only by the service role, with no anonymous/authenticated table reads. Production schema and permissions were verified after application.
 
@@ -30,3 +33,7 @@ See [data recovery](data-recovery.md) for the remaining operations work. Product
 Local verification: 137 unit regressions, 72 affected desktop/mobile browser cases, TypeScript, ESLint and the production-mode fixture build passed. The final Steam HTTP 429 branch has its own Retry-After regression; GitHub rebuilds and checks the complete change on every push. Real provider handshakes and a production restore were not exercised.
 
 Final statistics guard: an explicit Campaign choice takes precedence over legacy active/paused/stopped inference; that fallback applies only when play_style is null.
+
+Follow-up verification covers sticky Save and unobscured inputs at 320/390/768/1440px, keyboard gallery expansion/collapse, English/Spanish and light/dark rendering, failed Undo recovery, restoring after reload, and unchanged logs. The restore RPC is server-only and owner-scoped; production backup configuration remains outside these three items.
+
+Items 17–19 verification: 138 unit regressions, 62 affected desktop/mobile browser cases, TypeScript, ESLint and the production-mode fixture build passed. Migration `20261016121045_restore_skipped_steam_completions.sql` was applied; production inspection confirmed no anonymous/authenticated execute or delete permission.

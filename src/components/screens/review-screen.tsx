@@ -101,7 +101,7 @@ function commit() {
 }
 return (<>{conflict && <div role="alert" className="site-container mx-auto p-4"><p>{t(saveMessage)}</p><button type="button" onClick={() => { clearStoredDraft(); window.location.reload(); }} className="mt-3 min-h-11 rounded-lg bg-surface-container px-4 text-primary">{t("Discard draft and reload latest entry")}</button></div>}<fieldset disabled={pending} className="contents">
 <div className="w-full  bg-surface"><div className="flex flex-col w-full">
-<div className="relative w-full min-h-[calc(100dvh-var(--site-header-height))] flex items-stretch p-4 sm:p-6 lg:p-8 overflow-hidden">
+<div className="relative w-full min-h-[calc(100dvh-var(--site-header-height))] flex items-stretch p-4 sm:p-6 lg:p-8 overflow-clip">
 <div className="absolute inset-0 pointer-events-none overflow-hidden">
 <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[720px] h-[360px] bg-primary/5 rounded-full blur-[140px]"></div>
 
@@ -111,7 +111,7 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 
 </div>
 
-<div className="relative w-full min-w-0 bg-surface-container-low rounded-xl shadow-2xl overflow-hidden flex flex-col">
+<div className="relative w-full min-w-0 bg-surface-container-low rounded-xl shadow-2xl overflow-clip flex flex-col">
 <div className="w-full bg-surface-container px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
 <div className="flex items-center gap-3 min-w-0">
 <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
@@ -143,7 +143,7 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 
 <div className="p-4 sm:p-6 lg:p-8 grid grid-cols-1 xl:grid-cols-2 items-start gap-8">
 {!canEdit && <p className="xl:col-span-2 font-body-sm text-body-sm text-on-surface-variant">{t("Sign in to save your entry. ")}<Link href={`/login?next=${encodeURIComponent(`/log?game=${game.slug}`)}`} className="text-primary underline">{t("Sign in")}</Link> {t("to save entries to your own profile.")}</p>}
-<p role="status" hidden={!pending && !saveMessage} className="xl:col-span-2 font-body-sm text-body-sm text-primary">{pending ? t("Saving…") : t(saveMessage)}</p>
+
 <div className="xl:col-span-2 flex flex-col sm:flex-row gap-6 sm:gap-8 items-start">
 <div className="relative group flex-shrink-0 w-32 sm:w-40 aspect-[3/4] rounded-lg overflow-hidden bg-surface-container shadow-xl">
 <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt={game.title} src={game.cover} />
@@ -289,15 +289,16 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 
 </div>
 
-<div className="w-full bg-surface-container-lowest px-4 py-4 sm:px-10 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 mt-auto">
-{canEdit && game.logged ? <RemoveLog slug={game.slug} title={game.title} updatedAt={expectedUpdatedAt} onRemoved={clearStoredDraft} /> : <div />}
+{canEdit && game.logged && <div className="px-4 py-3 sm:px-10"><RemoveLog slug={game.slug} title={game.title} updatedAt={expectedUpdatedAt} onRemoved={clearStoredDraft} /></div>}
+<div data-editor-save-row className="sticky bottom-0 z-30 mt-auto w-full border-t border-outline-variant/30 bg-surface-container-lowest px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:static sm:px-10 sm:py-5 space-y-3">
+<p role="status" hidden={!pending && !saveMessage} className="font-body-sm text-body-sm text-primary break-words">{pending ? t("Saving…") : t(saveMessage)}</p>
 
-<div className="flex flex-col min-[360px]:flex-row items-center gap-3 w-full sm:w-auto justify-end">
-<button id="discard-rating" className="w-full sm:w-auto px-4 py-2 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-colors" type="button" onClick={resetDraft}>{t("\n            Discard Draft\n          ")}</button>
+<div className="flex items-center gap-3 w-full justify-end">
+<button id="discard-rating" className="min-h-11 flex-1 sm:flex-none sm:w-auto px-4 py-2 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-colors" type="button" onClick={resetDraft}>{t("Discard draft")}</button>
 
-<button id="commit-rating" className="w-full sm:w-auto px-6 py-2 rounded bg-primary-container text-on-primary-container hover:bg-primary font-label-md text-label-md uppercase tracking-wider font-semibold shadow-lg shadow-primary-container/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50" type="button" disabled={!canEdit || pending} onClick={commit}>
+<button id="commit-rating" className="min-h-11 flex-1 sm:flex-none sm:w-auto px-6 py-2 rounded bg-primary-container text-on-primary-container hover:bg-primary font-label-md text-label-md uppercase tracking-wider font-semibold shadow-lg shadow-primary-container/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50" type="button" disabled={!canEdit || pending} onClick={commit}>
 <span aria-hidden="true" className="material-symbols-outlined text-[18px]">{"bookmark_added"}</span>
-{pending ? t("Saving…") : t("Commit to Log")}</button>
+{pending ? t("Saving…") : t(game.logged ? "Save changes" : "Save game")}</button>
 
 </div>
 

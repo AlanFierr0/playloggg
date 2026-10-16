@@ -27,3 +27,17 @@ test("Steam provider throttling retains Retry-After instead of becoming an unava
  vm.runInNewContext(ts.transpileModule(readFileSync(new URL("../src/lib/steam-completion.ts",import.meta.url),"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,context);
  await assert.rejects(context.exports.readSteamCompletions("owner","76561198000000000",100,null),/Too many requests\. Try again in 17 seconds\./);
 });
+
+test("completion skip recovery uses only the verified owner and does not write ratings",async()=>{
+ let account=null,calls=[];
+ const db={from(table){assert.equal(table,"games");return {select(){return this;},eq(){return this;},single:async()=>({data:{id:7},error:null}),in:async(_key,ids)=>({data:ids.map(id=>({slug:`game-${id}`,title:`Game ${id}`})),error:null})};}};
+ const deps={"next/cache":{},"@/lib/owner":{getAccount:async()=>account},"@/lib/operation-limits":{checkOperationLimit:async()=>{},operationFailure:(_error,fallback)=>fallback},"@/lib/supabase/auth-admin":{createAuthAdmin:()=>({rpc:async(name,args)=>{calls.push([name,args]);return {data:name==="read_steam_completion_skips"?[7]:null,error:null};}})},"@/lib/recent-read":{recentRead:fn=>fn}};
+ const context={exports:{},require:name=>deps[name]??{}};
+ vm.runInNewContext(ts.transpileModule(readFileSync(new URL("../src/app/actions/steam-library.ts",import.meta.url),"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,context);
+ const {restoreSteamCompletion,listSkippedSteamCompletionGames}=context.exports;
+ assert.equal((await restoreSteamCompletion("game-7")).ok,false);assert.equal((await listSkippedSteamCompletionGames()).ok,false);assert.equal(calls.length,0);
+ account={user:{id:"verified-owner"},profile:{id:2},supabase:db};
+ assert.equal((await restoreSteamCompletion({slug:"game-7",owner:"forged"})).ok,false);assert.equal(calls.length,0);
+ assert.equal((await restoreSteamCompletion("game-7")).ok,true);assert.equal(calls[0][0],"restore_steam_completion_game");assert.equal(calls[0][1].p_owner,"verified-owner");assert.equal(calls[0][1].p_game,7);
+ const skipped=await listSkippedSteamCompletionGames();assert.equal(skipped.ok,true);assert.equal(skipped.games[0].slug,"game-7");assert.equal(calls[1][1].p_owner,"verified-owner");
+});

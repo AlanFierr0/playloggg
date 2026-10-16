@@ -335,3 +335,33 @@ do $$declare p bigint;g bigint;first uuid:='88888888-8888-4888-8888-888888888888
 end;$$;
 reset role;
 rollback;
+-- Skip recovery is owner-scoped, server-only and never modifies logs.
+begin;
+insert into auth.users(id,email,email_confirmed_at) values
+('88888888-8888-4888-8888-888888888888','restore-owner@example.invalid',now()),
+('99999999-9999-4999-8999-999999999999','restore-other@example.invalid',now());
+insert into public.profiles(handle,display_name,owner_user_id,is_public,is_discoverable) values
+('sql_restore_owner','Restore owner','88888888-8888-4888-8888-888888888888',false,false),
+('sql_restore_other','Restore other','99999999-9999-4999-8999-999999999999',false,false);
+insert into public.games(slug,title,cover_url) values('sql-restore-game','Restore game','/icon.svg');
+insert into public.ratings(profile_id,game_id,score,platform,review)
+select p.id,g.id,83,'pc','Keep review' from public.profiles p cross join public.games g where p.handle in ('sql_restore_owner','sql_restore_other') and g.slug='sql-restore-game';
+do $$begin
+ if has_function_privilege('authenticated','public.restore_steam_completion_game(uuid,bigint)','execute')
+ or has_function_privilege('anon','public.restore_steam_completion_game(uuid,bigint)','execute')
+ or has_table_privilege('authenticated','private.steam_completion_skips','delete') then raise exception 'Skip recovery exposed';end if;
+end;$$;
+set local role service_role;
+do $$declare g bigint;original jsonb;begin
+ select id into g from public.games where slug='sql-restore-game';
+ select jsonb_agg(to_jsonb(r) order by profile_id) into original from public.ratings r where game_id=g;
+ perform public.skip_steam_completion_game('88888888-8888-4888-8888-888888888888',g);
+ perform public.skip_steam_completion_game('99999999-9999-4999-8999-999999999999',g);
+ perform public.restore_steam_completion_game('88888888-8888-4888-8888-888888888888',g);
+ perform public.restore_steam_completion_game('88888888-8888-4888-8888-888888888888',g);
+ if public.read_steam_completion_skips('88888888-8888-4888-8888-888888888888') is distinct from '{}'::bigint[] then raise exception 'Skip not restored idempotently';end if;
+ if public.read_steam_completion_skips('99999999-9999-4999-8999-999999999999') is distinct from array[g] then raise exception 'Another owner changed';end if;
+ if (select jsonb_agg(to_jsonb(r) order by profile_id) from public.ratings r where game_id=g) is distinct from original then raise exception 'Restore changed logs';end if;
+end;$$;
+reset role;
+rollback;

@@ -25,6 +25,6 @@ export function TagEditor({ tags, onChange }: { tags: string[]; onChange: (tags:
       <button id="confirm-tag" type="button" onClick={add} className="rounded bg-primary-container px-3 py-2 text-on-primary-container">{t("Add")}</button><button type="button" onClick={() => { setAdding(false); setLabel(""); setError(""); }} className="px-2 py-2 text-on-surface-variant">{t("Cancel")}</button>
     </div>}
     {error && <p role="alert" className="text-error font-body-sm text-body-sm">{t(error)}</p>}
-    <p className="font-body-sm text-body-sm text-on-surface-variant">{t("Click a tag to remove it. Commit to Log saves your tags.")}</p>
+    <p className="font-body-sm text-body-sm text-on-surface-variant">{t("Select a tag to remove it. Save your game to keep your tags.")}</p>
   </div>;
 }

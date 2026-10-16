@@ -343,3 +343,30 @@ export async function skipSteamCompletion(slug:unknown) {
     return saveError?failure:{ok:true,message:"Game skipped. It will not appear in future completion scans."};
   }catch{return failure;}
 }
+
+export async function listSkippedSteamCompletionGames():Promise<{ok:boolean;message:string;games:{slug:string;title:string}[]}> {
+  try {
+    const account=await getAccount();if(!account?.profile)throw new Error("Profile required");
+    await checkOperationLimit(account.user.id,"steam");
+    const {data:ids,error}=await createAuthAdmin().rpc("read_steam_completion_skips",{p_owner:account.user.id});
+    if(error)throw new Error("Preferences unavailable");
+    const games:{slug:string;title:string}[]=[];
+    for(let offset=0;offset<(ids?.length??0);offset+=100){
+      const {data,error}=await account.supabase.from("games").select("slug,title").in("id",ids!.slice(offset,offset+100));
+      if(error)throw new Error("Catalog unavailable");games.push(...data);
+    }
+    return {ok:true,message:"",games:games.sort((a,b)=>a.title.localeCompare(b.title))};
+  }catch(error){return {ok:false,message:operationFailure(error,"Skipped games could not be loaded. Please retry."),games:[]};}
+}
+export async function restoreSteamCompletion(slug:unknown) {
+  const failure={ok:false,message:"Game could not be restored. Please retry."};
+  if(typeof slug!=="string"||!/^[a-z0-9][a-z0-9-]{0,199}$/.test(slug))return failure;
+  try {
+    const account=await getAccount();if(!account?.profile)return failure;
+    await checkOperationLimit(account.user.id,"steam");
+    const {data:game,error}=await account.supabase.from("games").select("id").eq("slug",slug).single();
+    if(error||!game)return failure;
+    const {error:saveError}=await createAuthAdmin().rpc("restore_steam_completion_game",{p_owner:account.user.id,p_game:game.id});
+    return saveError?failure:{ok:true,message:"Game restored. Run Find completion dates to check it again."};
+  }catch{return failure;}
+}

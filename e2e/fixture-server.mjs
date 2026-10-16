@@ -19,7 +19,7 @@ const profiles = [
 profiles.push({id:4,handle:"fixture_peer",display_name:"Published Peer",is_public:true,owner_user_id:null});
 profiles.push({id:5,handle:"fixture_empty",display_name:"Empty Profile",is_public:true,owner_user_id:null});
 const titles = [["hades", "Hades", "Roguelike"], ["elden-ring-shadow-of-the-erdtree", "Elden Ring: Shadow of the Erdtree", "Action RPG"], ...Array.from({ length: 120 }, (_, i) => [`fixture-game-${i}`, `Fixture Game ${String(i).padStart(2, "0")}`, "Adventure"])];
-const initialGames = titles.map(([slug, title, genre], index) => ({ id: index + 1, igdb_id: index + 1, slug, title, cover_url: "/icon.svg", release_year: 2020, released_on: "2020-01-01", genres: [genre], artwork_image_ids: [], screenshot_image_ids: [], search_keywords: title.toLowerCase(), igdb_metadata: { publishers: index === 0 ? ["Fixture Publisher"] : [], developers: index === 0 ? [{ name: "Fixture Studio" }, null, 7] : [], platforms: index === 0 ? ["PC (Microsoft Windows)", "Android"] : index === 1 ? ["PlayStation 5", "Xbox Series X|S", "Nintendo Switch 2"] : index === 2 ? ["Dreamcast"] : ["PC"], summary: "Deterministic test catalog entry." }, igdb_url: null }));
+const initialGames = titles.map(([slug, title, genre], index) => ({ id: index + 1, igdb_id: index + 1, slug, title, cover_url: "/icon.svg", release_year: 2020, released_on: "2020-01-01", genres: [genre], artwork_image_ids: [], screenshot_image_ids: index===121?Array.from({length:10},(_,i)=>`fixture-screenshot-${i}`):[], search_keywords: title.toLowerCase(), igdb_metadata: { publishers: index === 0 ? ["Fixture Publisher"] : [], developers: index === 0 ? [{ name: "Fixture Studio" }, null, 7] : [], platforms: index === 0 ? ["PC (Microsoft Windows)", "Android"] : index === 1 ? ["PlayStation 5", "Xbox Series X|S", "Nintendo Switch 2"] : index === 2 ? ["Dreamcast"] : ["PC"], summary: "Deterministic test catalog entry." }, igdb_url: null }));
 let alternateToken;
 let games = structuredClone(initialGames);
 let ratings;
@@ -344,11 +344,12 @@ export async function startFixtureServer() {
         for(const row of ratings){const profile=profiles.find(p=>p.id===row.profile_id);if((resource==="rpc/community_game_scores"&&(!profile?.is_public||!profile.is_discoverable))||row.score==null||(input.p_ids&&!input.p_ids.includes(row.game_id)))continue;const values=groups.get(row.game_id)??[];values.push(row.score);groups.set(row.game_id,values);}
         return reply(200,[...groups].filter(([,values])=>values.length>=Number(url.searchParams.get("sample_count")?.replace("gte.","")??1)).map(([game_id,values])=>{const average=values.reduce((a,b)=>a+b,0)/values.length;return {game_id,sample_count:values.length,average:Math.round(average*10)/10,deviation:Math.sqrt(values.reduce((sum,value)=>sum+(value-average)**2,0)/values.length)};}));
       }
-      if(["rpc/read_steam_completion_skips","rpc/skip_steam_completion_game"].includes(resource)){
+      if(["rpc/read_steam_completion_skips","rpc/skip_steam_completion_game","rpc/restore_steam_completion_game"].includes(resource)){
         if(!admin)return reply(403,{message:"Server only"});
         let body="";for await(const part of req)body+=part;const input=JSON.parse(body);
         if(resource==="rpc/read_steam_completion_skips")return reply(200,completionSkips.filter(row=>row.owner===input.p_owner).map(row=>row.game));
         if(failCompletionSkip)return reply(503,{message:"Controlled skip save failure"});
+        if(resource==="rpc/restore_steam_completion_game"){completionSkips=completionSkips.filter(row=>row.owner!==input.p_owner||row.game!==input.p_game);return reply(200,null);}
         if(!ratings.some(row=>row.game_id===input.p_game&&row.platform==="pc"&&profiles.some(profile=>profile.id===row.profile_id&&profile.owner_user_id===input.p_owner)))return reply(403,{message:"Owned PC log required"});
         if(!completionSkips.some(row=>row.owner===input.p_owner&&row.game===input.p_game))completionSkips.push({owner:input.p_owner,game:input.p_game});return reply(200,null);
       }
