@@ -55,9 +55,9 @@ test("published comparisons show real affinity, independent tiers and reloadable
  await expect(page.getByRole("table").locator("tbody tr")).toHaveCount(20);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
  await page.goto("/compare?left=alexvance&right=fixture_public");
- await expect(page.getByText("Comparison unavailable. Check both handles and make sure both profiles are published.")).toBeVisible();
+ await expect(page.getByRole("status").filter({hasText:"Comparison unavailable. Check both handles and make sure both profiles are published."})).toBeVisible();
  await page.goto("/compare?left=fixture_public&right=fixture_empty");
- await expect(page.getByText("These profiles have no shared logged games yet.")).toBeVisible();
+ await expect(page.getByRole("status").filter({hasText:"These profiles have no shared logged games yet."})).toBeVisible();
  await expect(page.getByRole("button",{name:"Download share card",exact:true})).toHaveCount(0);
  await expect(page.getByRole("combobox",{name:"Share card format",exact:true})).toHaveCount(0);
 });
@@ -65,12 +65,12 @@ test("other users private and missing profiles stay unavailable even to a signed
  await context.addCookies([authCookie]);
  for(const right of ["alexvance","missing_fixture","../../login"]){
   await page.goto(`/compare?left=fixture_public&right=${encodeURIComponent(right)}`);
-  await expect(page.getByText("Comparison unavailable. Check both handles and make sure both profiles are published.")).toBeVisible();
+  await expect(page.getByRole("status").filter({hasText:"Comparison unavailable. Check both handles and make sure both profiles are published."})).toBeVisible();
   await expect(page.getByText("Private fixture review")).toHaveCount(0);
   await expect(page.locator("[data-affinity]")).toHaveCount(0);
  }
  await page.goto("/compare?left=fixture_owner&right=fixture_owner");
- await expect(page.getByText("Choose two different published profiles.")).toBeVisible();
+ await expect(page.getByRole("status").filter({hasText:"Choose two different published profiles."})).toBeVisible();
 });
 test("signed-in comparisons default to the owner but allow either profile to change",async ({page,context})=>{
  await context.addCookies([authCookie]);
@@ -103,7 +103,7 @@ test("signed-in comparisons default to the owner but allow either profile to cha
  await expect(page.getByRole("region",{name:"Profile comparison"}).getByRole("link",{name:"Fixture Owner",exact:true})).toHaveAttribute("href","/profile");
  await page.goto("/compare?left=alexvance&right=fixture_public");
  await expect(page.locator("[data-affinity]")).toHaveCount(0);
- await expect(page.getByText("Comparison unavailable. Check both handles and make sure both profiles are published.")).toBeVisible();
+ await expect(page.getByRole("status").filter({hasText:"Comparison unavailable. Check both handles and make sure both profiles are published."})).toBeVisible();
  await page.goto("/compare");
  await expect(first).toHaveValue("fixture_owner");
 });

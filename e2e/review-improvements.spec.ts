@@ -55,7 +55,8 @@ test("Compare finds a followed public profile and keeps its owner first",async({
  await expect(page.getByRole("combobox",{name:"Second profile handle",exact:true})).toHaveValue("fixture_public");
  await expect(page.getByRole("combobox",{name:"First profile handle",exact:true})).toHaveValue("fixture_owner");
  await page.getByRole("button",{name:"Compare profiles",exact:true}).click();
- await expect(page.getByText("More shared scored games needed",{exact:false})).toContainText("5");
+ await expect(page).toHaveURL(/\/compare\?left=fixture_owner&right=fixture_public$/);
+ await expect(page.getByRole("status").filter({hasText:"More shared scored games needed"})).toContainText("5");
 });
 
 test("external search fails closed on quota limits and recovers without blocking the saved catalog",async({page,context})=>{
