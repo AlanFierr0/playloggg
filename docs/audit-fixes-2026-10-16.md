@@ -27,4 +27,6 @@ Regression coverage includes a 3,000-game library with exactly two bounded datab
 
 See [data recovery](data-recovery.md) for the remaining operations work. Production records and pictures must never be uploaded to this public repository or its public CI artifacts.
 
-Local verification: 136 unit regressions, 72 affected desktop/mobile browser cases, TypeScript, ESLint and the production-mode fixture build passed. The final Steam HTTP 429 branch has its own Retry-After regression; GitHub rebuilds and checks the complete change on every push. Real provider handshakes and a production restore were not exercised.
+Local verification: 137 unit regressions, 72 affected desktop/mobile browser cases, TypeScript, ESLint and the production-mode fixture build passed. The final Steam HTTP 429 branch has its own Retry-After regression; GitHub rebuilds and checks the complete change on every push. Real provider handshakes and a production restore were not exercised.
+
+Final statistics guard: an explicit Campaign choice takes precedence over legacy active/paused/stopped inference; that fallback applies only when play_style is null.

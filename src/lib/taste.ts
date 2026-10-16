@@ -66,7 +66,7 @@ export function tasteStats(games: Game[]) {
     (game) => game.status === "completed" && game.playStyle !== "ongoing",
   ).length;
   // Saved type includes online backlog entries; legacy entries retain their status-based fallback.
-  const ongoing = entries.filter(game => game.playStyle === "ongoing" || game.status === "active" || game.status === "paused" || game.status === "stopped").length;
+  const ongoing = entries.filter(game => game.playStyle === "ongoing" || (!game.playStyle && (game.status === "active" || game.status === "paused" || game.status === "stopped"))).length;
   const finishable = entries.length - ongoing;
   return {
     ongoing,

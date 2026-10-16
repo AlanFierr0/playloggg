@@ -49,3 +49,8 @@ test("saved ongoing game type excludes online backlog and completed legacy statu
  const stats=tasteStats([game("campaign",80,{status:"completed",playStyle:"campaign"}),game("online-backlog",null,{status:"backlog",playStyle:"ongoing"}),game("online-old",90,{status:"completed",playStyle:"ongoing"})]);
  assert.equal(stats.ongoing,2);assert.equal(stats.finishable,1);assert.equal(stats.completed,1);assert.equal(stats.completionRate,100);
 });
+
+test("an explicit campaign type takes precedence over legacy ongoing statuses",()=>{
+ const stats=tasteStats([game("manual-campaign",80,{playStyle:"campaign",status:"paused"})]);
+ assert.equal(stats.ongoing,0);assert.equal(stats.finishable,1);assert.equal(stats.completionRate,0);
+});
