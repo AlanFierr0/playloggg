@@ -60,7 +60,7 @@ export function SteamCompletionScan({disabled,children}:{profileId:number;disabl
   }
   async function restore(game:{slug:string;title:string}){
     setSaving(game.slug);setSkipMessage("");
-    try{const result=await restoreSteamCompletion(game.slug);if(mounted.current){setSkipMessage(result.message);if(result.ok){setResults(rows=>rows.map(row=>row.game.slug===game.slug?{...row,skipped:false,message:undefined}:row));setSkippedGames(games=>games?.filter(row=>row.slug!==game.slug)??null);setLastSkipped(previous=>previous?.slug===game.slug?null:previous);setMessage(result.message);scanButton.current?.focus({preventScroll:true});}}}
+    try{const result=await restoreSteamCompletion(game.slug);if(mounted.current){setSkipMessage(result.message);if(result.ok){setResults(rows=>rows.map(row=>row.game.slug===game.slug?{...row,skipped:false,message:undefined}:row));setSkippedGames(games=>games?.filter(row=>row.slug!==game.slug)??null);setLastSkipped(previous=>previous?.slug===game.slug?null:previous);setMessage(result.message);requestAnimationFrame(()=>scanButton.current?.focus({preventScroll:true}));}}}
     catch{if(mounted.current)setSkipMessage("Game could not be restored. Please retry.");}
     finally{if(mounted.current)setSaving(null);}
   }

@@ -57,7 +57,7 @@ test("completion skips can be undone immediately or restored later without editi
  await panel.getByRole("button",{name:"Skip game",exact:true}).click();await expect(panel.getByRole("article")).toHaveCount(0);
  const undo=page.getByRole("button",{name:"Undo skip",exact:true});await expect(undo).toBeFocused();
  await request.post(`${fixture}/__fail-completion-skip`);await undo.click();await expect(page.getByRole("status").filter({hasText:"Game could not be restored."})).toBeVisible();await expect(undo).toBeVisible();
- await request.post(`${fixture}/__fail-completion-skip`);await undo.click();await expect(panel.getByRole("article")).toHaveCount(1);
+ await request.post(`${fixture}/__fail-completion-skip`);await undo.click();await expect(panel.getByRole("article")).toHaveCount(1);await expect(page.getByRole("button",{name:"Find completion dates",exact:true})).toBeFocused();
  await panel.getByRole("button",{name:"Skip game",exact:true}).click();await expect(panel.getByRole("article")).toHaveCount(0);await expect(undo).toBeVisible();await context.addCookies([{name:"playlogg_locale",value:"es-AR",url:"http://127.0.0.1:3100"}]);await page.reload();
  const summary=page.locator("summary").filter({hasText:"Juegos omitidos"});await summary.focus();await page.keyboard.press("Enter");
  const restore=page.getByRole("button",{name:"Restaurar juego",exact:true});await expect(restore).toHaveCount(1);await restore.click();
