@@ -56,3 +56,10 @@ test("guest portfolio does not preload the catalog or sample ratings", async () 
   assert.equal(portfolio.profile.id, "");
   assert.deepEqual(calls, []);
 });
+
+test("card-only profile reads omit review prose while keeping game type and review timestamps",async()=>{
+ let selected;
+ const db={from(){return {select(fields){selected=fields;return this;},eq(){return this;},order(){return this;},range(){return {data:[{game_id:1,score:0,play_style:"ongoing",review_updated_at:"2026-10-16T00:00:00Z"}],error:null};}};}};
+ const rows=await readProfileRatings(db,7,false);
+ assert.ok(!selected.split(",").includes("review"));assert.ok(selected.split(",").includes("play_style"));assert.equal(rows[0].review,null);assert.equal(rows[0].play_style,"ongoing");
+});

@@ -1,3 +1,4 @@
+import { navigationPath } from "@/lib/return-navigation";
 import { randomBytes } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { steamLoginUrl, steamSite, steamLinkCookie } from "@/lib/steam-openid";
@@ -10,7 +11,9 @@ export async function POST(request: NextRequest) {
   try {
     const site = steamSite(process.env.PLAYLOGG_SITE_URL);
     if (request.headers.get("origin") !== site || request.nextUrl.origin !== site) return new NextResponse("Invalid origin", { status: 403 });
-    linking = (await request.formData()).get("mode") === "link";
+    const form = await request.formData();
+    linking = form.get("mode") === "link";
+    const next = linking ? null : navigationPath(form.get("next"));
     if (!process.env.SUPABASE_SECRET_KEY) throw new Error("Not configured");
     const account = linking ? await getAccount() : null;
     if (linking && !account?.profile) return NextResponse.redirect(new URL("/login", request.url), 303);
@@ -18,6 +21,7 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.redirect(steamLoginUrl(site, state), 303);
     response.cookies.set("playlogg-steam-state", state, { httpOnly: true, secure: site.startsWith("https:"), sameSite: "lax", path: "/auth/steam", maxAge: 600 });
     response.cookies.set("playlogg-steam-link", account ? steamLinkCookie(state, account.user.id, process.env.SUPABASE_SECRET_KEY) : "", { httpOnly: true, secure: site.startsWith("https:"), sameSite: "lax", path: "/auth/steam", maxAge: account ? 600 : 0 });
+    response.cookies.set("playlogg-steam-next", next ? JSON.stringify({state,next}) : "", { httpOnly: true, secure: site.startsWith("https:"), sameSite: "lax", path: "/auth/steam", maxAge: next ? 600 : 0 });
     response.headers.set("Cache-Control", "private, no-store");
     response.headers.set("Referrer-Policy", "no-referrer");
     return response;

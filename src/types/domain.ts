@@ -13,6 +13,7 @@ export interface Game {
   platformRatingCount?: number;
   review?: string | null;
   status?: PlaybackStatus | null;
+  playStyle?: "campaign" | "ongoing" | null;
   logged?: boolean;
   platform?: PlayedPlatform | null;
   hoursPlayed?: number | null;

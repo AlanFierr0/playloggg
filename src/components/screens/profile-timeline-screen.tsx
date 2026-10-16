@@ -15,12 +15,12 @@ export function ProfileTimelineScreen() {
   const timeline = useMemo(() => completionTimeline(games), [games]);
   const years = [...new Set(timeline.months.map(group => group.month.slice(0, 4)))];
   const months = timeline.months.filter(group => !year || group.month.startsWith(year));
-  const points = completionChart(months);
   const annual = completionYears(months);
   const shownYears = annual;
   const activeIndex = Math.max(0, shownYears.findIndex(group => group.year === activeYear));
   const activeGroup = shownYears[activeIndex];
   const yearMonths = completionChart(timeline.months.filter(group => group.month.startsWith(activeGroup?.year ?? "")));
+  const points = yearMonths;
   const visibleGames = activeGroup?.games.filter(game => !selectedMonth || game.completedOn!.slice(5, 7) === selectedMonth) ?? [];
   useEffect(() => {
     const element = rail.current;
@@ -43,10 +43,6 @@ export function ProfileTimelineScreen() {
   }
   function chooseOrbitMonth(value:string){
     setSelectedMonth(value);
-    if(value&&!activeGroup?.games.some(game=>game.completedOn!.slice(5,7)===value)){
-      const match=annual.find(group=>group.games.some(game=>game.completedOn!.slice(5,7)===value));
-      if(match)setActiveYear(match.year);
-    }
     history.current?.focus({preventScroll:true});
     history.current?.scrollIntoView({block:"start",behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"instant":"smooth"});
   }
@@ -104,8 +100,8 @@ export function ProfileTimelineScreen() {
         <div aria-hidden="true" className="absolute inset-[30%] rounded-full border border-outline-variant/20" />
         <div className="absolute inset-[32%] flex flex-col items-center justify-center text-center">
           {selectedMonth && <p className="text-body-sm text-on-surface-variant">{date(`2000-${selectedMonth}-01`, orbitMonthFormat)}</p>}
-          <p className="text-body-sm text-on-surface-variant">{year || t("All years")}</p>
-          <p className="text-[36px] font-semibold leading-tight tabular-nums text-primary sm:text-[52px]">{selectedMonth ? points.find(point => point.period === selectedMonth)!.count : dated.length}</p>
+          <p className="text-body-sm text-on-surface-variant">{activeGroup?.year}</p>
+          <p className="text-[36px] font-semibold leading-tight tabular-nums text-primary sm:text-[52px]">{selectedMonth ? points.find(point => point.period === selectedMonth)!.count : activeGroup?.games.length}</p>
           <p className="text-label-sm text-on-surface-variant">{t("Completed games")}</p>
         </div>
         <ol>{points.map((point, index) => {

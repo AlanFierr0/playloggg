@@ -19,7 +19,7 @@ test("game types detect ongoing games, keep co-op campaigns and allow a manual s
   await page.locator("#commit-rating").click();await expect(page).toHaveURL(/\/profile$/);
   await page.evaluate(()=>localStorage.removeItem("playlogg-play-style:2:fixture-game-0"));
   await page.goto("/log?game=fixture-game-0");
-  await expect(page.getByLabel("Game type",{exact:true})).toHaveValue("ongoing");
+  await expect(page.getByLabel("Game type",{exact:true})).toHaveValue("campaign");
   await expect(statuses.getByRole("button",{name:"Completed",exact:true})).toHaveAttribute("aria-pressed","true");
   await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");
   await expect(page.getByLabel("Game type",{exact:true})).toHaveValue("campaign");

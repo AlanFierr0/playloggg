@@ -75,3 +75,11 @@ test('magic links verify before sign-in and reject expired links',async({page})=
   await expect(page).toHaveURL(/\/profile$/);
   await expect(page.getByRole('heading',{name:'Fixture Owner',exact:true})).toBeVisible();
 });
+
+ test('signing in from a selected game returns to that editor and rejects external destinations',async({page,context})=>{
+  await page.goto('/login?next=%2Flog%3Fgame%3Dfixture-game-0');
+  await page.getByLabel('Email',{exact:true}).fill('owner@fixture.test');await page.getByLabel('Password',{exact:true}).fill('fixture-password-123');
+  await page.getByRole('button',{name:'Sign in with email',exact:true}).click();await expect(page).toHaveURL(/\/log\?game=fixture-game-0$/);
+  await context.clearCookies();await page.goto('http://localhost:3100/auth/confirm?token_hash=fixture-email-link&type=email&next=https%3A%2F%2Fattacker.invalid');
+  await expect(page).toHaveURL(/\/profile$/);
+ });

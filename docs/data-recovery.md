@@ -1,8 +1,8 @@
 # Data export and recovery
 
-Owners can download JSON or CSV from Settings. The response is authenticated, private and never cached. It includes original reviews, scores including zero, nullable playtime/dates, tags, automatic/manual tiers, score ranges, personal ranking anchors and independent favorites. JSON schemaVersion is 1. Ranking positions/anchors in both formats are zero-based. CSV contains profile, range, log, favorite and ranking records; quoted text is protected against spreadsheet formulas. JSON preserves text exactly and is the preferred portable copy. Account credentials, email, Steam IDs and avatar bytes are excluded. There is no self-service import yet.
+Owners can download JSON or CSV from Settings. The response is authenticated, private and never cached. It includes original reviews, scores including zero, nullable playtime/dates, saved game types, tags, automatic/manual tiers, score ranges, personal ranking anchors and independent favorites. JSON schemaVersion is 1. Ranking positions/anchors in both formats are zero-based. CSV contains profile, range, log, favorite and ranking records; quoted text is protected against spreadsheet formulas. JSON preserves text exactly and is the preferred portable copy. Account credentials, email, Steam IDs and avatar bytes are excluded. There is no self-service import yet.
 
-## Production state checked October 13, 2026
+## Production state checked October 16, 2026
 
 The authenticated Supabase backup-list command reported zero available backups, PITR disabled and WAL-G backup support enabled. This is not proof of a usable production restore point. Production off-site scheduling is not configured by this change. No paid backup add-on or production restore was enabled.
 
@@ -21,3 +21,7 @@ The database job starts fresh local Supabase, applies every migration and verifi
 5. Run the ownership/visibility regression and browser account/read/write checks against the isolated restored project, including private profile denial, zero ratings, favorites, tiers, rankings, review votes and pictures. Only promote after approval. Keep the pre-restore state privately until the incident is resolved.
 
 The automated rehearsal verifies the local restore mechanics. A real production restore point and complete provider cutover have not been exercised; that requires a verified private backup and an isolated recovery destination.
+
+## Pending off-site destination
+
+The October 16 audit reconfirmed that the authenticated backup list contains no available backups and PITR is disabled. Item 14 cannot be marked complete until a private off-site destination is chosen and its credentials are configured. The application owner has been asked to choose existing private storage, a private Google Drive folder, or tooling-only preparation. Do not upload production records or picture bytes to this public repository, browser artifacts or public CI artifacts. The existing isolated restore rehearsal remains the validation baseline; it is not a production backup.

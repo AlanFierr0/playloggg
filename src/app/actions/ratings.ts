@@ -25,7 +25,7 @@ export async function saveRating(input: unknown): Promise<{ ok: boolean; message
       p_game_id: game.id,
       p_expected_updated_at: rating.expectedUpdatedAt ?? null,
       p_values: { score: rating.score, tier: rating.tier, tier_manual: rating.tierManual ?? rating.tier !== null,
-        status: rating.status, platform: rating.platform, tags: rating.tags, hours_played: rating.hoursPlayed,
+        status: rating.status, ...(rating.playStyle === undefined ? {} : {play_style: rating.playStyle}), platform: rating.platform, tags: rating.tags, hours_played: rating.hoursPlayed,
         completed_on: rating.completedOn, review: rating.review || null },
     });
     if (error) return { ok: false, message: error.code === "40001"

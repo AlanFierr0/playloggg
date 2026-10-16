@@ -11,7 +11,7 @@ import type { Database } from "@/types/database";
 import type { Portfolio } from "@/types/domain";
 
 type RatingRow = Database["public"]["Tables"]["ratings"]["Row"];
-type PublicRating = Pick<RatingRow, "game_id" | "score" | "tier" | "tier_manual" | "review" | "review_updated_at" | "status" | "platform" | "hours_played" | "completed_on" | "tags" | "updated_at">;
+type PublicRating = Pick<RatingRow, "game_id" | "score" | "tier" | "tier_manual" | "review" | "review_updated_at" | "status" | "play_style" | "platform" | "hours_played" | "completed_on" | "tags" | "updated_at">;
 
 export const getPublicPortfolioShell = cache(async (handle: string): Promise<Portfolio | null> => {
   const publicBase = publicProfilePath(handle);
@@ -36,8 +36,8 @@ export const getPublicPortfolio = cache(async (handle: string, section: "overvie
       const all: PublicRating[] = [];
       for (let offset = 0; ; offset += 500) {
         const { data, error } = await (section === "reviews"
-          ? supabase.from("ratings").select("game_id,score,tier,tier_manual,review,review_updated_at,status,platform,hours_played,completed_on,tags,updated_at")
-          : supabase.from("ratings").select("game_id,score,tier,tier_manual,status,platform,hours_played,completed_on,tags,updated_at"))
+          ? supabase.from("ratings").select("game_id,score,tier,tier_manual,review,review_updated_at,status,play_style,platform,hours_played,completed_on,tags,updated_at")
+          : supabase.from("ratings").select("game_id,score,tier,tier_manual,status,play_style,platform,hours_played,completed_on,tags,updated_at"))
           .eq("profile_id", Number(shell.profile.id)).order("game_id").range(offset, offset + 499);
         if (error) throw new Error("This portfolio's entries could not be loaded.");
         all.push(...data.map(row => ({...row, review: section === "reviews" && "review" in row ? row.review : null, review_updated_at: "review_updated_at" in row ? row.review_updated_at : null})));
@@ -63,7 +63,7 @@ export const getPublicEntry = cache(async (handle: string, slug: string): Promis
   if (!shell || !row) return null;
   const supabase = createPublicClient();
   const {data: rating, error} = await supabase.from("ratings")
-    .select("game_id,score,tier,tier_manual,review,review_updated_at,status,platform,hours_played,completed_on,tags,updated_at")
+    .select("game_id,score,tier,tier_manual,review,review_updated_at,status,play_style,platform,hours_played,completed_on,tags,updated_at")
     .eq("profile_id", Number(shell.profile.id)).eq("game_id", row.id).maybeSingle();
   if (error) throw new Error("This entry could not be loaded.");
   if (!rating) {

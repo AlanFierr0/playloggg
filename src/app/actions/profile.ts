@@ -1,4 +1,5 @@
 "use server";
+import { navigationPath } from "@/lib/return-navigation";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getAccount } from "@/lib/owner";
@@ -41,5 +42,5 @@ export async function createProfile(_previous: { message: string }, form: FormDa
     }
   } catch { return { message: "Profile setup is unavailable. Please retry." }; }
   revalidatePath("/", "layout");
-  redirect("/profile");
+  redirect(navigationPath(form.get("next")) ?? "/profile");
 }

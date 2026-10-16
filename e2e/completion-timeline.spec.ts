@@ -13,7 +13,7 @@ test("completion timeline groups all completions by year, browses horizontally, 
  const chart=page.getByRole("region",{name:"Completion chart",exact:true});
  await expect(chart.locator("[data-completion-period]")).toHaveCount(12);
  await expect(chart.locator(`[data-completion-period="03"]`)).toHaveAttribute("data-completion-count","2");
- await expect(chart.locator(`[data-completion-period="02"]`)).toHaveAttribute("data-completion-count","1");
+ await expect(chart.locator(`[data-completion-period="02"]`)).toHaveAttribute("data-completion-count","0");
  await expect(chart.locator(`[data-completion-period="04"]`).getByRole("button")).toBeDisabled();
  await chart.getByRole("button",{name:"March: 2 Completed games",exact:true}).click();
  await expect(chart.getByRole("button",{name:"March: 2 Completed games",exact:true})).toHaveAttribute("aria-pressed","true");
@@ -68,6 +68,8 @@ test("completion timeline groups all completions by year, browses horizontally, 
  await page.getByRole("group",{name:"Monthly completions · 2024",exact:true}).locator('[data-month-section="02"]').click();
  await page.getByRole("button",{name:"Clear month filter",exact:true}).click();
  await expect(panels.first()).toHaveAttribute("data-timeline-year","2024");
+ await expect(chart.locator(`[data-completion-period="03"]`).getByRole("button")).toBeDisabled();
+ await tabs.getByRole("tab",{name:"2025",exact:true}).click();
  await chart.getByRole("button",{name:"March: 2 Completed games",exact:true}).click();
  await expect(panels.first()).toHaveAttribute("data-timeline-year","2025");
  await expect(panels.first().getByRole("link")).toHaveCount(2);

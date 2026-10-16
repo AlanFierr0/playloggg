@@ -110,7 +110,7 @@ export function TasteDetails({ games }: { games: Game[] }) {
         </dl>
         <p className="text-body-sm text-on-surface-variant">
           {t(
-            "Completion counts completed games among entries outside Currently playing, Paused and Stopped playing. Those statuses are counted as ongoing games.",
+            "Completion excludes ongoing online games, including their backlog entries. Older entries use Currently playing, Paused and Stopped playing as the fallback.",
           )}
         </p>
       </section>

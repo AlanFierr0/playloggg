@@ -31,7 +31,7 @@ const [conflict, setConflict] = useState(false);
 const [draftReady, setDraftReady] = useState(false);
 const cleared = useRef(false);
 const draftKey = `playlogg_draft:${profile.id}:${game.slug}`;
-const [saved, setSaved] = useState({ score: game.score, tier: game.tier ?? null, status: game.status ?? null, review: game.review ?? "", platform: game.platform ?? null, hoursPlayed: game.hoursPlayed ?? null, completedOn: game.completedOn ?? null, tags: game.tags ?? [] });
+const [saved, setSaved] = useState({ score: game.score, tier: game.tier ?? null, status: game.status ?? null, playStyle:game.playStyle??null, review: game.review ?? "", platform: game.platform ?? null, hoursPlayed: game.hoursPlayed ?? null, completedOn: game.completedOn ?? null, tags: game.tags ?? [] });
 const [score, setScore] = useState<number | null>(game.score);
 const scoreInput = useRef<HTMLInputElement>(null);
 const invalidScore = score !== null && (!Number.isInteger(score) || score < 0 || score > 100);
@@ -40,6 +40,7 @@ const [tier, setTier] = useState<Tier | null>(game.tier ?? null);
 const [tierManual,setTierManual] = useState(game.tierManual ?? Boolean(game.tier));
 const [platform, setPlatform] = useState<PlayedPlatform | null>(game.platform ?? null);
 const isPC = platform?.startsWith("pc") ?? false;
+const [playStyle,setPlayStyle]=useState<Game["playStyle"]>(game.playStyle??null);
 const [status, setStatus] = useState<PlaybackStatus | null>(game.status ?? null);
 const [hours, setHours] = useState(game.hoursPlayed == null ? "" : String(game.hoursPlayed));
 const [date, setDate] = useState(game.completedOn ?? "");
@@ -47,7 +48,7 @@ const dateInput = useRef<HTMLInputElement>(null);
 const [tags, setTags] = useState<string[]>(game.tags ?? []);
 const [tagVersion, setTagVersion] = useState(0);
 const [review, setReview] = useState(game.review ?? "");
-const dirty = score !== saved.score || tier !== saved.tier || status !== saved.status || review !== saved.review || platform !== saved.platform
+const dirty = playStyle !== saved.playStyle || score !== saved.score || tier !== saved.tier || status !== saved.status || review !== saved.review || platform !== saved.platform
   || hours !== (saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)) || (date || null) !== saved.completedOn || JSON.stringify(tags) !== JSON.stringify(saved.tags)
   || tierManual !== (game.tierManual ?? Boolean(game.tier));
 useEffect(() => {
@@ -59,7 +60,7 @@ useEffect(() => {
     const raw = stored ? JSON.parse(stored) : null;
     const draft = raw ? validateRating({...raw, hoursPlayed:null, completedOn:null}) : null;
     if (draft?.slug === game.slug) {
-      setScore(draft.score); setTier(draft.tier); setTierManual(draft.tierManual ?? false);
+      setPlayStyle(draft.playStyle??game.playStyle??null); setScore(draft.score); setTier(draft.tier); setTierManual(draft.tierManual ?? false);
       setPlatform(draft.platform); setStatus(draft.status); setHours(typeof raw.rawHours === "string" && raw.rawHours.length <= 100 ? raw.rawHours : "");
       setDate(typeof raw.rawDate === "string" && raw.rawDate.length <= 10 ? raw.rawDate : ""); setReview(draft.review); setTags(draft.tags); setTagVersion(value => value + 1);
       setExpectedUpdatedAt(draft.expectedUpdatedAt ?? null);
@@ -69,17 +70,17 @@ useEffect(() => {
   setDraftReady(true);
   });
   return () => { cancelled = true; };
-}, [canEdit, draftKey, game.slug]);
+}, [canEdit, draftKey, game.slug, game.playStyle]);
 useEffect(() => {
   if (!canEdit || !draftReady || cleared.current) return;
   try {
     if (!dirty) { sessionStorage.removeItem(draftKey); return; }
-    sessionStorage.setItem(draftKey, JSON.stringify({slug: game.slug, score, tier, tierManual, status, review, platform,
+    sessionStorage.setItem(draftKey, JSON.stringify({slug: game.slug, score, tier, tierManual, status, playStyle, review, platform,
       hoursPlayed: parseHours(hours) ?? null, completedOn: date || null, rawHours:hours, rawDate:date, tags, expectedUpdatedAt}));
   } catch { queueMicrotask(() => setSaveMessage("Draft storage is unavailable. Save before leaving this page.")); }
-}, [canEdit, draftReady, dirty, draftKey, game.slug, score, tier, tierManual, status, review, platform, hours, date, tags, expectedUpdatedAt]);
+}, [canEdit, draftReady, dirty, draftKey, game.slug, score, tier, tierManual, status, playStyle, review, platform, hours, date, tags, expectedUpdatedAt]);
 function clearStoredDraft() { cleared.current = true; try { sessionStorage.removeItem(draftKey); } catch {} }
-function resetDraft() { clearStoredDraft(); setScore(saved.score); setTier(saved.tier); setPlatform(saved.platform); setStatus(saved.status); setHours(saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)); setDate(saved.completedOn ?? ""); setReview(saved.review); setTags(saved.tags); setTagVersion((value) => value + 1); setSaveMessage(""); goBack(); }
+function resetDraft() { clearStoredDraft(); setPlayStyle(saved.playStyle); setScore(saved.score); setTier(saved.tier); setPlatform(saved.platform); setStatus(saved.status); setHours(saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)); setDate(saved.completedOn ?? ""); setReview(saved.review); setTags(saved.tags); setTagVersion((value) => value + 1); setSaveMessage(""); goBack(); }
 function commit() {
   if ((date || null) !== saved.completedOn && date && date > new Date().toISOString().slice(0, 10)) { setSaveMessage("Completion date cannot be in the future. Your draft has been kept."); return; }
   if (invalidScore || (scoreInput.current && !scoreInput.current.validity.valid)) { setSaveMessage("Use a whole-number score from 0 to 100."); scoreInput.current?.focus(); return; }
@@ -89,12 +90,12 @@ function commit() {
   const maxHours = maximumPlaytime(game.releasedOn);
   if (hoursPlayed !== saved.hoursPlayed && hoursPlayed !== null && maxHours !== null && hoursPlayed > maxHours) { setSaveMessage("Playtime cannot exceed the hours elapsed since the game’s release. Your draft has been kept."); return; }
   const completedOn = date || null;
-  const draft = { slug: game.slug, score, tier, tierManual, status, review, platform, hoursPlayed, completedOn, tags, expectedUpdatedAt };
+  const draft = { slug: game.slug, score, tier, tierManual, status, playStyle, review, platform, hoursPlayed, completedOn, tags, expectedUpdatedAt };
   startTransition(async () => {
     try {
       const result = await saveRating(draft);
       setSaveMessage(result.message); setConflict(!result.ok && result.message.startsWith("This entry changed"));
-      if (result.ok) { clearStoredDraft(); setExpectedUpdatedAt(result.updatedAt ?? null); setSaved({ score, tier, status, review: review.trim(), platform, hoursPlayed, completedOn, tags: normalizeTags(tags)! }); setReview(review.trim()); setHours(hoursPlayed == null ? "" : String(hoursPlayed)); goBack(); }
+      if (result.ok) { clearStoredDraft(); setExpectedUpdatedAt(result.updatedAt ?? null); setSaved({ score, tier, status, playStyle:playStyle??null, review: review.trim(), platform, hoursPlayed, completedOn, tags: normalizeTags(tags)! }); setReview(review.trim()); setHours(hoursPlayed == null ? "" : String(hoursPlayed)); goBack(); }
     } catch { setSaveMessage("Saving is unavailable right now. Your draft has been kept; please try again."); }
   });
 }
@@ -141,7 +142,7 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 </div>
 
 <div className="p-4 sm:p-6 lg:p-8 grid grid-cols-1 xl:grid-cols-2 items-start gap-8">
-{!canEdit && <p className="xl:col-span-2 font-body-sm text-body-sm text-on-surface-variant">{t("Sign in to save your entry. ")}<Link href="/login" className="text-primary underline">{t("Sign in")}</Link> {t("to save entries to your own profile.")}</p>}
+{!canEdit && <p className="xl:col-span-2 font-body-sm text-body-sm text-on-surface-variant">{t("Sign in to save your entry. ")}<Link href={`/login?next=${encodeURIComponent(`/log?game=${game.slug}`)}`} className="text-primary underline">{t("Sign in")}</Link> {t("to save entries to your own profile.")}</p>}
 <p role="status" hidden={!pending && !saveMessage} className="xl:col-span-2 font-body-sm text-body-sm text-primary">{pending ? t("Saving…") : t(saveMessage)}</p>
 <div className="xl:col-span-2 flex flex-col sm:flex-row gap-6 sm:gap-8 items-start">
 <div className="relative group flex-shrink-0 w-32 sm:w-40 aspect-[3/4] rounded-lg overflow-hidden bg-surface-container shadow-xl">
@@ -177,18 +178,18 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{t("Platform Played")}</span>
 
 <div className="flex flex-wrap gap-2" id="platform-selector">
-<button type="button" onClick={() => setPlatform(isPC ? null : "pc")} title={t("Select platform; click again to clear")} aria-pressed={isPC} aria-expanded={isPC} aria-controls="pc-store-selector" className={`platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider flex items-center gap-1.5 ${isPC ? "bg-primary/15 text-primary shadow-sm" : "bg-surface-container-highest text-on-surface-variant hover:bg-surface-bright hover:text-on-surface"}`}><span aria-hidden="true" className="material-symbols-outlined text-[14px]">desktop_windows</span>PC</button>
+<button type="button" onClick={() => setPlatform(isPC ? null : "pc")} title={t("Select platform; click again to clear")} aria-pressed={isPC} aria-expanded={isPC} aria-controls="pc-store-selector" className={`platform-btn min-h-11 px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider flex items-center gap-1.5 ${isPC ? "bg-primary/15 text-primary shadow-sm" : "bg-surface-container-highest text-on-surface-variant hover:bg-surface-bright hover:text-on-surface"}`}><span aria-hidden="true" className="material-symbols-outlined text-[14px]">desktop_windows</span>PC</button>
 <ConsolePlatformSelector family="PlayStation" value={platform} onChange={setPlatform} />
 <ConsolePlatformSelector family="Xbox" value={platform} onChange={setPlatform} />
 <ConsolePlatformSelector family="Nintendo" value={platform} onChange={setPlatform} />
 <ConsolePlatformSelector family="Other platforms" value={platform} onChange={setPlatform} />
-<button type="button" onClick={() => setPlatform(platform === "steam_deck" ? null : "steam_deck")} aria-pressed={platform === "steam_deck"} title={t("Select platform; click again to clear")} className={`platform-btn flex items-center gap-1.5 rounded px-3 py-1 font-label-sm text-label-sm uppercase tracking-wider ${platform === "steam_deck" ? "bg-primary/15 text-primary" : "bg-surface-container-highest text-on-surface-variant hover:bg-surface-bright hover:text-on-surface"}`}><span aria-hidden="true" className="material-symbols-outlined text-[14px]">tablet</span>Steam Deck</button>
+<button type="button" onClick={() => setPlatform(platform === "steam_deck" ? null : "steam_deck")} aria-pressed={platform === "steam_deck"} title={t("Select platform; click again to clear")} className={`platform-btn min-h-11 flex items-center gap-1.5 rounded px-3 py-1 font-label-sm text-label-sm uppercase tracking-wider ${platform === "steam_deck" ? "bg-primary/15 text-primary" : "bg-surface-container-highest text-on-surface-variant hover:bg-surface-bright hover:text-on-surface"}`}><span aria-hidden="true" className="material-symbols-outlined text-[14px]">tablet</span>Steam Deck</button>
 </div>
 {platform && !platform.startsWith("pc") && platform !== "steam_deck" && <p className="font-body-sm text-body-sm text-primary">{t(platform.startsWith("ps") || platform.startsWith("xbox") ? "Console" : "Platform")}: {t(playedPlatformLabels[platform])}</p>}
 <div id="pc-store-selector" hidden={!isPC}>
   {isPC && <div className="ml-3 border-l-2 border-primary/30 pl-3 space-y-2" role="group" aria-label={t("PC store")}>
     <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{t("PC store")}</span>
-    <div className="flex flex-wrap gap-2">{(Object.entries(playedPlatformLabels) as [PlayedPlatform, string][]).filter(([value]) => value.startsWith("pc")).map(([value,label]) => <button key={value} type="button" aria-label={t(label)} aria-pressed={platform === value} onClick={() => setPlatform(platform === value ? null : value)} title={t("Select platform; click again to clear")} className={`platform-btn px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider ${platform === value ? "bg-primary/15 text-primary shadow-sm" : "bg-surface-container-highest text-on-surface-variant hover:bg-surface-bright hover:text-on-surface"}`}>{t(label).replace(/^PC \/ /, "")}</button>)}</div>
+    <div className="flex flex-wrap gap-2">{(Object.entries(playedPlatformLabels) as [PlayedPlatform, string][]).filter(([value]) => value.startsWith("pc")).map(([value,label]) => <button key={value} type="button" aria-label={t(label)} aria-pressed={platform === value} onClick={() => setPlatform(platform === value ? null : value)} title={t("Select platform; click again to clear")} className={`platform-btn min-h-11 px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider ${platform === value ? "bg-primary/15 text-primary shadow-sm" : "bg-surface-container-highest text-on-surface-variant hover:bg-surface-bright hover:text-on-surface"}`}>{t(label).replace(/^PC \/ /, "")}</button>)}</div>
   </div>}
 </div>
 
@@ -207,7 +208,7 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 
 <div className="flex flex-col items-center justify-center gap-1 my-2">
 <div className="flex items-baseline gap-2">
-<input ref={scoreInput} id="score-display" type="text" inputMode="numeric" maxLength={3} pattern="[0-9]{0,3}" value={score ?? ""} placeholder="—" aria-label={t("Numerical score from 0 to 100")} aria-invalid={invalidScore} onFocus={event => event.currentTarget.select()} onChange={event => { const value = event.target.value; if (!/^[0-9]{0,3}$/.test(value) || Number(value) > 100) return; setScore(value === "" ? null : Number(value)); setSaveMessage(""); }} style={{ width: `${Math.max(1, String(score ?? "").length)}ch` }} className="min-w-0 appearance-none rounded-none border-0 border-b border-transparent bg-transparent p-0 text-center font-display-lg text-display-lg font-bold tracking-tighter text-primary font-headline-xl placeholder:text-primary placeholder:opacity-100 focus:border-primary/50 focus:outline-none" />
+<input ref={scoreInput} id="score-display" type="text" inputMode="numeric" maxLength={3} pattern="[0-9]{0,3}" value={score ?? ""} placeholder="—" aria-label={t("Numerical score from 0 to 100")} aria-invalid={invalidScore} onFocus={event => event.currentTarget.select()} onChange={event => { const value = event.target.value; if (!/^[0-9]{0,3}$/.test(value) || Number(value) > 100) return; setScore(value === "" ? null : Number(value)); setSaveMessage(""); }} style={{ width: `${Math.max(1, String(score ?? "").length)}ch` }} className="min-h-11 min-w-[3ch] appearance-none rounded-none border-0 border-b border-transparent bg-transparent p-0 text-center font-display-lg text-display-lg font-bold tracking-tighter text-primary font-headline-xl placeholder:text-primary placeholder:opacity-100 focus:border-primary/50 focus:outline-none" />
 
 <span className="font-headline-md text-headline-md text-on-surface-variant">{"/100"}</span>
 
@@ -228,15 +229,15 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 </div>
 
 <div className="flex items-center justify-center gap-2 mt-2">
-<button className="px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" disabled={score === null} onClick={() => setScore((previous) => Math.max(0, Math.min(100, (previous ?? 0) + -5)))}>{"-5"}</button>
+<button className="min-h-11 min-w-11 px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" disabled={score === null} onClick={() => setScore((previous) => Math.max(0, Math.min(100, (previous ?? 0) + -5)))}>{"-5"}</button>
 
-<button className="px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" disabled={score === null} onClick={() => setScore((previous) => Math.max(0, Math.min(100, (previous ?? 0) + -1)))}>{"-1"}</button>
+<button className="min-h-11 min-w-11 px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" disabled={score === null} onClick={() => setScore((previous) => Math.max(0, Math.min(100, (previous ?? 0) + -1)))}>{"-1"}</button>
 
 <div className="w-px h-4 bg-surface-container-highest mx-1"></div>
 
-<button className="px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" disabled={score === null} onClick={() => setScore((previous) => Math.max(0, Math.min(100, (previous ?? 0) + 1)))}>{"+1"}</button>
+<button className="min-h-11 min-w-11 px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" disabled={score === null} onClick={() => setScore((previous) => Math.max(0, Math.min(100, (previous ?? 0) + 1)))}>{"+1"}</button>
 
-<button className="px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" disabled={score === null} onClick={() => setScore((previous) => Math.max(0, Math.min(100, (previous ?? 0) + 5)))}>{"+5"}</button>
+<button className="min-h-11 min-w-11 px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" disabled={score === null} onClick={() => setScore((previous) => Math.max(0, Math.min(100, (previous ?? 0) + 5)))}>{"+5"}</button>
 
 </div>
 
@@ -246,7 +247,7 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 
 <div className="min-w-0 grid grid-cols-1 md:grid-cols-12 gap-6">
 <div className="md:col-span-12 flex flex-col gap-2.5">
-<PlaybackStatusPicker key={game.slug} slug={game.slug} value={status} onChange={setStatus}/>
+{draftReady && <PlaybackStatusPicker key={game.slug} slug={game.slug} value={status} onChange={setStatus} initialStyle={playStyle} onStyleChange={setPlayStyle}/>}
 
 </div>
 

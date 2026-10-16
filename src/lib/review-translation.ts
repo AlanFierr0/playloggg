@@ -1,5 +1,5 @@
 import "server-only";
-import {createHash} from "node:crypto";
+import {createHash,randomUUID} from "node:crypto";
 import {createAuthAdmin} from "@/lib/supabase/auth-admin";
 import {checkOperationLimit} from "@/lib/operation-limits";
 import {reviewParts,hasReviewProse} from "@/lib/review-text";
@@ -29,6 +29,11 @@ export function getReviewTranslation(profileId:number,gameId:number,text:string,
   const cached=await admin.rpc("read_review_translation",args);if(cached.error)throw new Error("Translation unavailable");
   if(cached.data&&typeof cached.data==="object"&&!Array.isArray(cached.data)&&typeof cached.data.text==="string"&&typeof cached.data.sourceLanguage==="string")return {text:cached.data.text,sourceLanguage:cached.data.sourceLanguage};
   if(!process.env.DEEPL_API_KEY)return null;
+  const claimArgs={...args,p_token:randomUUID()};
+  const claim=await admin.rpc("claim_review_translation",claimArgs);
+  if(claim.error)throw new Error("Translation unavailable");
+  if(!claim.data){const ready=await admin.rpc("read_review_translation",args);const value=ready.data;return !ready.error&&value&&typeof value==="object"&&!Array.isArray(value)&&typeof value.text==="string"&&typeof value.sourceLanguage==="string"?{text:value.text,sourceLanguage:value.sourceLanguage}:null;}
+  try {
   await checkOperationLimit("review-translation","translation");
   // shortcut: cap new translations at 500,000 monthly source characters; revisit when legitimate demand exceeds it.
   const reserved=await admin.rpc("reserve_review_translation",{p_characters:text.length});if(reserved.error||!reserved.data)return null;
@@ -36,6 +41,8 @@ export function getReviewTranslation(profileId:number,gameId:number,text:string,
   const saved=await admin.rpc("store_review_translation",{...args,p_original:text,p_translation:result.text,p_source_language:result.sourceLanguage});
   if(saved.error||!saved.data)return null;
   return result;
+  }finally{await admin.rpc("release_review_translation",claimArgs);}
+
  })().finally(()=>inFlight.delete(identity));
  inFlight.set(identity,promise);return promise;
 }

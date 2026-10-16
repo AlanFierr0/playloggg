@@ -296,3 +296,42 @@ do $$declare g bigint;original jsonb;begin
 end;$$;
 reset role;
 rollback;
+-- Audit fixes: explicit types preserve old clients; translation claims are atomic and private.
+begin;
+insert into auth.users(id,email,email_confirmed_at) values('77777777-7777-4777-8777-777777777777','audit-type@example.invalid',now());
+insert into public.profiles(handle,display_name,owner_user_id,is_public,is_discoverable)
+ values('sql_type_owner','Type owner','77777777-7777-4777-8777-777777777777',false,false);
+insert into public.games(slug,title,cover_url) values('sql-type-game','Type game','/icon.svg');
+select set_config('request.jwt.claims','{"sub":"77777777-7777-4777-8777-777777777777"}',true);
+set local role authenticated;
+do $$declare g bigint;stamp timestamptz;begin
+ select id into g from public.games where slug='sql-type-game';
+ stamp:=public.save_rating(g,'{"score":83,"status":"backlog","play_style":"ongoing","review":"Keep review"}',null);
+ if (select play_style from public.ratings where game_id=g) <> 'ongoing' then raise exception 'Type not saved';end if;
+ stamp:=public.save_rating(g,'{"score":84,"status":"backlog","review":"Keep review"}',stamp);
+ if (select play_style from public.ratings where game_id=g) <> 'ongoing' then raise exception 'Old client erased type';end if;
+ begin
+  perform public.save_rating(g,'{"play_style":"invented"}',stamp);
+  raise exception 'Invalid type accepted';
+ exception when check_violation then null;end;
+end;$$;
+reset role;
+do $$begin
+ if has_function_privilege('authenticated','public.claim_review_translation(bigint,bigint,text,text,uuid)','execute')
+ or has_function_privilege('anon','public.release_review_translation(bigint,bigint,text,text,uuid)','execute')
+ or has_table_privilege('authenticated','private.review_translation_claims','select') then raise exception 'Claims exposed';end if;
+end;$$;
+set local role service_role;
+do $$declare p bigint;g bigint;first uuid:='88888888-8888-4888-8888-888888888888';second uuid:='99999999-9999-4999-8999-999999999999';begin
+ select id into p from public.profiles where handle='sql_type_owner';select id into g from public.games where slug='sql-type-game';
+ if not public.claim_review_translation(p,g,repeat('a',64),'ES',first) then raise exception 'First worker denied';end if;
+ if public.claim_review_translation(p,g,repeat('a',64),'ES',second) then raise exception 'Duplicate worker accepted';end if;
+ perform public.release_review_translation(p,g,repeat('a',64),'ES',second);
+ if public.claim_review_translation(p,g,repeat('a',64),'ES',second) then raise exception 'Foreign release accepted';end if;
+ update private.review_translation_claims set expires_at=now()-interval '1 second' where profile_id=p and game_id=g;
+ if not public.claim_review_translation(p,g,repeat('a',64),'ES',second) then raise exception 'Expired claim not recovered';end if;
+ perform public.release_review_translation(p,g,repeat('a',64),'ES',second);
+ if exists(select 1 from private.review_translation_claims where profile_id=p and game_id=g) then raise exception 'Claim not released';end if;
+end;$$;
+reset role;
+rollback;

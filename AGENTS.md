@@ -55,7 +55,8 @@ implementation decisions; they do not override this file or later user requests.
 - Playback: completed, in progress, backlog, shelved, currently playing, paused, stopped playing.
 - Hours may be blank or nonnegative decimal values, bounded by elapsed time since known launch.
   Completion dates may be blank, cannot precede known launch or exceed the current UTC day.
-- Completion excludes active/paused/stopped entries and shows an ongoing-games summary.
+- Save explicit campaign/ongoing type in ratings.play_style; null retains legacy detection.
+  Completion excludes ongoing types (including backlog) and legacy active/paused/stopped entries.
 - Played platforms include Nintendo consoles, Sega, mobile and browser options.
 - Use shared played-platform labels; keep legacy pc for PC / Steam imports and sync.
 - Votes allow one up/down vote per other user's current public review and no self-voting.
@@ -79,7 +80,7 @@ implementation decisions; they do not override this file or later user requests.
 - Home exploration stays stable until ten minutes or login-token expiry, whichever is first.
   Community sections use bounded database results and fail independently of core home.
   Review carousel sorts upvotes minus downvotes; personalized exploration uses the same seed.
-- Steam imports offer rate all/some/none. Some supports genre, playtime and title filters.
+- Steam imports go directly into rating all newly imported entries; Skip and resume remain available.
   Import all selected games while rating new entries in descending playtime order.
   Preserve existing logs and concurrent manual edits. Import runs while the page stays open;
   unfinished import queues and rating sessions persist per profile in this browser.
@@ -90,9 +91,15 @@ implementation decisions; they do not override this file or later user requests.
 - Shared profile/compare image APIs recheck visibility; wrapped/list exports stay unavailable.
 - Keep responsive site-container alignment, accessible controls and reduced-motion support.
 - Theme/language preferences use cookies: English and Spanish (Argentina), dark/light.
-  Keep titles, names and original reviews untranslated. Review translation is deferred in TODO.md.
+  Keep titles, names and original reviews unchanged. English/Spanish review translation is active;
+  preserve original toggles, private cached results and database leases across cold instances.
 - Catalog pages are indexable; personal/public profile, auth, search and compare routes are
-  noindex. Sitemap is catalog-only. Export/backup/recovery remain planned, not implemented.
+  noindex. Sitemap is catalog-only. Owners can export JSON/CSV; local database/picture recovery
+  is rehearsed in CI. Production off-site backup scheduling still requires private storage.
+- Ranking/timeline/overview/statistics reads omit unused review prose; review pages and exports retain it.
+- Guest logging preserves a validated internal next destination through email/Steam and profile setup.
+- Completion scans stop on quota/deferred AI checks and keep unfinished games retryable.
+- Timeline pins and monthly orbit always represent the same selected year.
 
 ## Agent skills
 

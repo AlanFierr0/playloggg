@@ -23,21 +23,18 @@
    Blank limits are unrestricted; zero includes unplayed games.
    Filters and sorting apply to the whole library before batches are chosen.
    Select individual matched games, or **Select available games** among loaded cards.
-6. Select **Import selected games** in the upper-right toolbar, then choose
-   **Rate all games**, **Rate some games**, or **Just import**. Some games opens a
-   picker over the games selected for import: filter by genre, title and minimum/
-   maximum playtime, sort by title/playtime, then select individual or matching
-   games. Hidden selections stay selected until cleared. No writes happen until
-   you confirm an import mode or the picker.
+6. Select **Import selected games** in the upper-right toolbar. Newly imported games
+   enter the rate-all editor directly, in playtime order. Skip any game or resume later.
+   There is no separate rate-all/some/none choice screen.
    Games are imported in batches of up to 25, with
    a centered modal over the library showing the current title, processed/total
    count, remaining count and progress bar. It keeps focus and disables interaction
    with the page behind it while saving. Its spinner
-   respects reduced-motion preferences. In Just import mode, the indicator disappears on completion
+   respects reduced-motion preferences. The import indicator disappears on completion
    or failure, while errors remain available for retry. Successful imports stay saved if another
    batch fails; retry keeps only failed selections. A rating write is atomic within its batch. Changing filters, sorting or
    the amount resets the loaded set and selection; loading more preserves them.
-   In rating modes, chosen games are imported first and enter a one-at-a-time
+   After importing, chosen games are imported first and enter a one-at-a-time
    editor as each batch succeeds; the first rated game is imported separately so rating can begin promptly. Set an optional independent tier, 0–100 score
    (typed or slider), and playback status; **Save and next** persists these three
    fields, while **Skip this game** leaves them unset. Other selected games keep
@@ -125,7 +122,7 @@ Only explicitly selected imported entries become visible if the profile is publi
   exclusion, inaccessible libraries, failed-save retry, accessibility and mobile.
   Also verifies imported games stay hidden after reopening, sync retry, unchanged
   non-playtime fields and other profiles, and idempotent sync without date changes.
-  Rating-flow checks cover all/some/no ratings, live editing during imports, genre/
+  Historical rating-flow checks covered all/some/no ratings; the current flow always rates imported games. Checks cover live editing during imports, genre/
   title/playtime selection, independent tier/status, score zero, retry without lost
   drafts, skips and concurrent manual edit protection.
 - The fixture provider intercepts only the isolated test process. It does not
@@ -153,7 +150,7 @@ acknowledged successful imports remain available for rating; refresh the library
 to import remaining games. Pending requests are not a durable background job.
 
 Rating queues start with the most-played selected games (Steam hours descending),
-for both all-games and filtered some-games sessions, regardless of selection order.
+for current all-games sessions, regardless of selection order. Older sessions still resume.
 
 The rating popup places Game info to the right of the game name, opening the stored catalog game in a new
 tab so the current draft and running import stay on the original page. It loads
@@ -305,3 +302,7 @@ review, playtime, status or date. Skips also suppress import-editor suggestions
 for that game; manual date entry remains available. Failed confirmations/skips
 keep the card visible with a retryable error. Skip preferences are server-only,
 owner-scoped and removed with account deletion.
+
+### October 16 audit corrections
+
+Sync resolves only requested Steam app matches (at most 25), then reads owned logs for those local catalog IDs. It no longer rereads all owned logs and rematches the whole catalog for every batch. Game type choices persist in the rating; explicit ongoing entries are excluded from completion scans. Steam/AI quota responses pause scheduling new games, preserve finished results and enable retry after the indicated cooldown. Deferred AI checks with no text-rule suggestion remain retryable rather than becoming permanent no-match results. If text rules already identify completion evidence, those suggestions remain usable during AI outages.

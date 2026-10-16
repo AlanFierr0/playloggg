@@ -44,3 +44,8 @@ test("completion excludes ongoing statuses without treating unlogged games as en
   assert.equal(tasteStats([game("only",null,{status:"active"})]).completionRate,null);
   assert.equal(tasteStats([game("zero",null,{status:null})]).completionRate,0);
 });
+
+test("saved ongoing game type excludes online backlog and completed legacy statuses from finishable statistics",()=>{
+ const stats=tasteStats([game("campaign",80,{status:"completed",playStyle:"campaign"}),game("online-backlog",null,{status:"backlog",playStyle:"ongoing"}),game("online-old",90,{status:"completed",playStyle:"ongoing"})]);
+ assert.equal(stats.ongoing,2);assert.equal(stats.finishable,1);assert.equal(stats.completed,1);assert.equal(stats.completionRate,100);
+});

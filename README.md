@@ -2,7 +2,7 @@
 
 Playlogg lets people log games, score them, arrange personal rankings and tiers,
 write reviews, import Steam libraries and compare gaming taste. Entries persist
-in Supabase; the production site is https://playloggg.vercel.app.
+in Supabase; the production site is https://playlogg.alanfierro.dev.
 
 ## Current routes
 
@@ -105,8 +105,16 @@ Production off-site backup scheduling is not configured or promised by the appli
 
 ### Completion timeline
 
-Owners can open `/profile/timeline` from their profile tabs. Completed logs with valid saved completion dates appear in a horizontal, newest-first year timeline above the gaming orbit. Select a year to see its games and summary across all its months. Each year has a connected pin showing its completion count. Inside the selected year, twelve clickable month sections show monthly counts, including zero for empty months; choosing a month filters the game list, and Whole year restores it. Swipe the year rail, use Newer/Older controls, or use Left/Right/Home/End on the year tabs. Year filtering resets the selection, and reduced-motion settings are respected. The gaming orbit arranges 12 monthly completion circles around a calendar ring. Circle sizes reflect completion counts; All years aggregates the same month across years. Selecting a non-empty orbit month filters and returns focus to the dated timeline; All months or Clear month filter clears it. Year changes reset the month selection. Year summaries use current scores and lifetime recorded playtime for those games, not historical score changes or hours earned in that year. Undated completed games remain separate with links to add their dates. No update/import/release date is substituted for a completion date. This page is authenticated and has no public counterpart.
+Owners can open `/profile/timeline` from their profile tabs. Completed logs with valid saved completion dates appear in a horizontal, newest-first year timeline above the gaming orbit. Select a year to see its games and summary across all its months. Each year has a connected pin showing its completion count. Inside the selected year, twelve clickable month sections show monthly counts, including zero for empty months; choosing a month filters the game list, and Whole year restores it. Swipe the year rail or use Left/Right/Home/End on the year tabs. Year filtering resets the selection, and reduced-motion settings are respected. The gaming orbit arranges 12 monthly completion circles around a calendar ring. Circle sizes reflect completion counts for the selected year, matching its timeline panel. Selecting a non-empty orbit month filters and returns focus to the dated timeline; All months or Clear month filter clears it. Year changes reset the month selection. Year summaries use current scores and lifetime recorded playtime for those games, not historical score changes or hours earned in that year. Undated completed games remain separate with links to add their dates. No update/import/release date is substituted for a completion date. This page is authenticated and has no public counterpart.
 
 Steam achievement completion suggestions are available in Campaign import rating and **Find completion dates** for existing Steam logs. Users confirm every date; see [Steam import documentation](docs/steam-library-import.md#achievement-completion-date-suggestions).
 
 Optional Gemini-assisted Steam completion detection recognizes indirect endings from public achievement metadata, with shared cached classifications and Steam-only dates. Configure `GEMINI_API_KEY` in Vercel Production; existing text matching remains the fallback.
+
+## October 16 audit fixes
+
+Game type overrides are saved to each owned rating, including ongoing backlog games, and persist across browsers. Null types retain legacy detection/status fallback. Completion statistics exclude ongoing games. Ranking, timeline, overview and statistics queries omit unused review prose; review pages and exports retain original text. Score ranking filters consistently include only scored entries, except the explicit Backlog view.
+
+Sign-in from logging retains the selected game through password, email link, Steam and profile setup using validated internal destinations. Steam sync reads only the requested batch's catalog matches and logs. Completion scans pause on limits, retain results, show a cooldown and retry deferred AI checks; reliable text-rule suggestions remain usable. Translation results use a database lease so separate server instances do not duplicate DeepL requests for the same review version.
+
+Registration states that profiles start public. Settings aligns with the site container, with visibility beside discovery, and editor controls have larger touch targets. Imports enter rate-all directly with Skip/resume. Unused prototype game rendering was removed; original design references remain. CI browser shards finish independently. Production backup coverage was rechecked October 16: no listed restore point or PITR. Private off-site storage configuration remains required; see `docs/data-recovery.md`.

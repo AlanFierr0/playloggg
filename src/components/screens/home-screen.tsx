@@ -12,7 +12,7 @@ import { tasteStats } from "@/lib/taste";
 import type { Game } from "@/types/domain";
 
 export async function HomeScreen() {
-  const [t, { games: sampled, expiresAt }, portfolio] = await Promise.all([getMessages(), getDiscover(9).catch(()=>({games:[],expiresAt:0})), getPortfolio()]);
+  const [t, { games: sampled, expiresAt }, portfolio] = await Promise.all([getMessages(), getDiscover(9).catch(()=>({games:[],expiresAt:0})), getPortfolio(false)]);
   const personal = Boolean(portfolio.access?.canEdit);
   const entries = personal ? portfolio.games.filter(game => game.logged).sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "") || a.slug.localeCompare(b.slug)) : [];
   const loggedSlugs = new Set(entries.map(game => game.slug));

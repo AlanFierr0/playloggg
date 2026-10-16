@@ -33,7 +33,7 @@ const classifications=recentRead(async(appId:string)=>{
   const key=process.env.GEMINI_API_KEY;if(!key)throw new Error("AI unavailable");
   await checkOperationLimit("steam-completion-ai","achievement_ai");
   const response=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{method:"POST",headers:{"x-goog-api-key":key,"Content-Type":"application/json"},body:JSON.stringify(completionClassificationRequest(schema)),cache:"no-store",redirect:"error",signal:AbortSignal.timeout(20000)});
-  if(!response.ok)throw new Error("AI classification unavailable");
+  if(!response.ok)throw new Error(response.status===429 ? `Too many requests. Try again in ${Math.max(1,Math.min(86400,Number(response.headers.get("retry-after"))||60))} seconds.` : "AI classification unavailable");
   const ids=parseGeminiCompletion(await response.json(),schema);
   const saved=await admin.rpc("store_steam_completion_classification",{...args,p_ids:ids});
   if(saved.error)throw new Error("AI cache unavailable");
@@ -41,5 +41,5 @@ const classifications=recentRead(async(appId:string)=>{
 },900_000,250);
 export async function readAiCompletionClassification(appId:number) {
   if(!process.env.GEMINI_API_KEY)return null;
-  try{const schema=await schemas(String(appId));const ids=await classifications(String(appId));return {ids,schema};}catch{return null;}
+  try{const schema=await schemas(String(appId));const ids=await classifications(String(appId));return {ids,schema};}catch(error){return {deferred:true as const,retryAfter:Number(error instanceof Error&&error.message.match(/^Too many requests\. Try again in (\d+) seconds\.$/)?.[1])||60};}
 }

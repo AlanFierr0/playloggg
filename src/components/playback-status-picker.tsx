@@ -6,22 +6,22 @@ import { usePortfolio } from "@/components/portfolio-provider";
 import { useMessages } from "@/components/site-preferences";
 import type { PlaybackStatus } from "@/types/domain";
 
-export function PlaybackStatusPicker({slug,value,onChange,onStyleChange}:{slug:string;value:PlaybackStatus|null;onChange:(value:PlaybackStatus|null)=>void;onStyleChange?:(value:PlayStyle)=>void}) {
+export function PlaybackStatusPicker({slug,value,onChange,onStyleChange,initialStyle}:{initialStyle?:PlayStyle|null;slug:string;value:PlaybackStatus|null;onChange:(value:PlaybackStatus|null)=>void;onStyleChange?:(value:PlayStyle)=>void}) {
   const t=useMessages();
   const {profile}=usePortfolio();
   const storageKey=`playlogg-play-style:${profile.id}:${slug}`;
   const [notice,setNotice]=useState("");
-  const [chosen,setChosen]=useState<PlayStyle|null>(null);
+  const [chosen,setChosen]=useState<PlayStyle|null>(initialStyle??null);
   const [detected,setDetected]=useState<PlayStyle|null>(null);
   useEffect(()=>{
     let ignore=false;
     queueMicrotask(()=>{
-      if(ignore)return;
+      if(ignore||initialStyle)return;
       try{const saved=localStorage.getItem(storageKey);if(saved==="campaign"||saved==="ongoing")setChosen(saved);}catch{}
     });
     getGamePlayStyle(slug).then(style=>{if(!ignore)setDetected(style);}).catch(()=>{});
     return ()=>{ignore=true;};
-  },[slug,storageKey]);
+  },[slug,storageKey,initialStyle]);
   const savedStyle=statusPlayStyle(value);
   const style=chosen??(savedStyle==="ongoing"?"ongoing":detected??savedStyle??"campaign");
   useEffect(()=>{onStyleChange?.(style);},[style,onStyleChange]);
@@ -31,7 +31,7 @@ export function PlaybackStatusPicker({slug,value,onChange,onStyleChange}:{slug:s
   return <div id="status-group" role="group" aria-label={t("Playback status")} className="min-w-0 space-y-3">
     <label className="flex flex-wrap items-center justify-between gap-2 text-body-sm"><span>{t("Game type")}</span><select aria-label={t("Game type")} value={style} onChange={event=>{
       const next=event.target.value as PlayStyle;setChosen(next);setNotice("");
-      // shortcut: this view preference is browser-local; add account storage if cross-device overrides are needed.
+      // Keep legacy browser drafts until the editor saves the account-backed choice.
       try{localStorage.setItem(storageKey,next);}catch{setNotice("Game type preference could not be saved in this browser.");}
     }} className="min-h-11 max-w-full rounded-xl border border-outline-variant bg-surface-container px-3 text-on-surface"><option value="campaign">{t("Campaign")}</option><option value="ongoing">{t("Ongoing online")}</option></select></label>
     <div className="flex items-center justify-between gap-2"><span>{t("Playback status")}</span><button id="clear-status" type="button" onClick={()=>onChange(null)} className="min-h-11 text-body-sm text-on-surface-variant">{t(value?"Clear status":"Not set")}</button></div>

@@ -1479,5 +1479,10 @@
   "Select a year, then explore its monthly pins.": "Elegí un año y explorá sus marcadores mensuales.",
   "Select a year pin, then choose a month.": "Elegí el marcador de un año y después un mes.",
   "Choose a month to see its completed games.": "Elegí un mes para ver los juegos que completaste.",
-  "No games were completed in this month.": "No completaste juegos en este mes."
+  "No games were completed in this month.": "No completaste juegos en este mes.",
+  "Use at least 12 characters.": "Usá al menos 12 caracteres.",
+  "Import selected games with Steam playtime, then rate them in order. You can skip games and resume later. Existing entries are kept unchanged.": "Importá los juegos elegidos con las horas de Steam y valoralos en orden. Podés omitir juegos y continuar después. Las entradas existentes se conservan.",
+  "Completion excludes ongoing online games, including their backlog entries. Older entries use Currently playing, Paused and Stopped playing as the fallback.": "La finalización excluye los juegos online continuos, incluidos los pendientes. Las entradas antiguas usan Jugando actualmente, En pausa y Dejé de jugar como referencia.",
+  "AI completion checks are temporarily unavailable. Retry unfinished games later; manual dates remain available.": "La comprobación con IA no está disponible temporalmente. Reintentá los juegos pendientes más tarde; podés ingresar fechas manualmente.",
+  "Scan paused by a service limit. Your results are kept; retry unfinished games after the countdown.": "Búsqueda pausada por un límite del servicio. Conservamos los resultados; reintentá los juegos pendientes después de la cuenta regresiva."
 }

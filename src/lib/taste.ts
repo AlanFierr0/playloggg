@@ -63,10 +63,10 @@ export function tasteStats(games: Game[]) {
           a.name.localeCompare(b.name),
       );
   const completed = entries.filter(
-    (game) => game.status === "completed",
+    (game) => game.status === "completed" && game.playStyle !== "ongoing",
   ).length;
-  // Ongoing statuses describe games without a completion goal; don't infer this from genre.
-  const ongoing = entries.filter(game => game.status === "active" || game.status === "paused" || game.status === "stopped").length;
+  // Saved type includes online backlog entries; legacy entries retain their status-based fallback.
+  const ongoing = entries.filter(game => game.playStyle === "ongoing" || game.status === "active" || game.status === "paused" || game.status === "stopped").length;
   const finishable = entries.length - ongoing;
   return {
     ongoing,

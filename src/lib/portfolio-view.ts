@@ -21,7 +21,7 @@ export function loggedGames(games: Game[]): Game[] {
 export function filterRankings(games: Game[], filter: RankingFilter, tag = ""): Game[] {
   if (tag) {
     const matching = loggedGames(games).filter((game) => game.tags?.some((value) => value.toLowerCase() === tag.toLowerCase()));
-    return filter === "all" ? matching : filterRankings(matching, filter);
+    return filterRankings(matching, filter);
   }
   if (filter === "backlog") return loggedGames(games).filter((game) => game.status === "backlog");
   const rated = ratedGames(games);

@@ -99,7 +99,17 @@ export async function syncSteamPlaytime(input: unknown): Promise<{ok:boolean;mes
     if (!account?.profile || !steamIdentity(steamId)) return {ok:false,message:"Sign in with Steam to import your library.",updated,failed:input.length};
     await checkOperationLimit(account.user.id,"steam");
     const library=(await readSteamLibrary(steamId)).filter(game=>input.includes(game.appId));
-    const logged=await loggedSteamGames(account,library);
+    const matches=await readSteamCatalogMatches(input);
+    const ids=[...new Set([...matches.values()].map(match=>match.id))];
+    if(!ids.length)return {ok:true,message:"Playtime synced. Other entry details were kept unchanged.",updated,failed:0};
+    const {data:catalog,error:catalogError}=await account.supabase.from("games").select("id,igdb_id").in("igdb_id",ids);
+    if(catalogError)throw new Error("Catalog read failed");
+    if(!catalog.length)return {ok:true,message:"Steam playtime is up to date.",updated:0,failed:0};
+    const {data:entries,error:entryError}=await account.supabase.from("ratings").select("game_id,platform,hours_played,updated_at").eq("profile_id",account.profile.id).in("game_id",catalog.map(game=>game.id));
+    if(entryError)throw new Error("Entry read failed");
+    const byIgdb=new Map(catalog.map(game=>[game.igdb_id,game.id]));
+    const byGame=new Map(entries.map(entry=>[entry.game_id,entry]));
+    const logged=new Map([...matches].flatMap(([appId,match])=>{const entry=byGame.get(byIgdb.get(match.id)!);return entry?[[appId,entry] as const]:[];}));
     let failed=0;
     for (const game of library) {
       const rating=logged.get(game.appId);
@@ -227,7 +237,7 @@ export async function saveSteamImportRating(input: unknown, updatedAt: unknown) 
     if(!previous || previous.updated_at!==updatedAt)return {ok:false,message:"This entry changed elsewhere. Skip it and edit the latest entry from your profile."};
     if(rating.completedOn && (previous.completed_on || (game.released_on && rating.completedOn<game.released_on)))return {ok:false,message:"Completion date could not be saved. Review the latest entry and release date."};
     const {error}=await account.supabase.rpc("save_rating",{p_game_id:game.id,p_expected_updated_at:updatedAt as string,
-      p_values:{...previous,score:rating.score,tier:rating.tier,tier_manual:rating.tierManual??rating.tier!==null,status:rating.status,completed_on:rating.completedOn ?? previous.completed_on}});
+      p_values:{...previous,score:rating.score,tier:rating.tier,tier_manual:rating.tierManual??rating.tier!==null,status:rating.status,...(rating.playStyle===undefined?{}:{play_style:rating.playStyle}),completed_on:rating.completedOn ?? previous.completed_on}});
     if(error?.code==="40001")return {ok:false,message:"This entry changed elsewhere. Skip it and edit the latest entry from your profile."};
     if(error)throw new Error("Save failed");
     revalidatePath("/","layout");
@@ -253,7 +263,7 @@ export async function getSteamReviewSummary(input:unknown):Promise<SteamReviewSu
   } catch {return null;}
 }
 
-export type SteamCompletionResult = {ok:boolean;message:string;candidates:SteamCompletionCandidate[];releasedOn:string|null;updatedAt:string|null};
+export type SteamCompletionResult = {ok:boolean;message:string;candidates:SteamCompletionCandidate[];releasedOn:string|null;updatedAt:string|null;deferred?:boolean;retryAfter?:number};
 export async function getSteamCompletionSuggestions(appId:unknown,slug:unknown,refresh=false):Promise<SteamCompletionResult> {
   const empty:SteamCompletionResult={ok:false,message:"Steam achievements unavailable. You can enter a date manually.",candidates:[],releasedOn:null,updatedAt:null};
   if(!steamAppId(appId)||typeof slug!=="string"||!/^[a-z0-9][a-z0-9-]{0,199}$/.test(slug)||typeof refresh!=="boolean")return empty;
@@ -273,11 +283,13 @@ export async function getSteamCompletionSuggestions(appId:unknown,slug:unknown,r
     if(skips.data?.includes(game.id))return {...empty,ok:true,message:"No eligible completion date."};
     const records=await queryIgdb(`fields id,external_games.uid,external_games.external_game_source; where id = ${game.igdb_id}; limit 1;`);
     if(matchSteamGames(records,[appId]).get(appId)!==game.igdb_id)return empty;
-    const {data:rating,error:ratingError}=await account.supabase.from("ratings").select("updated_at,completed_on,status,platform").eq("profile_id",account.profile.id).eq("game_id",game.id).maybeSingle();
-    if(ratingError||!rating||rating.platform!=="pc"||rating.completed_on||["active","paused","stopped"].includes(rating.status??""))return {...empty,ok:true,message:"No eligible completion date."};
+    const {data:rating,error:ratingError}=await account.supabase.from("ratings").select("updated_at,completed_on,status,play_style,platform").eq("profile_id",account.profile.id).eq("game_id",game.id).maybeSingle();
+    if(ratingError||!rating||rating.platform!=="pc"||rating.completed_on||rating.play_style==="ongoing"||["active","paused","stopped"].includes(rating.status??""))return {...empty,ok:true,message:"No eligible completion date."};
+    if(await getGamePlayStyle(slug)==="ongoing")return {...empty,ok:true,message:"Ongoing online games are excluded from completion suggestions."};
     fallback={...empty,releasedOn:game.released_on,updatedAt:rating.updated_at};
-    return {ok:true,message:"",candidates:await readSteamCompletions(account.user.id,steamId,appId,game.released_on,refresh),releasedOn:game.released_on,updatedAt:rating.updated_at};
-  }catch(error){return {...fallback,message:operationFailure(error,empty.message)};}
+    const result=await readSteamCompletions(account.user.id,steamId,appId,game.released_on,refresh);
+    return {ok:true,message:result.deferred?"AI completion checks are temporarily unavailable. Retry unfinished games later; manual dates remain available.":"",...result,releasedOn:game.released_on,updatedAt:rating.updated_at};
+  }catch(error){return {...fallback,message:operationFailure(error,empty.message),retryAfter:Number(error instanceof Error&&error.message.match(/^Too many requests\. Try again in (\d+) seconds\.$/)?.[1])||undefined};}
 }
 export type SteamCompletionLog={appId:number;slug:string;title:string;updatedAt:string|null};
 export async function listSteamCompletionLogs():Promise<{ok:boolean;message:string;games:SteamCompletionLog[]}> {
@@ -290,7 +302,7 @@ export async function listSteamCompletionLogs():Promise<{ok:boolean;message:stri
     const skips=await createAuthAdmin().rpc("read_steam_completion_skips",{p_owner:account.user.id});
     if(skips.error)throw new Error("Preferences unavailable");
     const skipped=new Set(skips.data??[]);
-    const eligible=[...logged].filter(([,rating])=>!skipped.has(rating.game_id)&&rating.platform==="pc"&&!rating.completed_on&&!["active","paused","stopped"].includes(rating.status??""));
+    const eligible=[...logged].filter(([,rating])=>!skipped.has(rating.game_id)&&rating.platform==="pc"&&!rating.completed_on&&rating.play_style!=="ongoing"&&!["active","paused","stopped"].includes(rating.status??""));
     const games:SteamCompletionLog[]=[];
     for(let offset=0;offset<eligible.length;offset+=100){
       const batch=eligible.slice(offset,offset+100);

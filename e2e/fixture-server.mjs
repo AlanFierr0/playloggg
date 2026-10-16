@@ -49,7 +49,7 @@ function reset() {
  ratings.push({profile_id:4,game_id:7,score:0,tier:null,status:"playing",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  for (const game_id of Array.from({length:19},(_,i)=>i+8)) for (const profile_id of [3,4]) ratings.push({profile_id,game_id,score:profile_id===3 ? 50 : 40,tier:null,status:"playing",review:null,tags:[],hours_played:null,platform:null,completed_on:null});
  profiles.forEach(p=>p.tier_ranges=structuredClone(defaultTierRanges));
- ratings.forEach(row=>{row.updated_at="2026-09-29T12:00:00Z";row.review_updated_at=row.review?.trim()?row.updated_at:null;row.tier_manual=Boolean(row.tier);if(!row.tier_manual)row.tier=tierForScore(row.score);});
+ ratings.forEach(row=>{row.play_style=null;row.updated_at="2026-09-29T12:00:00Z";row.review_updated_at=row.review?.trim()?row.updated_at:null;row.tier_manual=Boolean(row.tier);if(!row.tier_manual)row.tier=tierForScore(row.score);});
  failSave = false;steamMinutes=90;steamAdventureMinutes=0;profileDeleted=false; }
 reset();
 
@@ -176,7 +176,7 @@ export async function startFixtureServer() {
           return reply(200,[{id,game_modes:[{name:id===3?"Massively multiplayer online (MMO)":"Single player"},...(id===2?[{name:"Multiplayer"},{name:"Co-operative"}]:[])],keywords:[]}]);
         }
         const candidate={id:9001,name:"Unified Fixture Adventure",slug:"unified-fixture-adventure",first_release_date:1577836800,platforms:[{name:"PC"}],genres:[{name:"Adventure"}]};
-        if(body.includes("external_games.uid"))return reply(200,[{...candidate,id:1,name:"Hades",slug:"hades",genres:[{name:"RPG"}],external_games:[{uid:"101",external_game_source:1}]},{id:2,external_games:[{uid:"102",external_game_source:1}]},{...candidate,id:9004,name:"Steam Fixture Adventure",slug:"steam-fixture-adventure",genres:[{name:"Adventure"}],external_games:[{uid:"103",external_game_source:1}]},...Array.from({length:2},(_,index)=>({...candidate,id:9005+index,name:"ZZZ Fixture "+index,slug:"zzz-fixture-"+index,external_games:[{uid:String(200+index),external_game_source:1}]}))]);
+        if(body.includes("external_games.uid"))return reply(200,[{...candidate,id:1,name:"Hades",slug:"hades",genres:[{name:"RPG"}],external_games:[{uid:"101",external_game_source:1}]},{...candidate,id:2,name:"Elden Ring",slug:"elden-ring-shadow-of-the-erdtree",external_games:[{uid:"102",external_game_source:1}]},{...candidate,id:9004,name:"Steam Fixture Adventure",slug:"steam-fixture-adventure",genres:[{name:"Adventure"}],external_games:[{uid:"103",external_game_source:1}]},...Array.from({length:2},(_,index)=>({...candidate,id:9005+index,name:"ZZZ Fixture "+index,slug:"zzz-fixture-"+index,external_games:[{uid:String(200+index),external_game_source:1}]}))]);
         if(body.includes("where id = 9004"))return reply(200,[{...candidate,id:9004,name:"Steam Fixture Adventure",slug:"steam-fixture-adventure"}]);
         const mobileCandidate={...candidate,id:9003,name:"Unified Mobile Adventure",slug:"unified-mobile-adventure"};
         if(body.includes("where id = 9001"))return reply(200,[candidate]);
@@ -319,7 +319,7 @@ export async function startFixtureServer() {
         if(failSave){failSave=false;return reply(503,{message:"Controlled save failure"});}
         const previous=ratings.find(row=>row.profile_id===2&&row.game_id===input.p_game_id);
         if((previous?.updated_at??null)!==input.p_expected_updated_at)return reply(409,{code:"40001",message:"Entry changed"});
-        const row={...input.p_values,profile_id:2,game_id:input.p_game_id,updated_at:new Date().toISOString()};
+        const row={play_style:previous?.play_style??null,...input.p_values,profile_id:2,game_id:input.p_game_id,updated_at:new Date().toISOString()};
         row.review_updated_at=row.review?.trim()?(previous?.review===row.review?previous.review_updated_at:row.updated_at):null;
         if(!row.tier_manual)row.tier=tierForScore(row.score,profiles[1].tier_ranges);
         if(previous?.review!==row.review){reviewVotes=reviewVotes.filter(v=>v.reviewer_profile_id!==2||v.game_id!==input.p_game_id);reviewTranslations=reviewTranslations.filter(value=>value.profile_id!==2||value.game_id!==input.p_game_id);}
@@ -365,9 +365,11 @@ export async function startFixtureServer() {
         if(resource==="rpc/read_steam_completion_classification")return reply(200,achievementClassifications.find(row=>row.appId===input.p_app_id&&row.hash===input.p_hash)?.ids??null);
         achievementClassifications=achievementClassifications.filter(row=>row.appId!==input.p_app_id);achievementClassifications.push({appId:input.p_app_id,hash:input.p_hash,ids:input.p_ids});return reply(200,null);
       }
-      if(["rpc/read_review_translation","rpc/store_review_translation","rpc/reserve_review_translation"].includes(resource)){
+      if(["rpc/read_review_translation","rpc/store_review_translation","rpc/reserve_review_translation","rpc/claim_review_translation","rpc/release_review_translation"].includes(resource)){
         if(!admin)return reply(403,{message:"Server only"});
         let body="";for await(const part of req)body+=part;const input=JSON.parse(body);
+        if(resource==="rpc/claim_review_translation")return reply(200,true);
+        if(resource==="rpc/release_review_translation")return reply(200,null);
         if(resource==="rpc/reserve_review_translation"){if(translatedCharacters+input.p_characters>500000)return reply(200,false);translatedCharacters+=input.p_characters;return reply(200,true);}
         if(resource==="rpc/read_review_translation")return reply(200,reviewTranslations.find(row=>row.profile_id===input.p_profile_id&&row.game_id===input.p_game_id&&row.hash===input.p_hash&&row.target===input.p_target)?.value??null);
         if(!ratings.some(row=>row.profile_id===input.p_profile_id&&row.game_id===input.p_game_id&&row.review===input.p_original))return reply(200,false);

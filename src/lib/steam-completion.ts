@@ -12,16 +12,18 @@ async function loadAchievements(key:string,refresh=false){
     url.searchParams.set("key",apiKey);url.searchParams.set("steamid",steamId);url.searchParams.set("appid",String(appId));url.searchParams.set("l","english");
     // Never log provider URLs: they contain credentials and private account IDs.
     const response=await fetch(url,{cache:"no-store",redirect:"error",signal:AbortSignal.timeout(10000)});
+    if(response.status===429)throw new Error(`Too many requests. Try again in ${Math.max(1,Math.min(86400,Number(response.headers.get("retry-after"))||60))} seconds.`);
     if(!response.ok)throw new Error("Steam achievements unavailable");
     const data:unknown=await response.json();
     parseSteamCompletions(data,appId,null,Date.now(),steamId);
     return data as Json;
   },refresh);
   const classification=await readAiCompletionClassification(appId);
-  return parseSteamCompletions(data,appId,null,Date.now(),steamId,classification?.ids,classification?.schema);
+  const candidates=parseSteamCompletions(data,appId,null,Date.now(),steamId,classification&&"ids" in classification?classification.ids:undefined,classification&&"schema" in classification?classification.schema:undefined);
+  return {candidates,...(classification&&"deferred" in classification&&!candidates.length?{deferred:true,retryAfter:classification.retryAfter}:{})};
 }
 export async function readSteamCompletions(ownerId:string,steamId:string,appId:number,releasedOn:string|null,refresh=false) {
   const key=JSON.stringify([ownerId,steamId,appId]);
-  const candidates=await loadAchievements(key,refresh);
-  return candidates.filter(candidate=>!releasedOn||candidate.date>=releasedOn);
+  const result=await loadAchievements(key,refresh);
+  return {...result,candidates:result.candidates.filter(candidate=>!releasedOn||candidate.date>=releasedOn)};
 }

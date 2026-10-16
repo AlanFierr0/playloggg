@@ -14,13 +14,14 @@ import type { Tier, PlaybackStatus } from "@/types/domain";
 
 const button = "min-h-11 rounded-xl bg-primary-container text-on-primary-container px-5 py-3 disabled:opacity-50";
 export type SteamRatingGame = LibraryRow & ImportedSteamRating;
-export type SteamRatingDraft = { score: string; tier: Tier|null; status: PlaybackStatus|null; completedOn?:string };
+export type SteamRatingDraft = { score: string; tier: Tier|null; status: PlaybackStatus|null; completedOn?:string; playStyle?:PlayStyle|null };
 export const emptySteamRatingDraft: SteamRatingDraft = {score:"",tier:null,status:null,completedOn:""};
 export function readSteamRatingSession(raw: string) {
   const value = JSON.parse(raw);
   if (!value || !Array.isArray(value.games) || !value.games.length || value.games.length>10000 || !Number.isInteger(value.index) || value.index<0 || value.index>value.games.length || !Number.isInteger(value.target) || value.target<value.games.length || !Number.isInteger(value.progress) || !Number.isInteger(value.total) || value.progress<0 || value.total<value.progress) return null;
   if (!value.games.every((game: SteamRatingGame)=>game && Number.isSafeInteger(game.appId) && game.appId>0 && typeof game.slug==="string" && typeof game.title==="string" && Number.isFinite(game.hours) && game.hours>=0 && (game.cover===null || typeof game.cover==="string") && (game.updatedAt===null || typeof game.updatedAt==="string"))) return null;
   const draft = value.draft;
+  if(draft?.playStyle!==undefined&&draft.playStyle!==null&&draft.playStyle!=="campaign"&&draft.playStyle!=="ongoing")return null;
   if (!draft || typeof draft.score!=="string" || !/^\d{0,3}$/.test(draft.score) || Number(draft.score)>100 || (draft.tier!==null && !["S","A","B","C","D","F"].includes(draft.tier)) || (draft.status!==null && !Object.hasOwn(playbackLabels,draft.status))) return null;
   if(draft.completedOn!==undefined && draft.completedOn!=="" && !isCalendarDate(draft.completedOn))return null;
   draft.completedOn ??= "";
@@ -31,9 +32,9 @@ export function SteamRatingEditor({ game, draft, onDraft, onNext }: { game: Stea
   const t = useMessages();
   const {score,tier,status} = draft;
   const dateInput=useRef<HTMLInputElement>(null);
-  const [style,setStyle]=useState<PlayStyle|null>(null);
+  const [style,setStyle]=useState<PlayStyle|null>(draft.playStyle??null);
   const [suggestions,setSuggestions]=useState<SteamCompletionResult|null>(null);
-  useEffect(()=>{let ignore=false;const request=game.hours>=5?getSteamCompletionSuggestions(game.appId,game.slug):Promise.resolve({ok:true,message:"Achievement checks require at least 5 hours of Steam playtime.",candidates:[],releasedOn:null,updatedAt:null});request.then(result=>{if(!ignore)setSuggestions(result);}).catch(()=>{if(!ignore)setSuggestions({ok:false,message:"Steam achievements unavailable. You can enter a date manually.",candidates:[],releasedOn:null,updatedAt:null});});return ()=>{ignore=true;};},[game.appId,game.slug,game.hours]);
+  useEffect(()=>{if(style!=="campaign")return;let ignore=false;const request=game.hours>=5?getSteamCompletionSuggestions(game.appId,game.slug):Promise.resolve({ok:true,message:"Achievement checks require at least 5 hours of Steam playtime.",candidates:[],releasedOn:null,updatedAt:null});request.then(result=>{if(!ignore)setSuggestions(result);}).catch(()=>{if(!ignore)setSuggestions({ok:false,message:"Steam achievements unavailable. You can enter a date manually.",candidates:[],releasedOn:null,updatedAt:null});});return ()=>{ignore=true;};},[game.appId,game.slug,game.hours,style]);
   const setScore = (score:string)=>onDraft({...draft,score});
   const setTier = (tier:Tier|null)=>onDraft({...draft,tier});
   const setStatus = (status:PlaybackStatus|null)=>onDraft({...draft,status});
@@ -50,7 +51,7 @@ export function SteamRatingEditor({ game, draft, onDraft, onNext }: { game: Stea
   async function save() {
     setSaving(true);setMessage("");
     try {
-      const result = await saveSteamImportRating({slug:game.slug,score:score==="" ? null : Number(score),tier,tierManual:tier!==null,status,review:"",tags:[],platform:null,hoursPlayed:null,completedOn:style!=="ongoing" ? draft.completedOn||null : null},game.updatedAt);
+      const result = await saveSteamImportRating({slug:game.slug,score:score==="" ? null : Number(score),tier,tierManual:tier!==null,status,playStyle:style,review:"",tags:[],platform:null,hoursPlayed:null,completedOn:style!=="ongoing" ? draft.completedOn||null : null},game.updatedAt);
       if (result.ok) onNext(); else setMessage(result.message);
     } catch { setMessage("Your rating could not be saved. Please retry or skip this game."); }
     finally { setSaving(false); }
@@ -66,7 +67,7 @@ export function SteamRatingEditor({ game, draft, onDraft, onNext }: { game: Stea
     <fieldset disabled={saving} className="min-w-0 space-y-5 disabled:opacity-60">
       <div className="flex items-center justify-between gap-3"><span>{t("Tier")}</span><TierBadge value={tier} onChange={setTier}/></div>
       <div className="space-y-3"><label className="block text-center">{t("Score")}<span className="flex justify-center items-baseline gap-2"><input aria-label={t("Score")} inputMode="numeric" maxLength={3} style={{fontSize:"clamp(2rem, 6vw, 3rem)"}} value={score} placeholder="—" onChange={event=>{const value=event.target.value;if(/^\d{0,3}$/.test(value)&&(value===""||Number(value)<=100))setScore(value);}} className="w-[3ch] min-h-14 border-0 bg-transparent text-center font-display-lg text-display-lg text-primary focus:outline-none focus:ring-2 focus:ring-primary rounded"/><span className="text-on-surface-variant">/100</span></span></label>{score!=="" && <ScoreStars score={Number(score)}/>}<input type="range" aria-label={t("Numerical score from 0 to 100")} min={0} max={100} step={1} value={Number(score)} onChange={event=>setScore(event.target.value)} className="score-slider w-full"/>{score!=="" && <button type="button" className="block mx-auto min-h-11 text-primary" onClick={()=>setScore("")}>{t("Remove score")}</button>}</div>
-      <PlaybackStatusPicker key={game.slug} slug={game.slug} value={status} onChange={setStatus} onStyleChange={setStyle}/>
+      <PlaybackStatusPicker key={game.slug} slug={game.slug} value={status} onChange={setStatus} initialStyle={draft.playStyle} onStyleChange={next=>{setStyle(next);if(draft.playStyle!==next)onDraft({...draft,playStyle:next});}}/>
       {style==="campaign" && <div className="space-y-3">{suggestions?.candidates.length ? <SteamCompletionCandidates candidates={suggestions.candidates} onAccept={candidate=>onDraft({...draft,status:"completed",completedOn:candidate.date})}/> : <p role="status" className="text-body-sm text-on-surface-variant">{t(!suggestions?"Checking Steam completion achievements…":suggestions.message||"No completion achievement found. You can enter a date manually.")}</p>}<label htmlFor="date-input" className="block text-body-md">{t("Completion date")}</label><CompletionDate value={draft.completedOn??""} onChange={completedOn=>onDraft({...draft,completedOn})} inputRef={dateInput} minDate={suggestions?.releasedOn??undefined}/></div>}
     </fieldset>
     {message && <p role="alert" className="text-error">{t(message)}</p>}

@@ -41,5 +41,5 @@ test("persistent per-game cache survives cold servers, includes empty results an
  for(const mode of ["valid","empty"]){const cache=new Map(),counters={ai:0,quota:0};const first=await service(cache,mode,counters)(101);const second=await service(cache,mode,counters)(101);assert.deepEqual(first,second);assert.equal(counters.ai,1);assert.equal(counters.quota,1);assert.equal(cache.size,1);}
 });
 test("quota/provider failures return fallback without saving a false AI result",async()=>{
- const cache=new Map(),counters={ai:0,quota:0};assert.equal(await service(cache,"unavailable",counters)(101),null);assert.equal(cache.size,0);
+ const cache=new Map(),counters={ai:0,quota:0};assert.deepEqual(await service(cache,"unavailable",counters)(101),{deferred:true,retryAfter:60});assert.equal(cache.size,0);
 });

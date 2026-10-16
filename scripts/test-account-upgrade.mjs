@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import ts from 'typescript';
+import {navigationPath} from '../src/lib/return-navigation.ts';
 import {eligibleAccount} from '../src/lib/account-identity.ts';
 import {emailAddress,passwordValue} from '../src/lib/password-input.ts';
 import {avatarFormat,avatarPath,avatarSource} from '../src/lib/avatar-input.ts';
@@ -63,7 +64,7 @@ test('password registration, recovery and sign-in use public Auth; ownership com
   const calls=[];let linkError=null;let user={id:'verified-user',email:'player@example.com',email_confirmed_at:'2026-10-01',app_metadata:{}};
   const supabase={auth:{signInWithOtp:async input=>{calls.push(['link',input]);return {error:linkError};},signUp:async input=>{calls.push(['register',input]);return {data:{session:null},error:null};},resetPasswordForEmail:async(...args)=>{calls.push(['recover',args]);return {error:null};},signInWithPassword:async input=>{calls.push(['signin',input]);return {data:{user},error:null};}},from(table){assert.equal(table,'profiles');return {select(){return this;},eq(key,value){if(key==='owner_user_id')assert.equal(value,'verified-user');return this;},maybeSingle:async()=>({data:null,error:null})};}};
   const {emailPassword}=load('../src/app/actions/password.ts',{
-    'next/navigation':{redirect:path=>{throw new Error(`REDIRECT ${path}`);}},'next/cache':{revalidatePath:()=>{}},'@/lib/supabase/server':{createClient:async()=>supabase},'@/lib/account-identity':{eligibleAccount},'@/lib/password-input':{emailAddress,passwordValue},'@/lib/steam-openid':{steamSite:()=> 'https://playloggg.vercel.app'}
+    'next/navigation':{redirect:path=>{throw new Error(`REDIRECT ${path}`);}},'next/cache':{revalidatePath:()=>{}},'@/lib/supabase/server':{createClient:async()=>supabase},'@/lib/account-identity':{eligibleAccount},'@/lib/password-input':{emailAddress,passwordValue},'@/lib/steam-openid':{steamSite:()=> 'https://playloggg.vercel.app'},'@/lib/return-navigation':{navigationPath}
   },{process:{env:{}},String});
   const form=mode=>{const f=new FormData();f.set('mode',mode);f.set('email','player@example.com');f.set('password','fixture-password-123');f.set('owner_user_id','attacker');return f;};
   assert.match((await emailPassword({},form('register'))).message,/verify your email/);
@@ -71,6 +72,8 @@ test('password registration, recovery and sign-in use public Auth; ownership com
   assert.match((await emailPassword({},form('recover'))).message,/If this account exists/);
   assert.equal(calls[1][1][1].redirectTo,'https://playloggg.vercel.app/auth/confirm?flow=recovery');
   await assert.rejects(emailPassword({},form('signin')),/REDIRECT \/signup/);
+  const returning=form('signin');returning.set('next','/log?game=example-game');await assert.rejects(emailPassword({},returning),/REDIRECT \/signup\?next=%2Flog%3Fgame%3Dexample-game/);
+  returning.set('next','https://attacker.invalid');await assert.rejects(emailPassword({},returning),/REDIRECT \/signup$/);
   user={...user,email_confirmed_at:null};assert.match((await emailPassword({},form('signin'))).message,/Sign-in failed/);
   const link=form('link');link.delete('password');link.set('email','new-player@example.com');link.set('redirectTo','https://attacker.invalid');
   assert.match((await emailPassword({},link)).message,/Check your inbox for a sign-in link/);

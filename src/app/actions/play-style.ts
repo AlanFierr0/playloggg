@@ -20,6 +20,8 @@ export async function getGamePlayStyle(slug:unknown):Promise<PlayStyle|null> {
     if(!account?.profile)return null;
     const game=await getCatalogGame(slug);
     if(!game)return null;
+    const {data:entry}=await account.supabase.from("ratings").select("play_style").eq("profile_id",account.profile.id).eq("game_id",game.id).maybeSingle();
+    if(entry?.play_style==="campaign"||entry?.play_style==="ongoing")return entry.play_style;
     const metadata=game.igdb_metadata&&typeof game.igdb_metadata==="object"&&!Array.isArray(game.igdb_metadata)?game.igdb_metadata:{};
     const known=classifyPlayStyle({...metadata,genres:game.genres});
     if(known)return known;

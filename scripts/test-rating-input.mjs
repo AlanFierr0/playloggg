@@ -67,3 +67,9 @@ test("live-service statuses are shared by full saves and catalog URLs", async()=
   assert.equal(maximumPlaytime("2026-10-09", now), 0);
   assert.equal(maximumPlaytime(null, now), null);
 });
+
+test("explicit game types are validated and optional old drafts preserve omission",()=>{
+ for(const playStyle of ["campaign","ongoing",null])assert.equal(validateRating({...draft,playStyle}).playStyle,playStyle);
+ for(const playStyle of ["multiplayer",1,{},false])assert.equal(validateRating({...draft,playStyle}),null);
+ assert.ok(!Object.hasOwn(validateRating(draft),"playStyle"));
+});

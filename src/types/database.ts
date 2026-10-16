@@ -408,6 +408,7 @@ export type Database = {
           created_at: string
           game_id: number
           hours_played: number | null
+          play_style: string | null
           platform: string | null
           profile_id: number
           review: string | null
@@ -424,6 +425,7 @@ export type Database = {
           created_at?: string
           game_id: number
           hours_played?: number | null
+          play_style?: string | null
           platform?: string | null
           profile_id: number
           review?: string | null
@@ -440,6 +442,7 @@ export type Database = {
           created_at?: string
           game_id?: number
           hours_played?: number | null
+          play_style?: string | null
           platform?: string | null
           profile_id?: number
           review?: string | null
@@ -524,6 +527,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_review_translation: { Args: { p_profile_id:number; p_game_id:number; p_hash:string; p_target:string; p_token:string }; Returns:boolean }
+      release_review_translation: { Args: { p_profile_id:number; p_game_id:number; p_hash:string; p_target:string; p_token:string }; Returns:undefined }
+
       account_deletion_objects: {
         Args: { p_owner: string }
         Returns: {

@@ -59,7 +59,7 @@ test("sample and unlogged entry explicitly identify their state", () => {
 });
 test("Shelf routes guests to sign-in and editors to the selected game's editor", () => {
   portfolio = { access: { canEdit: false } };
-  assert.ok(renderToStaticMarkup(React.createElement(ShelfLink, { slug: "example-game" }, "Shelf")).includes('href="/login"'));
+  assert.ok(renderToStaticMarkup(React.createElement(ShelfLink, { slug: "example-game" }, "Shelf")).includes('href="/login?next=%2Flog%3Fgame%3Dexample-game"'));
   portfolio = { access: { canEdit: true } };
   assert.ok(renderToStaticMarkup(React.createElement(ShelfLink, { slug: "example-game" }, "Shelf")).includes('href="/log?game=example-game"'));
 });

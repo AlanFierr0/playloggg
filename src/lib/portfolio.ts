@@ -70,9 +70,9 @@ export const getPortfolioShell = cache(async (): Promise<Portfolio> => {
   const { owner, profile } = await selectedAccount();
   return { games: [], lists: [], profile: profile ? { id: String(profile.id), handle: profile.handle, displayName: profile.display_name, isSample: false, avatarUrl: avatarSource(profile.id, profile.avatar_url), bio: profile.bio, location: profile.location, platformPreference: profile.platform_preference, tierRanges: parseTierRanges(profile.tier_ranges) ?? defaultTierRanges, isPublic: profile.is_public, isDiscoverable:profile.is_discoverable } : {id: "", handle: "", displayName: "", isSample: false, isPublic: false}, access: { signedIn: Boolean(owner), canEdit: Boolean(profile), canImportCatalog: Boolean(profile) } };
 });
-const selectedRatings = cache(async () => {
+const selectedRatings = cache(async (includeReviews = true) => {
   const { owner, profile } = await selectedAccount();
-  return owner?.profile && profile ? readProfileRatings(owner.supabase, profile.id) : [];
+  return owner?.profile && profile ? readProfileRatings(owner.supabase, profile.id, includeReviews) : [];
 });
 const searchFields = "id,slug,title,cover_url,release_year,released_on,genres,search_keywords";
 export const getSearchPortfolio = cache(async (query = "", offset = 0, hideRated = false): Promise<Portfolio & { hasMore: boolean; excludedSlugs: string[] }> => {
@@ -91,8 +91,8 @@ export const getSearchPortfolio = cache(async (query = "", offset = 0, hideRated
   const games = portfolioGames(rows.slice(0,24).map(row => ({...row, artwork_image_ids: [], screenshot_image_ids: [], igdb_metadata: {}, igdb_url: null})), ratings).map(game => ({...game, review: null}));
   return {...shell, games, hasMore: rows.length > 24, excludedSlugs};
 });
-export const getPortfolio = cache(async (): Promise<Portfolio> => {
-  const [shell, ratings] = await Promise.all([getPortfolioShell(), selectedRatings()]);
+export const getPortfolio = cache(async (includeReviews = true): Promise<Portfolio> => {
+  const [shell, ratings] = await Promise.all([getPortfolioShell(), selectedRatings(includeReviews)]);
   const favorites = shell.profile.id ? await readFavorites(await createClient(), Number(shell.profile.id)) : [];
   const rows = await getCatalogRows(ratings.map(row => row.game_id), favorites.map(favorite => favorite.slug));
   const ranking=shell.profile.id ? await readPreferenceRanking(await createClient(),Number(shell.profile.id),rows) : undefined;
@@ -104,14 +104,14 @@ export const getPublicGame = cache(async (slug: string) => {
   const { owner, profile } = await selectedAccount();
   let ratings: RatingRow[];
   if (owner?.profile && profile) {
-    const { data, error } = await owner.supabase.from("ratings").select("game_id,score,tier,tier_manual,review,review_updated_at,status,platform,hours_played,completed_on,tags,updated_at").eq("profile_id", profile.id).eq("game_id", row.id).limit(1);
+    const { data, error } = await owner.supabase.from("ratings").select("game_id,score,tier,tier_manual,review,review_updated_at,status,play_style,platform,hours_played,completed_on,tags,updated_at").eq("profile_id", profile.id).eq("game_id", row.id).limit(1);
     if (error) throw new Error("Your ratings could not be loaded.");
     ratings = data as RatingRow[];
   } else ratings = [];
   return portfolioGames([row], ratings)[0];
 });
 
-export function portfolioGames(rows: GameRow[], ratings: (Pick<RatingRow, "game_id" | "score" | "tier" | "review" | "status" | "platform" | "hours_played" | "completed_on" | "tags"> & {updated_at?: string; review_updated_at?: string | null; tier_manual?: boolean})[]): Game[] {
+export function portfolioGames(rows: GameRow[], ratings: (Pick<RatingRow, "game_id" | "score" | "tier" | "review" | "status" | "platform" | "hours_played" | "completed_on" | "tags"> & {updated_at?: string; review_updated_at?: string | null; tier_manual?: boolean; play_style?: string | null})[]): Game[] {
   const byGame = new Map(ratings.map((rating) => [rating.game_id, rating]));
   const games: Game[] = rows.map((row) => {
     const rating = byGame.get(row.id);
@@ -124,6 +124,7 @@ export function portfolioGames(rows: GameRow[], ratings: (Pick<RatingRow, "game_
       review: rating?.review ?? null,
       reviewUpdatedAt: rating?.review_updated_at ?? null,
       ...(rating?.updated_at ? {updatedAt: rating.updated_at} : {}),
+      playStyle: rating?.play_style === "campaign" || rating?.play_style === "ongoing" ? rating.play_style : null,
       status: rating?.status as Game["status"] ?? null, logged: Boolean(rating),
       platform: rating?.platform as Game["platform"] ?? null,
       hoursPlayed: rating?.hours_played ?? null, completedOn: rating?.completed_on ?? null, tags: rating?.tags ?? [],
@@ -138,10 +139,10 @@ export function portfolioGames(rows: GameRow[], ratings: (Pick<RatingRow, "game_
   return games;
 }
 
-export async function getPersonalPortfolio() {
+export async function getPersonalPortfolio(includeReviews = true) {
   const {redirect} = await import("next/navigation");
   const account = await getAccount();
   if (!account) return redirect("/login");
   if (!account.profile) redirect("/signup");
-  return getPortfolio();
+  return getPortfolio(includeReviews);
 }

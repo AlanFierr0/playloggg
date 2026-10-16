@@ -165,3 +165,21 @@ test("skipped completion games disappear across reloads without changing their l
   const response=await fetch(action.url(),{method:"POST",headers:{"next-action":action.headers()["next-action"],"content-type":action.headers()["content-type"],origin:"http://127.0.0.1:3100"},body:action.postData()});
   expect(await response.text()).toContain("Game could not be skipped");expect((await state()).completionSkips).toEqual([]);
 });
+
+test("completion scan pauses on quota limits, keeps unfinished work and retries after cooldown",async({page,context,request})=>{
+ await context.addCookies([authCookie]);await request.post(`${fixture}/__steam-user`);await request.post(`${fixture}/__steam-five-hours`);await request.post(`${fixture}/__steam-completion-log`);
+ await page.goto("/profile/import/steam");
+ const game=(await state()).games.find((game:{id:number})=>game.id===2);
+ await page.route("**/profile/import/steam",async route=>{
+  if(route.request().method()==="POST"&&route.request().postData()?.includes(game.slug))await request.post(`${fixture}/__quota-denied`);
+  await route.continue();
+ });
+ await page.getByRole("button",{name:"Find completion dates",exact:true}).click();
+ const panel=page.getByRole("region",{name:"Steam completion dates",exact:true});
+ await expect(panel.getByRole("status")).toContainText("Scan paused by a service limit.");
+ await expect(panel.getByRole("button",{name:/Retry unfinished games/})).toBeDisabled();
+ await page.unrouteAll({behavior:"wait"});await request.post(`${fixture}/__quota-allow`);
+ await page.clock.install();await page.clock.fastForward(61000);
+ await panel.getByRole("button",{name:"Retry unfinished games",exact:true}).click();
+ await expect(panel.getByText(/Scan finished/)).toBeVisible();await expect(panel.getByRole("button",{name:"Confirm completion",exact:true})).toHaveCount(2);
+});

@@ -1,3 +1,4 @@
+import {navigationPath} from "../src/lib/return-navigation.ts";
 import * as tierRanges from "../src/lib/tier-ranges.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -19,6 +20,7 @@ function load(relative, dependencies) {
 test("new profiles are public, discoverable and owned by the verified account", async () => {
   let account = null, inserted;
   const { createProfile } = load("../src/app/actions/profile.ts", {
+    "@/lib/return-navigation": {navigationPath},
     "next/navigation": { redirect(path) { assert.equal(path, "/profile"); } },
     "next/cache": { revalidatePath() {} },
     "@/lib/owner": { getAccount: async () => account },
@@ -47,6 +49,7 @@ test("profile mutations verify Auth ownership, never trust submitted IDs", async
   const invalidated = [];
   const query = { update(value) { patch = value; constraints = []; return this; }, eq(key, value) { constraints.push([key, value]); return this; }, select() { return this; }, async maybeSingle() { return result; } };
   const { updateProfile } = load("../src/app/actions/profile.ts", {
+    "@/lib/return-navigation": {navigationPath},
     "next/navigation": { redirect() { throw new Error("Unexpected redirect"); } },
     "next/cache": { revalidatePath: (...args) => invalidated.push(args) },
     "@/lib/owner": { getAccount: async () => account },

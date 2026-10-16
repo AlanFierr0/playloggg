@@ -1,3 +1,4 @@
+import { navigationPath } from "@/lib/return-navigation";
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { steamSite, verifySteam, steamLinkActor } from "@/lib/steam-openid";
@@ -10,8 +11,10 @@ export async function GET(request: NextRequest) {
   const store = await cookies();
   const state = store.get("playlogg-steam-state")?.value;
   const linking = store.get("playlogg-steam-link")?.value;
-  for (const name of ["playlogg-steam-state", "playlogg-steam-link"]) store.set(name, "", { path: "/auth/steam", maxAge: 0, httpOnly: true, sameSite: "lax", secure: request.nextUrl.protocol === "https:" });
-  let destination = linking ? "/profile/import/steam?error=steam" : "/login?error=steam";
+  let next: string | null = null;
+  try { const saved = JSON.parse(store.get("playlogg-steam-next")?.value ?? "null"); if (state && saved?.state === state) next = navigationPath(saved.next); } catch {}
+  for (const name of ["playlogg-steam-state", "playlogg-steam-link", "playlogg-steam-next"]) store.set(name, "", { path: "/auth/steam", maxAge: 0, httpOnly: true, sameSite: "lax", secure: request.nextUrl.protocol === "https:" });
+  let destination = linking ? "/profile/import/steam?error=steam" : `/login?error=steam${next ? `&next=${encodeURIComponent(next)}` : ""}`;
   try {
     const site = steamSite(process.env.PLAYLOGG_SITE_URL);
     if (request.nextUrl.origin !== site) throw new Error("Invalid origin");
@@ -45,7 +48,7 @@ export async function GET(request: NextRequest) {
       if (verified.error || verified.data.user?.id !== data.user.id) throw new Error("Session failed");
       const { data: profile, error: profileError } = await supabase.from("profiles").select("id").eq("owner_user_id", data.user.id).maybeSingle();
       if (profileError) throw new Error("Profile read failed");
-      destination = profile ? "/profile" : "/signup";
+      destination = profile ? next ?? "/profile" : `/signup${next ? `?next=${encodeURIComponent(next)}` : ""}`;
     }
   } catch (error) {
     if (linking && error instanceof Error && error.message === "steam-linked") destination = "/profile/import/steam?error=steam-linked";

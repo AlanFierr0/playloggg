@@ -1,4 +1,5 @@
 "use server";
+import { navigationPath } from "@/lib/return-navigation";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -8,12 +9,13 @@ import { steamSite } from "@/lib/steam-openid";
 
 export async function emailPassword(_previous: {message: string}, form: FormData) {
   const mode = form.get("mode");
+  const next = navigationPath(form.get("next"));
   const email = emailAddress(form.get("email"));
   if (!email || !["signin", "register", "recover", "link"].includes(String(mode))) return {message: "Enter a valid email address."};
   let destination: string | undefined;
   try {
     const supabase = await createClient();
-    const callback = `${steamSite(process.env.PLAYLOGG_SITE_URL)}/auth/confirm`;
+    const callback = `${steamSite(process.env.PLAYLOGG_SITE_URL)}/auth/confirm${next ? `?next=${encodeURIComponent(next)}` : ""}`;
     if (mode === "link") {
       const {error} = await supabase.auth.signInWithOtp({email, options: {
         shouldCreateUser: true, emailRedirectTo: callback,
@@ -21,7 +23,7 @@ export async function emailPassword(_previous: {message: string}, form: FormData
       return {message: error ? "We couldn't send an email. Please try again shortly." : "Check your inbox for a sign-in link. New accounts start with a public profile."};
     }
     if (mode === "recover") {
-      const {error} = await supabase.auth.resetPasswordForEmail(email, {redirectTo: `${callback}?flow=recovery`});
+      const {error} = await supabase.auth.resetPasswordForEmail(email, {redirectTo: `${callback}${next ? "&" : "?"}flow=recovery`});
       return {message: error ? "We couldn't send an email. Please try again shortly." : "If this account exists, a password reset link has been sent. Check your inbox."};
     }
     const raw = form.get("password");
@@ -42,7 +44,7 @@ export async function emailPassword(_previous: {message: string}, form: FormData
     }
     const {data: profile, error: profileError} = await supabase.from("profiles").select("id").eq("owner_user_id", data.user.id).maybeSingle();
     if (profileError) return {message: "Your profile could not be loaded. Please retry."};
-    destination = profile ? "/profile" : "/signup";
+    destination = profile ? next ?? "/profile" : `/signup${next ? `?next=${encodeURIComponent(next)}` : ""}`;
   } catch { return {message: "Sign-in is unavailable right now. Please try again."}; }
   revalidatePath("/", "layout");
   redirect(destination!);

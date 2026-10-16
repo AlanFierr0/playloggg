@@ -2,7 +2,7 @@ import type {Portfolio} from "../types/domain.ts";
 export function portfolioExport(portfolio:Portfolio,exportedAt=new Date().toISOString()){
  const source=portfolio.profile;
  const profile={handle:source.handle,displayName:source.displayName,bio:source.bio??null,location:source.location??null,platformPreference:source.platformPreference??null,avatarUrl:source.avatarUrl??null,isPublic:source.isPublic,isDiscoverable:source.isDiscoverable,tierRanges:source.tierRanges};
- const logs=portfolio.games.filter(game=>game.logged).map(game=>({slug:game.slug,title:game.title,score:game.score,tier:game.tier??null,tierManual:game.tierManual??false,status:game.status??null,platform:game.platform??null,hoursPlayed:game.hoursPlayed??null,completedOn:game.completedOn??null,review:game.review??null,tags:game.tags??[],updatedAt:game.updatedAt??null,reviewUpdatedAt:game.reviewUpdatedAt??null}));
+ const logs=portfolio.games.filter(game=>game.logged).map(game=>({slug:game.slug,title:game.title,score:game.score,tier:game.tier??null,tierManual:game.tierManual??false,status:game.status??null,playStyle:game.playStyle??null,platform:game.platform??null,hoursPlayed:game.hoursPlayed??null,completedOn:game.completedOn??null,review:game.review??null,tags:game.tags??[],updatedAt:game.updatedAt??null,reviewUpdatedAt:game.reviewUpdatedAt??null}));
  return {schemaVersion:1,exportedAt,profile,logs,favorites:portfolio.favorites??[],ranking:{slugs:portfolio.ranking?.slugs??logs.map(log=>log.slug),manualPositions:portfolio.ranking?.manualPositions??{}}};
 }
 export function portfolioCsv(data:ReturnType<typeof portfolioExport>){

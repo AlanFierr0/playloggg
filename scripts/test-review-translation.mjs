@@ -21,3 +21,22 @@ test("DeepL preserves exact source URLs, skips link-only reviews and validates p
  bad=true;await assert.rejects(translate("Original review","ES"),/unavailable/);
  key=undefined;assert.equal(await translate("Original review","ES"),null);assert.equal(calls,2);
 });
+import {randomUUID} from "node:crypto";
+test("cold servers share translation claims and only one provider call is charged",async()=>{
+ let calls=0,reservations=0,stored=null,held=null,finish;
+ const wait=new Promise(resolve=>{finish=resolve;});
+ const admin={rpc:async(name,args)=>{
+  if(name==="read_review_translation")return {data:stored,error:null};
+  if(name==="claim_review_translation"){if(held||stored)return {data:false,error:null};held=args.p_token;return {data:true,error:null};}
+  if(name==="release_review_translation"){if(held===args.p_token)held=null;return {error:null};}
+  if(name==="reserve_review_translation"){reservations++;return {data:true,error:null};}
+  assert.equal(name,"store_review_translation");stored={text:args.p_translation,sourceLanguage:args.p_source_language};return {data:true,error:null};
+ }};
+ function server(){const context={exports:{},require:name=>({"server-only":{},"node:crypto":{createHash,randomUUID},"@/lib/supabase/auth-admin":{createAuthAdmin:()=>admin},"@/lib/operation-limits":{checkOperationLimit:async()=>{}},"@/lib/review-text":{reviewParts,hasReviewProse}})[name],process:{env:{DEEPL_API_KEY:"fixture:fx"}},AbortSignal,fetch:async()=>{calls++;await wait;return Response.json({translations:[{text:"Traducido",detected_source_language:"EN"}]});}};
+ vm.runInNewContext(ts.transpileModule(readFileSync(new URL("../src/lib/review-translation.ts",import.meta.url),"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,context);return context.exports.getReviewTranslation;}
+ const first=server()(2,3,"Original review","ES");
+ while(!calls)await new Promise(resolve=>setTimeout(resolve,0));
+ assert.equal(await server()(2,3,"Original review","ES"),null);assert.equal(calls,1);
+ finish();assert.equal((await first).text,"Traducido");assert.equal(held,null);
+ assert.equal((await server()(2,3,"Original review","ES")).text,"Traducido");assert.equal(calls,1);assert.equal(reservations,1);
+});
