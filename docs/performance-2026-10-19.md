@@ -38,3 +38,7 @@ Las precargas RSC bajaron de 22 a 8 y los requests totales de 44 a 28. La navega
 El LCP todavía supera el presupuesto de 2,5 s en esta simulación. No se declara cumplido: quedan CSS/fuentes críticas y JS compartido para una siguiente medición en producción, manteniendo la tipografía aprobada. No se hizo una reescritura del sistema de traducciones ni se añadieron servicios de telemetría.
 
 La cobertura precisa de V8 sobre un tablero de 16 juegos identificó 16 ejecuciones iniciales de la función de render de tarjeta y **0 ejecuciones adicionales al pasar el arrastre a otra tier** después de iniciarlo. Se verificó en la build de producción con Chromium; las pruebas de arrastre comprueban aparte persistencia, cancelación y recuperación de fallos.
+
+Comprobación local: typecheck y lint correctos, 141 pruebas de unidad, build de producción con proveedores controlados, 121 pruebas de navegador aprobadas y una exclusión deliberada (gesto táctil en escritorio). Después de la última optimización de tarjetas y fuentes, se aprobaron otras 33 comprobaciones afectadas y la misma exclusión. La batería SQL y la recuperación con Postgres real se ejecutan en el workflow de GitHub; Docker no está disponible en esta máquina.
+
+Referencia del CDN de imágenes: [documentación oficial de IGDB](https://api-docs.igdb.com/#images). El tamaño pequeño WebP se comprobó también con una respuesta HTTP 200 del CDN.

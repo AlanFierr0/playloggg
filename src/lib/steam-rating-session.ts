@@ -17,4 +17,3 @@ export function readSteamRatingSession(raw: string) {
   draft.completedOn ??= "";
   return value as {games:SteamRatingGame[];index:number;target:number;progress:number;total:number;draft:SteamRatingDraft};
 }
-
