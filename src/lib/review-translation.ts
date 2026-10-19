@@ -7,7 +7,7 @@ export type ReviewTranslation={text:string;sourceLanguage:string};
 export async function translateReview(text:string,target:"EN"|"ES"):Promise<ReviewTranslation|null>{
  const key=process.env.DEEPL_API_KEY;
  if(!key||text.length>20000||!hasReviewProse(text))return null;
- const parts=reviewParts(text),indexes=parts.flatMap((part,index)=>!/^https?:\/\//.test(part)&&part.trim()?[index]:[]);
+ const parts=reviewParts(text),indexes=parts.flatMap((part,index)=>!/^https?:\/\//.test(part)&&/[\p{L}\p{N}]/u.test(part)?[index]:[]);
  if(indexes.length>50)return null;
  const endpoint=key.endsWith(":fx")?"https://api-free.deepl.com/v2/translate":"https://api.deepl.com/v2/translate";
  const response=await fetch(endpoint,{method:"POST",headers:{Authorization:`DeepL-Auth-Key ${key}`,"Content-Type":"application/json"},body:JSON.stringify({text:indexes.map(index=>parts[index].trim()),target_lang:target==="EN"?"EN-US":"ES",preserve_formatting:true}),signal:AbortSignal.timeout(10000),cache:"no-store"});

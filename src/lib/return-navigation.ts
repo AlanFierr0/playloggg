@@ -20,6 +20,10 @@ export function navigationPath(value: unknown): string | null {
   } catch { return null; }
 }
 
+export function loginHref(destination: unknown): string {
+  return `/login?${new URLSearchParams({ next: navigationPath(destination) ?? "/" })}`;
+}
+
 export function visitPage(history: string[], current: string | null): string[] {
   if (!current) return [];
   const index = history.lastIndexOf(current);

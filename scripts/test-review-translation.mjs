@@ -18,8 +18,11 @@ test("DeepL preserves exact source URLs, skips link-only reviews and validates p
  assert.equal(await translate(url,"ES"),null);assert.equal(calls,0);
  const result=await translate(`Original review\n${url}\nAnother paragraph`,"ES");
  assert.equal(result.text,`Reseña traducida\n${url}\nReseña traducida`);assert.equal(result.sourceLanguage,"EN");assert.equal(body.target_lang,"ES");
+ const punctuated=await translate(`Original review (${url}).`,"ES");
+ assert.equal(punctuated.text,`Reseña traducida${url}).`);
+ assert.equal(body.text.length,1);
  bad=true;await assert.rejects(translate("Original review","ES"),/unavailable/);
- key=undefined;assert.equal(await translate("Original review","ES"),null);assert.equal(calls,2);
+ key=undefined;assert.equal(await translate("Original review","ES"),null);assert.equal(calls,3);
 });
 import {randomUUID} from "node:crypto";
 test("cold servers share translation claims and only one provider call is charged",async()=>{

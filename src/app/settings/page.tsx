@@ -1,3 +1,4 @@
+import { loginHref } from "@/lib/return-navigation";
 import { BackLink } from "@/components/return-navigation";
 import { avatarSource } from "@/lib/avatar-input";
 import { localizeMetadata } from "@/lib/locale/server";
@@ -11,8 +12,8 @@ export async function generateMetadata() { return localizeMetadata({ title: "Pro
 export default async function SettingsPage() {
   const t = await getMessages();
   const account = await getAccount();
-  if (!account) redirect("/login");
-  if (!account.profile) redirect("/signup");
+  if (!account) redirect(loginHref("/settings"));
+  if (!account.profile) redirect("/signup?next=/settings");
   const profile = account.profile;
   return <section className="site-container mx-auto w-full px-4 sm:px-6 lg:px-12 py-8 sm:py-12 space-y-6">
     <BackLink className="inline-flex min-h-11 items-center text-primary font-label-md text-label-md" href="/profile">← {t("Back")}</BackLink>

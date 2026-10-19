@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { navigationPath, previousPage, restoreNavigation, visitPage } from "../src/lib/return-navigation.ts";
+import { loginHref, navigationPath, previousPage, restoreNavigation, visitPage } from "../src/lib/return-navigation.ts";
 
 test("return navigation accepts only internal app pages and safe query state", () => {
   for (const value of ["https://evil.test", "//evil.test", "/\\evil.test", "/%2f%2fevil.test", "/auth/confirm?token_hash=secret", "/login", "/api/profile/export", "javascript:alert(1)", null]) assert.equal(navigationPath(value), null);
@@ -33,3 +33,10 @@ test("refresh restores this page's history; direct entries and corrupt storage u
   for (const stored of [null, "broken", '{}', '["//evil.test","/log?game=hades"]', '["/login","/log?game=hades"]']) assert.deepEqual(restoreNavigation(stored, history[1]), [history[1]]);
   assert.deepEqual(restoreNavigation(JSON.stringify(history), "/settings"), ["/settings"]);
 });
+
+ test("sign-in destinations preserve allowed state without exposing tokens or accepting redirects", () => {
+   const destination = "/games?q=Hades&genre=Adventure&sort=score-desc&size=50";
+   assert.equal(new URL(loginHref(destination), "https://playlogg.test").searchParams.get("next"), destination);
+   assert.equal(new URL(loginHref("/u/fixture_public/reviews?page=2&token=secret"), "https://playlogg.test").searchParams.get("next"), "/u/fixture_public/reviews?page=2");
+   for (const path of ["//evil.test", "https://evil.test", "/auth/confirm?token_hash=secret", "/login?next=/login"]) assert.equal(loginHref(path), "/login?next=%2F");
+ });

@@ -1,3 +1,4 @@
+import { loginHref } from "@/lib/return-navigation";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getAccount } from "@/lib/owner";
@@ -12,7 +13,7 @@ async function ProfileContent() { const portfolio = await getPersonalPortfolio(f
 
 export default async function ProfilePage(){
  const account=await getAccount();
- if(!account)redirect("/login");
- if(!account.profile)redirect("/signup");
+ if(!account)redirect(loginHref("/profile"));
+ if(!account.profile)redirect("/signup?next=/profile");
  return <Suspense fallback={<RouteLoading/>}><ProfileContent/></Suspense>;
 }

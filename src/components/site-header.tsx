@@ -5,6 +5,7 @@ import { useMessages } from "@/components/site-preferences";
 import Link from "next/link";
 import { useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import { loginHref } from "@/lib/return-navigation";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { useSitePreferences } from "@/components/site-preferences";
@@ -56,7 +57,7 @@ export function SiteHeader() {
               </div>
             </div>
           </details>
-          <Link className="group flex h-11 w-11 shrink-0 items-center justify-center rounded-xl" href={access?.signedIn ? "/profile" : "/login"} aria-label={access?.signedIn ? t("Your profile") : t("Sign in")} title={access?.signedIn ? t("Your profile") : t("Sign in")}><ProfileAvatar src={access?.canEdit ? profile.avatarUrl : null} name={access?.canEdit ? profile.displayName : "Account"} className="h-11 w-11 rounded-xl ring-1 ring-inset ring-outline-variant/30 group-hover:ring-primary group-focus-visible:ring-primary transition-colors" /></Link>
+          {access?.signedIn ? <Link className="group flex h-11 w-11 shrink-0 items-center justify-center rounded-xl" href="/profile" aria-label={t("Your profile")} title={t("Your profile")}><ProfileAvatar src={access?.canEdit ? profile.avatarUrl : null} name={profile.displayName} className="h-11 w-11 rounded-xl ring-1 ring-inset ring-outline-variant/30 group-hover:ring-primary group-focus-visible:ring-primary transition-colors" /></Link> : <Link href={loginHref(returnPath)} aria-label={t("Sign in")} title={t("Sign in")} className="inline-flex h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-surface-container px-2 text-primary transition-colors hover:bg-surface-container-high sm:px-3"><span aria-hidden="true" className="material-symbols-outlined text-[20px]">login</span><span className="hidden text-body-md font-semibold sm:inline">{t("Sign in")}</span></Link>}
         </div>
       </div>
 

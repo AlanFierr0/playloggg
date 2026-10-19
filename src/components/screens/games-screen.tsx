@@ -8,7 +8,8 @@ import { GameTags } from "@/components/game-tags";
 import { GameLogAction } from "@/components/game-actions";
 import { IgdbSearch } from "@/components/igdb-search";
 import { useCallback, useEffect, useRef, useOptimistic, useTransition, useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { loginHref } from "@/lib/return-navigation";
 import { gamesQuery } from "@/lib/games-query";
 import type { GamesPageData } from "@/lib/games-page";
 import { defaultGamesFilters, validScoreRange, type GamesFilters } from "@/lib/games-view";
@@ -21,6 +22,7 @@ const button = "inline-flex items-center justify-center rounded px-4 py-2.5 font
 export function GamesScreen({ data, access }: { data: GamesPageData; profile: Portfolio["profile"]; access: Portfolio["access"] }) {
   const t = useMessages();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [interactive, setInteractive] = useState(false);
   useEffect(() => { queueMicrotask(() => setInteractive(true)); }, []);
   const [optimisticFilters, updateFilters] = useOptimistic(data.filters);
@@ -123,7 +125,7 @@ export function GamesScreen({ data, access }: { data: GamesPageData; profile: Po
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3">{!validScoreRange(filters) && <p role="status" aria-live="polite" className="text-on-surface-variant font-body-sm text-body-sm">{t("Use whole-number scores from 0 to 100, with minimum no greater than maximum.")}</p>}<button type="button" className="ml-auto inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors" onClick={clear}><span aria-hidden="true" className="material-symbols-outlined text-[18px]">restart_alt</span>{t("Clear filters")}</button></div>
     </fieldset>
-    {filters.query.trim().length >= 2 && <section className="rounded-xl bg-surface-container-low p-5 space-y-3"><h2 className="font-headline-md text-headline-md">{t("Missing a game?")}</h2>{access?.canImportCatalog ? <IgdbSearch query={filters.query} excludeSlugs={visible.map(game => game.slug)} /> : <Link prefetch={false} href="/login" className="text-primary underline">{t("Sign in to search more games and import a game.")}</Link>}</section>}
+    {filters.query.trim().length >= 2 && <section className="rounded-xl bg-surface-container-low p-5 space-y-3"><h2 className="font-headline-md text-headline-md">{t("Missing a game?")}</h2>{access?.canImportCatalog ? <IgdbSearch query={filters.query} excludeSlugs={visible.map(game => game.slug)} /> : <Link prefetch={false} href={loginHref(`/games?${searchParams}`)} className="text-primary underline">{t("Sign in to search more games and import a game.")}</Link>}</section>}
     <section aria-label={t("Game catalog results")}><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-3 gap-y-6 sm:gap-x-5">{visible.map((game) => <CatalogCard key={game.slug} game={game} logged={Boolean(game.logged)} canEdit={Boolean(access?.canEdit)} filters={filters} />)}</div>{!visible.length && <div className="py-12 text-center space-y-4"><h2 className="font-headline-lg text-headline-lg">{t("No games match these filters")}</h2><p className="text-on-surface-variant">{t("Try a broader search or clear the filters.")}</p><button className={button} onClick={clear}>{t("Show all games")}</button></div>}</section>
     {loadError && <p role="alert" className="text-error">{t("The game catalog could not be loaded.")} {t("Try again.")}</p>}
     {currentPage < pageCount && <div ref={sentinel} data-infinite-scroll className="flex min-h-14 justify-center items-center">

@@ -1,3 +1,4 @@
+import { loginHref } from "@/lib/return-navigation";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAccount } from "@/lib/owner";
@@ -13,8 +14,8 @@ export async function generateMetadata() {
 }
 export default async function Page() {
   const account = await getAccount();
-  if (!account) redirect("/login");
-  if (!account.profile) redirect("/signup");
+  if (!account) redirect(loginHref("/profile/social"));
+  if (!account.profile) redirect("/signup?next=/profile/social");
   const [
     { data: follows, error: followsError },
     { data: blocks, error: blocksError },

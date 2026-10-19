@@ -1,3 +1,4 @@
+import * as returnNavigation from "../src/lib/return-navigation.ts";
 import * as tierRanges from "../src/lib/tier-ranges.ts";
 import {test} from "node:test";
 import assert from "node:assert/strict";
@@ -40,7 +41,7 @@ function loader({hidden=false,unpublish=false,fail=false}={}){
  const source=readFileSync(new URL("../src/lib/public-comparison.ts",import.meta.url),"utf8");
  const dependencies={"@/lib/owner":{getAccount:async()=>null},"@/lib/favorites":{readFavorites:async()=>[]},"@/lib/avatar-input":{avatarSource:()=>null},"server-only":{},"@/lib/supabase/public":{createPublicClient:()=>{created++;return db}},"@/lib/profile-settings":{publicProfilePath:handle=>/^[a-z0-9_]{3,30}$/.test(handle)?`/u/${handle}`:null},"@/lib/portfolio":{getCatalogRows:async(ids)=>rows.filter(row=>ids.includes(row.id))}};
  const portfolioModule={exports:{}};
- const portfolioDependencies={...dependencies,"@/lib/tier-ranges":tierRanges,react:{cache:fn=>fn},"@/lib/profile-ratings":{},"@/lib/preference-ranking":{},"@/lib/supabase/server":{},"@/lib/supabase/auth-admin":{}};
+ const portfolioDependencies={...dependencies,"@/lib/return-navigation":returnNavigation,"@/lib/tier-ranges":tierRanges,react:{cache:fn=>fn},"@/lib/profile-ratings":{},"@/lib/preference-ranking":{},"@/lib/supabase/server":{},"@/lib/supabase/auth-admin":{}};
  vm.runInNewContext(ts.transpileModule(readFileSync(new URL("../src/lib/portfolio.ts",import.meta.url),"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:portfolioModule,exports:portfolioModule.exports,require:name=>{assert.ok(name in portfolioDependencies);return portfolioDependencies[name]}});
  dependencies["@/lib/portfolio"].portfolioGames=portfolioModule.exports.portfolioGames;
  const compiledModule={exports:{}};vm.runInNewContext(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:compiledModule,exports:compiledModule.exports,require:name=>{assert.ok(name in dependencies);return dependencies[name]}});

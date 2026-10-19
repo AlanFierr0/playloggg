@@ -1,3 +1,4 @@
+import { loginHref } from "@/lib/return-navigation";
 import { BackLink } from "@/components/return-navigation";
 import { redirect } from "next/navigation";
 import { SteamLibraryImport } from "@/components/steam-library-import";
@@ -9,8 +10,8 @@ export async function generateMetadata() {return localizeMetadata({title:"Import
 export default async function Page({ searchParams }: { searchParams: Promise<{ error?: string; connected?: string }> }) {
   const params = await searchParams;
   const [account,t] = await Promise.all([getAccount(),getMessages()]);
-  if (!account) redirect("/login");
-  if (!account.profile) redirect("/signup");
+  if (!account) redirect(loginHref("/profile/import/steam"));
+  if (!account.profile) redirect("/signup?next=/profile/import/steam");
   const eligible = steamIdentity(account.user.app_metadata.playlogg_steam_id);
   return <section className="w-full site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-12 space-y-6">
     <BackLink href="/profile" className="inline-flex min-h-11 items-center text-primary">← {t("Back")}</BackLink>

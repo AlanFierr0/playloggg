@@ -9,6 +9,7 @@ import { readProfileRatings } from "@/lib/profile-ratings";
 import {readPreferenceRanking} from "@/lib/preference-ranking";
 import { readFavorites } from "@/lib/favorites";
 import { createClient } from "@/lib/supabase/server";
+import { loginHref, navigationPath } from "@/lib/return-navigation";
 import { getAccount } from "@/lib/owner";
 
 type GameRow = Database["public"]["Tables"]["games"]["Row"];
@@ -139,10 +140,11 @@ export function portfolioGames(rows: GameRow[], ratings: (Pick<RatingRow, "game_
   return games;
 }
 
-export async function getPersonalPortfolio(includeReviews = true) {
+export async function getPersonalPortfolio(includeReviews = true, returnPath = "/profile") {
   const {redirect} = await import("next/navigation");
   const account = await getAccount();
-  if (!account) return redirect("/login");
-  if (!account.profile) redirect("/signup");
+  const destination = navigationPath(returnPath) ?? "/profile";
+  if (!account) return redirect(loginHref(destination));
+  if (!account.profile) redirect(`/signup?${new URLSearchParams({ next: destination })}`);
   return getPortfolio(includeReviews);
 }
