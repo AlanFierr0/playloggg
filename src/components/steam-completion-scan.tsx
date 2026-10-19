@@ -11,10 +11,17 @@ export function SteamCompletionScan({disabled,children}:{profileId:number;disabl
   const [lastSkipped,setLastSkipped]=useState<{slug:string;title:string}|null>(null);
   const [skippedGames,setSkippedGames]=useState<{slug:string;title:string}[]|null>(null),[skipMessage,setSkipMessage]=useState(""),[loadingSkipped,setLoadingSkipped]=useState(false);
   const undoButton=useRef<HTMLButtonElement>(null),scanButton=useRef<HTMLButtonElement>(null);
+  const restoreFocus=useRef(false);
   useEffect(()=>{if(lastSkipped)undoButton.current?.focus();},[lastSkipped]);
   const [retryAt,setRetryAt]=useState(0),[remaining,setRemaining]=useState(0);
   useEffect(()=>{if(!retryAt)return;const update=()=>{const seconds=Math.max(0,Math.ceil((retryAt-Date.now())/1000));setRemaining(seconds);if(!seconds)setRetryAt(0);};const initial=setTimeout(update,0),timer=setInterval(update,1000);return ()=>{clearTimeout(initial);clearInterval(timer);};},[retryAt]);
   const [progress,setProgress]=useState({done:0,total:0});const [saving,setSaving]=useState<string|null>(null);
+  // Results still change when a fast restore batches both saving updates.
+  useEffect(()=>{
+    if(!restoreFocus.current||saving!==null||disabled||busy||remaining>0)return;
+    restoreFocus.current=false;
+    scanButton.current?.focus({preventScroll:true});
+  },[results,saving,disabled,busy,remaining]);
   useEffect(()=>{mounted.current=true;return ()=>{mounted.current=false;stopped.current=true;};},[]);
   async function scan(retry=false){
     if(running.current||retryAt>Date.now())return;running.current=true;stopped.current=false;setOpen(true);setBusy(true);setMessage("");
@@ -60,7 +67,7 @@ export function SteamCompletionScan({disabled,children}:{profileId:number;disabl
   }
   async function restore(game:{slug:string;title:string}){
     setSaving(game.slug);setSkipMessage("");
-    try{const result=await restoreSteamCompletion(game.slug);if(mounted.current){setSkipMessage(result.message);if(result.ok){setResults(rows=>rows.map(row=>row.game.slug===game.slug?{...row,skipped:false,message:undefined}:row));setSkippedGames(games=>games?.filter(row=>row.slug!==game.slug)??null);setLastSkipped(previous=>previous?.slug===game.slug?null:previous);setMessage(result.message);requestAnimationFrame(()=>scanButton.current?.focus({preventScroll:true}));}}}
+    try{const result=await restoreSteamCompletion(game.slug);if(mounted.current){setSkipMessage(result.message);if(result.ok){setResults(rows=>rows.map(row=>row.game.slug===game.slug?{...row,skipped:false,message:undefined}:row));setSkippedGames(games=>games?.filter(row=>row.slug!==game.slug)??null);setLastSkipped(previous=>previous?.slug===game.slug?null:previous);setMessage(result.message);restoreFocus.current=true;}}}
     catch{if(mounted.current)setSkipMessage("Game could not be restored. Please retry.");}
     finally{if(mounted.current)setSaving(null);}
   }

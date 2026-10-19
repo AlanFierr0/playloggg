@@ -15,7 +15,7 @@
 | Medición | Antes | Después |
 | --- | ---: | ---: |
 | Fuente de iconos WOFF2 | 212.012 bytes | 101.972 bytes |
-| JS inicial Steam, sin comprimir | 669.940 bytes | 656.032 bytes |
+| JS inicial Steam, sin comprimir | 669.940 bytes | 656.120 bytes |
 | Catálogo: ejemplo EXPLAIN ANALYZE en producción | 69,416 ms | 27,727 ms |
 | Catálogo: bloques temporales escritos/leídos | 367 / 367 | 0 / 0 |
 
@@ -42,3 +42,5 @@ La cobertura precisa de V8 sobre un tablero de 16 juegos identificó 16 ejecucio
 Comprobación local: typecheck y lint correctos, 141 pruebas de unidad, build de producción con proveedores controlados, 121 pruebas de navegador aprobadas y una exclusión deliberada (gesto táctil en escritorio). Después de la última optimización de tarjetas y fuentes, se aprobaron otras 33 comprobaciones afectadas y la misma exclusión. La batería SQL y la recuperación con Postgres real se ejecutan en el workflow de GitHub; Docker no está disponible en esta máquina.
 
 Referencia del CDN de imágenes: [documentación oficial de IGDB](https://api-docs.igdb.com/#images). El tamaño pequeño WebP se comprobó también con una respuesta HTTP 200 del CDN.
+
+La verificación completa en GitHub detectó además una carrera de foco al deshacer una omisión de Steam: `requestAnimationFrame` podía ejecutarse antes del commit de React que habilita el botón. El foco vuelve ahora en un efecto posterior al commit, cuando el botón está habilitado, conservando la prueba de accesibilidad que detectó el problema.
