@@ -27,15 +27,24 @@ export const getCommunity = cache(async () => {
   };
 });
 
-export const getCommunityScores=cache(async (gameIds:number[])=>{
+const readCommunityScores=cache(async (key:string)=>{
+  const gameIds=key ? key.split(",").map(Number) : [];
   const scores:CommunityScore[]=[];
-  for(let offset=0;offset<gameIds.length;offset+=100){
-    const {data,error}=await createAuthAdmin().rpc("anonymous_game_scores",{p_ids:gameIds.slice(offset,offset+100)}).limit(100);
-    if(error)throw new Error("Community score could not be loaded.");
-    scores.push(...data.map(toScore));
+  const client=createAuthAdmin();
+  for(let offset=0;offset<gameIds.length;offset+=200){
+    const batches=[gameIds.slice(offset,offset+100),gameIds.slice(offset+100,offset+200)].filter(batch=>batch.length);
+    const results=await Promise.all(batches.map(batch=>client.rpc("anonymous_game_scores",{p_ids:batch}).limit(100)));
+    for(const {data,error} of results){
+      if(error)throw new Error("Community score could not be loaded.");
+      scores.push(...data.map(toScore));
+    }
   }
   return scores;
 });
+export function getCommunityScores(gameIds:number[]){
+  return readCommunityScores([...new Set(gameIds)].sort((a,b)=>a-b).join(","));
+}
+
 export const getCommunityGameScore=cache(async (gameId:number)=>(await getCommunityScores([gameId]))[0]);
 
 export type TasteDiscovery = {

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { getGamePlayStyle } from "@/app/actions/play-style";
 import { playbackGroups, playbackLabels, statusPlayStyle, type PlayStyle } from "@/lib/playback-status";
 import { usePortfolio } from "@/components/portfolio-provider";
@@ -13,18 +13,21 @@ export function PlaybackStatusPicker({slug,value,onChange,onStyleChange,initialS
   const [notice,setNotice]=useState("");
   const [chosen,setChosen]=useState<PlayStyle|null>(initialStyle??null);
   const [detected,setDetected]=useState<PlayStyle|null>(null);
+  const initial = useRef(initialStyle);
   useEffect(()=>{
+    if(initial.current)return;
     let ignore=false;
     queueMicrotask(()=>{
-      if(ignore||initialStyle)return;
+      if(ignore)return;
       try{const saved=localStorage.getItem(storageKey);if(saved==="campaign"||saved==="ongoing")setChosen(saved);}catch{}
     });
     getGamePlayStyle(slug).then(style=>{if(!ignore)setDetected(style);}).catch(()=>{});
     return ()=>{ignore=true;};
-  },[slug,storageKey,initialStyle]);
+  },[slug,storageKey]);
   const savedStyle=statusPlayStyle(value);
   const style=chosen??(savedStyle==="ongoing"?"ongoing":detected??savedStyle??"campaign");
-  useEffect(()=>{onStyleChange?.(style);},[style,onStyleChange]);
+  const notifyStyle = useEffectEvent((next:PlayStyle)=>onStyleChange?.(next));
+  useEffect(()=>{notifyStyle(style);},[style]);
   const choices=playbackGroups[style];
   // Keep an existing saved status visible when the user switches groups.
   const visible=value&&!choices.includes(value)?[...choices,value]:choices;

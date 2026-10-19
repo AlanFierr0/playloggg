@@ -15,5 +15,5 @@ export function GameLogAction({ slug, logged }: { slug: string; logged: boolean 
 
 export function ShelfLink({ slug, className, children }: { slug: string; className?: string; children: ReactNode }) {
   const { access } = usePortfolio();
-  return <Link href={access?.canEdit ? `/log?game=${encodeURIComponent(slug)}` : `/login?next=${encodeURIComponent(`/log?game=${slug}`)}`} className={className}>{children}</Link>;
+  return <Link prefetch={false} href={access?.canEdit ? `/log?game=${encodeURIComponent(slug)}` : `/login?next=${encodeURIComponent(`/log?game=${slug}`)}`} className={className}>{children}</Link>;
 }

@@ -66,7 +66,7 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {neighbors.slice(0, 6).map((neighbor) => (
-              <Link
+              <Link prefetch={false}
                 key={neighbor.profileId}
                 href={`/u/${neighbor.handle}`}
                 className="min-w-0 flex items-start gap-4 rounded-lg bg-surface-container-low p-5"
@@ -97,13 +97,13 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
           return game ? [(
                 <article key={game.id} className="group/game flex min-w-0 flex-col">
                   <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low">
-                    <Link href={`/game/${game.slug}`} aria-label={game.title} className="block h-full">
+                    <Link prefetch={false} href={`/game/${game.slug}`} aria-label={game.title} className="block h-full">
                       <img src={game.cover_url} alt="" loading="lazy" className="w-full h-full object-cover transition-opacity group-hover/game:opacity-90" />
                     </Link>
                     <GameLogAction slug={game.slug} logged={loggedSlugs.has(game.slug)} />
                   </div>
                   <div className="mt-3 flex flex-col gap-1">
-                    <h3 translate="no" className="font-headline-md text-headline-md group-hover/game:text-primary line-clamp-2"><Link href={`/game/${game.slug}`}>{game.title}</Link></h3>
+                    <h3 translate="no" className="font-headline-md text-headline-md group-hover/game:text-primary line-clamp-2"><Link prefetch={false} href={`/game/${game.slug}`}>{game.title}</Link></h3>
                     <p className="text-body-sm text-primary break-words">{row.count} {t("people")}</p>
                   </div>
                 </article>
@@ -125,13 +125,13 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
                 game && (
                   <article key={game.id} className="group/game min-w-0 space-y-2">
                     <div className="relative w-full aspect-[3/4] overflow-hidden rounded-lg bg-surface-container-low">
-                      <Link href={`/game/${game.slug}`} aria-label={game.title} className="block h-full">
+                      <Link prefetch={false} href={`/game/${game.slug}`} aria-label={game.title} className="block h-full">
                         <img src={game.cover_url} alt="" loading="lazy" className="w-full h-full object-cover transition-opacity group-hover/game:opacity-90" />
                       </Link>
                       <GameLogAction slug={game.slug} logged={loggedSlugs.has(game.slug)} />
                     </div>
                     <h3 translate="no" className="font-headline-md text-headline-md break-words group-hover/game:text-primary">
-                      <Link href={`/game/${game.slug}`}>{game.title}</Link>
+                      <Link prefetch={false} href={`/game/${game.slug}`}>{game.title}</Link>
                     </h3>
                     <p className="text-body-sm text-primary break-words">{row.value}</p>
                   </article>
@@ -151,15 +151,15 @@ export async function CommunityDiscovery({ loggedSlugs }: { loggedSlugs: Set<str
       {reviews.length > 0 && <HomeCarousel>
         {reviews.map(review => <article key={`${review.profile_id}-${review.game_id}`} className="flex h-full flex-col gap-5 rounded-xl border border-outline-variant/30 bg-surface-container-low p-5 sm:p-6">
           <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-4 gap-y-2">
-            <Link href={`/game/${review.game.slug}`} className="row-start-2 shrink-0"><img src={review.game.cover_url} alt={review.game.title} loading="lazy" className="h-[72px] w-12 rounded-md object-cover sm:h-24 sm:w-16" /></Link>
-            <Link href={`/u/${review.profiles.handle}`} aria-label={review.profiles.display_name} className="col-span-2 row-start-1 inline-flex min-h-11 max-w-full items-center justify-self-end gap-2 rounded-lg text-body-sm text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
+            <Link prefetch={false} href={`/game/${review.game.slug}`} className="row-start-2 shrink-0"><img src={review.game.cover_url} alt={review.game.title} loading="lazy" className="h-[72px] w-12 rounded-md object-cover sm:h-24 sm:w-16" /></Link>
+            <Link prefetch={false} href={`/u/${review.profiles.handle}`} aria-label={review.profiles.display_name} className="col-span-2 row-start-1 inline-flex min-h-11 max-w-full items-center justify-self-end gap-2 rounded-lg text-body-sm text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
               <span translate="no" className="min-w-0 break-words text-right">{review.profiles.display_name}</span>
               <ProfileAvatar src={`/avatars/${review.profile_id}`} name={review.profiles.display_name} className="h-10 w-10 rounded-xl" />
             </Link>
-            <h3 translate="no" className="row-start-2 min-w-0 font-headline-md text-headline-md line-clamp-2"><Link href={`/u/${review.profiles.handle}/game/${review.game.slug}`} className="hover:text-primary">{review.game.title}</Link></h3>
+            <h3 translate="no" className="row-start-2 min-w-0 font-headline-md text-headline-md line-clamp-2"><Link prefetch={false} href={`/u/${review.profiles.handle}/game/${review.game.slug}`} className="hover:text-primary">{review.game.title}</Link></h3>
           </div>
           <ReviewText text={review.review} slug={review.game.slug} profileId={String(review.profile_id)} className="line-clamp-5 text-body-md"/>
-          <Link href={`/u/${review.profiles.handle}/game/${review.game.slug}`} className="mt-auto inline-flex min-h-11 items-center gap-2 text-primary text-body-sm hover:underline">{t("Read review")}<span aria-hidden="true" className="material-symbols-outlined text-[18px]">arrow_forward</span></Link>
+          <Link prefetch={false} href={`/u/${review.profiles.handle}/game/${review.game.slug}`} className="mt-auto inline-flex min-h-11 items-center gap-2 text-primary text-body-sm hover:underline">{t("Read review")}<span aria-hidden="true" className="material-symbols-outlined text-[18px]">arrow_forward</span></Link>
           <ReviewHelpfulness profileId={String(review.profile_id)} slug={review.game.slug} data={{ ...review.data, reviews: { [review.game.slug]: review.data.reviews[review.game.slug] } }} />
         </article>)}
       </HomeCarousel>}

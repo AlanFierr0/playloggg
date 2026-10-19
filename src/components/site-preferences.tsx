@@ -1,10 +1,11 @@
 "use client";
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { localeCookie, siteLocale, siteTheme, themeCookie, type SiteLocale, type SiteTheme } from "@/lib/locale/preferences";
 import { translateText } from "@/lib/locale/translate";
 
 type Preferences = { locale: SiteLocale; theme: SiteTheme; setLocale: (value: SiteLocale) => void; setTheme: (value: SiteTheme) => void };
+const LocaleContext = createContext<SiteLocale>("en");
 const Context = createContext<Preferences | null>(null);
 
 export function SitePreferences({ initialLocale, initialTheme, children }: { initialLocale: SiteLocale; initialTheme: SiteTheme; children: ReactNode }) {
@@ -25,7 +26,7 @@ export function SitePreferences({ initialLocale, initialTheme, children }: { ini
     root.style.colorScheme = theme;
     document.cookie = `${themeCookie}=${siteTheme(theme)}; Path=/; Max-Age=31536000; SameSite=Lax`;
   }, [theme]);
-  return <Context.Provider value={{ locale, theme, setLocale, setTheme }}>{children}</Context.Provider>;
+  return <Context.Provider value={{ locale, theme, setLocale, setTheme }}><LocaleContext.Provider value={locale}>{children}</LocaleContext.Provider></Context.Provider>;
 }
 export function useSitePreferences() {
   const value = useContext(Context);
@@ -33,6 +34,7 @@ export function useSitePreferences() {
   return value;
 }
 export function useMessages(override?: SiteLocale) {
-  const value = useContext(Context);
-  return (source: string) => translateText(source, override ?? value?.locale ?? "en");
+  const current = useContext(LocaleContext);
+  const locale = override ?? current;
+  return useCallback((source: string) => translateText(source, locale), [locale]);
 }

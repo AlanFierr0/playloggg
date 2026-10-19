@@ -1,4 +1,5 @@
 "use client";
+import { coverImage } from "@/lib/cover-image";
 import { useMessages } from "@/components/site-preferences";
 
 
@@ -32,7 +33,7 @@ export function SearchResults({ query, scope, mode, profiles, profilesHasMore, p
       {show("curators") && <section className="pt-3">
         <ResultHeading icon="group" label={t("Profiles")} detail={profilesLoading ? "Loading…" : `${profiles.length}${profilesHasMore ? "+" : ""} matching profiles`} color="text-tertiary" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">{profiles.map((profile) => <ReferenceProfile0 key={profile.id} profile={profile} />)}</div>
-        {profilesHasMore && <Link href={`/people?q=${encodeURIComponent(query)}`} className="mt-3 inline-flex min-h-11 items-center rounded-lg px-3 text-primary hover:bg-surface-container">{t("View all matching profiles")}<span aria-hidden="true" className="material-symbols-outlined ml-2 text-[18px]">arrow_forward</span></Link>}
+        {profilesHasMore && <Link prefetch={false} href={`/people?q=${encodeURIComponent(query)}`} className="mt-3 inline-flex min-h-11 items-center rounded-lg px-3 text-primary hover:bg-surface-container">{t("View all matching profiles")}<span aria-hidden="true" className="material-symbols-outlined ml-2 text-[18px]">arrow_forward</span></Link>}
         {profilesLoading ? <p className="p-4 text-on-surface-variant">{t("Loading…")}</p> : profilesError ? <p className="p-4 text-on-surface-variant">{t("Profile search could not be loaded.")}</p> : profiles.length === 0 && <p className="p-4 text-on-surface-variant">{t("No profiles match this search.")}</p>}
       </section>}
     </div>
@@ -41,8 +42,8 @@ export function SearchResults({ query, scope, mode, profiles, profilesHasMore, p
 
 function GameResult({ game, query, mode }: { game: Game; query: string; mode: "browse" | "log" }) {
   const t = useMessages();
-  return <Link data-search-result href={mode === "log" ? `/log?game=${game.slug}` : `/game/${game.slug}`} className="group flex items-center gap-3 sm:gap-4 rounded-xl p-3 hover:bg-surface-container focus-visible:bg-surface-container transition-colors">
-    <img loading="lazy" className="h-[72px] w-12 shrink-0 rounded-md bg-surface-container-high object-cover" src={game.cover} alt="" onError={event => { if (!event.currentTarget.src.endsWith("/images/missing-cover.svg")) event.currentTarget.src = "/images/missing-cover.svg"; }} />
+  return <Link prefetch={false} data-search-result href={mode === "log" ? `/log?game=${game.slug}` : `/game/${game.slug}`} className="group flex items-center gap-3 sm:gap-4 rounded-xl p-3 hover:bg-surface-container focus-visible:bg-surface-container transition-colors">
+    <img loading="lazy" className="h-[72px] w-12 shrink-0 rounded-md bg-surface-container-high object-cover" {...coverImage(game.cover, "48px")} decoding="async" width={264} height={374} alt="" onError={event => { if (!event.currentTarget.src.endsWith("/images/missing-cover.svg")) {event.currentTarget.removeAttribute("srcset"); event.currentTarget.removeAttribute("sizes"); event.currentTarget.src = "/images/missing-cover.svg";} }} />
     <div className="min-w-0 flex-1 space-y-1"><span className="block text-body-lg font-semibold break-words text-on-surface group-hover:text-primary"><HighlightedTitle title={game.title} query={query} /></span><span className="block text-body-sm text-on-surface-variant">{game.year ?? t("Release unknown")}{game.genres?.[0] && <> · <span translate="no">{game.genres[0]}</span></>}</span></div>
     <div className="flex shrink-0 flex-col items-end gap-1"><span className={`rounded-md px-2 py-1 text-body-md font-semibold tabular-nums ${game.score === null ? "text-on-surface-variant" : "bg-primary/10 text-primary"}`}>{game.score ?? "—"}</span><span className="text-label-sm text-on-surface-variant">{game.tier ? t(`Tier ${game.tier}`) : t(game.score === null ? "Unrated" : "Unassigned tier")}</span></div>
     <span aria-hidden="true" className="material-symbols-outlined hidden sm:block text-[18px] text-on-surface-variant group-hover:text-primary">chevron_right</span>

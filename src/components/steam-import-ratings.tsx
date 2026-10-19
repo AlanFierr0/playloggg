@@ -4,29 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import { useMessages } from "@/components/site-preferences";
 import { TierBadge, ScoreStars } from "@/components/rating-controls";
 import { SteamGameCover } from "@/components/steam-game-cover";
-import { getSteamCompletionSuggestions, type SteamCompletionResult, getSteamReviewSummary, saveSteamImportRating, type SteamReviewSummary, type LibraryRow, type ImportedSteamRating } from "@/app/actions/steam-library";
+import { getSteamCompletionSuggestions, type SteamCompletionResult, getSteamReviewSummary, saveSteamImportRating, type SteamReviewSummary } from "@/app/actions/steam-library";
 import { PlaybackStatusPicker } from "@/components/playback-status-picker";
 import { CompletionDate } from "@/components/completion-date";
 import { SteamCompletionCandidates } from "@/components/steam-completion-candidates";
-import { isCalendarDate } from "@/lib/rating-input";
-import { playbackLabels, type PlayStyle } from "@/lib/playback-status";
+import { type PlayStyle } from "@/lib/playback-status";
 import type { Tier, PlaybackStatus } from "@/types/domain";
 
+import type { SteamRatingGame, SteamRatingDraft } from "@/lib/steam-rating-session";
+
 const button = "min-h-11 rounded-xl bg-primary-container text-on-primary-container px-5 py-3 disabled:opacity-50";
-export type SteamRatingGame = LibraryRow & ImportedSteamRating;
-export type SteamRatingDraft = { score: string; tier: Tier|null; status: PlaybackStatus|null; completedOn?:string; playStyle?:PlayStyle|null };
-export const emptySteamRatingDraft: SteamRatingDraft = {score:"",tier:null,status:null,completedOn:""};
-export function readSteamRatingSession(raw: string) {
-  const value = JSON.parse(raw);
-  if (!value || !Array.isArray(value.games) || !value.games.length || value.games.length>10000 || !Number.isInteger(value.index) || value.index<0 || value.index>value.games.length || !Number.isInteger(value.target) || value.target<value.games.length || !Number.isInteger(value.progress) || !Number.isInteger(value.total) || value.progress<0 || value.total<value.progress) return null;
-  if (!value.games.every((game: SteamRatingGame)=>game && Number.isSafeInteger(game.appId) && game.appId>0 && typeof game.slug==="string" && typeof game.title==="string" && Number.isFinite(game.hours) && game.hours>=0 && (game.cover===null || typeof game.cover==="string") && (game.updatedAt===null || typeof game.updatedAt==="string"))) return null;
-  const draft = value.draft;
-  if(draft?.playStyle!==undefined&&draft.playStyle!==null&&draft.playStyle!=="campaign"&&draft.playStyle!=="ongoing")return null;
-  if (!draft || typeof draft.score!=="string" || !/^\d{0,3}$/.test(draft.score) || Number(draft.score)>100 || (draft.tier!==null && !["S","A","B","C","D","F"].includes(draft.tier)) || (draft.status!==null && !Object.hasOwn(playbackLabels,draft.status))) return null;
-  if(draft.completedOn!==undefined && draft.completedOn!=="" && !isCalendarDate(draft.completedOn))return null;
-  draft.completedOn ??= "";
-  return value as {games:SteamRatingGame[];index:number;target:number;progress:number;total:number;draft:SteamRatingDraft};
-}
 
 export function SteamRatingEditor({ game, draft, onDraft, onNext }: { game: SteamRatingGame; draft: SteamRatingDraft; onDraft: (draft: SteamRatingDraft) => void; onNext: () => void }) {
   const t = useMessages();

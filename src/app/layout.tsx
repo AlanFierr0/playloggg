@@ -12,9 +12,9 @@ import { siteOrigin, noIndex } from "@/lib/site-url";
 import "./globals.css";
 import { Hanken_Grotesk, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 
-const bodyFont = Hanken_Grotesk({ subsets: ["latin"], style: ["normal", "italic"], display: "swap", variable: "--font-hanken" });
+const bodyFont = Hanken_Grotesk({ subsets: ["latin"], display: "swap", variable: "--font-hanken" });
 const headingFont = Space_Grotesk({ subsets: ["latin"], display: "swap", variable: "--font-space" });
-const labelFont = JetBrains_Mono({ subsets: ["latin"], style: ["normal", "italic"], display: "swap", variable: "--font-jetbrains" });
+const labelFont = JetBrains_Mono({ preload: false, subsets: ["latin"], display: "swap", variable: "--font-jetbrains" });
 
 export async function generateMetadata() { return localizeMetadata({
   metadataBase: new URL(siteOrigin),

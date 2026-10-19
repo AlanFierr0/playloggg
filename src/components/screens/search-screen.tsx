@@ -19,24 +19,32 @@ const [scope, setScope] = useState<SearchScope>("all");
 const dialog = useRef<HTMLDialogElement>(null);
 const input = useRef<HTMLInputElement>(null);
 const { goBack } = useReturnNavigation(returnPath);
+const profileCache = useRef(new Map<string, {query:string;profiles:Profile[];hasMore:boolean}>());
 const [profileSearch, setProfileSearch] = useState<{ query: string; profiles: Profile[]; hasMore?: boolean; error?: boolean } | null>(null);
 const profiles = profileSearch?.query === query ? profileSearch.profiles : [];
 const profilesLoading = mode !== "log" && profileSearch?.query !== query;
 useEffect(() => {
-  if (mode === "log") return;
+  if (mode === "log" || scope === "games") return;
+  const cached = profileCache.current.get(query);
+  if (cached) {queueMicrotask(()=>setProfileSearch(cached)); return;}
   const controller = new AbortController();
   const timer = setTimeout(async () => {
     try {
       const response = await fetch(`/api/profiles/search?q=${encodeURIComponent(query)}`, { signal: controller.signal, cache: "no-store" });
       if (!response.ok) throw new Error("Profile search failed.");
       const data: { profiles: Profile[]; hasMore: boolean } = await response.json();
-      if (!controller.signal.aborted) setProfileSearch({ query, profiles: data.profiles, hasMore: data.hasMore });
+      if (!controller.signal.aborted) {
+        const result = {query, profiles:data.profiles, hasMore:data.hasMore};
+        if(profileCache.current.size>=20)profileCache.current.delete(profileCache.current.keys().next().value!);
+        profileCache.current.set(query,result);
+        setProfileSearch(result);
+      }
     } catch {
       if (!controller.signal.aborted) setProfileSearch({ query, profiles: [], error: true });
     }
   }, 250);
   return () => { clearTimeout(timer); controller.abort(); };
-}, [query, mode]);
+}, [query, mode, scope]);
 const categories: { scope: SearchScope; label: string }[] = [{ scope: "all", label: "All Results" }, { scope: "games", label: "Games" }, { scope: "curators", label: "Profiles" }];
 
 function close() { goBack(); }

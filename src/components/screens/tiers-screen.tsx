@@ -1,10 +1,11 @@
 "use client";
+import { coverImage } from "@/lib/cover-image";
 import { tierLabels } from "@/lib/tier-labels";
 import { useMessages } from "@/components/site-preferences";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Fragment, useEffect, useRef, useState, useTransition, type FormEvent } from "react";
+import { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState, useTransition, type FormEvent } from "react";
 import { saveTierRanges, updateGameTier } from "@/app/actions/tiers";
 import { TierDragHandle } from "@/components/tier-drag-handle";
 import { usePortfolio } from "@/components/portfolio-provider";
@@ -46,14 +47,16 @@ if (previousGames !== games) {
     return !move.saved || game?.tier !== move.tier || game.tierManual !== !move.automatic;
   })));
 }
-const displayGames = games.map(game => {
-  const move = overrides.get(game.slug);
-  return move ? {...game, tier: move.tier, tierManual: !move.automatic} : game;
-});
-const logged = loggedGames(displayGames);
-const groups = groupTiers(logged);
+const {logged, groups} = useMemo(() => {
+  const displayGames = games.map(game => {
+    const move = overrides.get(game.slug);
+    return move ? {...game, tier: move.tier, tierManual: !move.automatic} : game;
+  });
+  const logged = loggedGames(displayGames);
+  return {logged, groups: groupTiers(logged)};
+}, [games, overrides]);
 const ranges = profile.tierRanges ?? defaultTierRanges;
-async function flushMoves() {
+const flushMoves = useCallback(async () => {
   if (draining.current) return;
   draining.current = true;
   const failures = new Set<string>();
@@ -75,8 +78,8 @@ async function flushMoves() {
   draining.current = false;
   if (!failures.size) setMessage("Tier saved.");
   router.refresh();
-}
-function moveGame(slug:string,tier:Tier|null,automatic=false){
+}, [router]);
+const moveGame = useCallback((slug:string,tier:Tier|null,automatic=false)=>{
   const game=logged.find(game=>game.slug===slug);
   if(!canEdit||saving.current||pending||!game||(!automatic&&(game.tier??null)===tier))return;
   if (!queue.current.some(move => move.slug === slug)) confirmed.current.set(slug, {tier: game.tier ?? null, automatic: !game.tierManual});
@@ -86,7 +89,7 @@ function moveGame(slug:string,tier:Tier|null,automatic=false){
   setQueued(queue.current.length);
   if (!draining.current) setMessage("");
   void flushMoves();
-}
+}, [canEdit, pending, logged, flushMoves]);
 function saveRanges(event:FormEvent<HTMLFormElement>){
   event.preventDefault();
   if(!canEdit||saving.current||pending||queued)return;
@@ -99,11 +102,12 @@ function saveRanges(event:FormEvent<HTMLFormElement>){
     finally {saving.current=false;}
   });
 }
-function dropGame(slug: string, tier: Tier | null) {
+const dropGame = useCallback((slug: string, tier: Tier | null) => {
   const game = games.find(game => game.slug === slug);
   moveGame(slug, tier, Boolean(game && tier === tierForScore(game.score, ranges)));
-}
-function endDrag(){setDragged(null);setOver(null);}
+}, [games, ranges, moveGame]);
+const endDrag = useCallback(()=>{setDragged(null);setOver(null);}, []);
+const hoverTier = useCallback((tier:Tier|null|undefined)=>setOver(tier===undefined ? null : tier??"Unassigned"), []);
 return (<>
 <div className="w-full  bg-surface"><div className="flex flex-col w-full">
 
@@ -164,7 +168,7 @@ return (<>
  <div className="flex items-center gap-1.5 pt-0 md:pt-6"><span className="font-label-sm text-label-sm">{group.games.length} {group.games.length === 1 ? t("game") : t("games")}</span><span className="w-1.5 h-1.5 rounded-full bg-current"></span></div>
  </div>
  <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-2 flex-1 min-w-0">
- {group.games.map((game) => <TierCard key={game.slug} game={game} color={theme.color} publicBase={publicBase} editable={canEdit} disabled={pending} dragged={dragged===game.slug} onStart={()=>setDragged(game.slug)} onEnd={endDrag} onHover={tier=>setOver(tier===undefined ? null : tier??"Unassigned")} onMove={tier=>moveGame(game.slug,tier)} onDrop={tier=>dropGame(game.slug,tier)} />)}
+ {group.games.map((game) => <TierCard key={game.slug} game={game} color={theme.color} publicBase={publicBase} editable={canEdit} disabled={pending} dragged={dragged===game.slug} onStart={setDragged} onEnd={endDrag} onHover={hoverTier} onMove={moveGame} onDrop={dropGame} />)}
  {group.games.length === 0 && <p className="col-span-full py-8 font-body-sm text-body-sm">{t(over===key ? "Drop game here" : "No games assigned to this tier.")}</p>}
  </div>
  </section>;
@@ -202,15 +206,15 @@ const tierThemes: Record<string, { label: string; color: string; surface: string
  F:{label:tierLabels.F,color:"text-[#7fff7f] [.light_&]:text-[#176117]",surface:"bg-[#7fff7f] text-black"},
  Unassigned:{label:"Unassigned",color:"text-on-surface-variant",surface:"bg-surface-container-low text-on-surface-variant"},
 };
-function TierCard({ game, color, publicBase, editable, disabled, dragged, onStart, onEnd, onHover, onMove, onDrop }: { game: Game; color: string; publicBase?: string; editable:boolean; disabled:boolean; dragged:boolean; onStart:()=>void; onEnd:()=>void; onHover:(tier:Tier|null|undefined)=>void; onMove:(tier:Tier|null)=>void; onDrop:(tier:Tier|null)=>void }) {
+const TierCard = memo(function TierCard({ game, color, publicBase, editable, disabled, dragged, onStart, onEnd, onHover, onMove, onDrop }: { game: Game; color: string; publicBase?: string; editable:boolean; disabled:boolean; dragged:boolean; onStart:(slug:string)=>void; onEnd:()=>void; onHover:(tier:Tier|null|undefined)=>void; onMove:(slug:string,tier:Tier|null)=>void; onDrop:(slug:string,tier:Tier|null)=>void }) {
   const t = useMessages();
 
  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => event.currentTarget.closest("[data-tier-game]")?.querySelector("select")?.focus();
  const dragLabel = `${t("Drag to change tier")}: ${game.title}`;
- return <TierDragHandle title={game.title} slug={game.slug} disabled={!editable||disabled} coverUrl={game.cover} onStart={onStart} onEnd={onEnd} onHover={onHover} onMove={onDrop} className={`group relative rounded-lg overflow-hidden bg-surface-container transition-transform duration-200 hover:-translate-y-1 ${editable ? "cursor-grab" : ""} ${dragged ? "opacity-50 ring-2 ring-primary" : ""}`}>
- <div className="relative aspect-[3/4] w-full overflow-hidden bg-surface-container-high"><img draggable={false} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src={game.cover} alt={game.title} />{editable&&game.tier&&<button data-tier-drag-start type="button" disabled={disabled} aria-label={dragLabel} title={t("Drag to change tier")} onClick={handleClick} className="absolute inset-0 z-10 min-h-11 min-w-11 touch-none cursor-grab active:cursor-grabbing disabled:opacity-50"/>}{editable&&game.tier&&<button type="button" disabled={disabled} onClick={()=>onMove(null)} aria-label={`${t("Clear tier for")} ${game.title}`} title={t("Clear tier; keep log entry")} className="absolute top-0 left-0 z-20 min-h-11 min-w-11 rounded bg-surface/90 text-on-surface-variant transition-opacity [@media(hover:hover)]:[.group:not(:hover):not(:focus-within)_&]:opacity-0 [@media(hover:hover)]:[.group:not(:hover):not(:focus-within)_&]:pointer-events-none hover:bg-surface-container-high hover:text-error disabled:opacity-50"><span aria-hidden="true" className="material-symbols-outlined">close</span></button>}</div>
+ return <TierDragHandle title={game.title} slug={game.slug} disabled={!editable||disabled} coverUrl={game.cover} onStart={()=>onStart(game.slug)} onEnd={onEnd} onHover={onHover} onMove={tier=>onDrop(game.slug,tier)} className={`group relative rounded-lg overflow-hidden bg-surface-container transition-transform duration-200 hover:-translate-y-1 ${editable ? "cursor-grab" : ""} ${dragged ? "opacity-50 ring-2 ring-primary" : ""}`}>
+ <div className="relative aspect-[3/4] w-full overflow-hidden bg-surface-container-high"><img loading="lazy" width={264} height={374} draggable={false} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" {...coverImage(game.cover, "120px")} decoding="async" alt={game.title} />{editable&&game.tier&&<button data-tier-drag-start type="button" disabled={disabled} aria-label={dragLabel} title={t("Drag to change tier")} onClick={handleClick} className="absolute inset-0 z-10 min-h-11 min-w-11 touch-none cursor-grab active:cursor-grabbing disabled:opacity-50"/>}{editable&&game.tier&&<button type="button" disabled={disabled} onClick={()=>onMove(game.slug,null)} aria-label={`${t("Clear tier for")} ${game.title}`} title={t("Clear tier; keep log entry")} className="absolute top-0 left-0 z-20 min-h-11 min-w-11 rounded bg-surface/90 text-on-surface-variant transition-opacity [@media(hover:hover)]:[.group:not(:hover):not(:focus-within)_&]:opacity-0 [@media(hover:hover)]:[.group:not(:hover):not(:focus-within)_&]:pointer-events-none hover:bg-surface-container-high hover:text-error disabled:opacity-50"><span aria-hidden="true" className="material-symbols-outlined">close</span></button>}</div>
  <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-surface/90 backdrop-blur-md shadow"><span className={"font-label-sm text-label-sm font-bold " + color}>{game.score ?? "—"}</span></div>
- <div className="p-2.5 flex flex-col bg-surface-container"><h2 className="font-headline-md text-body-md font-semibold text-on-surface min-h-[2.5rem] line-clamp-2"><Link draggable={false} className="block after:absolute after:inset-0" href={(publicBase ?? "") + "/game/" + game.slug}>{game.title}</Link></h2><span className="font-label-sm text-label-sm text-on-surface-variant truncate">{game.year ?? t("Release year unavailable")}</span></div>
- {editable&&<div className={game.tier ? "" : "relative z-10 flex flex-col gap-1 px-1 pb-1"}><div className="flex items-center justify-between">{!game.tier&&<button data-tier-drag-start type="button" disabled={disabled} aria-label={dragLabel} title={t("Drag to change tier")} onClick={handleClick} className="relative z-10 min-h-11 min-w-11 shrink-0 touch-none cursor-grab rounded bg-surface-container-high text-on-surface-variant active:cursor-grabbing disabled:opacity-50"><span aria-hidden="true" className="material-symbols-outlined">drag_indicator</span></button>}</div><select disabled={disabled} aria-label={`${t("Tier for")} ${game.title}`} value={game.tier??""} onChange={event=>{onMove(event.target.value ? event.target.value as Tier : null);event.currentTarget.blur();}} className={(game.tier ? "sr-only focus:not-sr-only focus:relative focus:z-20 focus:min-h-11 focus:w-full focus:rounded focus:px-1 focus:text-body-sm " : "relative z-10 min-h-11 min-w-0 w-full rounded px-1 text-body-sm ") + (game.tier ? tierThemes[game.tier].surface : "bg-surface-container-high text-on-surface")}><option value="" className="bg-surface-container-high text-on-surface">{t("Unassigned")}</option>{tiers.map(tier=><option key={tier} value={tier} className={tierThemes[tier].surface}>{tier} · {t(tierLabels[tier])}</option>)}</select></div>}
+ <div className="p-2.5 flex flex-col bg-surface-container"><h2 className="font-headline-md text-body-md font-semibold text-on-surface min-h-[2.5rem] line-clamp-2"><Link prefetch={false} draggable={false} className="block after:absolute after:inset-0" href={(publicBase ?? "") + "/game/" + game.slug}>{game.title}</Link></h2><span className="font-label-sm text-label-sm text-on-surface-variant truncate">{game.year ?? t("Release year unavailable")}</span></div>
+ {editable&&<div className={game.tier ? "" : "relative z-10 flex flex-col gap-1 px-1 pb-1"}><div className="flex items-center justify-between">{!game.tier&&<button data-tier-drag-start type="button" disabled={disabled} aria-label={dragLabel} title={t("Drag to change tier")} onClick={handleClick} className="relative z-10 min-h-11 min-w-11 shrink-0 touch-none cursor-grab rounded bg-surface-container-high text-on-surface-variant active:cursor-grabbing disabled:opacity-50"><span aria-hidden="true" className="material-symbols-outlined">drag_indicator</span></button>}</div><select disabled={disabled} aria-label={`${t("Tier for")} ${game.title}`} value={game.tier??""} onChange={event=>{onMove(game.slug,event.target.value ? event.target.value as Tier : null);event.currentTarget.blur();}} className={(game.tier ? "sr-only focus:not-sr-only focus:relative focus:z-20 focus:min-h-11 focus:w-full focus:rounded focus:px-1 focus:text-body-sm " : "relative z-10 min-h-11 min-w-0 w-full rounded px-1 text-body-sm ") + (game.tier ? tierThemes[game.tier].surface : "bg-surface-container-high text-on-surface")}><option value="" className="bg-surface-container-high text-on-surface">{t("Unassigned")}</option>{tiers.map(tier=><option key={tier} value={tier} className={tierThemes[tier].surface}>{tier} · {t(tierLabels[tier])}</option>)}</select></div>}
  </TierDragHandle>;
-}
+});

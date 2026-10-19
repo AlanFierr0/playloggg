@@ -1,4 +1,5 @@
 "use client";
+import { coverImage } from "@/lib/cover-image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { useMessages } from "@/components/site-preferences";
@@ -14,15 +15,15 @@ export type HomeEntry = Pick<Game, "slug" | "title" | "cover" | "score" | "tier"
 function HomeGameCard({ game, continuing = false }: { game: HomeEntry; continuing?: boolean }) {
   const t = useMessages();
   return <article className="group/game flex h-full min-w-0 items-start gap-3 sm:gap-4">
-    <Link href={`/game/${game.slug}`} aria-label={game.title} className={`shrink-0 rounded-xl ${continuing ? "w-20 sm:w-24" : "w-14 sm:w-16"}`}><img src={game.cover} alt="" width={96} height={128} className="aspect-[3/4] w-full rounded-xl object-cover bg-surface-container-high" loading="lazy" /></Link>
+    <Link prefetch={false} href={`/game/${game.slug}`} aria-label={game.title} className={`shrink-0 rounded-xl ${continuing ? "w-20 sm:w-24" : "w-14 sm:w-16"}`}><img {...coverImage(game.cover, "(max-width: 639px) 80px, 96px")} decoding="async" alt="" width={96} height={128} className="aspect-[3/4] w-full rounded-xl object-cover bg-surface-container-high" loading="lazy" /></Link>
     <div className="flex min-h-40 min-w-0 flex-1 flex-col gap-2">
-      <Link href={`/game/${game.slug}`} translate="no" className={`block ${game.score === null ? "" : "min-h-12"} font-headline-md text-body-md font-semibold line-clamp-2 hover:text-primary`}>{game.title}</Link>
+      <Link prefetch={false} href={`/game/${game.slug}`} translate="no" className={`block ${game.score === null ? "" : "min-h-12"} font-headline-md text-body-md font-semibold line-clamp-2 hover:text-primary`}>{game.title}</Link>
       <div className="flex min-h-8 flex-wrap items-center gap-2 text-body-sm">
         <span className="text-primary">{game.score === null ? t("Unrated") : `${game.score} / 100`}</span>
         {game.tier && <span className={`rounded px-2 py-0.5 font-label-sm text-label-sm ${tierColors[game.tier]}`}>{game.tier} · {t(tierLabels[game.tier])}</span>}
       </div>
       <p className="min-h-5 text-body-sm text-on-surface-variant">{continuing ? [game.platform ? t(playedPlatformLabels[game.platform]) : null, game.hoursPlayed != null ? `${game.hoursPlayed} ${t("hrs")}` : null].filter(Boolean).join(" · ") || t("In Progress") : t(game.status ? playbackLabels[game.status] : "Not set")}</p>
-      <Link href={`/log?game=${encodeURIComponent(game.slug)}`} className="mt-auto inline-flex min-h-11 self-start items-center gap-2 rounded-lg px-2 -ml-2 text-body-sm text-primary hover:bg-primary/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary transition-colors"><span aria-hidden="true" className="material-symbols-outlined text-[16px]">edit</span>{t("Edit log entry")}</Link>
+      <Link prefetch={false} href={`/log?game=${encodeURIComponent(game.slug)}`} className="mt-auto inline-flex min-h-11 self-start items-center gap-2 rounded-lg px-2 -ml-2 text-body-sm text-primary hover:bg-primary/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary transition-colors"><span aria-hidden="true" className="material-symbols-outlined text-[16px]">edit</span>{t("Edit log entry")}</Link>
     </div>
   </article>;
 }
@@ -39,9 +40,9 @@ export function HomeIntro({ preview, recent, playing }: { preview: ReactNode; re
           <p className="max-w-xl text-body-md text-on-surface-variant">{t("Pick up where you left off. Log a game, update your profile or arrange your tiers.")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 xl:shrink-0">
-          <Link href="/log" className="ui-action bg-primary text-on-primary"><span aria-hidden="true" className="material-symbols-outlined text-[20px]">add</span>{t("Log a game")}</Link>
-          <Link href="/profile" className="ui-action bg-surface-container-low text-on-surface hover:bg-surface-container-high">{t("Open your profile")}</Link>
-          <Link href="/tiers" className="ui-action text-primary hover:bg-surface-container">{t("Tier List")}<span aria-hidden="true" className="material-symbols-outlined text-[18px]">arrow_forward</span></Link>
+          <Link prefetch={false} href="/log" className="ui-action bg-primary text-on-primary"><span aria-hidden="true" className="material-symbols-outlined text-[20px]">add</span>{t("Log a game")}</Link>
+          <Link prefetch={false} href="/profile" className="ui-action bg-surface-container-low text-on-surface hover:bg-surface-container-high">{t("Open your profile")}</Link>
+          <Link prefetch={false} href="/tiers" className="ui-action text-primary hover:bg-surface-container">{t("Tier List")}<span aria-hidden="true" className="material-symbols-outlined text-[18px]">arrow_forward</span></Link>
         </div>
       </div>
       {(playing.length > 0 || recent.length > 0) && <div className={`mt-6 grid items-stretch gap-5 ${playing.length && recent.length ? "lg:grid-cols-2" : ""}`}>
@@ -50,7 +51,7 @@ export function HomeIntro({ preview, recent, playing }: { preview: ReactNode; re
           <div className="grid auto-rows-fr grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">{playing.map(game => <HomeGameCard key={game.slug} game={game} continuing />)}</div>
         </section>}
         {recent.length > 0 && <section aria-label={t("Recently updated")} className="flex min-w-0 flex-col gap-5 rounded-2xl border border-outline-variant/30 bg-surface-container-low p-4 sm:p-6">
-          <div className="flex min-h-11 flex-wrap items-center justify-between gap-3"><h2 className="font-headline-lg text-headline-lg font-semibold">{t("Recently updated")}</h2><Link href="/profile/ranking" className="inline-flex min-h-11 items-center gap-1 text-body-sm text-primary hover:underline">{t("View collection")}<span aria-hidden="true" className="material-symbols-outlined text-[16px]">arrow_forward</span></Link></div>
+          <div className="flex min-h-11 flex-wrap items-center justify-between gap-3"><h2 className="font-headline-lg text-headline-lg font-semibold">{t("Recently updated")}</h2><Link prefetch={false} href="/profile/ranking" className="inline-flex min-h-11 items-center gap-1 text-body-sm text-primary hover:underline">{t("View collection")}<span aria-hidden="true" className="material-symbols-outlined text-[16px]">arrow_forward</span></Link></div>
           <div className="grid auto-rows-fr grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">{recent.map(game => <HomeGameCard key={game.slug} game={game} />)}</div>
         </section>}
       </div>}
@@ -65,8 +66,8 @@ export function HomeIntro({ preview, recent, playing }: { preview: ReactNode; re
           <h1 className="max-w-[12ch] font-display-lg font-bold text-[40px] leading-[1.08] sm:text-[56px] xl:text-[64px] tracking-tight">{t("Build your gaming identity.")}</h1>
           <p className="max-w-[38ch] text-body-lg text-on-surface-variant">{t("Rate games. Rank your favorites. Compare your taste.")}</p>
           <div className="flex flex-col min-[400px]:flex-row flex-wrap gap-3 pt-2">
-            <Link href={access?.signedIn ? "/signup" : "/login?mode=register"} className="ui-action bg-primary text-on-primary">{t("Create your profile")}</Link>
-            <Link href="/games" className="ui-action border border-outline text-on-surface hover:bg-surface-container">{t("Explore games")}</Link>
+            <Link prefetch={false} href={access?.signedIn ? "/signup" : "/login?mode=register"} className="ui-action bg-primary text-on-primary">{t("Create your profile")}</Link>
+            <Link prefetch={false} href="/games" className="ui-action border border-outline text-on-surface hover:bg-surface-container">{t("Explore games")}</Link>
           </div>
         </div>
         {preview}

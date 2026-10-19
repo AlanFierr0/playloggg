@@ -41,3 +41,19 @@ test("completion skip recovery uses only the verified owner and does not write r
  assert.equal((await restoreSteamCompletion("game-7")).ok,true);assert.equal(calls[0][0],"restore_steam_completion_game");assert.equal(calls[0][1].p_owner,"verified-owner");assert.equal(calls[0][1].p_game,7);
  const skipped=await listSkippedSteamCompletionGames();assert.equal(skipped.ok,true);assert.equal(skipped.games[0].slug,"game-7");assert.equal(calls[1][1].p_owner,"verified-owner");
 });
+
+
+test("community score reads deduplicate IDs, cap concurrency at two and propagate failures",async()=>{
+ let active=0,peak=0,calls=0,fail=false;
+ const deps={"react":{cache:fn=>fn},"@/lib/supabase/auth-admin":{createAuthAdmin:()=>({rpc(name,{p_ids}){
+  assert.equal(name,"anonymous_game_scores");assert.ok(p_ids.length<=100);
+  return {limit:async()=>{calls++;peak=Math.max(peak,++active);await new Promise(resolve=>setTimeout(resolve,1));active--;return fail?{error:new Error("unavailable")}:{data:p_ids.map(id=>({game_id:id,sample_count:5,average:80,deviation:2})),error:null};}};
+ }})}};
+ const context={exports:{},require:name=>deps[name]??{}};
+ vm.runInNewContext(ts.transpileModule(readFileSync(new URL("../src/lib/community.ts",import.meta.url),"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,context);
+ const ids=Array.from({length:305},(_,i)=>i+1);
+ const scores=await context.exports.getCommunityScores([...ids,...ids]);
+ assert.equal(scores.length,305);assert.equal(calls,4);assert.equal(peak,2);
+ assert.equal((await context.exports.getCommunityScores([])).length,0);assert.equal(calls,4);
+ fail=true;await assert.rejects(context.exports.getCommunityScores([1]),/Community score could not be loaded/);
+});

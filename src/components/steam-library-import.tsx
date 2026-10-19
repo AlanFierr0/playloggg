@@ -1,15 +1,18 @@
 "use client";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useReturnNavigation } from "@/components/return-navigation";
 import { useMessages } from "@/components/site-preferences";
 import { importSteamGames, previewSteamLibrary, syncSteamPlaytime, type LibraryPreview } from "@/app/actions/steam-library";
 import { browseSteamLibrary, parseSteamBrowse, type SteamBrowse } from "@/lib/steam-library-input";
 import { parseHours } from "@/lib/rating-input";
-import { SteamRatingEditor, emptySteamRatingDraft, readSteamRatingSession, type SteamRatingDraft, type SteamRatingGame } from "@/components/steam-import-ratings";
+import { emptySteamRatingDraft, readSteamRatingSession, type SteamRatingDraft, type SteamRatingGame } from "@/lib/steam-rating-session";
 import { readSteamImportWork, type SteamImportWork } from "@/lib/steam-import-work";
 import { SteamCompletionScan } from "@/components/steam-completion-scan";
 import { SteamGameCover } from "@/components/steam-game-cover";
+
+const SteamRatingEditor = dynamic(() => import("@/components/steam-import-ratings").then(module => module.SteamRatingEditor));
 
 const button = "inline-flex min-h-11 items-center justify-center rounded-xl bg-primary-container text-on-primary-container px-5 py-3 disabled:opacity-50";
 export function SteamLibraryImport({configured,profileId}:{configured:boolean;profileId:number}) {

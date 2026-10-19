@@ -1,4 +1,5 @@
 "use client";
+import { coverImage } from "@/lib/cover-image";
 import { useMessages } from "@/components/site-preferences";
 
 import {PreferenceRanking} from "@/components/preference-ranking";
@@ -52,7 +53,7 @@ return <div className="site-container mx-auto w-full min-w-0 px-4 py-8 sm:px-6 l
       <div><dt className="text-body-sm text-on-surface-variant">{t("Games rated")}</dt><dd className="mt-1 text-headline-lg font-semibold tabular-nums">{rated.length}</dd></div>
       <div><dt className="text-body-sm text-on-surface-variant">{t("Average score")}</dt><dd className="mt-1 text-headline-lg font-semibold tabular-nums text-primary">{rated.length ? averageScore(rated) : t("Unrated")}</dd></div>
     </dl>
-    {!publicBase && access?.canEdit && <Link href="/settings" className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-body-sm text-primary hover:bg-surface-container-low"><span aria-hidden="true" className="material-symbols-outlined text-[18px]">settings</span>{t("Profile settings")}</Link>}
+    {!publicBase && access?.canEdit && <Link prefetch={false} href="/settings" className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-body-sm text-primary hover:bg-surface-container-low"><span aria-hidden="true" className="material-symbols-outlined text-[18px]">settings</span>{t("Profile settings")}</Link>}
   </header>
   <nav aria-label={t("Ranking view")} className="mb-6 flex gap-2">{([['personal', 'Personal order'], ['score', 'By score']] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={view === value} onClick={() => setView(value)} className={`min-h-11 rounded-lg px-4 font-semibold ${view === value ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface'}`}>{t(label)}</button>)}</nav>
   <div hidden={view !== "personal"}><PreferenceRanking /></div>
@@ -83,12 +84,12 @@ function RankingCard({ game, rank, publicBase }: { game: Game; rank?: number; pu
   const t = useMessages();
   return <article className="group relative min-w-0" data-rank={rank} data-score={game.score}>
     <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-surface-container-low">
-      <img loading="lazy" className="h-full w-full object-cover transition-transform duration-300 motion-reduce:transition-none group-hover:scale-[1.03] group-focus-within:scale-[1.03] motion-reduce:transform-none" src={game.cover} alt="" />
+      <img width={264} height={374} loading="lazy" className="h-full w-full object-cover transition-transform duration-300 motion-reduce:transition-none group-hover:scale-[1.03] group-focus-within:scale-[1.03] motion-reduce:transform-none" {...coverImage(game.cover, "(max-width: 639px) 44vw, (max-width: 1023px) 22vw, 210px")} decoding="async" alt="" />
       <span className="absolute left-3 top-3 rounded-lg bg-surface-container-lowest px-2.5 py-1.5 text-body-sm font-semibold tabular-nums">{rank ? '#' + String(rank).padStart(2, '0') : t(game.status === 'backlog' ? 'Backlog' : 'Unrated')}</span>
     </div>
     <div className="space-y-2 pt-3">
       <div className="flex items-start justify-between gap-2">
-        <h3 translate="no" className="min-w-0 line-clamp-2 text-body-md font-semibold group-hover:text-primary"><Link className="after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-primary" href={(publicBase ?? '') + '/game/' + game.slug}>{game.title}</Link></h3>
+        <h3 translate="no" className="min-w-0 line-clamp-2 text-body-md font-semibold group-hover:text-primary"><Link prefetch={false} className="after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-primary" href={(publicBase ?? '') + '/game/' + game.slug}>{game.title}</Link></h3>
         <span className="shrink-0 text-body-lg font-semibold tabular-nums text-primary">{game.score ?? t('Unrated')}</span>
       </div>
       <p className="text-body-sm text-on-surface-variant">{[game.year, game.status ? t(playbackLabels[game.status]) : null].filter(Boolean).join(' · ') || t('Profile rating')}</p>
