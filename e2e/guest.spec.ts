@@ -130,7 +130,7 @@ test("navigation stays usable and layouts avoid horizontal page overflow", async
   const navigation = page.getByRole("navigation", { name: "Main navigation" }).filter({ visible: true });
   await expect(navigation.getByRole("link", { name: "Profile", exact: true })).toHaveCount(0);
   await page.locator("header").getByRole("link", { name: "Sign in", exact: true }).click();
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page).toHaveURL(/\/login\?next=%2F$/);
   await expect(navigation.getByRole("link", {name:"Discover", exact:true})).toHaveCount(0);
   for (const [name, path] of [["Games", "/games"], ["Compare", "/compare"]]) {
     await openNavigation(page);

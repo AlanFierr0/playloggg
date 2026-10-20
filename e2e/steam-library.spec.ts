@@ -128,7 +128,7 @@ test("Steam import previews, selects, saves trusted playtime and preserves exist
 
 test("Steam import protects guests and email accounts and handles hidden libraries and save retries",async({page,context})=>{
   await page.goto("/profile/import/steam");
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page).toHaveURL(/\/login\?next=%2Fprofile%2Fimport%2Fsteam$/);
   await context.addCookies([authCookie]);
   await page.goto("/profile/import/steam");
   await expect(page.getByRole("button", {name:"Connect Steam", exact:true})).toBeVisible();

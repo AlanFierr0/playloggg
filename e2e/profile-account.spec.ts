@@ -6,7 +6,7 @@ test("profile sign out clears the session and preserves the profile",async({page
   await context.addCookies([authCookie]);await page.goto("/profile");
   await page.getByRole("button",{name:"Sign out",exact:true}).click();
   await expect(page).toHaveURL(/\/login$/);
-  await page.goto("/profile");await expect(page).toHaveURL(/\/login$/);
+  await page.goto("/profile");await expect(page).toHaveURL(/\/login\?next=%2Fprofile$/);
   const state=await (await fetch("http://127.0.0.1:3101/__state")).json();
   expect(state.profiles.some((row:{id:number})=>row.id===2)).toBe(true);
   expect(state.ratings.some((row:{profile_id:number})=>row.profile_id===2)).toBe(true);
@@ -39,7 +39,7 @@ test("profile deletion requires the handle, allows cancellation and retry, and k
   expect(after.accountDeleted).toBe(true);
   expect((await context.cookies()).some(cookie=>cookie.name.startsWith("sb-127-auth-token"))).toBe(false);
   await context.addCookies([authCookie]);
-  await page.goto("/profile");await expect(page).toHaveURL(/\/login$/);
+  await page.goto("/profile");await expect(page).toHaveURL(/\/login\?next=%2Fprofile$/);
 });
 
 test("public profiles do not offer account controls",async({page,context})=>{

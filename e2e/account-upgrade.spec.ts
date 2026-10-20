@@ -63,7 +63,7 @@ test('guest routes contain no demo player and missing-game search asks for sign-
   await expect(page.getByRole('link',{name:'Sign in to search more games and import a game.'})).toBeVisible();
   await expect(page.getByText(/Sample Player|Sample profile/)).toHaveCount(0);
   await page.goto('/u/alexvance');await expect(page.getByRole('heading',{name:'Nothing to play here.'})).toBeVisible();
-  await page.goto('/profile');await expect(page).toHaveURL(/\/login$/);
+  await page.goto('/profile');await expect(page).toHaveURL(/\/login\?next=%2Fprofile$/);
 });
 
 test('magic links verify before sign-in and reject expired links',async({page})=>{

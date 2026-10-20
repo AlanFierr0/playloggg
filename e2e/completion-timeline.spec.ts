@@ -123,7 +123,7 @@ test("completion timeline groups all completions by year, browses horizontally, 
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.screenshot({path:"e2e-artifacts/completion-orbit-320.png",fullPage:true});
  }
- await context.clearCookies();await page.goto("/profile/timeline");await expect(page).toHaveURL(/\/login$/);
+ await context.clearCookies();await page.goto("/profile/timeline");await expect(page).toHaveURL(/\/login\?next=%2Fprofile%2Ftimeline$/);
 });
 
 test("timeline with no completion dates offers an honest empty state",async({page,context})=>{
