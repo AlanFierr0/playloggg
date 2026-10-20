@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useMessages } from "@/components/site-preferences";
+import { StudioName } from "@/components/studio-name";
 import { tasteStats } from "@/lib/taste";
 import { playedPlatformLabels } from "@/lib/played-platforms";
 import type { Game } from "@/types/domain";
@@ -46,7 +47,7 @@ export function TasteDetails({ games }: { games: Game[] }) {
                         scope="row"
                         className="p-3 font-semibold text-on-surface"
                       >
-                        {group.name}
+                        {label === "Genre statistics" ? group.name : <StudioName name={group.name} />}
                       </th>
                       <td className="p-3 font-medium tabular-nums">{group.count}</td>
                       <td className="p-3 font-bold tabular-nums text-primary">{group.average}</td>

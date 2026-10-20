@@ -1,4 +1,5 @@
 "use client";
+import { StudioName } from "@/components/studio-name";
 import { validateRating } from "@/lib/rating-input";
 import { useMessages } from "@/components/site-preferences";
 
@@ -170,7 +171,7 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 
 <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight break-words">{game.title}</h1>
 
-<p translate="no" className="font-body-md text-body-md text-on-surface-variant">{game.developers?.join(" / ") || game.genres?.join(" / ")}</p>
+<p translate="no" className="inline-flex flex-wrap items-center gap-x-3 gap-y-1 font-body-md text-body-md text-on-surface-variant">{game.developers?.length ? game.developers.map(name => <StudioName key={name} name={name} compact />) : game.genres?.join(" / ")}</p>
 
 </div>
 

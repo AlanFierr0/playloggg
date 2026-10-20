@@ -190,6 +190,14 @@ export async function startFixtureServer() {
       }
       if (url.pathname === "/__legacy-entry" && req.method === "POST") {Object.assign(ratings.find(row=>row.profile_id===2&&row.game_id===2),{hours_played:1e9,completed_on:"2099-01-01"});return reply(200,{ok:true});}
       if(url.pathname==="/__translation-failure"){failTranslation=true;return reply(200,{ok:true});}
+      if(url.pathname==="/__studio-logos"){
+        for(let index=0;index<3;index++){
+          const id=7001+index;
+          games.push({...structuredClone(initialGames[0]),id,igdb_id:id,slug:`studio-logo-fixture-${index}`,title:`Studio Logo Fixture ${index}`,igdb_metadata:{developers:["Valve"],publishers:["Valve"]}});
+          ratings.push({profile_id:3,game_id:id,score:90,tier:"A",status:"completed",platform:"pc",hours_played:5,completed_on:"2026-01-01",review:null,tags:[],updated_at:"2026-10-20T00:00:00Z"});
+        }
+        return reply(200,{ok:true});
+      }
       if(url.pathname==="/__translation-review"){ratings.find(row=>row.profile_id===3&&row.game_id===1).review="Review with sources\nhttps://www.youtube.com/watch?v=example&t=637s";return reply(200,{ok:true});}
       if(url.pathname==="/__translate"){
         translateCalls++;if(failTranslation)return reply(503,{message:"Controlled translation failure"});

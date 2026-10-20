@@ -222,3 +222,6 @@ a.inline-flex:not(.rounded-full), a[class*="bg-primary"]:not(.rounded-full) { bo
 
 /* Reserve icon space while its existing font loads; ligature text cannot shift navigation. */
 .material-symbols-outlined { display: inline-block; width: 1em; flex-shrink: 0; overflow: hidden; white-space: nowrap; vertical-align: middle; }
+
+.studio-logo { filter: invert(1); }
+html.light .studio-logo { filter: none; }

@@ -1,3 +1,4 @@
+import { StudioName } from "@/components/studio-name";
 import { BackLink } from "@/components/return-navigation";
 import {CommunityGameReviews} from "@/components/community-game-reviews";
 import { ReviewText } from "@/components/review-text";
@@ -35,9 +36,9 @@ export async function CatalogGameScreen({ game, isSample, publicProfile }: { gam
 
           </header>
           <div className="flex flex-wrap gap-x-4 gap-y-2 font-label-md text-label-md text-on-surface-variant"><span>{game.releasedOn ? t(`Released ${game.releasedOn}`) : t("Release date unknown")}</span><GameGenres genres={game.genres} fallback={t("Genres unknown")} /></div>
-          {Boolean(game.developers?.length) && <p className="break-words text-on-surface-variant font-body-md text-body-md">{t("Developer · ")}{game.developers!.join(", ")}</p>}
+          {Boolean(game.developers?.length) && <p className="break-words text-on-surface-variant font-body-md text-body-md">{t("Developer · ")}<span className="inline-flex flex-wrap items-center gap-x-4 gap-y-2">{game.developers!.map(name => <StudioName key={name} name={name} />)}</span></p>}
           {!publicProfile&&<GameFavorite slug={game.slug}/>}
-          {Boolean(game.publishers?.length) && <p className="break-words text-on-surface-variant font-body-md text-body-md">{game.publishers!.join(", ")}</p>}
+          {Boolean(game.publishers?.length) && <p className="break-words text-on-surface-variant font-body-md text-body-md"><span className="inline-flex flex-wrap items-center gap-x-4 gap-y-2">{game.publishers!.map(name => <StudioName key={name} name={name} />)}</span></p>}
           <div className="flex flex-wrap gap-2">{game.platforms?.map((platform) => <span key={platform} className="break-words max-w-full px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">{platform === "PC (Microsoft Windows)" ? "PC" : platform}</span>)}</div>
           <section className="rounded-xl bg-surface-container-low p-5 sm:p-6 space-y-4">
             <h2 className="font-headline-md text-headline-md font-bold">{publicProfile ? t(`${publicProfile.displayName}'s log entry`) : isSample ? t("Sample profile entry") : t("Your log entry")}</h2>
