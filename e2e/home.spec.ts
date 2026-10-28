@@ -10,6 +10,7 @@ test("home uses owned entries, qualifying genre ratings and working filters", as
   await expect(page.getByRole("region", { name: "Explore your taste", exact: true })).toHaveCount(0);
   await expect(page.getByRole("region", { name: "Continue playing" })).toContainText("Elden Ring: Shadow of the Erdtree");
   await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");
+  await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   await page.getByRole("button", { name: "PC", exact: true }).click();
   await page.locator("#hours-input").fill("0");
   await page.locator("#commit-rating").click();

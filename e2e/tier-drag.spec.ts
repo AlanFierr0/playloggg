@@ -52,6 +52,7 @@ test("keyboard tier changes can clear assignment and failed saves keep the exist
   await request.post("http://127.0.0.1:3101/__fail-save");await selector.selectOption("S");
   await expect(page.getByRole("status")).toContainText("Tier could not be saved");
   await expect(selector).toHaveValue("B");await expect(page.locator('#tier-b [data-tier-game="elden-ring-shadow-of-the-erdtree"]')).toBeVisible();
+  await expect(selector).toBeFocused();await expect(selector).toBeInViewport();
   await selector.focus();await selector.press("Home");await selector.press("Enter");
   await expect(page.locator('#tier-unassigned [data-tier-game="elden-ring-shadow-of-the-erdtree"]')).toBeVisible();
   await page.reload();await expect(selector).toHaveValue("");
@@ -100,6 +101,9 @@ test("compact board clears a tier while preserving the log entry",async({page,co
   await expect(page.locator('#tier-a [data-tier-game="elden-ring-shadow-of-the-erdtree"]')).toBeVisible();
   await expect.poll(async()=>(await card.boundingBox())!.height).toBeLessThan(expandedHeight);
   await expect(card.locator("select")).toHaveClass(/sr-only/);
+  await expect(card.locator("select")).toBeFocused();
+  expect((await card.locator("select").boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  await page.keyboard.press("Tab");
   await expect.poll(async()=>(await card.locator("select").boundingBox())!.height).toBeLessThanOrEqual(1);
   await expect(card.locator('.material-symbols-outlined').filter({hasText:"drag_indicator"})).toHaveCount(0);
   await page.screenshot({path:`e2e-artifacts/tier-compact-${info.project.name}.png`,fullPage:true});
