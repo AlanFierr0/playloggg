@@ -6,6 +6,7 @@ import { getMessages } from "@/lib/locale/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAccount } from "@/lib/owner";
+import { ProfileAccountControls } from "@/components/profile-account-controls";
 import { ProfileSettingsForm } from "@/components/profile-settings-form";
 
 export async function generateMetadata() { return localizeMetadata({ title: "Profile settings", robots: { index: false, follow: false } }); }
@@ -27,6 +28,11 @@ export default async function SettingsPage() {
         <a href="/api/profile/export?format=json" download className="inline-flex min-h-11 items-center rounded-lg bg-primary-container text-on-primary-container px-4 py-3">{t("Full copy (JSON)")}</a>
         <a href="/api/profile/export?format=csv" download className="inline-flex min-h-11 items-center rounded-lg bg-surface-container-high text-on-surface px-4 py-3">{t("Spreadsheet (CSV)")}</a>
       </div>
+    </section>
+    <section aria-labelledby="account-title" className="rounded-xl bg-surface-container-low p-5 sm:p-8 space-y-4">
+      <h2 id="account-title" className="font-headline-lg text-headline-lg">{t("Account")}</h2>
+      <p className="text-body-sm text-on-surface-variant">{t("Sign out of this device, or permanently delete your account and personal data.")}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl"><ProfileAccountControls handle={profile.handle} /></div>
     </section>
   </section>;
 }

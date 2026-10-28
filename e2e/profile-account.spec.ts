@@ -3,7 +3,7 @@ import {test,expect} from "./test";
 import {authCookie} from "./fixture-server.mjs";
 
 test("profile sign out clears the session and preserves the profile",async({page,context})=>{
-  await context.addCookies([authCookie]);await page.goto("/profile");
+  await context.addCookies([authCookie]);await page.goto("/settings");
   await page.getByRole("button",{name:"Sign out",exact:true}).click();
   await expect(page).toHaveURL(/\/login$/);
   await page.goto("/profile");await expect(page).toHaveURL(/\/login\?next=%2Fprofile$/);
@@ -13,7 +13,7 @@ test("profile sign out clears the session and preserves the profile",async({page
 });
 
 test("profile deletion requires the handle, allows cancellation and retry, and keeps other profiles and catalog",async({page,context})=>{
-  await context.addCookies([authCookie]);await page.goto("/profile");
+  await context.addCookies([authCookie]);await page.goto("/settings");
   await page.getByRole("button",{name:"Delete account",exact:true}).click();
   const popup=page.getByRole("dialog",{name:"Delete account",exact:true});
   await expect(popup).toBeVisible();
@@ -70,7 +70,7 @@ test("account deletion removes only owned pictures and permits retry after Auth 
   await context.addCookies([authCookie]);
   await fetch("http://127.0.0.1:3101/__deletion-pictures",{method:"POST"});
   await fetch("http://127.0.0.1:3101/__fail-storage-delete",{method:"POST"});
-  await page.goto("/profile");
+  await page.goto("/settings");
   await page.getByRole("button",{name:"Delete account",exact:true}).click();
   const popup=page.getByRole("dialog",{name:"Delete account",exact:true});
   await popup.getByRole("textbox").fill("fixture_owner");

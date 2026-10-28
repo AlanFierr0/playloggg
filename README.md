@@ -12,7 +12,7 @@ in Supabase; the production site is https://playlogg.alanfierro.dev.
 | `/games` | Catalog filters/sorts and 25-card incremental batches |
 | `/search` | Game/profile search; game logging picker |
 | `/game/[slug]` | Catalog details, anonymous community average, friends' scores and reviews |
-| `/log?game=[slug]` | Edit an entry; tab-local drafts survive navigation and refresh |
+| `/log?game=[slug]` | Edit an entry; tab-local drafts survive navigation, refresh and guest sign-in |
 | `/tiers` | Owner tier board with editable ranges and queued optimistic moves |
 | `/people` | Public profile directory and text search |
 | `/compare` | Compare any two eligible profiles, defaulting to the owner |
@@ -21,6 +21,7 @@ in Supabase; the production site is https://playlogg.alanfierro.dev.
 | `/profile/reviews`, `/profile/stats` | Reviews/voting and rating/taste statistics |
 | `/profile/favorites`, `/profile/social` | Manage favorites and following |
 | `/profile/import/steam` | Link Steam, preview/import games, sync hours and resume imports/ratings |
+| `/data-use` | Profile visibility, Steam/AI/translation data use, drafts and account controls |
 | `/settings` | Names, picture, optional identity details, privacy/discovery and account deletion |
 | `/u/[handle]` | Public overview with ranking/tiers/reviews/stats/favorites and entry pages |
 | `/login`, `/signup`, `/reset-password` | Verified email/Steam authentication and profile setup |

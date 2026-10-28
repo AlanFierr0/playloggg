@@ -6,13 +6,13 @@ import { authCookie } from "./fixture-server.mjs";
 test("PC stores persist independently and can be cleared without changing other entry data", async ({page,context,request}) => {
   await context.addCookies([authCookie]);
   for (const [value,label] of [["pc_battlenet","PC / Battle.net"],["pc_gog","PC / GOG"],["pc_epic","PC / Epic Games"],["pc_ea","PC / EA app"],["pc_ubisoft","PC / Ubisoft Connect"],["pc_xbox","PC / Xbox app"],["pc_other","PC / Other"]]) {
-    await page.goto("/log?game=hades");
+    await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
     const pc=page.getByRole("button",{name:"PC",exact:true});
     if(await pc.getAttribute("aria-pressed")!=="true") await pc.click();
     await page.getByRole("button",{name:label,exact:true}).click();
     await page.locator("#commit-rating").click();
     await expect(page).toHaveURL(/\/profile$/);
-    await page.goto("/log?game=hades");
+    await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
     await expect(page.getByRole("button",{name:label,exact:true})).toHaveAttribute("aria-pressed","true");
     const state=await (await request.get("http://127.0.0.1:3101/__state")).json();
     expect(state.ratings.find((row:{profile_id:number;game_id:number})=>row.profile_id===2&&row.game_id===1)).toMatchObject({platform:value,score:null,tier:null,status:null});
@@ -20,14 +20,14 @@ test("PC stores persist independently and can be cleared without changing other 
   await page.getByRole("button",{name:"PC / Other",exact:true}).click();
   await page.locator("#commit-rating").click();
   await expect(page).toHaveURL(/\/profile$/);
-  await page.goto("/log?game=hades");
+  await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   await expect(page.locator("#platform-selector [aria-pressed=true]")).toHaveCount(0);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
 
 test("PC stores appear below main platforms and collapse for console selection",async({page,context},testInfo)=>{
   await context.addCookies([authCookie]);
-  await page.goto("/log?game=hades");
+  await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   const pc=page.getByRole("button",{name:"PC",exact:true});
   const stores=page.getByRole("group",{name:"PC store",exact:true});
   await expect(stores).toBeHidden();
@@ -49,7 +49,7 @@ test("PC stores appear below main platforms and collapse for console selection",
 
 test("score slider works on an unrated game and discard returns to profile without saving", async ({ page, context, request }) => {
   await context.addCookies([authCookie]);
-  await page.goto("/log?game=hades");
+  await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   const slider = page.getByRole("slider", { name: "Numerical score from 0 to 100" });
   await expect(slider).toBeEnabled();
   const box = (await slider.boundingBox())!;
@@ -73,7 +73,7 @@ test("score slider works on an unrated game and discard returns to profile witho
   await page.locator("#discard-rating").click();
   await expect(page).toHaveURL(/\/profile$/);
   await expect(page.locator("#score-slider")).toHaveCount(0);
-  await page.goto("/log?game=hades");
+  await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   await expect(page.locator("#score-display")).toHaveValue("");
   await expect(page.locator("#dispatch-textarea")).toHaveValue("");
   await expect(page.locator("#hours-input")).toHaveValue("");
@@ -87,7 +87,7 @@ test("editor tier dropdown matches the tier board colors in both themes", async 
   await context.addCookies([authCookie]);
   for (const theme of ["dark", "light"]) {
     await context.addCookies([{ name: "playlogg_theme", value: theme, url: "http://127.0.0.1:3100" }]);
-    await page.goto("/log?game=hades");
+    await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
     await page.locator("#tier-badge").click();
     const options = page.getByRole("menuitemradio");
     for (const [index, color] of ["rgb(255, 127, 127)", "rgb(255, 191, 127)", "rgb(255, 223, 127)", "rgb(255, 255, 127)", "rgb(191, 255, 127)", "rgb(127, 255, 127)"].entries()) {
@@ -107,7 +107,7 @@ test("editor tier dropdown matches the tier board colors in both themes", async 
 
 test("score descriptions follow typing and sliding without numeric labels", async ({ page, context }) => {
   await context.addCookies([authCookie]);
-  await page.goto("/log?game=hades");
+  await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   const descriptions = page.locator("#score-descriptions");
   const active = descriptions.locator('[aria-current="true"]');
   await expect(descriptions.locator("span")).toHaveText(["Terrible", "Poor", "Average", "Great", "Masterpiece"]);
@@ -134,7 +134,7 @@ test("score descriptions follow typing and sliding without numeric labels", asyn
 
 test("score keyboard controls and discard retain the last committed score", async ({ page, context }) => {
   await context.addCookies([authCookie]);
-  await page.goto("/log?game=hades");
+  await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   const slider = page.getByRole("slider", { name: "Numerical score from 0 to 100" });
   await slider.focus();
   await slider.press("Home");
@@ -144,14 +144,14 @@ test("score keyboard controls and discard retain the last committed score", asyn
   await page.locator("#dispatch-textarea").fill("Keep this saved review");
   await page.locator("#commit-rating").click();
   await expect(page).toHaveURL(/\/profile$/);
-  await page.goto("/log?game=hades");
+  await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   await slider.press("ArrowLeft");
   await expect(page.locator("#score-display")).toHaveValue("99");
   await page.locator("#dispatch-textarea").fill("Discard this draft");
   await page.locator("#discard-rating").click();
   await expect(page).toHaveURL(/\/profile$/);
   await expect(page.locator("#score-slider")).toHaveCount(0);
-  await page.goto("/log?game=hades");
+  await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   await expect(page.locator("#score-display")).toHaveValue("100");
   await expect(page.locator("#dispatch-textarea")).toHaveValue("Keep this saved review");
   await page.reload();
@@ -165,7 +165,7 @@ test("editor score and discard controls are accessible in both themes and langua
       { name: "playlogg_locale", value: locale, url: "http://127.0.0.1:3100" },
       { name: "playlogg_theme", value: theme, url: "http://127.0.0.1:3100" },
     ]);
-    await page.goto("/log?game=hades");
+    await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
     const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
     expect(result.violations).toEqual([]);
     await page.screenshot({ path: `e2e-artifacts/editor-${testInfo.project.name}-${locale}-${theme}.png`, fullPage: true });
@@ -175,7 +175,7 @@ test("editor score and discard controls are accessible in both themes and langua
 
 test("typed scores sync with the slider, reject invalid values and persist zero", async ({page,context}) => {
   await context.addCookies([authCookie]);
-  await page.goto("/log?game=hades");
+  await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   const input=page.getByRole("textbox", {name:"Numerical score from 0 to 100"});
   const slider=page.getByRole("slider", {name:"Numerical score from 0 to 100"});
   await input.fill("87");
@@ -209,7 +209,7 @@ test("typed scores sync with the slider, reject invalid values and persist zero"
   await input.fill("0");
   await page.locator("#commit-rating").click();
   await expect(page).toHaveURL(/\/profile$/);
-  await page.goto("/log?game=hades");
+  await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   await expect(input).toHaveValue("0");
   await expect(slider).toHaveValue("0");
 });
@@ -217,7 +217,7 @@ test("typed scores sync with the slider, reject invalid values and persist zero"
 
 test("completion calendar selects leap days, supports keyboard navigation and saves dates", async ({ page, context }, testInfo) => {
   await context.addCookies([authCookie]);
-  await page.goto("/log?game=hades");
+  await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   const input = page.locator("#date-input");
   const trigger = page.getByRole("button", { name: "Choose completion date", exact: true });
   await input.fill("2024-02-28");
@@ -246,7 +246,7 @@ test("completion calendar selects leap days, supports keyboard navigation and sa
   await expect(input).toHaveValue("2024-02-29");
   await page.locator("#commit-rating").click();
   await expect(page).toHaveURL(/\/profile$/);
-  await page.goto("/log?game=hades");
+  await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   await expect(input).toHaveValue("2024-02-29");
   await trigger.click();
   await calendar.getByRole("button", { name: "Clear date", exact: true }).click();
@@ -270,7 +270,7 @@ test("completion calendar selects leap days, supports keyboard navigation and sa
 
 test("playtime rejects negative typing and pasted values while saving fractional hours", async ({ page, context }) => {
   await context.addCookies([authCookie]);
-  await page.goto("/log?game=hades");
+  await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   const hours = page.locator("#hours-input");
   await hours.press("-");
   await expect(hours).toHaveValue("");
@@ -290,14 +290,14 @@ test("playtime rejects negative typing and pasted values while saving fractional
   await hours.fill("0.5");
   await page.locator("#commit-rating").click();
   await expect(page).toHaveURL(/\/profile$/);
-  await page.goto("/log?game=hades");
+  await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   await expect(hours).toHaveValue("0.5");
 });
 
 
 test("console platform popups save specific consoles and preserve existing entry data", async ({ page, context }, testInfo) => {
   await context.addCookies([authCookie]);
-  await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");
+  await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   for (const [family, consoleName] of [["PlayStation", "PlayStation 4"], ["Xbox", "Xbox Series S"]]) {
     const trigger = page.getByRole("button", { name: family, exact: true });
     await trigger.click();
@@ -309,7 +309,7 @@ test("console platform popups save specific consoles and preserve existing entry
     await expect(page.locator("#score-display")).toHaveValue("80");
     await page.locator("#commit-rating").click();
     await expect(page).toHaveURL(/\/profile$/);
-    await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");
+    await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
     await trigger.click();
     await expect(menu.getByRole("menuitemradio", { name: consoleName, exact: true })).toHaveAttribute("aria-checked", "true");
     await menu.screenshot({ path: `e2e-artifacts/console-${family}-${testInfo.project.name}.png` });
@@ -335,7 +335,7 @@ test("console platform popups save specific consoles and preserve existing entry
 
 test("completion calendar blocks dates before launch and accepts launch day", async ({ page, context }) => {
   await context.addCookies([authCookie]);
-  await page.goto("/log?game=hades");
+  await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   const input = page.locator("#date-input");
   await expect(input).toHaveAttribute("min", "2020-01-01");
   await input.fill("2019-12-31");
@@ -352,6 +352,6 @@ test("completion calendar blocks dates before launch and accepts launch day", as
   await launch.click();
   await page.locator("#commit-rating").click();
   await expect(page).toHaveURL(/\/profile$/);
-  await page.goto("/log?game=hades");
+  await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   await expect(input).toHaveValue("2020-01-01");
 });

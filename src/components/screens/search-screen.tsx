@@ -21,6 +21,7 @@ const input = useRef<HTMLInputElement>(null);
 const { goBack } = useReturnNavigation(returnPath);
 const profileCache = useRef(new Map<string, {query:string;profiles:Profile[];hasMore:boolean}>());
 const [profileSearch, setProfileSearch] = useState<{ query: string; profiles: Profile[]; hasMore?: boolean; error?: boolean } | null>(null);
+const [profileRetry, setProfileRetry] = useState(0);
 const profiles = profileSearch?.query === query ? profileSearch.profiles : [];
 const profilesLoading = mode !== "log" && profileSearch?.query !== query;
 useEffect(() => {
@@ -44,7 +45,7 @@ useEffect(() => {
     }
   }, 250);
   return () => { clearTimeout(timer); controller.abort(); };
-}, [query, mode, scope]);
+}, [query, mode, scope, profileRetry]);
 const categories: { scope: SearchScope; label: string }[] = [{ scope: "all", label: "All Results" }, { scope: "games", label: "Games" }, { scope: "curators", label: "Profiles" }];
 
 function close() { goBack(); }
@@ -92,7 +93,7 @@ return (
         </nav>}
       </header>
       <Suspense fallback={<p role="status" className="px-6 py-8 text-on-surface-variant">{t("Loading…")}</p>}>
-      <SearchData portfolio={portfolio} initialQuery={initialQuery} offset={offset} onLoadMore={() => setOffset(value => value + 24)} query={query} scope={mode === "log" ? "games" : scope} mode={mode} profiles={profiles} profilesHasMore={profileSearch?.query === query && profileSearch.hasMore} profilesLoading={profilesLoading} profilesError={profileSearch?.query === query && profileSearch.error} />
+      <SearchData portfolio={portfolio} initialQuery={initialQuery} offset={offset} onLoadMore={() => setOffset(value => value + 24)} query={query} scope={mode === "log" ? "games" : scope} mode={mode} profiles={profiles} profilesHasMore={profileSearch?.query === query && profileSearch.hasMore} profilesLoading={profilesLoading} profilesError={profileSearch?.query === query && profileSearch.error} onRetryProfiles={() => {setProfileSearch(null); setProfileRetry(value => value + 1);}} />
       </Suspense>
     </div>
   </dialog>

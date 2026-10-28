@@ -18,7 +18,7 @@ test("studio logos appear beside names in summaries, stats and game details in b
   }
   await page.goto("/u/fixture_public/stats");
   const studios = page.getByRole("heading", { name: "Studio statistics", exact: true }).locator("..");
-  await studios.getByRole("button", { name: "Load more — Studio statistics", exact: true }).click();
+  await studios.getByRole("button", { name: "Show smaller groups — Studio statistics", exact: true }).click();
   await expect(studios.locator('img[src="/images/studios/valve.svg"]')).toBeVisible();
   await page.goto("/game/studio-logo-fixture-0");
   await expect(page.locator('main img[src="/images/studios/valve.svg"]')).toHaveCount(2);

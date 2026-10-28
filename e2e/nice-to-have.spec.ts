@@ -4,12 +4,12 @@ import {authCookie} from "./fixture-server.mjs";
 
 test("Nintendo and other platform choices persist through the editor and stats",async({page,context})=>{
   await context.addCookies([authCookie]);
-  await page.goto("/log?game=hades");
+  await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   await page.getByRole("button",{name:"Nintendo",exact:true}).click();
   await page.getByRole("menuitemradio",{name:"Nintendo Switch",exact:true}).click();
   await page.locator("#commit-rating").click();
   await expect(page).toHaveURL(/\/profile$/);
-  await page.goto("/log?game=hades");
+  await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   await expect(page.getByRole("button",{name:"Nintendo",exact:true})).toHaveAttribute("aria-pressed","true");
   await page.getByRole("button",{name:"Other platforms",exact:true}).click();
   await page.getByRole("menuitemradio",{name:"Android",exact:true}).click();
@@ -23,12 +23,12 @@ test("Nintendo and other platform choices persist through the editor and stats",
 
 test("ongoing games have their own summary and do not lower completion",async({page,context})=>{
   await context.addCookies([authCookie]);
-  await page.goto("/log?game=hades");
+  await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   await page.getByLabel("Game type",{exact:true}).selectOption("ongoing");
   await page.locator("#status-group").getByRole("button",{name:"Currently playing",exact:true}).click();
   await page.locator("#commit-rating").click();
   await expect(page).toHaveURL(/\/profile$/);
-  await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");
+  await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   await page.locator("#status-group").getByRole("button",{name:"Completed",exact:true}).click();
   await page.locator("#commit-rating").click();
   await expect(page).toHaveURL(/\/profile$/);
@@ -73,7 +73,7 @@ test("Steam recovery replays acknowledged blank entries without overwriting manu
   await page.getByRole("button",{name:"Resume import (1)",exact:true}).click();
   await expect(page.getByRole("dialog").getByRole("heading",{name:"Hades",exact:true})).toBeVisible();
   await page.getByRole("button",{name:"Close rating session",exact:true}).click();
-  await page.goto("/log?game=hades");
+  await page.goto("/log?game=hades");await page.locator("details").filter({has:page.locator("#platform-selector")}).locator("summary").click();
   await page.locator("#score-display").fill("92");
   await page.locator("#commit-rating").click();
   await expect(page).toHaveURL(/\/profile$/);

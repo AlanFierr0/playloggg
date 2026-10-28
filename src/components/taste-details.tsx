@@ -18,6 +18,7 @@ export function TasteDetails({ games }: { games: Game[] }) {
       ].map(({ label, groups }) => (
         <section key={label} className="space-y-4">
           <h2 className="font-headline-lg text-headline-lg">{t(label)}</h2>
+          <p className="text-body-sm text-on-surface-variant">{t(expanded.includes(label) ? "Scored games, including groups with fewer than five ratings." : "Scored games in groups with at least five ratings.")}</p>
           {groups.some(group => expanded.includes(label) || group.count >= 5) ? (
             <div className="overflow-x-auto">
               <table className="w-full text-left font-body-md text-body-md leading-relaxed">
@@ -70,9 +71,9 @@ export function TasteDetails({ games }: { games: Game[] }) {
               type="button"
               className="min-h-11 rounded-xl bg-surface-container-high px-5 py-3 text-on-surface hover:bg-surface-container-highest"
               onClick={() => setExpanded(current => [...current, label])}
-              aria-label={`${t("Load more")} — ${t(label)}`}
+              aria-label={`${t("Show smaller groups")} — ${t(label)}`}
             >
-              {t("Load more")}
+              {t("Show smaller groups")}
             </button>
           )}
         </section>
@@ -119,6 +120,7 @@ export function TasteDetails({ games }: { games: Game[] }) {
         <h2 className="font-headline-lg text-headline-lg">
           {t("Release eras")}
         </h2>
+        <p className="text-body-sm text-on-surface-variant">{t("All logged games with a known release year.")}</p>
         <ul className="space-y-4">
           {stats.eras.map(([era, count]) => {
             const percent = count / (stats.logged - stats.unknownYears) * 100;
@@ -139,6 +141,7 @@ export function TasteDetails({ games }: { games: Game[] }) {
         <h2 className="font-headline-lg text-headline-lg">
           {t("Platforms played")}
         </h2>
+        <p className="text-body-sm text-on-surface-variant">{t("All logged games with a recorded platform.")}</p>
         {stats.platforms.map(([platform, count]) => (
           <div key={platform} className="flex justify-between gap-4">
             <span>

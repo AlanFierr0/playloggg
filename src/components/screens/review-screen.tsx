@@ -31,7 +31,9 @@ const [expectedUpdatedAt, setExpectedUpdatedAt] = useState(game.updatedAt ?? nul
 const [conflict, setConflict] = useState(false);
 const [draftReady, setDraftReady] = useState(false);
 const cleared = useRef(false);
-const draftKey = `playlogg_draft:${profile.id}:${game.slug}`;
+const guestDraftKey = `playlogg_guest_draft:${game.slug}`;
+const draftKey = canEdit ? `playlogg_draft:${profile.id}:${game.slug}` : guestDraftKey;
+const restoringGuest = useRef(false);
 const [saved, setSaved] = useState({ score: game.score, tier: game.tier ?? null, status: game.status ?? null, playStyle:game.playStyle??null, review: game.review ?? "", platform: game.platform ?? null, hoursPlayed: game.hoursPlayed ?? null, completedOn: game.completedOn ?? null, tags: game.tags ?? [] });
 const [score, setScore] = useState<number | null>(game.score);
 const scoreInput = useRef<HTMLInputElement>(null);
@@ -56,30 +58,33 @@ useEffect(() => {
   let cancelled = false;
   queueMicrotask(() => {
   if (cancelled) return;
-  if (canEdit) try {
-    const stored = sessionStorage.getItem(draftKey);
+  try {
+    const ownDraft = sessionStorage.getItem(draftKey);
+    const stored = ownDraft ?? (canEdit ? sessionStorage.getItem(guestDraftKey) : null);
     const raw = stored ? JSON.parse(stored) : null;
     const draft = raw ? validateRating({...raw, hoursPlayed:null, completedOn:null}) : null;
     if (draft?.slug === game.slug) {
       setPlayStyle(draft.playStyle??game.playStyle??null); setScore(draft.score); setTier(draft.tier); setTierManual(draft.tierManual ?? false);
       setPlatform(draft.platform); setStatus(draft.status); setHours(typeof raw.rawHours === "string" && raw.rawHours.length <= 100 ? raw.rawHours : "");
       setDate(typeof raw.rawDate === "string" && raw.rawDate.length <= 10 ? raw.rawDate : ""); setReview(draft.review); setTags(draft.tags); setTagVersion(value => value + 1);
-      setExpectedUpdatedAt(draft.expectedUpdatedAt ?? null);
+      restoringGuest.current = canEdit && !ownDraft;
+      setExpectedUpdatedAt(restoringGuest.current ? game.updatedAt ?? null : draft.expectedUpdatedAt ?? null);
       setSaveMessage("Your unfinished draft has been restored.");
     }
   } catch { setSaveMessage("Draft storage is unavailable. Save before leaving this page."); }
   setDraftReady(true);
   });
   return () => { cancelled = true; };
-}, [canEdit, draftKey, game.slug, game.playStyle]);
+}, [canEdit, draftKey, guestDraftKey, game.slug, game.playStyle, game.updatedAt]);
 useEffect(() => {
-  if (!canEdit || !draftReady || cleared.current) return;
+  if (!draftReady || cleared.current) return;
   try {
-    if (!dirty) { sessionStorage.removeItem(draftKey); return; }
+    if (!dirty) { sessionStorage.removeItem(draftKey); if (canEdit && restoringGuest.current) { sessionStorage.removeItem(guestDraftKey); restoringGuest.current = false; } return; }
     sessionStorage.setItem(draftKey, JSON.stringify({slug: game.slug, score, tier, tierManual, status, playStyle, review, platform,
       hoursPlayed: parseHours(hours) ?? null, completedOn: date || null, rawHours:hours, rawDate:date, tags, expectedUpdatedAt}));
+    if (canEdit && restoringGuest.current) { sessionStorage.removeItem(guestDraftKey); restoringGuest.current = false; }
   } catch { queueMicrotask(() => setSaveMessage("Draft storage is unavailable. Save before leaving this page.")); }
-}, [canEdit, draftReady, dirty, draftKey, game.slug, score, tier, tierManual, status, playStyle, review, platform, hours, date, tags, expectedUpdatedAt]);
+}, [canEdit, draftReady, dirty, draftKey, guestDraftKey, game.slug, score, tier, tierManual, status, playStyle, review, platform, hours, date, tags, expectedUpdatedAt]);
 function clearStoredDraft() { cleared.current = true; try { sessionStorage.removeItem(draftKey); } catch {} }
 function resetDraft() { clearStoredDraft(); setPlayStyle(saved.playStyle); setScore(saved.score); setTier(saved.tier); setPlatform(saved.platform); setStatus(saved.status); setHours(saved.hoursPlayed == null ? "" : String(saved.hoursPlayed)); setDate(saved.completedOn ?? ""); setReview(saved.review); setTags(saved.tags); setTagVersion((value) => value + 1); setSaveMessage(""); goBack(); }
 function commit() {
@@ -145,13 +150,13 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 <div className="p-4 sm:p-6 lg:p-8 grid grid-cols-1 xl:grid-cols-2 items-start gap-8">
 {!canEdit && <p className="xl:col-span-2 font-body-sm text-body-sm text-on-surface-variant">{t("Sign in to save your entry. ")}<Link href={`/login?next=${encodeURIComponent(`/log?game=${game.slug}`)}`} className="text-primary underline">{t("Sign in")}</Link> {t("to save entries to your own profile.")}</p>}
 
-<div className="xl:col-span-2 flex flex-col sm:flex-row gap-6 sm:gap-8 items-start">
-<div className="relative group flex-shrink-0 w-32 sm:w-40 aspect-[3/4] rounded-lg overflow-hidden bg-surface-container shadow-xl">
+<div className="xl:col-span-2 flex flex-row gap-4 sm:gap-8 items-start">
+<div className="relative group flex-shrink-0 w-20 sm:w-40 aspect-[3/4] rounded-lg overflow-hidden bg-surface-container shadow-xl">
 <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt={game.title} src={game.cover} />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/80 via-transparent to-transparent opacity-90"></div>
 
-<div className="absolute bottom-2 left-2 right-2 flex justify-between items-center text-on-surface">
+<div className="absolute bottom-2 left-2 right-2 hidden sm:flex justify-between items-center text-on-surface">
 <span className="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-lowest/80 backdrop-blur-sm text-primary">{game.year ?? "—"}</span>
 
 <span className="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-lowest/80 backdrop-blur-sm text-on-surface-variant">{game.genres?.[0] ?? t("Game")}</span>
@@ -169,14 +174,15 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 
 </div>
 
-<h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight break-words">{game.title}</h1>
+<h1 className="font-headline-xl text-headline-lg sm:text-headline-xl text-on-surface tracking-tight break-words">{game.title}</h1>
 
 <p translate="no" className="inline-flex flex-wrap items-center gap-x-3 gap-y-1 font-body-md text-body-md text-on-surface-variant">{game.developers?.length ? game.developers.map(name => <StudioName key={name} name={name} compact />) : game.genres?.join(" / ")}</p>
 
 </div>
 
-<div className="flex flex-col gap-2.5 mt-5 pt-5 bg-surface-container/40 -mx-3 px-3 py-3 rounded-lg">
-<span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{t("Platform Played")}</span>
+<details className="mt-3 rounded-lg bg-surface-container/40 px-3 py-2">
+<summary className="min-h-11 cursor-pointer py-3 text-body-sm text-on-surface-variant">{t("Platform Played")}: <span className="text-primary">{platform ? t(playedPlatformLabels[platform]) : t("Not set")}</span></summary>
+<div className="space-y-2.5 pb-2">
 
 <div className="flex flex-wrap gap-2" id="platform-selector">
 <button type="button" onClick={() => setPlatform(isPC ? null : "pc")} title={t("Select platform; click again to clear")} aria-pressed={isPC} aria-expanded={isPC} aria-controls="pc-store-selector" className={`platform-btn min-h-11 px-3 py-1 rounded font-label-sm text-label-sm uppercase tracking-wider flex items-center gap-1.5 ${isPC ? "bg-primary/15 text-primary shadow-sm" : "bg-surface-container-highest text-on-surface-variant hover:bg-surface-bright hover:text-on-surface"}`}><span aria-hidden="true" className="material-symbols-outlined text-[14px]">desktop_windows</span>PC</button>
@@ -195,6 +201,7 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 </div>
 
 </div>
+</details>
 
 </div>
 

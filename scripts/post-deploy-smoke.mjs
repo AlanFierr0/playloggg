@@ -24,6 +24,7 @@ const checks = [
   ["/u/unknown_smoke_profile/favorites", 404, null],
   ["/search?q=Hades&from=/games", 200, "Search the game catalog"],
   ["/login", 200, "Sign in with Steam"],
+  ["/data-use", 200, "How your data is used"],
   ["/compare", 200, "First profile handle"],
   ["/compare?left=alexvance&right=unknown_smoke_profile", 200, "Comparison unavailable."],
   ["/u/unknown_smoke_profile", 404, null],

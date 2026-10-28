@@ -11,7 +11,7 @@ import type { Game, Profile } from "@/types/domain";
 import { HighlightedTitle, ReferenceProfile0 } from "./search-reference-rows";
 
 export type SearchScope = "all" | "games" | "curators";
-export function SearchResults({ query, scope, mode, profiles, profilesHasMore, profilesLoading, profilesError, excludedSlugs, gamesLoading, gamesError, hasMore, onLoadMore, onRetry }: { query: string; scope: SearchScope; mode: "browse" | "log"; profiles: Profile[]; profilesHasMore?: boolean; profilesLoading: boolean; profilesError?: boolean; excludedSlugs: string[]; gamesLoading: boolean; gamesError: boolean; hasMore: boolean; onLoadMore: () => void; onRetry: () => void }) {
+export function SearchResults({ query, scope, mode, profiles, profilesHasMore, profilesLoading, profilesError, onRetryProfiles, excludedSlugs, gamesLoading, gamesError, hasMore, onLoadMore, onRetry }: { query: string; scope: SearchScope; mode: "browse" | "log"; profiles: Profile[]; profilesHasMore?: boolean; profilesLoading: boolean; profilesError?: boolean; onRetryProfiles: () => void; excludedSlugs: string[]; gamesLoading: boolean; gamesError: boolean; hasMore: boolean; onLoadMore: () => void; onRetry: () => void }) {
   const t = useMessages();
   const portfolio = usePortfolio();
   const { titles } = getSearchMatches(query, portfolio);
@@ -34,7 +34,7 @@ export function SearchResults({ query, scope, mode, profiles, profilesHasMore, p
         <ResultHeading icon="group" label={t("Profiles")} detail={profilesLoading ? "Loading…" : `${profiles.length}${profilesHasMore ? "+" : ""} matching profiles`} color="text-tertiary" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">{profiles.map((profile) => <ReferenceProfile0 key={profile.id} profile={profile} />)}</div>
         {profilesHasMore && <Link prefetch={false} href={`/people?q=${encodeURIComponent(query)}`} className="mt-3 inline-flex min-h-11 items-center rounded-lg px-3 text-primary hover:bg-surface-container">{t("View all matching profiles")}<span aria-hidden="true" className="material-symbols-outlined ml-2 text-[18px]">arrow_forward</span></Link>}
-        {profilesLoading ? <p className="p-4 text-on-surface-variant">{t("Loading…")}</p> : profilesError ? <p className="p-4 text-on-surface-variant">{t("Profile search could not be loaded.")}</p> : profiles.length === 0 && <p className="p-4 text-on-surface-variant">{t("No profiles match this search.")}</p>}
+        {profilesLoading ? <p className="p-4 text-on-surface-variant">{t("Loading…")}</p> : profilesError ? <div className="p-4"><p role="status" className="text-on-surface-variant">{t("Profile search could not be loaded.")}</p><button type="button" onClick={onRetryProfiles} className="mt-2 min-h-11 rounded-lg px-3 text-primary hover:bg-surface-container">{t("Retry profile search")}</button></div> : profiles.length === 0 && <p className="p-4 text-on-surface-variant">{t("No profiles match this search.")}</p>}
       </section>}
     </div>
   );

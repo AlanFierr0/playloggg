@@ -1,4 +1,4 @@
-import { test as base, expect } from "@playwright/test";
+import { test as base, expect, type Page } from "@playwright/test";
 
 export const test = base.extend<{ runtimeCheck: void }>({
   runtimeCheck: [async ({ page }, use, testInfo) => {
@@ -15,3 +15,12 @@ export const test = base.extend<{ runtimeCheck: void }>({
   }, { auto: true }],
 });
 export { expect };
+
+export async function openSteamTools(page: Page) {
+  await page.waitForURL(/\/(?:profile\/import\/steam|login)/);
+  if (new URL(page.url()).pathname !== "/profile/import/steam") return;
+  const summary = page.locator("summary").filter({hasText:/^(Steam library tools|Herramientas de la biblioteca de Steam)$/});
+  const connect = page.getByRole("button", {name:/^(Connect Steam|Conectar Steam)$/});
+  await expect(summary.or(connect).first()).toBeVisible();
+  if (await summary.count() && !await summary.evaluate(element => element.parentElement!.hasAttribute("open"))) await summary.click();
+}

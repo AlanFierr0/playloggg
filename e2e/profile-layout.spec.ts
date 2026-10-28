@@ -86,7 +86,7 @@ test("stats hide small groups until each section loads more", async ({ page }) =
       expect(Number(await row.locator("td").first().innerText())).toBeGreaterThanOrEqual(5);
     }
     const before = await rows.count();
-    await section.getByRole("button", { name: `Load more — ${label}`, exact: true }).click();
+    await section.getByRole("button", { name: `Show smaller groups — ${label}`, exact: true }).click();
     expect(await rows.count()).toBeGreaterThan(before);
     const counts = await rows.locator("td:first-of-type").allTextContents();
     expect(counts.some(count => Number(count) < 5)).toBe(true);
@@ -119,6 +119,8 @@ test("recent profile entries fill the sidebar height without stretching the over
     await page.evaluate(()=>window.scrollTo(0,0));
   }else{
     await expect(recent.getByRole("link")).toHaveCount(6);
+    await recent.getByRole("button",{name:"Show more updates",exact:true}).click();await expect(recent.getByRole("link")).toHaveCount(16);
+    await recent.getByRole("button",{name:"Show fewer updates",exact:true}).click();await expect(recent.getByRole("link")).toHaveCount(6);
     const left=(await summary.boundingBox())!,right=(await recent.boundingBox())!;
     expect(right.y).toBeGreaterThanOrEqual(left.y+left.height);
   }

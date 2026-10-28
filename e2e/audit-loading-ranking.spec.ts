@@ -59,8 +59,7 @@ test("ranking conflicts keep the draft and require explicit acknowledgement befo
   await expect(other.getByRole("status")).toContainText("Ranking changed elsewhere");
   await expect(other.getByRole("button",{name:"Retry saving ranking",exact:true})).toHaveCount(0);
   await expect(other.getByRole("button",{name:"Discard unsaved ranking",exact:true})).toBeVisible();
-  await other.getByRole("button",{name:"Use latest saved version for retry",exact:true}).click();
-  await other.getByRole("button",{name:"Retry saving ranking",exact:true}).click();
+  await other.getByRole("button",{name:"Keep my order and retry",exact:true}).click();
   await expect(other.getByRole("status")).toContainText("Personal ranking saved");
   await other.reload();await expect(other.locator("[data-ranking-game]").nth(1)).toContainText("Fixture Game 00");
   await other.close();

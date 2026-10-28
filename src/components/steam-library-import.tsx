@@ -242,10 +242,19 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
     {recoveryWarning&&<p role="alert" className="text-error">{t(recoveryWarning)}</p>}
     {importWork&&!importing&&<div className="flex flex-wrap items-center gap-3 rounded-xl bg-surface-container-low p-4"><button className={button} disabled={busy} onClick={()=>void importSelected(false,[],importWork)}>{t("Resume import")} ({importWork.pending.length})</button><button type="button" className="min-h-11 px-3 text-primary" disabled={busy} onClick={()=>keepImport(null)}>{t("Discard remaining import")}</button><p className="text-body-sm text-on-surface-variant">{t("Your unfinished import is saved in this browser. Already imported games are kept.")}</p></div>}
     {ratingSession&&ratingHidden&&<div className="flex flex-wrap items-center gap-3 rounded-xl bg-surface-container-low p-4"><button className={button} onClick={()=>{setRatingHidden(false);setDetailsOpen(importing);}}>{t("Resume rating games")} ({Math.max(0,ratingGames.length-ratingIndex)})</button><p className="text-body-sm text-on-surface-variant">{t("Your unfinished ratings are kept in this browser.")}</p></div>}
-    <p className="text-body-sm text-on-surface-variant">{t("Steam Game details must be Public, including playtime. Your Playlogg profile visibility does not change.")}</p>
-    <SteamCompletionScan profileId={profileId} disabled={importing||syncing||modalOpen}>
-    <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex flex-wrap gap-3"><button className={button} disabled={busy} onClick={()=>load(filters,amount,false,true)}>{t(loading ? "Loading…" : "Refresh library")}</button><button className={button} disabled={busy||!preview?.syncAppIds.length} onClick={syncPlaytime}>{t(syncing ? "Syncing playtime…" : "Sync Steam playtime")}</button><Link href="/profile" className="inline-flex min-h-11 items-center rounded-xl bg-surface-container text-primary px-5 py-3">{t("View profile")}</Link></div><button className={`${button} ml-auto`} disabled={busy||ratingSession||(Boolean(importWork)&&!failures.length)||!selected.length} onClick={()=>void importSelected(false,selected)}>{t("Import selected games")} ({selected.length})</button></div>
-    </SteamCompletionScan>
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <button className={`${button} ml-auto order-2`} disabled={busy||ratingSession||(Boolean(importWork)&&!failures.length)||!selected.length} onClick={()=>void importSelected(false,selected)}>{t("Import selected games")} ({selected.length})</button>
+      <Link href="/profile" className="order-1 inline-flex min-h-11 items-center px-3 text-primary">{t("View profile")}</Link>
+    </div>
+    <details className="rounded-xl border border-outline-variant/30 bg-surface-container-low px-4">
+      <summary className="min-h-11 cursor-pointer py-3 font-medium text-primary">{t("Steam library tools")}</summary>
+      <div className="space-y-4 pb-4">
+        <p className="text-body-sm text-on-surface-variant">{t("Steam Game details must be Public, including playtime. Your Playlogg profile visibility does not change.")} <Link href="/data-use#steam" className="text-primary underline">{t("How your data is used")}</Link></p>
+        <SteamCompletionScan profileId={profileId} disabled={importing||syncing||modalOpen}>
+          <div className="flex flex-wrap gap-3"><button className={button} disabled={busy} onClick={()=>load(filters,amount,false,true)}>{t(loading ? "Loading…" : "Refresh library")}</button><button className={button} disabled={busy||!preview?.syncAppIds.length} onClick={syncPlaytime}>{t(syncing ? "Syncing playtime…" : "Sync Steam playtime")}</button></div>
+        </SteamCompletionScan>
+      </div>
+    </details>
     <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end rounded-xl bg-surface-container-low p-5">
       <label className="min-w-0 space-y-2"><span className="block">{t("Sort by")}</span><select aria-label={t("Sort by")} disabled={busy&&!loading} value={displaySort} onChange={event=>setDisplaySort(event.target.value as SteamBrowse["sort"])} className="w-full rounded-xl bg-surface-container p-3"><option value="title">{t("Title A–Z")}</option><option value="hours_desc">{t("Most played")}</option><option value="hours_asc">{t("Least played")}</option></select></label>
       <label className="min-w-0 space-y-2"><span className="block">{t("Minimum hours")}</span><input disabled={busy&&!loading} type="number" min="0" step="any" value={minHours} onChange={event=>{setMinHours(event.target.value);updateFilters(event.target.value,maxHours);}} className="w-full rounded-xl bg-surface-container p-3" /></label>

@@ -103,10 +103,10 @@ export function PreferenceRanking() {
     latest.current=overrides;setManual(overrides);
     save(overrides);
   }
-  function save(overrides = latest.current) {
+  function save(overrides = latest.current, retryConflict = false) {
     checkpoint(overrides);
     queued.current=overrides;
-    if(saving.current || conflictRevision!==undefined)return;
+    if(saving.current || (conflictRevision!==undefined && !retryConflict))return;
     saving.current=true;setFailed(false);setMessage("Saving…");
     startTransition(async()=>{
       try {
@@ -258,8 +258,8 @@ export function PreferenceRanking() {
       {canEdit && conflictRevision!==undefined && <button className={button} disabled={pending} onClick={()=>{
         revision.current=conflictRevision;setConflictRevision(undefined);queued.current=null;
         // Explicitly applying the reviewed draft permits a save against the latest revision.
-        checkpoint(latest.current);
-      }}>{t("Use latest saved version for retry")}</button>}
+        save(latest.current, true);
+      }}>{t("Keep my order and retry")}</button>}
       {canEdit && failed && <button className={button} disabled={pending} onClick={()=>{try{sessionStorage.removeItem(draftKey);window.location.reload();}catch{setMessage("Unsaved ranking could not be discarded. Browser storage is unavailable.");}}}>{t("Discard unsaved ranking")}</button>}
       {storageWarning && <p role="alert">{t("Browser storage is unavailable. Keep this page open until your ranking saves.")}</p>}
       <p role="status" aria-live="polite" className="min-h-5 text-body-sm text-primary">

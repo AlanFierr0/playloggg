@@ -31,6 +31,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <form action="/auth/steam" method="post"><input type="hidden" name="next" value={next} /><button type="submit" className="w-full rounded bg-primary-container px-5 py-3 font-label-md text-on-primary-container">{t("Sign in with Steam")}</button></form>
         <div className="flex items-center gap-4 text-on-surface-variant text-body-sm"><span className="h-px flex-1 bg-outline-variant/30" />{t("or use email")}<span className="h-px flex-1 bg-outline-variant/30" /></div>{deleted === "1" && <p role="status" className="text-primary">{t("Your account has been deleted. Create a new account to start again.")}</p>}<PasswordForm key={registering ? "register" : "signin"} initialMode={registering ? "register" : "signin"} next={next} />
       </>}
+      <Link href="/data-use" className="inline-flex min-h-11 items-center text-body-sm text-primary underline">{t("How your data is used")}</Link>
+      <Link href="/data-use" className="inline-flex min-h-11 items-center text-body-sm text-primary underline">{t("How your data is used")}</Link>
     </div></div>
   </section>;
 }

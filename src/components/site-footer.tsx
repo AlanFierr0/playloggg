@@ -16,7 +16,7 @@ export async function SiteFooter() {
         <div className="max-w-lg space-y-3">
           <h2 className="font-headline-md text-headline-md text-on-surface">{t("Your profile, your choice")}</h2>
           <p className="text-body-sm leading-relaxed text-on-surface-variant">{t("Profiles are public and discoverable by default. You can change this in settings.")}</p>
-          <Link className={external} href="/settings">{t("Profile settings")}</Link>
+          <div className="flex flex-wrap gap-x-6"><Link className={external} href="/settings">{t("Profile settings")}</Link><Link className={external} href="/data-use">{t("How your data is used")}</Link></div>
         </div>
       </div>
       <div className="mt-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-outline-variant/20 pt-4 text-body-sm text-on-surface-variant">

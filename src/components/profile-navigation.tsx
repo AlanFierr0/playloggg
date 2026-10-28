@@ -27,6 +27,7 @@ export function ProfileNavigation() {
   return <><nav ref={navigation} aria-label={t("Profile sections")} className="relative flex overflow-x-auto overscroll-x-contain lg:grid lg:grid-cols-5 gap-2 rounded-xl bg-surface-container-low p-2">
     {items.map(([label, href]) => <Link key={href} href={href} aria-current={path === href ? "page" : undefined} className={`min-h-12 shrink-0 inline-flex justify-center items-center rounded-lg px-4 py-3 text-center font-label-md ${path === href ? "bg-primary-container text-on-primary-container font-semibold" : "text-on-surface-variant hover:bg-surface-container-high hover:text-primary"}`}>{t(label)}</Link>)}
   </nav>
+  <p className="mt-2 text-right text-label-sm text-on-surface-variant lg:hidden">{t("Scroll for more sections")} <span aria-hidden="true">↔</span></p>
   {publicBase && path !== publicBase && (
       <div className="flex justify-end pt-4">
         <Link href={publicBase} aria-label={`${t("Viewing profile")} ${profile.displayName}`} className="flex min-w-0 max-w-full items-center gap-3 rounded-xl bg-surface-container-low px-4 py-3">

@@ -1,16 +1,17 @@
 "use client";
 import Link from "next/link";
+import { useState } from "react";
 import { useMessages, useSitePreferences } from "@/components/site-preferences";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { TasteSummary } from "@/components/taste-summary";
 import { ProfileAvatar } from "@/components/profile-avatar";
-import { ProfileAccountControls } from "@/components/profile-account-controls";
 import { ProfileNavigation } from "@/components/profile-navigation";
 import { averageScore, ratedGames, loggedGames } from "@/lib/portfolio-view";
 import type { Game } from "@/types/domain";
 
 export function ProfileOverviewScreen({ hotTake }: { hotTake?: React.ReactNode }) {
   const t = useMessages();
+  const [allRecent, setAllRecent] = useState(false);
   const { locale } = useSitePreferences();
   const { profile, games, favorites = [], access, publicBase } = usePortfolio();
   const base = publicBase ?? "/profile";
@@ -72,16 +73,14 @@ export function ProfileOverviewScreen({ hotTake }: { hotTake?: React.ReactNode }
         <section className={`${panel} lg:flex lg:h-0 lg:min-h-full lg:flex-col`}>
           <h2 className="font-headline-lg text-headline-lg">{t("Recently updated entries")}</h2>
           <p className="text-body-sm text-on-surface-variant">{t("Latest saved entry updates, including rating, review or playback edits.")}</p>
-          {recent.length ? <div className="space-y-1 [&>a:nth-child(n+7)]:hidden lg:[&>a:nth-child(n+7)]:flex lg:h-0 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:overflow-x-hidden lg:-mx-2 lg:px-2">{recent.map(game => <Link href={gameHref(game)} key={game.slug} className="group flex min-w-0 items-center gap-3 rounded-xl p-2 -mx-2 hover:bg-surface-container focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary transition-colors">
+          {recent.length ? <div id="recent-profile-entries" className={`${allRecent ? "" : "[&>a:nth-child(n+7)]:hidden"} space-y-1 lg:[&>a:nth-child(n+7)]:flex lg:h-0 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:overflow-x-hidden lg:-mx-2 lg:px-2`}>{recent.map(game => <Link href={gameHref(game)} key={game.slug} className="group flex min-w-0 items-center gap-3 rounded-xl p-2 -mx-2 hover:bg-surface-container focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary transition-colors">
             <img loading="lazy" src={game.cover} alt="" className="w-12 h-[72px] shrink-0 object-cover rounded-lg bg-surface-container" />
             <div className="min-w-0 flex-1 space-y-1"><h3 translate="no" className="text-body-md font-semibold break-words group-hover:text-primary">{game.title}</h3><p className="text-primary text-body-sm">{t("Score")}: {game.score ?? t("Unrated")}</p><time className="block text-label-sm text-on-surface-variant" dateTime={game.updatedAt}>{game.updatedAt!.slice(0, 10)}</time></div>
           </Link>)}</div> : <p className="text-body-sm text-on-surface-variant">{t("No dated entry updates yet.")}</p>}
+          {recent.length > 6 && <button type="button" aria-expanded={allRecent} aria-controls="recent-profile-entries" onClick={() => setAllRecent(value => !value)} className="min-h-11 rounded-lg px-3 text-body-sm text-primary hover:bg-surface-container lg:hidden">{t(allRecent ? "Show fewer updates" : "Show more updates")}</button>}
         </section>
       </div>
-      {!publicBase && access?.canEdit && <section aria-label={t("Danger zone")} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-t border-outline-variant/20 pt-6">
-        <h2 className="font-headline-md text-headline-md text-on-surface-variant">{t("Danger zone")}</h2>
-        <div className="grid grid-cols-2 gap-3 w-full sm:w-auto sm:min-w-[20rem]"><ProfileAccountControls handle={profile.handle} /></div>
-      </section>}
+
     </section>
   );
 }
