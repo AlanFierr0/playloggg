@@ -75,5 +75,5 @@ test("log search hides personal scores including zero but keeps unscored logs an
   await page.waitForTimeout(1200);
   await expect(page.locator('[data-search-result]')).toHaveCount(0);
   await page.goto("/search?q=Hades");
-  await expect(page.locator('[data-search-result][href="/game/hades"]')).toBeVisible();
+  await expect(page.locator('[data-search-result][href="/game/hades"]:visible')).toBeVisible();
 });

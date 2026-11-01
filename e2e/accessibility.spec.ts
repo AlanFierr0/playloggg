@@ -52,12 +52,12 @@ test("language changes preserve catalog filters and an owner’s unsaved review"
   await page.goto("/games");
   await page.locator("#games-query").fill("Hades");
   await expect(page).toHaveURL(/q=Hades/);
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
+  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(1);
   await openNavigation(page);
   await page.getByRole("button", { name: "Switch to Spanish (Argentina)" }).click();
   await expect(page.getByRole("navigation", { name: "Navegación principal" }).filter({ visible: true })).toBeVisible();
   await expect(page.locator("#games-query")).toHaveValue("Hades");
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
+  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(1);
   await context.addCookies([authCookie]);
   await page.goto("/log?game=hades");
   await page.locator("#dispatch-textarea").fill("Private English review: Games and Discover stay exactly as written.");
