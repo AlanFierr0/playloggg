@@ -79,5 +79,5 @@ test("external search fails closed on quota limits and recovers without blocking
  await fetch("http://127.0.0.1:3101/__quota-allow",{method:"POST"});
  await page.getByRole("button",{name:"Retry search",exact:true}).click();
  await expect(page.getByRole("heading",{name:"Unified Fixture Adventure",exact:true}).or(page.getByRole("link",{name:/^Unified Fixture Adventure/}))).toBeVisible();
- await search.fill("Hades");await expect(page.locator('[data-search-result][href="/log?game=hades"]')).toHaveCount(1);
+ await search.fill("Hades");await expect(page.locator('[data-search-result]:visible[href="/log?game=hades"]')).toHaveCount(1);
 });

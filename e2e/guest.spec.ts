@@ -6,7 +6,7 @@ import { authCookie } from "./fixture-server.mjs";
 test("game cover actions reveal on hover and focus, edit logged games and stay available on touch", async ({page,context,browser},testInfo) => {
   await context.addCookies([authCookie]);
   await page.goto("/games?q=Hades");
-  const card=page.locator('[data-catalog-game="hades"]');
+  const card=page.locator('[data-catalog-game="hades"]:visible');
   const add=card.getByRole("link",{name:"Log this game",exact:true});
   await page.mouse.move(0,0);
   await expect(add).toHaveCSS("opacity","0");
@@ -20,7 +20,7 @@ test("game cover actions reveal on hover and focus, edit logged games and stay a
   await add.click();
   await expect(page).toHaveURL(/\/log\?game=hades$/);
   await page.goto("/games?q=Elden");
-  const edit=page.locator("[data-catalog-game]").getByRole("link",{name:"Edit log entry",exact:true});
+  const edit=page.locator("[data-catalog-game]:visible").getByRole("link",{name:"Edit log entry",exact:true});
   await edit.focus();
   await expect(edit).toHaveCSS("opacity","1");
   await edit.click();
@@ -35,7 +35,7 @@ test("game cover actions reveal on hover and focus, edit logged games and stay a
   await touch.addCookies([authCookie]);
   const touchPage=await touch.newPage();
   await touchPage.goto("http://127.0.0.1:3100/games?q=Hades");
-  await expect(touchPage.locator("[data-catalog-game]").getByRole("link",{name:"Log this game",exact:true})).toHaveCSS("opacity","1");
+  await expect(touchPage.locator("[data-catalog-game]:visible").getByRole("link",{name:"Log this game",exact:true})).toHaveCSS("opacity","1");
   await touch.close();
 });
 
@@ -52,20 +52,20 @@ async function openFilters(page: import("@playwright/test").Page) {
 // Stable named fixture games, independent of production catalog contents.
 test("catalog combines filters, loads more, clears and handles empty results", async ({ page }) => {
   await page.goto("/games");
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(25);
-  const initial = await page.locator("[data-catalog-game]").first().getAttribute("data-catalog-game");
+  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(25);
+  const initial = await page.locator("[data-catalog-game]:visible").first().getAttribute("data-catalog-game");
   await page.locator("[data-infinite-scroll]").scrollIntoViewIfNeeded();
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(50);
+  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(50);
   await expect(page.locator(`[data-catalog-game="${initial}"]`)).toBeVisible();
   await page.getByRole("searchbox",{name:"Search titles",exact:true}).fill("Hades");
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
+  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(1);
   await openFilters(page);
   await page.getByRole("combobox", { name: "Genre", exact: true }).selectOption("Roguelike");
   await expect(page.getByRole("heading", { name: "Hades", exact: true })).toBeVisible();
   await page.getByRole("searchbox",{name:"Search titles",exact:true}).fill("absent-game");
   await expect(page.getByRole("heading", { name: "No games match these filters" })).toBeVisible();
   await page.getByRole("button", { name: "Show all games" }).click();
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(25);
+  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(25);
   await expect(page.locator("[data-infinite-scroll]")).toHaveCount(1);
 });
 
@@ -80,7 +80,7 @@ test("search supports keyboard selection and returns to its originating route", 
   await page.getByRole("link", { name: "Open game search" }).filter({ visible: true }).click();
   await expect(page.getByRole("dialog", { name: "Search the game catalog" })).toBeVisible();
   await page.getByRole("textbox", { name: "Search titles and profiles" }).fill("Hades");
-  await expect(page.locator('[data-search-result][href="/game/hades"]')).toBeVisible();
+  await expect(page.locator('[data-search-result]:visible[href="/game/hades"]')).toBeVisible();
   await page.getByRole("textbox", { name: "Search titles and profiles" }).press("Enter");
   await expect(page).toHaveURL(/\/game\/hades$/);
   await expect(page.getByRole("heading", { name: "Hades", exact: true })).toBeVisible();
@@ -91,13 +91,13 @@ test("search supports keyboard selection and returns to its originating route", 
     await context.addCookies([{ name: "playlogg_theme", value: theme, url: "http://127.0.0.1:3100" }]);
     await page.goto("/search?q=Hades&from=/games");
     const dialog = page.getByRole("dialog", { name: "Search the game catalog" });
-    await expect(dialog.locator('[data-search-result][href="/game/hades"]')).toHaveCount(1);
+    await expect(dialog.locator('[data-search-result]:visible[href="/game/hades"]')).toHaveCount(1);
     const box = (await dialog.locator("#palette-dialog").boundingBox())!;
     expect(box.width).toBeLessThanOrEqual(768);
     expect(box.x + box.width / 2).toBeCloseTo(page.viewportSize()!.width / 2, 0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await expect(dialog.getByRole("button", { name: "Actions", exact: true })).toHaveCount(0);
-    await expect(dialog.locator('[data-search-result][href="/log"], [data-search-result][href="/compare"]')).toHaveCount(0);
+    await expect(dialog.locator('[data-search-result]:visible[href="/log"], [data-search-result]:visible[href="/compare"]')).toHaveCount(0);
     await dialog.getByRole("button", { name: /^Profiles/ }).click();
     await expect(dialog.getByRole("button", { name: /^Profiles/ })).toHaveAttribute("aria-pressed", "true");
     await dialog.getByRole("button", { name: "All Results", exact: true }).click();
@@ -161,9 +161,9 @@ test("homepage omits the spotlight and links to the game catalog", async ({ page
 
 test("Games URLs retain filters and loaded results through reload, sharing and history", async ({page}) => {
   await page.goto("/games?page=2");
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(50);
+  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(50);
   await page.reload();
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(50);
+  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(50);
   await page.getByRole("searchbox",{name:"Search titles",exact:true}).fill("Hades");
   await expect(page).toHaveURL(/q=Hades$/);
   await expect(page.getByRole("heading",{name:"Hades",exact:true})).toBeVisible();
@@ -194,26 +194,26 @@ test("Games automatically append batches on scroll and reset with filters",async
   const catalogSize=(await (await request.get("http://127.0.0.1:3101/__state")).json()).games.length;
   await page.goto("/games");
   await expect(page.getByRole("combobox",{name:"Games to show",exact:true})).toHaveCount(0);
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(25);
+  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(25);
   await page.locator("[data-infinite-scroll]").scrollIntoViewIfNeeded();
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(50);
+  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(50);
   await expect(page).toHaveURL(/page=2$/);
-  const slugs=await page.locator("[data-catalog-game]").evaluateAll(nodes=>nodes.map(node=>node.getAttribute("data-catalog-game")));
+  const slugs=await page.locator("[data-catalog-game]:visible").evaluateAll(nodes=>nodes.map(node=>node.getAttribute("data-catalog-game")));
   expect(new Set(slugs).size).toBe(slugs.length);
   await page.reload();
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(50);
-  while(await page.locator("[data-catalog-game]").count()<catalogSize){
-    const before=await page.locator("[data-catalog-game]").count();
+  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(50);
+  while(await page.locator("[data-catalog-game]:visible").count()<catalogSize){
+    const before=await page.locator("[data-catalog-game]:visible").count();
     await page.locator("[data-infinite-scroll]").scrollIntoViewIfNeeded();
-    await expect(page.locator("[data-catalog-game]")).toHaveCount(Math.min(before+25,catalogSize));
+    await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(Math.min(before+25,catalogSize));
   }
   await expect(page.locator("[data-infinite-scroll]")).toHaveCount(0);
   await page.getByRole("searchbox",{name:"Search titles",exact:true}).fill("Hades");
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
+  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(1);
   await expect(page).toHaveURL(/q=Hades$/);
   await page.getByRole("button",{name:"Clear filters",exact:true}).click();
   await page.evaluate(()=>window.scrollTo(0,0));
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(25);
+  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(25);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
 
@@ -225,29 +225,29 @@ test("platform filter shows main families and groups the remaining platforms und
   await expect(platform.locator("option")).toHaveText(["All platforms", "PC", "PlayStation", "Xbox", "Nintendo", "Other"]);
   for (const family of ["PlayStation", "Xbox", "Nintendo"]) {
     await platform.selectOption(family);
-    await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
+    await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(1);
     await expect(page.getByRole("heading", {name: "Elden Ring: Shadow of the Erdtree", exact: true})).toBeVisible();
   }
   await platform.selectOption("Other");
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(2);
+  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(2);
   await expect(page.getByRole("heading", {name: "Hades", exact: true})).toBeVisible();
   await page.reload(); await openFilters(page); await expect(platform).toHaveValue("Other");
   await platform.selectOption("PC");
   await expect(page).toHaveURL(/platform=PC/);
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(25);
+  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(25);
   await expect(page.getByRole("heading", {name: "Fixture Game 01", exact: true})).toBeVisible();
   await expect(page.getByRole("heading", {name: "Hades", exact: true})).toHaveCount(0);
   while(await page.getByRole("heading", {name: "Hades", exact: true}).count()===0){
-    const before=await page.locator("[data-catalog-game]").count();
+    const before=await page.locator("[data-catalog-game]:visible").count();
     await page.locator("[data-infinite-scroll]").scrollIntoViewIfNeeded();
-    await expect.poll(()=>page.locator("[data-catalog-game]").count()).toBeGreaterThan(before);
+    await expect.poll(()=>page.locator("[data-catalog-game]:visible").count()).toBeGreaterThan(before);
   }
   await expect(page.getByRole("heading", {name: "Hades", exact: true})).toBeVisible();
   await page.goto("/games?platform=Android");
   await openFilters(page);
   await expect(platform).toHaveValue("Android");
   await expect(platform.locator('option[value="Android"]')).toHaveAttribute("hidden", "");
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
+  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(1);
 });
 
 
@@ -262,32 +262,32 @@ test("saved tags link game details and catalog cards to a persistent combined fi
   await page.goto("/game/hades");
   await page.getByRole("link",{name:"Co-op & friends",exact:true}).click();
   await expect(page).toHaveURL(/tag=Co-op/);
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
+  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(1);
   const filter=page.getByRole("combobox",{name:"Tag",exact:true});
   await openFilters(page);
   await expect(filter).toHaveValue("Co-op & friends");
   await page.reload();await openFilters(page);await expect(filter).toHaveValue("Co-op & friends");
   await page.getByRole("searchbox",{name:"Search titles",exact:true}).fill("missing-title");
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(0);
+  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(0);
   await page.getByRole("button",{name:"Clear filters",exact:true}).click();
   await expect(filter).toHaveValue("");
   await page.getByRole("searchbox",{name:"Search titles",exact:true}).fill("Hades");
-  await page.locator('[data-catalog-game="hades"]').getByRole("link",{name:"Co-op & friends",exact:true}).click();
+  await page.locator('[data-catalog-game="hades"]:visible').getByRole("link",{name:"Co-op & friends",exact:true}).click();
   await expect(filter).toHaveValue("Co-op & friends");
   await expect(page.getByRole("searchbox",{name:"Search titles",exact:true})).toHaveValue("Hades");
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(1);
+  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(1);
 });
 
 
 test("genres on cards and details open Games with the selected genre filter",async({page})=>{
   await page.goto("/games?q=Hades");
-  await page.locator('[data-catalog-game="hades"]').getByRole("link",{name:"Roguelike",exact:true}).click();
+  await page.locator('[data-catalog-game="hades"]:visible').getByRole("link",{name:"Roguelike",exact:true}).click();
   await expect(page).toHaveURL(/genre=Roguelike/);
   await openFilters(page);
   await expect(page.getByRole("combobox",{name:"Genre",exact:true})).toHaveValue("Roguelike");
   await expect(page.getByRole("searchbox",{name:"Search titles",exact:true})).toHaveCount(1);
   await expect(page.getByRole("searchbox",{name:"Search titles",exact:true})).toHaveValue("Hades");
-  await expect(page.getByRole("region",{name:"Game catalog results",exact:true}).locator("[data-catalog-game]")).toHaveCount(1);
+  await expect(page.getByRole("region",{name:"Game catalog results",exact:true}).locator("[data-catalog-game]:visible")).toHaveCount(1);
   await page.goto("/game/hades");
   await page.getByRole("link",{name:"Roguelike",exact:true}).click();
   await expect(page).toHaveURL(/\/games\?genre=Roguelike$/);

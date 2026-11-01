@@ -12,7 +12,7 @@ test("platform sorting uses anonymous all-profile averages and survives filterin
   await expect(page.getByText("No ratings yet",{exact:true})).toBeVisible();
   await fetch("http://127.0.0.1:3101/__platform-scores",{method:"POST"});
   await page.goto("/games?sort=platform-desc");
-  const cards=page.locator("[data-catalog-game]");
+  const cards=page.locator("[data-catalog-game]:visible");
   await expect(cards.first()).toHaveAttribute("data-catalog-game","fixture-game-0");
   await expect(cards.nth(2)).toHaveAttribute("data-catalog-game","hades");
   await expect(cards.nth(2)).toContainText("50.0 / 100");

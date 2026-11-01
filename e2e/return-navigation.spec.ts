@@ -47,10 +47,10 @@ test("saving after picking and switching games returns to the original profile t
   await page.getByRole("link", {name: "Log a game", exact: true}).click();
   const search = page.getByRole("textbox", {name: "Search titles and profiles"});
   await search.fill("Hades");
-  await page.locator('[data-search-result][href="/log?game=hades"]').click();
+  await page.locator('[data-search-result]:visible[href="/log?game=hades"]').click();
   await page.getByRole("link", {name: "Switch Game", exact: true}).click();
   await search.fill("Fixture Game 00");
-  await page.locator('[data-search-result][href="/log?game=fixture-game-0"]').click();
+  await page.locator('[data-search-result]:visible[href="/log?game=fixture-game-0"]').click();
   await page.locator("#score-display").fill("71");
   await page.locator("#commit-rating").click();
   await expect(page).toHaveURL("/profile/stats");

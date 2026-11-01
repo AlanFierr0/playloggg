@@ -1,5 +1,6 @@
 import { test as base, expect, type Page } from "@playwright/test";
 
+// Scope UI assertions to visible nodes: streamed route trees may coexist in the DOM.
 export const test = base.extend<{ runtimeCheck: void }>({
   runtimeCheck: [async ({ page }, use, testInfo) => {
     const reset = await fetch("http://127.0.0.1:3101/__reset", { method: "POST" });

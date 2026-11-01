@@ -45,7 +45,7 @@ test("search keeps reviews out of its payload and Log excludes scored provider m
   await request.post(`${fixture}/__ranking-edit`);await page.goto("/log");
   await page.getByRole("textbox",{name:"Search titles and profiles"}).fill("Hades");
   await expect(page.getByRole("dialog").getByText("No games found. Try another title.",{exact:true})).toBeVisible();
-  await expect(page.locator('[data-search-result][href="/log?game=hades"]')).toHaveCount(0);
+  await expect(page.locator('[data-search-result]:visible[href="/log?game=hades"]')).toHaveCount(0);
   await expect(page.getByRole("button",{name:/^Import Hades/})).toHaveCount(0);
 });
 

@@ -77,7 +77,7 @@ test("live-service statuses save, reload and filter without changing scores or t
    await page.reload();
    await expect(page.getByRole("group",{name:"Playback status",exact:true}).getByRole("button",{name:label,exact:true})).toHaveAttribute("aria-pressed","true");
    await page.goto(`/games?status=${status}`);
-   await expect(page.locator('[data-catalog-game="elden-ring-shadow-of-the-erdtree"]')).toBeVisible();
+   await expect(page.locator('[data-catalog-game="elden-ring-shadow-of-the-erdtree"]:visible')).toBeVisible();
    await expect(page.getByRole("button",{name:"Remove filter: Playback status",exact:true})).toContainText(label);
  }
  await page.goto("/log?game=elden-ring-shadow-of-the-erdtree");

@@ -81,7 +81,7 @@ test("home uses owned entries, qualifying genre ratings and working filters", as
   }
   await explore.getByRole("link", { name: "Co-op & friends", exact: true }).click();
   await expect(page).toHaveURL(/tag=Co-op/);
-  await expect(page.locator("[data-catalog-game]")).toHaveCount(3);
+  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(3);
   await page.goto("/");
   await taste.getByRole("link", { name: "Adventure", exact: true }).click();
   await expect(page).toHaveURL(/\/games\?genre=Adventure$/);

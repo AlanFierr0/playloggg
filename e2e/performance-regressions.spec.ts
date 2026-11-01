@@ -37,7 +37,7 @@ test("small search covers have responsive sources, dimensions and a working fail
  await page.route("https://images.igdb.com/**",route=>failImage?route.fulfill({status:404,body:"Unavailable"}):route.fulfill({contentType:"image/svg+xml",body:'<svg xmlns="http://www.w3.org/2000/svg" width="90" height="128"/>'}));
  await page.goto("/search");
  await page.getByLabel("Search titles and profiles").fill("elden");
- const image=page.locator("[data-search-result] img").first();
+ const image=page.locator("[data-search-result]:visible img").first();
  await expect(image).toHaveAttribute("width","264");
  await expect(image).toHaveAttribute("sizes","48px");
  await expect(image).toHaveAttribute("srcset",/90w.*264w.*528w/);
@@ -52,7 +52,7 @@ test("catalog cards do not prefetch every game before a user chooses one",async(
  const requests:string[]=[];
  page.on("request",request=>{if(/\/game\/[^?]+\?_rsc=/.test(request.url()))requests.push(request.url());});
  await page.goto("/games");
- const first=page.locator("[data-catalog-game] a").first();
+ const first=page.locator("[data-catalog-game]:visible a").first();
  await expect(first).toBeVisible();
  await page.waitForTimeout(800);
  expect(requests).toEqual([]);

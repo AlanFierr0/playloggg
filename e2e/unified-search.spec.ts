@@ -10,10 +10,10 @@ test("one search deduplicates stored games and hides stale or failed provider re
   const search = page.getByRole("textbox", { name: "Search titles and profiles" });
   await expect(dialog).not.toContainText(/IGDB|Saved catalog|Catalog entry/i);
   await search.fill("Hades");
-  await expect(dialog.locator('[data-search-result][href="/log?game=hades"]')).toHaveCount(1);
+  await expect(dialog.locator('[data-search-result]:visible[href="/log?game=hades"]')).toHaveCount(1);
   await expect(dialog.getByText("Searching games…", { exact: true })).toHaveCount(0);
   await page.waitForTimeout(1000);
-  await expect(dialog.locator('[data-search-result][href="/log?game=hades"]')).toHaveCount(1);
+  await expect(dialog.locator('[data-search-result]:visible[href="/log?game=hades"]')).toHaveCount(1);
   await expect(dialog.getByRole("button", { name: /^Import Hades/ })).toHaveCount(0);
   await search.fill("Slow");
   await expect(dialog.getByText("Searching games…", { exact: true })).toBeVisible();

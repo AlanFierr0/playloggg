@@ -53,7 +53,7 @@ test("profile preview, responsive menu and catalog disclosure work in both theme
   await page.screenshot({path: `e2e-artifacts/catalog-filter-button-${testInfo.project.name}.png`});
   await filters.click();
   await expect(page.locator("#games-genre")).toHaveValue("Roguelike");
-  await expect(page.locator("[data-catalog-game]").getByText("No registrado",{exact:true})).toHaveCount(0);
+  await expect(page.locator("[data-catalog-game]:visible").getByText("No registrado",{exact:true})).toHaveCount(0);
   await page.screenshot({path: `e2e-artifacts/ui-catalog-${testInfo.project.name}.png`, fullPage: true});
   const themeMenu = page.locator("header summary");
   if (await themeMenu.isVisible()) await themeMenu.click();
