@@ -52,7 +52,7 @@ test("a missing game imports from the same search and opens the chosen editor", 
   const imported = state.games.filter((game: { igdb_id: number }) => game.igdb_id === providerId);
   expect(imported).toHaveLength(1);
   await page.goto(`/search?q=${encodeURIComponent(title)}&mode=log`);
-  await expect(page.locator(`[data-search-result][href="/log?game=${imported[0].slug}"]`)).toHaveCount(1);
+  await expect(page.locator(`[data-search-result]:visible[href="/log?game=${imported[0].slug}"]`)).toHaveCount(1);
   await page.waitForTimeout(1000);
   await expect(page.getByRole("button", { name: `Import ${title} (2020)`, exact: true })).toHaveCount(0);
   expect(state.ratings.filter((row: { game_id: number }) => row.game_id === imported[0].id)).toEqual([]);

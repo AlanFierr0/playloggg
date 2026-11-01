@@ -4,6 +4,8 @@ import { authCookie } from "./fixture-server.mjs";
 
 test("studio logos appear beside names in summaries, stats and game details in both themes", async ({ page, context, request }, info) => {
   await request.get("http://127.0.0.1:3101/__studio-logos");
+  const search=await (await request.get("/api/games/search?q=Hades")).json();
+  expect(search.games.filter((game:{slug:string})=>game.slug.startsWith("studio-logo-fixture-"))).toEqual([]);
   for (const theme of ["dark", "light"]) {
     await context.addCookies([{ name: "playlogg_theme", value: theme, url: "http://127.0.0.1:3100" }]);
     await page.goto("/u/fixture_public");

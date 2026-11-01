@@ -15,7 +15,7 @@ test("catalog scrolling appends only the next 25 unique cards",async({page,reque
  await page.goto("/games");
  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(25);
  await expect(page.locator("#games-query:visible")).toBeEnabled();
- await page.locator("[data-infinite-scroll]").scrollIntoViewIfNeeded();
+ await page.locator("[data-infinite-scroll]:visible").scrollIntoViewIfNeeded();
  await expect(page).toHaveURL(/page=2/);
  await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(50);
  const state=await (await request.get(`${fixture}/__state`)).json();

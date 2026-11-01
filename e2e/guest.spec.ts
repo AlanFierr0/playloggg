@@ -54,9 +54,9 @@ test("catalog combines filters, loads more, clears and handles empty results", a
   await page.goto("/games");
   await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(25);
   const initial = await page.locator("[data-catalog-game]:visible").first().getAttribute("data-catalog-game");
-  await page.locator("[data-infinite-scroll]").scrollIntoViewIfNeeded();
+  await page.locator("[data-infinite-scroll]:visible").scrollIntoViewIfNeeded();
   await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(50);
-  await expect(page.locator(`[data-catalog-game="${initial}"]`)).toBeVisible();
+  await expect(page.locator(`[data-catalog-game="${initial}"]:visible`)).toBeVisible();
   await page.getByRole("searchbox",{name:"Search titles",exact:true}).fill("Hades");
   await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(1);
   await openFilters(page);
@@ -66,7 +66,7 @@ test("catalog combines filters, loads more, clears and handles empty results", a
   await expect(page.getByRole("heading", { name: "No games match these filters" })).toBeVisible();
   await page.getByRole("button", { name: "Show all games" }).click();
   await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(25);
-  await expect(page.locator("[data-infinite-scroll]")).toHaveCount(1);
+  await expect(page.locator("[data-infinite-scroll]:visible")).toHaveCount(1);
 });
 
 test("search supports keyboard selection and returns to its originating route", async ({ page, context }, testInfo) => {
@@ -195,7 +195,7 @@ test("Games automatically append batches on scroll and reset with filters",async
   await page.goto("/games");
   await expect(page.getByRole("combobox",{name:"Games to show",exact:true})).toHaveCount(0);
   await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(25);
-  await page.locator("[data-infinite-scroll]").scrollIntoViewIfNeeded();
+  await page.locator("[data-infinite-scroll]:visible").scrollIntoViewIfNeeded();
   await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(50);
   await expect(page).toHaveURL(/page=2$/);
   const slugs=await page.locator("[data-catalog-game]:visible").evaluateAll(nodes=>nodes.map(node=>node.getAttribute("data-catalog-game")));
@@ -204,10 +204,10 @@ test("Games automatically append batches on scroll and reset with filters",async
   await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(50);
   while(await page.locator("[data-catalog-game]:visible").count()<catalogSize){
     const before=await page.locator("[data-catalog-game]:visible").count();
-    await page.locator("[data-infinite-scroll]").scrollIntoViewIfNeeded();
+    await page.locator("[data-infinite-scroll]:visible").scrollIntoViewIfNeeded();
     await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(Math.min(before+25,catalogSize));
   }
-  await expect(page.locator("[data-infinite-scroll]")).toHaveCount(0);
+  await expect(page.locator("[data-infinite-scroll]:visible")).toHaveCount(0);
   await page.getByRole("searchbox",{name:"Search titles",exact:true}).fill("Hades");
   await expect(page.locator("[data-catalog-game]:visible")).toHaveCount(1);
   await expect(page).toHaveURL(/q=Hades$/);
@@ -239,7 +239,7 @@ test("platform filter shows main families and groups the remaining platforms und
   await expect(page.getByRole("heading", {name: "Hades", exact: true})).toHaveCount(0);
   while(await page.getByRole("heading", {name: "Hades", exact: true}).count()===0){
     const before=await page.locator("[data-catalog-game]:visible").count();
-    await page.locator("[data-infinite-scroll]").scrollIntoViewIfNeeded();
+    await page.locator("[data-infinite-scroll]:visible").scrollIntoViewIfNeeded();
     await expect.poll(()=>page.locator("[data-catalog-game]:visible").count()).toBeGreaterThan(before);
   }
   await expect(page.getByRole("heading", {name: "Hades", exact: true})).toBeVisible();
@@ -305,7 +305,7 @@ test("catalog active filters can be removed independently and log filters need n
   await context.addCookies([authCookie]);
   await page.goto("/games?q=Elden&genre=Adventure&library=logged&sort=score-desc");
   await expect(page.getByRole("button",{name:"Remove filter: Genre",exact:true})).toContainText("Adventure");
-  await expect(page.locator("[data-active-filter-count]")).toHaveText("(3)");
+  await expect(page.locator("[data-active-filter-count]:visible")).toHaveText("(3)");
   await openFilters(page);
   await expect(page.getByRole("group",{name:"Game details",exact:true})).toBeVisible();
   await expect(page.getByRole("group",{name:"Your log",exact:true})).toBeVisible();
@@ -316,7 +316,7 @@ test("catalog active filters can be removed independently and log filters need n
   await expect(page).toHaveURL(/q=Elden/);
   await expect(page).toHaveURL(/library=logged/);
   await expect(page).toHaveURL(/sort=score-desc/);
-  await expect(page.locator("[data-active-filter-count]")).toHaveText("(2)");
+  await expect(page.locator("[data-active-filter-count]:visible")).toHaveText("(2)");
   await page.reload();
   await expect(page.getByRole("button",{name:"Remove filter: Log entries",exact:true})).toContainText("Logged games");
   await openFilters(page);
