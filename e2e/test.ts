@@ -24,3 +24,14 @@ export async function openSteamTools(page: Page) {
   await expect(summary.or(connect).first()).toBeVisible();
   if (await summary.count() && !await summary.evaluate(element => element.parentElement!.hasAttribute("open"))) await summary.click();
 }
+
+export async function openFilters(page: Page) {
+  const summary=page.locator("summary:visible").filter({hasText:/^Filters/}).first();
+  await expect(summary).toBeVisible();
+  if(!await summary.evaluate(element=>element.parentElement!.hasAttribute("open")))await summary.click();
+}
+export async function openComparisonProfiles(page: Page) {
+  const summary=page.locator("summary:visible").filter({hasText:/^Change profiles/});
+  await expect(summary.or(page.getByRole("combobox",{name:"First profile handle",exact:true})).first()).toBeVisible();
+  if(await summary.count()&&!await summary.evaluate(element=>element.parentElement!.hasAttribute("open")))await summary.click();
+}

@@ -1,4 +1,4 @@
-import { test, expect } from "./test";
+import { test, expect, openComparisonProfiles } from "./test";
 import AxeBuilder from "@axe-core/playwright";
 // @ts-expect-error The fake session is exported by the Node-only fixture server.
 import { authCookie } from "./fixture-server.mjs";
@@ -91,7 +91,9 @@ test("profile creation preserves registration intent and ordinary sign-in", asyn
 test("comparison and game details prioritize useful actions without inventing data", async ({page},testInfo) => {
   await page.goto("/compare");
   await expect(page.getByRole("region",{name:"What a comparison shows"})).toBeVisible();
+  await openComparisonProfiles(page);
   await expect(page.getByRole("combobox",{name:"First profile handle",exact:true})).toHaveCSS("border-top-style","solid");
+  await openComparisonProfiles(page);
   await page.getByRole("combobox",{name:"First profile handle",exact:true}).fill("fixture_public");
   await page.getByRole("combobox",{name:"Second profile handle",exact:true}).fill("fixture_peer");
   await page.getByRole("button",{name:"Compare profiles"}).click();

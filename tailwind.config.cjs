@@ -165,9 +165,9 @@ module.exports = {
           }
         ],
         "label-sm": [
-          "10px",
+          "12px",
           {
-            "lineHeight": "14px",
+            "lineHeight": "16px",
             "letterSpacing": "0.06em",
             "fontWeight": "600"
           }

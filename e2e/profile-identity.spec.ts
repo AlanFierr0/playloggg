@@ -74,7 +74,8 @@ test("public profile sections use real zero scores, review text and independent 
     const identityBox = (await viewedProfile.boundingBox())!;
     const tabsBox = (await navigation.boundingBox())!;
     expect(tabsBox.y + tabsBox.height).toBeLessThan(identityBox.y);
-    expect(identityBox.x + identityBox.width).toBeCloseTo(tabsBox.x + tabsBox.width, 0);
+    const headingBox=(await page.getByRole("heading",{level:1}).boundingBox())!;
+    expect(Math.abs(identityBox.y-headingBox.y)).toBeLessThan(140);
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
   }
   await navigation.getByRole("link", { name: "Overview", exact: true }).click();

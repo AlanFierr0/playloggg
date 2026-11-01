@@ -134,12 +134,12 @@ test("tier selection filters the colored board instead of jumping to an anchor",
     await page.getByRole("button",{name:"Tier B",exact:true}).click();
     await expect(page.locator("[data-tier-drop]:visible")).toHaveCount(1);
     await expect(page.locator("#tier-b")).toBeVisible();
-    await expect(page.locator("#tier-b")).toHaveCSS("background-color","rgb(255, 223, 127)");
+    await expect(page.locator("#tier-b").locator(":scope > div").first()).toHaveCSS("background-color","rgb(255, 223, 127)");
     await expect(page.getByRole("button",{name:"Tier B",exact:true})).toHaveAttribute("aria-pressed","true");
     await expect(page).toHaveURL(new RegExp(route+"$"));
     await page.getByRole("button",{name:"Tier S",exact:true}).click();
     await expect(page.locator("[data-tier-drop]:visible")).toHaveCount(1);
-    await expect(page.locator("#tier-s")).toHaveCSS("background-color","rgb(255, 127, 127)");
+    await expect(page.locator("#tier-s").locator(":scope > div").first()).toHaveCSS("background-color","rgb(255, 127, 127)");
     await expect(page.locator("#tier-b")).toBeHidden();
     await page.screenshot({path:`e2e-artifacts/tier-filter-${route==="/tiers"?"owner":"public"}-${info.project.name}.png`});
     await page.getByRole("button",{name:"Unassigned",exact:true}).click();

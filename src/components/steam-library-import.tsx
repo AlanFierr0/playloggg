@@ -20,12 +20,14 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
   const { goBack } = useReturnNavigation("/profile/import/steam");
   const [preview,setPreview] = useState<LibraryPreview|null>(null);
   const [selected,setSelected] = useState<number[]>([]);
+  // Keep selected rows available when filtering replaces the visible preview.
+  const loadedGames = useRef(new Map<number, LibraryPreview["games"][number]>());
   const [busy,setBusy] = useState(configured);
   const [loading,setLoading] = useState(configured);
   const [syncing,setSyncing] = useState(false);
   const [importing,setImporting] = useState(false);
   const [importTitle,setImportTitle] = useState("");
-  const [amount,setAmount] = useState("all");
+  const [amount,setAmount] = useState("25");
   const [filters,setFilters] = useState<Omit<SteamBrowse,"offset">>({sort:"title",minHours:null,maxHours:null});
   // Keep fetch order stable so local sorting never changes the next page offset.
   const [displaySort,setDisplaySort] = useState<SteamBrowse["sort"]>("title");
@@ -112,7 +114,7 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
     active.current=true;stopLoading.current=false;setBusy(true);setLoading(true);setMessage("");setFailures([]);
     let current=append ? preview : null;
     const target=size==="all" ? Infinity : (current?.games.length ?? 0)+Number(size);
-    if (!append) {setPreview(null);setSelected([]);}
+    if (!append) setPreview(null);
     try {
       do {
         const offset=current?.nextOffset ?? 0;
@@ -122,6 +124,7 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
         hasPreview.current=true;
         const games=new Map([...(current?.games ?? []),...result.games].map(game=>[game.appId,game]));
         current={...result,games:[...games.values()]};
+        for (const game of result.games) loadedGames.current.set(game.appId,game);
         setPreview(current);setMessage(result.message);
         if (!result.games.length || current.nextOffset>=current.total) break;
       } while(current.games.length<target&&!stopLoading.current);
@@ -134,8 +137,8 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
   }
   function updateFilters(min=minHours,max=maxHours,sort=filters.sort,size=amount,delay=350) {
     revision.current++;stopLoading.current=true;pendingLoad.current=null;
-    setSelected([]);
     if(filterTimer.current)clearTimeout(filterTimer.current);
+    filterTimer.current=null;
     const query=parseSteamBrowse({offset:0,sort,minHours:parseHours(min),maxHours:parseHours(max)});
     if (!query) {setMessage("Use nonnegative hours and a minimum no greater than the maximum.");return;}
     const next={sort:query.sort,minHours:query.minHours,maxHours:query.maxHours};
@@ -150,11 +153,11 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
   async function importSelected(retry=false,rateIds:number[]=[],resume:SteamImportWork|null=null) {
     const ids=retry ? failures.map(failure=>failure.appId) : selected;
     const wanted=new Set(resume?.rateIds ?? rateIds);
-    const rows=resume?.rows ?? preview?.games.filter(game=>ids.includes(game.appId)) ?? [];
+    const rows=resume?.rows ?? ids.flatMap(id=>{const game=loadedGames.current.get(id);return game?[game]:[];});
     const byId=new Map(rows.map(game=>[game.appId,game]));
     const rated=ids.filter(id=>wanted.has(id)).sort((a,b)=>(byId.get(b)?.hours??0)-(byId.get(a)?.hours??0));
     const queue=resume?.pending ?? [...rated,...ids.filter(id=>!wanted.has(id))];
-    if (active.current || !queue.length) return;
+    if (active.current || filterTimer.current || pendingLoad.current || !queue.length) return;
     let work:SteamImportWork=resume ? {...resume} : {version:1,rows,pending:queue,rateIds,total:queue.length,imported:0,skipped:0};
     // Save before the first request; an interrupted batch can be safely replayed.
     keepImport(work);pauseImport.current=false;
@@ -181,7 +184,12 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
           if(result.ok){
             if(result.skipped)work.skipped++;else work.imported++;
             if(wanted.has(appId)&&result.rating&&row)additions.push({...row,...result.rating});
-            setPreview(current=>current ? {...current,games:current.games.filter(game=>game.appId!==appId),total:Math.max(0,current.total-1),nextOffset:Math.max(0,current.nextOffset-1),syncAppIds:[...new Set([...current.syncAppIds,appId])]} : current);
+            setPreview(current=>{
+              if(!current)return current;
+              const visible=current.games.some(game=>game.appId===appId);
+              const matches=Boolean(row&&browseSteamLibrary([row],{...filters,offset:0}).length);
+              return {...current,games:current.games.filter(game=>game.appId!==appId),total:Math.max(0,current.total-Number(matches)),nextOffset:Math.max(0,current.nextOffset-Number(visible)),syncAppIds:[...new Set([...current.syncAppIds,appId])]};
+            });
           }else{failedIds.push(appId);failed.push({appId,title:row?.title??String(appId),message:result.message});}
         }
         if(additions.length){
@@ -218,7 +226,7 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
   }
   if (!configured) return <p role="status" className="rounded-xl bg-surface-container-low p-6">{t("Steam library import is not configured yet.")}</p>;
   const orderedGames=browseSteamLibrary(preview?.games ?? [],{...filters,sort:displaySort,offset:0});
-  const available=preview?.games.filter(game=>game.matched&&!game.logged) ?? [];
+  const available=orderedGames.filter(game=>game.matched&&!game.logged);
   const importProgress = <>
     <div role="status" aria-live="polite" className="mt-6 space-y-5">
       <div><p className="text-body-sm text-on-surface-variant">{t(importing ? "Processing now" : progress<importTotal ? "Import paused. Resume it here whenever you are ready." : "Import complete")}</p>{importing&&<p translate="no" className="mt-1 font-headline-md break-words">{importTitle}</p>}</div>
@@ -242,8 +250,8 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
     {recoveryWarning&&<p role="alert" className="text-error">{t(recoveryWarning)}</p>}
     {importWork&&!importing&&<div className="flex flex-wrap items-center gap-3 rounded-xl bg-surface-container-low p-4"><button className={button} disabled={busy} onClick={()=>void importSelected(false,[],importWork)}>{t("Resume import")} ({importWork.pending.length})</button><button type="button" className="min-h-11 px-3 text-primary" disabled={busy} onClick={()=>keepImport(null)}>{t("Discard remaining import")}</button><p className="text-body-sm text-on-surface-variant">{t("Your unfinished import is saved in this browser. Already imported games are kept.")}</p></div>}
     {ratingSession&&ratingHidden&&<div className="flex flex-wrap items-center gap-3 rounded-xl bg-surface-container-low p-4"><button className={button} onClick={()=>{setRatingHidden(false);setDetailsOpen(importing);}}>{t("Resume rating games")} ({Math.max(0,ratingGames.length-ratingIndex)})</button><p className="text-body-sm text-on-surface-variant">{t("Your unfinished ratings are kept in this browser.")}</p></div>}
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <button className={`${button} ml-auto order-2`} disabled={busy||ratingSession||(Boolean(importWork)&&!failures.length)||!selected.length} onClick={()=>void importSelected(false,selected)}>{t("Import selected games")} ({selected.length})</button>
+    <div className="sticky top-16 z-20 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-outline-variant/30 bg-surface p-3">
+      <button className={`${button} ml-auto order-2`} disabled={busy||Boolean(filterTimer.current)||ratingSession||(Boolean(importWork)&&!failures.length)||!selected.length} onClick={()=>void importSelected(false,selected)}>{t("Import selected games")} ({selected.length})</button>
       <Link href="/profile" className="order-1 inline-flex min-h-11 items-center px-3 text-primary">{t("View profile")}</Link>
     </div>
     <details className="rounded-xl border border-outline-variant/30 bg-surface-container-low px-4">
@@ -255,12 +263,17 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
         </SteamCompletionScan>
       </div>
     </details>
-    <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end rounded-xl bg-surface-container-low p-5">
-      <label className="min-w-0 space-y-2"><span className="block">{t("Sort by")}</span><select aria-label={t("Sort by")} disabled={busy&&!loading} value={displaySort} onChange={event=>setDisplaySort(event.target.value as SteamBrowse["sort"])} className="w-full rounded-xl bg-surface-container p-3"><option value="title">{t("Title A–Z")}</option><option value="hours_desc">{t("Most played")}</option><option value="hours_asc">{t("Least played")}</option></select></label>
-      <label className="min-w-0 space-y-2"><span className="block">{t("Minimum hours")}</span><input disabled={busy&&!loading} type="number" min="0" step="any" value={minHours} onChange={event=>{setMinHours(event.target.value);updateFilters(event.target.value,maxHours);}} className="w-full rounded-xl bg-surface-container p-3" /></label>
-      <label className="min-w-0 space-y-2"><span className="block">{t("Maximum hours")}</span><input disabled={busy&&!loading} type="number" min="0" step="any" value={maxHours} onChange={event=>{setMaxHours(event.target.value);updateFilters(minHours,event.target.value);}} className="w-full rounded-xl bg-surface-container p-3" /></label>
-      <label className="min-w-0 space-y-2"><span className="block">{t("Games to show")}</span><select aria-label={t("Games to show")} disabled={busy&&!loading} value={amount} onChange={event=>{const size=event.target.value;setAmount(size);updateFilters(minHours,maxHours,filters.sort,size,0);}} className="w-full rounded-xl bg-surface-container p-3">{["25","50","100","all"].map(size=><option key={size} value={size}>{size==="all" ? t("All") : size}</option>)}</select></label>
+    <div className="flex flex-wrap items-end gap-3">
+      <label className="min-w-44 flex-1 space-y-2"><span className="block">{t("Sort by")}</span><select aria-label={t("Sort by")} disabled={busy&&!loading} value={displaySort} onChange={event=>setDisplaySort(event.target.value as SteamBrowse["sort"])} className="catalog-control p-3"><option value="title">{t("Title A–Z")}</option><option value="hours_desc">{t("Most played")}</option><option value="hours_asc">{t("Least played")}</option></select></label>
+      <details className="min-w-0 flex-1 rounded-xl border border-outline-variant/30 bg-surface-container-low px-4">
+        <summary className="min-h-11 cursor-pointer py-3 text-body-sm text-on-surface">{t("Filters")}{(minHours || maxHours) && <span className="ml-2 text-on-surface-variant">{minHours || "0"} - {maxHours || "∞"} {t("hours")}</span>}</summary>
+        <div className="grid grid-cols-2 gap-3 pb-4 sm:grid-cols-4">
+      <label className="min-w-0 space-y-2"><span className="block">{t("Minimum hours")}</span><input disabled={busy&&!loading} type="number" min="0" step="any" value={minHours} onChange={event=>{setMinHours(event.target.value);updateFilters(event.target.value,maxHours);}} className="catalog-control p-3" /></label>
+      <label className="min-w-0 space-y-2"><span className="block">{t("Maximum hours")}</span><input disabled={busy&&!loading} type="number" min="0" step="any" value={maxHours} onChange={event=>{setMaxHours(event.target.value);updateFilters(minHours,event.target.value);}} className="catalog-control p-3" /></label>
+      <label className="min-w-0 space-y-2"><span className="block">{t("Games to show")}</span><select aria-label={t("Games to show")} disabled={busy&&!loading} value={amount} onChange={event=>{const size=event.target.value;setAmount(size);updateFilters(minHours,maxHours,filters.sort,size,0);}} className="catalog-control p-3">{["25","50","100","all"].map(size=><option key={size} value={size}>{size==="all" ? t("All") : size}</option>)}</select></label>
       <button type="button" disabled={busy&&!loading} onClick={()=>{setMinHours("");setMaxHours("");updateFilters("","",filters.sort,amount,0);}} className="min-h-11 rounded-xl bg-surface-container text-primary px-4">{t("Clear filters")}</button>
+        </div>
+      </details>
     </div>
     <p role="status" aria-live="polite">{t(message)}{loading&&<span className="flex items-center gap-2"><span aria-hidden="true" className="w-5 h-5 rounded-full border-2 border-primary/25 border-t-primary motion-safe:animate-spin"/>{t("Loading library")}: {preview?.games.length ?? 0} / {preview?.total ?? "—"}</span>}</p>
     <dialog ref={importDialog} tabIndex={-1} aria-labelledby="steam-import-title" onCancel={event=>{if(event.target!==event.currentTarget)return;if(ratingSession){event.preventDefault();setRatingHidden(true);}else if(importing)event.preventDefault();}} className={`fixed inset-0 m-auto w-[calc(100%_-_2rem)] max-w-lg max-h-[calc(100dvh_-_2rem)] overflow-y-auto rounded-2xl bg-surface-container-high text-on-surface p-6 sm:p-8 shadow-2xl border border-primary/20 backdrop:bg-black/65 backdrop:backdrop-blur-sm ${detailsOpen ? "max-xl:!mt-4 max-xl:!mb-auto max-xl:!max-h-[calc(100dvh_-_13rem)]" : ""}`}>
@@ -279,8 +292,8 @@ export function SteamLibraryImport({configured,profileId}:{configured:boolean;pr
     {!!failures.length&&<button disabled={busy||ratingSession} onClick={()=>importWork ? importSelected(false,[],importWork) : importSelected(true,failures.map(failure=>failure.appId))} className={button}>{t("Retry failed games")}</button>}
     {!!failures.length&&<ul className="space-y-2 text-on-surface-variant">{failures.map(failure=><li key={failure.appId}><span translate="no">{failure.title}</span>: {t(failure.message)}</li>)}</ul>}
     {preview&&preview.total>0&&<>
-      <div className="flex flex-wrap items-center justify-between gap-4"><p>{preview.games.length} / {preview.total} {t("Steam games")}</p><div className="flex flex-wrap gap-3"><button className="min-h-11 rounded-xl bg-surface-container text-primary px-4" disabled={(busy&&!loading)||!available.length} onClick={()=>setSelected(available.map(game=>game.appId))}>{t("Select available games")}</button><button className="min-h-11 rounded-xl bg-surface-container text-primary px-4" disabled={(busy&&!loading)||!selected.length} onClick={()=>setSelected([])}>{t("Clear selection")}</button></div></div>
-      <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">{orderedGames.map(game=><li key={game.appId} className="min-w-0 rounded-xl bg-surface-container-low p-4"><label className="flex items-start gap-4 cursor-pointer"><input type="checkbox" className="mt-2 shrink-0 accent-primary w-5 h-5" checked={selected.includes(game.appId)} disabled={(busy&&!loading)||!game.matched||game.logged} onChange={event=>setSelected(current=>event.target.checked ? [...current,game.appId] : current.filter(id=>id!==game.appId))} aria-label={`${t("Select game")} ${game.title}`} /><SteamGameCover key={`${game.appId}-${game.cover}`} appId={game.appId} cover={game.cover}/><span className="min-w-0 space-y-2"><span translate="no" className="block font-headline-md text-headline-md break-words">{game.title}</span><span className="block text-on-surface-variant">{game.hours} {t("hours")}</span><span className="block text-body-sm text-primary">{t(game.logged ? "Already in your profile" : game.matched ? "Ready to import" : "No exact catalog match")}</span></span></label>{!game.matched&&<Link href={`/search?${new URLSearchParams({q:game.title,from:"/profile/import/steam"})}`} className="mt-3 min-h-11 inline-flex items-center text-primary">{t("Find this game manually")}</Link>}</li>)}</ul>
+      <div className="flex flex-wrap items-center justify-between gap-4"><p>{preview.games.length} / {preview.total} {t("Steam games")}</p><div className="flex flex-wrap gap-3"><button className="min-h-11 rounded-xl bg-surface-container text-primary px-4" disabled={(busy&&!loading)||!available.length} onClick={()=>setSelected(current=>[...new Set([...current,...available.map(game=>game.appId)])])}>{t("Select loaded games")}</button><button className="min-h-11 rounded-xl bg-surface-container text-primary px-4" disabled={(busy&&!loading)||!selected.length} onClick={()=>setSelected([])}>{t("Clear selection")}</button></div></div>
+      <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">{orderedGames.map(game=><li key={game.appId} className="min-w-0 rounded-xl bg-surface-container-low p-4"><label className="flex items-start gap-4 cursor-pointer"><input type="checkbox" className="mt-2 shrink-0 accent-primary w-5 h-5" checked={selected.includes(game.appId)} disabled={(busy&&!loading)||!game.matched||game.logged} onChange={event=>setSelected(current=>event.target.checked ? [...current,game.appId] : current.filter(id=>id!==game.appId))} aria-label={`${t("Select game")} ${game.title}`} /><SteamGameCover key={`${game.appId}-${game.cover}`} appId={game.appId} cover={game.cover}/><span className="min-w-0 space-y-2"><span translate="no" className="block font-headline-md text-headline-md break-words">{game.title}</span><span className="block text-on-surface-variant">{game.hours} {t("hours")}</span><span className="block text-body-sm text-on-surface-variant">{t(game.logged ? "Already in your profile" : game.matched ? "Ready to import" : "No exact catalog match")}</span></span></label>{!game.matched&&<Link href={`/search?${new URLSearchParams({q:game.title,from:"/profile/import/steam"})}`} className="mt-3 min-h-11 inline-flex items-center text-primary">{t("Find this game manually")}</Link>}</li>)}</ul>
       {preview.nextOffset<preview.total&&<div className="flex justify-end"><button type="button" className="min-h-11 rounded-xl bg-surface-container text-primary px-5 py-3" disabled={busy} onClick={()=>load(filters,amount,true)}>{t("Load more")}</button></div>}
     </>}
   </div>;

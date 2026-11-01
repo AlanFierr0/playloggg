@@ -56,7 +56,9 @@ features must not be inferred as available from historical documentation.
 - Reviews are original text with clickable HTTP/HTTPS sources. Helpful votes are
   upvotes minus downvotes. Changing review text clears its votes; other edits keep them.
   Automatic English/Spanish review translation is active; translated reviews include a notice and Show original.
-- Steam import opens ratings for all selected games directly, imports them in batches and keeps
+- Steam import initially shows 25 games with Load more; sorting uses the loaded games and
+  selections survive filters and added batches. Import opens ratings for all selected
+  games directly, imports them in batches and keeps
   existing logs. Rating order is descending playtime. Import queues and rating sessions
   are saved per profile in this browser. Leaving pauses work; Resume import retries
   safely when returning. Nothing runs while the browser is closed.
@@ -64,6 +66,8 @@ features must not be inferred as available from historical documentation.
   Users can switch groups; manual group preferences are remembered per profile/game in this browser.
 - Played platforms include Nintendo consoles/handhelds, Sega, mobile and browser.
   Completion statistics exclude ongoing statuses and show a separate ongoing summary.
+- Timeline year pins and month sections are primary; the optional gaming orbit uses the same
+  selected year and month. Profile and ranking filters use disclosures to keep game content close.
 - English/Spanish (Argentina), light/dark themes, keyboard access and reduced motion
   are supported. Profile/account/search/compare pages remain noindex.
 

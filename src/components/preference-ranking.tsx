@@ -132,7 +132,7 @@ export function PreferenceRanking() {
   }
   return (
     <section className="space-y-5" aria-label={t("Personal ranking")}>
-      <h2 className="font-headline-lg text-headline-lg font-semibold">
+      <h2 className="sr-only">
         {t("Personal ranking")}
       </h2>
       {canEdit && order.length > 0 && <p className="text-body-sm text-on-surface-variant">{t("Drag games or edit their position. Changes save automatically.")}</p>}
@@ -172,12 +172,12 @@ export function PreferenceRanking() {
           </button>
         </details>
       )}
-      <div className="grid grid-cols-2 gap-3 rounded-xl border border-outline-variant/30 bg-surface-container-low p-4 text-body-sm sm:grid-cols-2 lg:grid-cols-[2fr_1.5fr_1fr_1fr]">
+      <details className="rounded-xl border border-outline-variant/30 bg-surface-container-low px-4"><summary className="min-h-11 cursor-pointer py-3 text-body-sm">{t("Filters")}<span className="ml-2 text-on-surface-variant">{query || t("All games")}{platform && ` / ${t(playedPlatformLabels[platform as keyof typeof playedPlatformLabels] ?? "Unassigned")}`}{(minimum || maximum) && ` / ${minimum || "0"} - ${maximum || "∞"} ${t("hours")}`}</span></summary><div className="grid grid-cols-2 gap-3 pb-4 text-body-sm sm:grid-cols-2 lg:grid-cols-[2fr_1.5fr_1fr_1fr]">
         <label className="col-span-2 sm:col-span-1">{t("Search your games")}<input className="mt-2 min-h-11 w-full rounded-lg border border-outline-variant/40 bg-surface p-3" value={query} onChange={event => setQuery(event.target.value)} /></label>
         <label className="col-span-2 sm:col-span-1">{t("Platform")}<select className="mt-2 min-h-11 w-full rounded-lg border border-outline-variant/40 bg-surface p-3" value={platform} onChange={event => setPlatform(event.target.value)}><option value="">{t("All platforms")}</option><option value="unset">{t("Unassigned")}</option>{Object.entries(playedPlatformLabels).map(([id, label]) => <option key={id} value={id}>{t(label)}</option>)}</select></label>
         <label>{t("Minimum hours")}<input className="mt-2 min-h-11 w-full rounded-lg border border-outline-variant/40 bg-surface p-3" type="number" min="0" step="any" value={minimum} onChange={event => setMinimum(event.target.value)} /></label>
         <label>{t("Maximum hours")}<input className="mt-2 min-h-11 w-full rounded-lg border border-outline-variant/40 bg-surface p-3" type="number" min="0" step="any" value={maximum} onChange={event => setMaximum(event.target.value)} /></label>
-      </div>
+      </div></details>
       {!validBounds && <p role="alert">{t("Use nonnegative hours and a minimum no greater than the maximum.")}</p>}
       {validBounds && !visible.length && <p className="text-on-surface-variant">{t("No logged games match these filters.")}</p>}
       <ol className="overflow-hidden rounded-xl border border-outline-variant/30 bg-surface-container-low divide-y divide-outline-variant/30">

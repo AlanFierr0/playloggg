@@ -118,7 +118,7 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 </div>
 
 <div className="relative w-full min-w-0 bg-surface-container-low rounded-xl shadow-2xl overflow-clip flex flex-col">
-<div className="w-full bg-surface-container px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+<div className="w-full bg-surface-container px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-3">
 <div className="flex items-center gap-3 min-w-0">
 <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
 
@@ -147,32 +147,22 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 
 </div>
 
-<div className="p-4 sm:p-6 lg:p-8 grid grid-cols-1 xl:grid-cols-2 items-start gap-8">
-{!canEdit && <p className="xl:col-span-2 font-body-sm text-body-sm text-on-surface-variant">{t("Sign in to save your entry. ")}<Link href={`/login?next=${encodeURIComponent(`/log?game=${game.slug}`)}`} className="text-primary underline">{t("Sign in")}</Link> {t("to save entries to your own profile.")}</p>}
+<div className="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-2 items-start gap-5">
+{!canEdit && <p className="lg:col-span-2 font-body-sm text-body-sm text-on-surface-variant"><Link href={`/login?next=${encodeURIComponent(`/log?game=${game.slug}`)}`} className="text-primary underline">{t("Sign in")}</Link> {t("to save entries to your own profile.")}</p>}
 
-<div className="xl:col-span-2 flex flex-row gap-4 sm:gap-8 items-start">
-<div className="relative group flex-shrink-0 w-20 sm:w-40 aspect-[3/4] rounded-lg overflow-hidden bg-surface-container shadow-xl">
+<div className="lg:col-span-2 flex flex-row gap-4 items-start">
+<div className="relative group flex-shrink-0 w-16 sm:w-20 aspect-[3/4] rounded-lg overflow-hidden bg-surface-container shadow-xl">
 <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt={game.title} src={game.cover} />
 
 <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/80 via-transparent to-transparent opacity-90"></div>
 
-<div className="absolute bottom-2 left-2 right-2 hidden sm:flex justify-between items-center text-on-surface">
-<span className="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-lowest/80 backdrop-blur-sm text-primary">{game.year ?? "—"}</span>
 
-<span className="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-lowest/80 backdrop-blur-sm text-on-surface-variant">{game.genres?.[0] ?? t("Game")}</span>
 
 </div>
 
-</div>
-
-<div className="flex flex-col flex-1 min-w-0 justify-between self-stretch">
+<div className="flex flex-col flex-1 min-w-0 self-stretch">
 <div className="flex flex-col gap-2">
-<div className="flex flex-wrap items-center gap-2">
-<span className="font-label-sm text-label-sm uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">{t("Selected game")}</span>
 
-
-
-</div>
 
 <h1 className="font-headline-xl text-headline-lg sm:text-headline-xl text-on-surface tracking-tight break-words">{game.title}</h1>
 
@@ -180,8 +170,12 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 
 </div>
 
-<details className="mt-3 rounded-lg bg-surface-container/40 px-3 py-2">
-<summary className="min-h-11 cursor-pointer py-3 text-body-sm text-on-surface-variant">{t("Platform Played")}: <span className="text-primary">{platform ? t(playedPlatformLabels[platform]) : t("Not set")}</span></summary>
+<div className="mt-1 flex flex-wrap items-center gap-2 text-body-sm text-on-surface-variant">
+{game.year && <span>{game.year}</span>}{game.genres?.[0] && <span>{game.genres[0]}</span>}
+</div>
+
+<details className="mt-1 rounded-lg">
+<summary className="min-h-11 cursor-pointer py-2 text-body-sm text-on-surface-variant">{t("Platform Played")}: <span className="text-primary">{platform ? t(playedPlatformLabels[platform]) : t("Not set")}</span></summary>
 <div className="space-y-2.5 pb-2">
 
 <div className="flex flex-wrap gap-2" id="platform-selector">
@@ -207,14 +201,14 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 
 </div>
 
-<div className="min-w-0 bg-surface-container/60 rounded-xl p-4 sm:p-8 flex flex-col items-center gap-6 relative">
+<div className="min-w-0 bg-surface-container/60 rounded-xl p-4 sm:p-5 flex flex-col items-center gap-3 relative">
 <div className="w-full flex flex-wrap gap-2 items-center justify-between">
 <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{t("Score")}</span>
 
 <TierBadge value={tierManual ? tier : tierForScore(score, profile.tierRanges)} onChange={value=>{setTier(value);setTierManual(true);}} />
 </div>
 
-<div className="flex flex-col items-center justify-center gap-1 my-2">
+<div className="flex flex-col items-center justify-center gap-1">
 <div className="flex items-baseline gap-2">
 <input ref={scoreInput} id="score-display" type="text" inputMode="numeric" maxLength={3} pattern="[0-9]{0,3}" value={score ?? ""} placeholder="—" aria-label={t("Numerical score from 0 to 100")} aria-invalid={invalidScore} onFocus={event => event.currentTarget.select()} onChange={event => { const value = event.target.value; if (!/^[0-9]{0,3}$/.test(value) || Number(value) > 100) return; setScore(value === "" ? null : Number(value)); setSaveMessage(""); }} style={{ width: `${Math.max(1, String(score ?? "").length)}ch` }} className="min-h-11 min-w-[3ch] appearance-none rounded-none border-0 border-b border-transparent bg-transparent p-0 text-center font-display-lg text-display-lg font-bold tracking-tighter text-primary font-headline-xl placeholder:text-primary placeholder:opacity-100 focus:border-primary/50 focus:outline-none" />
 
@@ -223,20 +217,20 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 </div>
 
 {score === null ? <p className="font-body-sm text-body-sm text-on-surface-variant">{t("Unrated · a score is optional")}</p> : <ScoreStars score={score} />}
-<button id="toggle-score" type="button" className="mt-2 rounded bg-surface-container px-3 py-1.5 font-label-sm text-label-sm text-on-surface-variant hover:text-primary" onClick={() => setScore(score === null ? 0 : null)}>{score === null ? t("Add score") : t("Remove score")}</button>
+<button id="toggle-score" type="button" className="min-h-11 rounded bg-surface-container px-3 py-1.5 font-label-sm text-label-sm text-on-surface-variant hover:text-primary" onClick={() => setScore(score === null ? 0 : null)}>{score === null ? t("Add score") : t("Remove score")}</button>
 </div>
 
-<div className="w-full max-w-xl flex flex-col gap-3">
+<div className="w-full max-w-xl flex flex-col gap-1">
 <div className="relative w-full flex items-center">
 <input className="score-slider w-full cursor-pointer disabled:opacity-30" id="score-slider" max="100" min="0" step="1" type="range" value={score ?? 0} onPointerDown={(event) => setScore(Number(event.currentTarget.value))} onKeyDown={(event) => { if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "PageUp", "PageDown"].includes(event.key)) setScore(Number(event.currentTarget.value)); }} onChange={(event) => setScore(Number(event.target.value))} aria-label={t("Numerical score from 0 to 100")} aria-valuetext={score === null ? t("Unrated · a score is optional") : `${score} / 100`} />
 
 </div>
 
-<div id="score-descriptions" className="relative mx-[11px] h-8 text-on-surface-variant font-label-sm text-label-sm">
+<div id="score-descriptions" className="relative mx-[11px] h-6 text-on-surface-variant font-body-sm text-body-sm">
 {["Terrible", "Poor", "Average", "Great", "Masterpiece"].map((description, index) => <span key={description} style={{ left: `${index * 25}%` }} aria-current={scoreDescription === description ? "true" : undefined} className={`absolute w-1/4 -translate-x-1/2 text-center ${scoreDescription === description ? "text-primary font-bold" : ""}`}>{t(description)}</span>)}
 </div>
 
-<div className="flex items-center justify-center gap-2 mt-2">
+<div className="flex items-center justify-center gap-2">
 <button className="min-h-11 min-w-11 px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" disabled={score === null} onClick={() => setScore((previous) => Math.max(0, Math.min(100, (previous ?? 0) + -5)))}>{"-5"}</button>
 
 <button className="min-h-11 min-w-11 px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright font-label-sm text-label-sm transition-colors" type="button" disabled={score === null} onClick={() => setScore((previous) => Math.max(0, Math.min(100, (previous ?? 0) + -1)))}>{"-1"}</button>
@@ -253,7 +247,7 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 
 </div>
 
-<div className="min-w-0 grid grid-cols-1 md:grid-cols-12 gap-6">
+<div className="min-w-0 grid grid-cols-1 md:grid-cols-12 gap-4">
 <div className="md:col-span-12 flex flex-col gap-2.5">
 {draftReady && <PlaybackStatusPicker key={game.slug} slug={game.slug} value={status} onChange={setStatus} initialStyle={playStyle} onStyleChange={setPlayStyle}/>}
 
@@ -265,7 +259,7 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 <div className="relative flex items-center">
 <span aria-hidden="true" className="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">{"schedule"}</span>
 
-<input className="min-w-0 w-full bg-surface-container pl-10 pr-4 py-2.5 rounded text-on-surface font-label-md text-label-md focus:outline-none focus:bg-surface-container-high transition-colors" id="hours-input" placeholder={t("Hours, e.g. 45.5")} type="text" inputMode="decimal" value={hours} onChange={(event) => { const value = event.target.value; const maxHours = maximumPlaytime(game.releasedOn); if (!value.trimStart().startsWith("-") && (maxHours === null || !value.trim() || Number.isNaN(Number(value)) || Number(value) <= maxHours)) setHours(value); }} />
+<input className="catalog-control pl-10 pr-4 py-2.5 text-on-surface font-label-md text-label-md focus:bg-surface-container-high transition-colors" id="hours-input" placeholder={t("Hours, e.g. 45.5")} type="text" inputMode="decimal" value={hours} onChange={(event) => { const value = event.target.value; const maxHours = maximumPlaytime(game.releasedOn); if (!value.trimStart().startsWith("-") && (maxHours === null || !value.trim() || Number.isNaN(Number(value)) || Number(value) <= maxHours)) setHours(value); }} />
 
 </div>
 
@@ -286,7 +280,7 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 
 </div>
 
-<textarea className="w-full bg-surface-container p-4 rounded text-on-surface font-body-md text-body-md placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-high transition-colors resize-none leading-relaxed" id="dispatch-textarea" placeholder={t("Write a review (optional)...")} rows={4} maxLength={20000} value={review} onChange={(event) => setReview(event.target.value)}></textarea>
+<textarea className="catalog-control p-4 text-on-surface font-body-md text-body-md placeholder:text-on-surface-variant focus:bg-surface-container-high transition-colors resize-none leading-relaxed" id="dispatch-textarea" placeholder={t("Write a review (optional)...")} rows={3} maxLength={20000} value={review} onChange={(event) => setReview(event.target.value)}></textarea>
 
 </div>
 
@@ -301,10 +295,10 @@ return (<>{conflict && <div role="alert" className="site-container mx-auto p-4">
 <div data-editor-save-row className="sticky bottom-0 z-30 mt-auto w-full border-t border-outline-variant/30 bg-surface-container-lowest px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:static sm:px-10 sm:py-5 space-y-3">
 <p role="status" hidden={!pending && !saveMessage} className="font-body-sm text-body-sm text-primary break-words">{pending ? t("Saving…") : t(saveMessage)}</p>
 
-<div className="flex items-center gap-3 w-full justify-end">
-<button id="discard-rating" className="min-h-11 flex-1 sm:flex-none sm:w-auto px-4 py-2 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md uppercase tracking-wider transition-colors" type="button" onClick={resetDraft}>{t("Discard draft")}</button>
+<div className="flex flex-wrap items-center gap-3 w-full justify-end">
+<button id="discard-rating" className="min-h-11 flex-1 sm:flex-none sm:w-auto px-3 sm:px-4 py-2 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-body-md text-body-md whitespace-nowrap transition-colors" type="button" onClick={resetDraft}>{t("Discard draft")}</button>
 
-<button id="commit-rating" className="min-h-11 flex-1 sm:flex-none sm:w-auto px-6 py-2 rounded bg-primary-container text-on-primary-container hover:bg-primary font-label-md text-label-md uppercase tracking-wider font-semibold shadow-lg shadow-primary-container/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50" type="button" disabled={!canEdit || pending} onClick={commit}>
+<button id="commit-rating" className="min-h-11 flex-1 sm:flex-none sm:w-auto px-3 sm:px-6 py-2 rounded bg-primary-container text-on-primary-container hover:bg-primary font-body-md text-body-md whitespace-nowrap font-semibold shadow-lg shadow-primary-container/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50" type="button" disabled={!canEdit || pending} onClick={commit}>
 <span aria-hidden="true" className="material-symbols-outlined text-[18px]">{"bookmark_added"}</span>
 {pending ? t("Saving…") : t(game.logged ? "Save changes" : "Save game")}</button>
 

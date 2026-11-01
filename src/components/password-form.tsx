@@ -3,14 +3,14 @@ import { useActionState, useState } from "react";
 import { emailPassword, changePassword } from "@/app/actions/password";
 import { useMessages } from "@/components/site-preferences";
 
-const input = "w-full rounded-xl bg-surface-container px-4 py-3 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary";
+const input = "catalog-control px-4 py-3 focus:ring-2 focus:ring-primary";
 const button = "w-full rounded-xl bg-primary-container px-5 py-3 font-semibold text-on-primary-container disabled:opacity-50";
 export function PasswordForm({initialMode="signin",next=""}:{initialMode?:"signin"|"register";next?:string}) {
   const t = useMessages();
   const [mode, setMode] = useState<"signin" | "register" | "recover" | "link">(initialMode);
   return <div className="space-y-5">
     <div className="grid grid-cols-3 gap-2 rounded-xl bg-surface-container p-1" aria-label={t("Email sign-in options")}>
-      {(["signin", "register", "link"] as const).map(option => <button key={option} type="button" aria-pressed={mode === option} onClick={() => setMode(option)} className={`px-3 py-2.5 font-label-md ${mode === option ? "bg-surface-container-high text-primary" : "text-on-surface-variant"}`}>{t(option === "signin" ? "Sign in" : option === "register" ? "Create account" : "Email link")}</button>)}
+      {(["signin", "register", "link"] as const).map(option => <button key={option} type="button" aria-pressed={mode === option} onClick={() => setMode(option)} className={`px-2 py-2.5 font-body-sm text-body-sm font-semibold sm:text-body-md ${mode === option ? "bg-surface-container-high text-primary" : "text-on-surface-variant"}`}>{t(option === "signin" ? "Sign in" : option === "register" ? "Create account" : "Email link")}</button>)}
     </div>
     <EmailForm key={mode} mode={mode} next={next} />
     <button type="button" onClick={() => setMode(mode === "recover" || mode === "link" ? "signin" : "recover")} className="inline-flex min-h-11 items-center text-primary underline underline-offset-4 text-body-sm">{t(mode === "recover" || mode === "link" ? "Back to sign in" : "Forgot password?")}</button>

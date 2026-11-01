@@ -114,7 +114,8 @@ test("home review carousel ranks net helpfulness and supports navigation", async
   await page.screenshot({path:`e2e-artifacts/home-review-authors-${testInfo.project.name}.png`,fullPage:true});
   await expect(cards.nth(1)).toContainText("Carousel review 1");
   await expect(carousel).not.toContainText("Private fixture review");
-  await expect(cards.first().getByRole("button", { name: /^Helpful/ })).toBeDisabled();
+  await expect(cards.first().getByRole("button", { name: /^Helpful/ })).toHaveCount(0);
+  await expect(cards.first().getByRole("link",{name:"Sign in to vote on reviews.",exact:true})).toBeVisible();
   const track=carousel.getByRole("group", {name:"Review carousel"});
   await expect(track).toHaveCSS("scrollbar-width", "none");
   const trackBox=(await track.boundingBox())!;

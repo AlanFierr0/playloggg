@@ -1,4 +1,4 @@
-import { test, expect } from "./test";
+import { test, expect, openFilters } from "./test";
 // @ts-expect-error Node-only fixture exports a cookie descriptor.
 import { authCookie } from "./fixture-server.mjs";
 import AxeBuilder from "@axe-core/playwright";
@@ -78,6 +78,7 @@ test("independent ranking saves a pairwise choice without changing scores", asyn
   await expect(page.getByRole("status").filter({ hasText: "Personal ranking saved" })).toBeVisible();
   await page.reload();
   await expect(rows.first()).toContainText("Hades");
+  await openFilters(page);
   await page.getByRole("textbox", { name: "Search your games", exact: true }).fill("Elden");
   await expect(rows).toHaveCount(1);
   const eldenPosition = page.getByRole("textbox", { name: /^Position for Elden Ring/ });
@@ -85,6 +86,7 @@ test("independent ranking saves a pairwise choice without changing scores", asyn
   await eldenPosition.fill("1");
   await eldenPosition.press("Enter");
   await expect(eldenPosition).toBeEnabled();
+  await openFilters(page);
   await page.getByRole("textbox", { name: "Search your games", exact: true }).fill("");
   await expect(rows).toHaveCount(2);
   await expect(rows.first()).toContainText("Elden Ring");

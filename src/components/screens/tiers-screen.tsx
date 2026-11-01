@@ -1,4 +1,5 @@
 "use client";
+import { ProfileIdentity } from "@/components/profile-navigation";
 import { coverImage } from "@/lib/cover-image";
 import { tierLabels } from "@/lib/tier-labels";
 import { useMessages } from "@/components/site-preferences";
@@ -141,7 +142,7 @@ return (<>
 </div>
 
 <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold">{t("\n          Personal Tier Board\n        ")}</h1>
-
+<ProfileIdentity />
 <p className="font-body-md text-body-md text-on-surface-variant">{`${logged.length} ${t("logged titles grouped by score ranges and manual tiers.")}`}</p>
 
 </div>
@@ -171,8 +172,8 @@ return (<>
 {groups.filter(group => (canEdit || group.tier!==null || group.games.length>0 || selectedTier===null)).map((group) => {
  const key = group.tier ?? "Unassigned";
  const theme = tierThemes[key];
- return <section hidden={selectedTier!=="all"&&group.tier!==selectedTier} key={key} data-tier-drop={group.tier??"unassigned"} className={`${selectedTier!=="all"&&group.tier!==selectedTier ? "hidden" : "flex"} flex-col md:flex-row ${group.games.length ? "gap-4 p-4 lg:p-6" : "gap-3 p-3 lg:p-4"} rounded-xl shadow-sm ${theme.surface} ${over===key ? "ring-2 ring-on-surface ring-offset-2 ring-offset-surface" : ""}`} id={"tier-" + key.toLowerCase()}>
- <div className={group.games.length ? "flex flex-wrap gap-2 md:flex-col justify-between items-center md:items-start w-full md:w-44 flex-shrink-0 p-4 rounded-lg" : "grid grid-cols-[minmax(0,1fr)_9rem_auto] items-center gap-3 w-full md:w-[28rem] shrink-0"}>
+ return <section hidden={selectedTier!=="all"&&group.tier!==selectedTier} key={key} data-tier-drop={group.tier??"unassigned"} className={`${selectedTier!=="all"&&group.tier!==selectedTier ? "hidden" : "flex"} flex-col md:flex-row ${group.games.length ? "gap-4 p-4 lg:p-6" : "gap-3 p-3 lg:p-4"} rounded-xl border border-outline-variant/30 bg-surface-container-low text-on-surface ${over===key ? "ring-2 ring-on-surface ring-offset-2 ring-offset-surface" : ""}`} id={"tier-" + key.toLowerCase()}>
+ <div className={`${group.games.length ? "flex flex-wrap gap-2 md:flex-col justify-between items-center md:items-start w-full md:w-44 flex-shrink-0 p-4 rounded-lg" : "grid grid-cols-[minmax(0,1fr)_9rem_auto] items-center gap-3 w-full md:w-[28rem] shrink-0 rounded-lg p-3"} ${theme.surface}`}>
  <div className={group.games.length ? "flex items-center md:flex-col md:items-start gap-2" : "flex min-w-0 flex-col items-start gap-1"}><span className={`${group.games.length ? "text-display-lg" : "text-headline-xl"} font-display-lg font-bold leading-none`}>{group.tier ?? "—"}</span><div className="flex flex-col"><span className="font-label-md text-label-md font-semibold uppercase tracking-wider">{t(theme.label)}</span>{!group.tier && <span className="font-label-sm text-label-sm">{t("No tier selected")}</span>}</div></div>
  {group.tier && (canEdit ? <div className="w-full max-w-[9rem] space-y-1.5" role="group" aria-label={`${t("Score range")} ${group.tier}`}><span className="block text-center font-label-sm text-label-sm font-semibold">{t("Range")}</span><div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5">
  {([0,1] as const).map(bound=><Fragment key={`${group.tier}-${bound}-${ranges[group.tier!][bound]}`}><label className="min-w-0 overflow-hidden rounded-lg border border-black/50 bg-white/15 text-black transition-colors hover:bg-white/25 focus-within:border-black focus-within:ring-2 focus-within:ring-black motion-reduce:transition-none">

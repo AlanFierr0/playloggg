@@ -57,11 +57,11 @@ test("future completion dates cannot be saved", async ({page,context}) => {
 
 test("public rankings have an automatic fallback and show one view at a time", async ({page}) => {
   await page.goto("/u/fixture_public/ranking");
-  await expect(page.getByRole("heading",{name:"Score ranking",exact:true})).toBeVisible();
+  await expect(page.getByRole("region",{name:"Score ranking",exact:true})).toBeVisible();
   await expect(page.getByRole("heading",{name:"Personal ranking",exact:true})).toBeHidden();
   await page.getByRole("button",{name:"Personal order",exact:true}).click();
   await expect(page.locator("[data-ranking-game]").first()).toBeVisible();
-  await expect(page.getByRole("heading",{name:"Score ranking",exact:true})).toBeHidden();
+  await expect(page.getByRole("region",{name:"Score ranking",exact:true})).toBeHidden();
   await expect(page.getByText("No logged games match these filters.")).toHaveCount(0);
 });
 

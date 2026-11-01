@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useMessages } from "@/components/site-preferences";
 import { usePortfolio } from "@/components/portfolio-provider";
 import { FavoriteControls } from "@/components/favorite-controls";
-import { ProfileNavigation } from "@/components/profile-navigation";
+import { ProfileNavigation, ProfileIdentity } from "@/components/profile-navigation";
 
 export function FavoritesScreen() {
   const t = useMessages();
@@ -34,7 +34,7 @@ export function FavoritesScreen() {
   const pages = catalog ? page + (results.hasMore ? 1 : 0) : Math.max(1, Math.ceil(filtered.length / 24));
   const current = catalog ? page : Math.min(page, pages);
   return <section className="site-container mx-auto px-4 sm:px-6 lg:px-12 py-8 space-y-6">
-    {!publicBase && <ProfileNavigation />}<h1 className="font-headline-xl text-headline-xl">{canEdit ? t("Manage favorites") : t("Favorites")}</h1>
+    {!publicBase && <ProfileNavigation />}<header className="flex flex-wrap items-center justify-between gap-4"><h1 className="font-headline-xl text-headline-xl">{canEdit ? t("Manage favorites") : t("Favorites")}</h1><ProfileIdentity /></header>
     <p className="text-on-surface-variant">{t("Favorites never create a rating or playback status. Choose up to four featured positions; replacing a position keeps the previous game as a favorite.")}</p>
     {canEdit && <div className="flex flex-wrap gap-4"><button className="min-h-11 text-primary" aria-pressed={!catalog} onClick={() => { setCatalog(false); setPage(1); }}>{t("Your favorites")}</button><button className="min-h-11 text-primary" aria-pressed={catalog} onClick={() => { setCatalog(true); setPage(1); }}>{t("Browse catalog")}</button></div>}
     <label className="block max-w-lg"><span className="block mb-2">{t("Search games")}</span><input value={search} onChange={event => { setSearch(event.target.value); setPage(1); }} className="w-full min-h-11 rounded bg-surface-container p-3" /></label>

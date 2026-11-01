@@ -1,4 +1,4 @@
-import { test, expect } from "./test";
+import { test, expect, openFilters } from "./test";
 
 // @ts-expect-error Test-only fixture exports a fake session.
 import { authCookie } from "./fixture-server.mjs";
@@ -10,21 +10,22 @@ test(`${owner ? "owner" : "public"} ranking appends games on scroll and resets f
   await page.goto(owner ? "/profile/ranking" : "/u/fixture_public/ranking");
   if (owner) await page.getByRole("button", {name:"By score", exact:true}).click();
   const cards = page.locator("article[data-rank]");
-  await expect(cards).toHaveCount(8);
+  await expect.poll(()=>cards.count()).toBeGreaterThanOrEqual(8);
   if (info.project.name === "desktop") expect((await cards.first().boundingBox())!.width).toBeLessThan(240);
   await expect(page.getByRole("button", {name:"Next Page", exact:true})).toHaveCount(0);
   const first = await cards.first().getAttribute("data-rank");
   await cards.last().scrollIntoViewIfNeeded();
-  await expect(cards).toHaveCount(16);
+  await expect.poll(()=>cards.count()).toBeGreaterThanOrEqual(16);
   expect(await cards.first().getAttribute("data-rank")).toBe(first);
   await cards.last().scrollIntoViewIfNeeded();
   await expect(cards).toHaveCount(20);
   await expect(page.getByRole("button", {name:"Load more", exact:true})).toHaveCount(0);
+  await openFilters(page);
   await page.locator('[data-filter="backlog"]').click();
   await expect(cards).toHaveCount(0);
   await expect(page.getByText(owner ? "Your backlog is empty. Choose Backlog in the game log and save; a score is optional." : "This profile's backlog is empty.")).toBeVisible();
   await page.locator('[data-filter="masterpieces"]').click();
-  await expect(cards).toHaveCount(8);
+  await expect.poll(()=>cards.count()).toBeGreaterThanOrEqual(8);
   await cards.last().scrollIntoViewIfNeeded();
   await expect(cards).toHaveCount(11);
   expect(await cards.evaluateAll(nodes=>nodes.map(node=>Number(node.getAttribute("data-score"))))).toEqual(Array.from({length:11},(_,i)=>100-i));

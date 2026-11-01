@@ -51,7 +51,7 @@ export function ProfileTimelineScreen() {
     <header className="space-y-5 border-b border-outline-variant/30 pb-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="max-w-2xl space-y-2"><h1 className="font-headline-xl text-headline-xl">{t("Completion timeline")}</h1><p className="text-body-md text-on-surface-variant">{t("Your finished games, year by year.")}</p></div>
-        {years.length > 0 && <label className="space-y-1 text-body-sm"><span className="block text-on-surface-variant">{t("Year")}</span><select aria-label={t("Year")} value={year} onChange={event => chooseYear(event.target.value)} className="min-h-11 rounded-xl border border-outline-variant/40 bg-surface-container px-3"><option value="">{t("All years")}</option>{years.map(value => <option key={value} value={value}>{value}</option>)}</select></label>}
+        {years.length > 0 && <label className="space-y-1 text-body-sm"><span className="block text-on-surface-variant">{t("Filter years")}</span><select aria-label={t("Filter years")} value={year} onChange={event => chooseYear(event.target.value)} className="min-h-11 rounded-xl border border-outline-variant/40 bg-surface-container px-3"><option value="">{t("All years")}</option>{years.map(value => <option key={value} value={value}>{value}</option>)}</select></label>}
       </div>
       <dl className="grid grid-cols-2 gap-6 sm:grid-cols-3">
         <div><dt className="text-body-sm text-on-surface-variant">{t("Dated completions")}</dt><dd className="mt-1 text-headline-xl font-semibold tabular-nums text-primary">{dated.length}</dd></div>
@@ -63,7 +63,6 @@ export function ProfileTimelineScreen() {
     {activeGroup ? <section ref={history} tabIndex={-1} aria-label={t("Timeline")} className="min-w-0 scroll-mt-24 space-y-5 rounded-2xl border border-outline-variant/30 bg-surface-container-low p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="space-y-1"><h2 className="font-headline-lg text-headline-lg">{t("Timeline")}</h2><p className="text-body-sm text-on-surface-variant">{t("Select a year pin, then choose a month.")}</p></div>
-        {selectedMonth && <button type="button" onClick={()=>setSelectedMonth("")} className="min-h-11 rounded-xl px-3 text-body-sm text-primary hover:bg-surface-container">{t("Clear month filter")}</button>}
       </div>
       <div ref={rail} role="tablist" aria-label={t("Completion years")} aria-orientation="horizontal" className="relative flex min-w-0 overflow-x-auto overscroll-x-contain p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" onKeyDown={event=>{
         const index=event.key==="ArrowRight"?Math.min(activeIndex+1,shownYears.length-1):event.key==="ArrowLeft"?Math.max(activeIndex-1,0):event.key==="Home"?0:event.key==="End"?shownYears.length-1:null;
@@ -93,8 +92,8 @@ export function ProfileTimelineScreen() {
         </Link>)}</div>
       </section>
     </section> : <div className="rounded-2xl border border-outline-variant/20 bg-surface-container-low p-6 sm:p-8 space-y-3"><h2 className="font-headline-lg text-headline-lg">{t("Your timeline starts with a completion date.")}</h2><p className="text-body-md text-on-surface-variant">{t("Mark a game completed and add its completion date to see it here.")}</p><Link href="/log" className="ui-action bg-primary text-on-primary">{t("Log a game")}</Link></div>}
-    {months.length > 0 && <figure className="space-y-4 rounded-2xl border border-outline-variant/20 bg-surface-container-low p-4 sm:p-6">
-      <figcaption className="space-y-1"><h2 className="font-headline-lg text-headline-lg">{t("Your gaming orbit")}</h2><p className="text-body-sm text-on-surface-variant">{t("Larger circles mean more completed games. Select a month to explore it.")}</p></figcaption>
+    {months.length > 0 && <details className="rounded-2xl border border-outline-variant/20 bg-surface-container-low"><summary className="min-h-11 cursor-pointer px-4 py-4 font-semibold sm:px-6">{t("Your gaming orbit")} <span className="ml-2 font-normal text-on-surface-variant">{activeGroup?.year}</span></summary><figure className="space-y-4 px-4 pb-4 sm:px-6 sm:pb-6">
+      <figcaption className="space-y-1"><p className="text-body-sm text-on-surface-variant">{t("Larger circles mean more completed games. Select a month to explore it.")}</p></figcaption>
       <div role="region" aria-label={t("Completion chart")} className="relative mx-auto aspect-square w-full max-w-[520px] rounded-xl">
         <div aria-hidden="true" className="absolute inset-[15%] rounded-full border border-dashed border-outline-variant/60" />
         <div aria-hidden="true" className="absolute inset-[30%] rounded-full border border-outline-variant/20" />
@@ -117,8 +116,8 @@ export function ProfileTimelineScreen() {
           </li>;
         })}</ol>
       </div>
-      <div className="flex justify-center"><button type="button" aria-pressed={!selectedMonth} onClick={() => chooseOrbitMonth("")} className={`min-h-11 rounded-xl px-4 text-body-sm ${!selectedMonth ? "bg-primary/10 text-primary" : "text-on-surface-variant hover:bg-surface-container"}`}>{t("All months")}</button></div>
-    </figure>}
+
+    </figure></details>}
     {timeline.undated.length > 0 && <section className="space-y-4 border-t border-outline-variant/30 pt-6"><h2 className="font-headline-lg text-headline-lg">{t("Completed without a date")} <span className="text-on-surface-variant">({timeline.undated.length})</span></h2><p className="text-body-sm text-on-surface-variant">{t("Add a completion date to place these games on your timeline.")}</p><div className="flex flex-wrap gap-2">{timeline.undated.map(game => <Link key={game.slug} href={`/log?game=${encodeURIComponent(game.slug)}`} translate="no" className="inline-flex min-h-11 items-center rounded-xl border border-outline-variant/30 px-3 text-body-sm hover:bg-surface-container-low focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">{game.title}</Link>)}</div></section>}
   </section>;
 }

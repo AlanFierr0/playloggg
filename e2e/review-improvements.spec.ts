@@ -1,4 +1,4 @@
-import {test,expect} from "./test";
+import {test,expect, openComparisonProfiles, openFilters } from "./test";
 import AxeBuilder from "@axe-core/playwright";
 // @ts-expect-error Local fixture only.
 import {authCookie} from "./fixture-server.mjs";
@@ -26,20 +26,27 @@ test("ranking keeps its filters without the game management subsection",async({p
  await context.addCookies([authCookie]);
  await page.goto("/profile/ranking");
  await expect(page.getByText("Manage your games",{exact:true})).toHaveCount(0);
+  await openFilters(page);
  await page.getByLabel("Search your games",{exact:true}).fill("Elden");
  await expect(page.locator("[data-ranking-game]")).toHaveCount(1);
+  await openFilters(page);
  await page.getByLabel("Search your games",{exact:true}).fill("Hades");
  await expect(page.locator("[data-ranking-game]")).toHaveCount(0);
+  await openFilters(page);
  await page.getByLabel("Search your games",{exact:true}).fill("");
  await page.getByRole("combobox",{name:"Platform",exact:true}).selectOption("pc");
  await expect(page.locator("[data-ranking-game]")).toHaveCount(0);
  await page.getByRole("combobox",{name:"Platform",exact:true}).selectOption("unset");
  await expect(page.locator("[data-ranking-game]")).toHaveCount(1);
+  await openFilters(page);
  await page.getByLabel("Minimum hours",{exact:true}).fill("0");
  await expect(page.locator("[data-ranking-game]")).toHaveCount(0);
+  await openFilters(page);
  await page.getByLabel("Minimum hours",{exact:true}).fill("");
+  await openFilters(page);
  await page.getByLabel("Maximum hours",{exact:true}).fill("0");
  await expect(page.locator("[data-ranking-game]")).toHaveCount(0);
+  await openFilters(page);
  await page.getByLabel("Maximum hours",{exact:true}).fill("");
  await page.screenshot({path:`e2e-artifacts/ranking-filters-${testInfo.project.name}.png`,fullPage:true});
  expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
@@ -49,10 +56,12 @@ test("Compare finds a followed public profile and keeps its owner first",async({
  await context.addCookies([authCookie]);await page.goto("/people",{waitUntil:"domcontentloaded"});
  await page.getByRole("button",{name:"Follow",exact:true}).first().click();
  await page.goto("/compare");
+  await openComparisonProfiles(page);
  await expect(page.getByRole("combobox",{name:"First profile handle",exact:true})).toHaveValue("fixture_owner");
  await page.getByRole("combobox",{name:"Second profile handle",exact:true}).fill("Published Fixture");
  await page.getByRole("option",{name:/@fixture_public/}).click();
  await expect(page.getByRole("combobox",{name:"Second profile handle",exact:true})).toHaveValue("fixture_public");
+  await openComparisonProfiles(page);
  await expect(page.getByRole("combobox",{name:"First profile handle",exact:true})).toHaveValue("fixture_owner");
  await page.getByRole("button",{name:"Compare profiles",exact:true}).click();
  await expect(page).toHaveURL(/\/compare\?left=fixture_owner&right=fixture_public$/);

@@ -1529,5 +1529,13 @@
   "Drafts and browser preferences": "Borradores y preferencias del navegador",
   "Theme and language use cookies. Unfinished editor drafts use storage in this browser tab. Steam import and rating recovery use this browser’s storage. Avoid leaving unfinished drafts on shared devices.": "El tema y el idioma usan cookies. Los borradores del editor se guardan en esta pestaña. La recuperación de importaciones y puntuaciones de Steam usa el almacenamiento de este navegador. Evitá dejar borradores sin terminar en dispositivos compartidos.",
   "Exporting and deleting your account": "Exportar datos y eliminar tu cuenta",
-  "Settings lets you export your saved data as JSON or CSV. Delete account requires confirmation and removes your account, profile, logs, reviews, favorites and uploaded pictures. Shared catalog games remain available to other players.": "Configuración permite exportar tus datos en JSON o CSV. Eliminar la cuenta requiere confirmación y borra tu cuenta, perfil, registros, reseñas, favoritos e imágenes subidas. Los juegos del catálogo compartido siguen disponibles para otros jugadores."
+  "Settings lets you export your saved data as JSON or CSV. Delete account requires confirmation and removes your account, profile, logs, reviews, favorites and uploaded pictures. Shared catalog games remain available to other players.": "Configuración permite exportar tus datos en JSON o CSV. Eliminar la cuenta requiere confirmación y borra tu cuenta, perfil, registros, reseñas, favoritos e imágenes subidas. Los juegos del catálogo compartido siguen disponibles para otros jugadores.",
+  "Filters": "Filtros",
+  "Select loaded games": "Seleccionar juegos cargados",
+  "Change profiles": "Cambiar perfiles",
+  "Filter years": "Filtrar años",
+  "Profile identity": "Identidad del perfil",
+  "Connections": "Conexiones",
+  "Settings sections": "Secciones de configuración",
+  "All games": "Todos los juegos"
 }

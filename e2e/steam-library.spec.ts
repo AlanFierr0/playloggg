@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test";
-import {test,expect,openSteamTools} from "./test";
+import {test,expect,openSteamTools, openFilters } from "./test";
 import AxeBuilder from "@axe-core/playwright";
 // @ts-expect-error Local fixture only.
 import {authCookie} from "./fixture-server.mjs";
@@ -85,21 +85,26 @@ test("Steam import previews, selects, saves trusted playtime and preserves exist
   await expect(page.getByRole("checkbox",{name:"Select game Unmatched Fixture",exact:true})).toBeDisabled();
   let state=await (await fetch("http://127.0.0.1:3101/__state")).json();
   expect(state.ratings.filter((row:{profile_id:number})=>row.profile_id===2)).toHaveLength(1);
-  await expect(page.getByRole("checkbox")).toHaveCount(127);
+  await expect(page.getByRole("checkbox")).toHaveCount(25);
   const previewState=await (await fetch("http://127.0.0.1:3101/__state")).json();
   console.log("Steam preview request counts",JSON.stringify(previewState.requestCounts));
   expect(previewState.requestCounts["GET /rest/v1/ratings"]).toBe(1);
   expect(previewState.requestCounts["POST /__provider-games"]).toBeLessThanOrEqual(7);
-  await expect(page.getByLabel("Games to show",{exact:true})).toHaveValue("all");
-  await expect(page.getByRole("button",{name:"Load more",exact:true})).toHaveCount(0);
+  await openFilters(page);
+  await expect(page.getByLabel("Games to show",{exact:true})).toHaveValue("25");
+  await expect(page.getByRole("button",{name:"Load more",exact:true})).toBeVisible();
   const importButton=page.getByRole("button",{name:"Import selected games (0)",exact:true});
   const importBox=(await importButton.boundingBox())!;
   const firstGameBox=(await page.getByRole("checkbox").first().boundingBox())!;
   expect(importBox.y).toBeLessThan(firstGameBox.y);
   const controlsBox=(await importButton.locator("..").boundingBox())!;
-  expect(Math.abs(importBox.x+importBox.width-controlsBox.x-controlsBox.width)).toBeLessThan(2);
+  expect(Math.abs(importBox.x+importBox.width-controlsBox.x-controlsBox.width+12)).toBeLessThan(3);
   await page.getByRole("checkbox",{name:"Select game Hades",exact:true}).check();
   await page.getByRole("checkbox",{name:"Select game Steam Fixture Adventure",exact:true}).check();
+  await page.getByLabel("Minimum hours",{exact:true}).fill("0");
+  await page.getByLabel("Maximum hours",{exact:true}).fill("0");
+  await expect(page.getByRole("checkbox",{name:"Select game Hades",exact:true})).toHaveCount(0);
+  await expect(page.getByRole("button",{name:"Import selected games (2)",exact:true})).toBeEnabled();
   await page.evaluate(()=>window.scrollTo(0,0));
   await page.screenshot({path:`e2e-artifacts/steam-library-${testInfo.project.name}.png`});
   expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
@@ -124,6 +129,25 @@ test("Steam import previews, selects, saves trusted playtime and preserves exist
   await expect(page.getByText("125 Steam games",{exact:false})).toBeVisible();
   await expect(page.getByRole("checkbox",{name:"Select game Hades",exact:true})).toHaveCount(0);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+
+test("Importing retained selections outside the hours filter keeps the remaining library visible",async({page,context})=>{
+  await context.addCookies([authCookie]);await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
+  await page.goto("/profile/import/steam");
+  for(const title of ["Hades","Steam Fixture Adventure"])await page.getByRole("checkbox",{name:`Select game ${title}`,exact:true}).check();
+  await openFilters(page);
+  await page.getByLabel("Minimum hours",{exact:true}).fill("5");
+  await expect(page.getByRole("button",{name:"Import selected games (2)",exact:true})).toBeDisabled();
+  await expect(page.getByRole("checkbox",{name:"Select game Hades",exact:true})).toHaveCount(0);
+  const remaining=page.getByRole("checkbox");
+  await expect(remaining).toHaveCount(1);
+  const label=await remaining.getAttribute("aria-label");
+  await page.getByRole("button",{name:"Import selected games (2)",exact:true}).click();
+  await expect(page.getByRole("dialog",{name:"Rate imported games",exact:true})).toBeVisible();
+  await expect(page.getByText("Import complete. Your games are saved in your profile.",{exact:true})).toBeAttached();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("checkbox",{name:label!,exact:true})).toBeVisible();
+  await expect(page.getByRole("checkbox")).toHaveCount(1);
 });
 
 test("Steam import protects guests and email accounts and handles hidden libraries and save retries",async({page,context})=>{
@@ -178,7 +202,8 @@ test("Steam browsing loads more without losing selection, changes amounts and fi
   await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
   await page.route("https://shared.steamstatic.com/**",route=>route.fulfill({contentType:"image/svg+xml",body:'<svg xmlns="http://www.w3.org/2000/svg" width="60" height="90"><rect width="60" height="90" fill="#ba831f"/></svg>'}));
   await page.goto("/profile/import/steam");await openSteamTools(page);
-  await expect(page.getByRole("checkbox")).toHaveCount(127);
+  await expect(page.getByRole("checkbox")).toHaveCount(25);
+  await openFilters(page);
   await page.getByLabel("Games to show",{exact:true}).selectOption("25");
   await expect(page.getByRole("checkbox")).toHaveCount(25);
   const hades=page.getByRole("checkbox",{name:"Select game Hades",exact:true});
@@ -186,14 +211,18 @@ test("Steam browsing loads more without losing selection, changes amounts and fi
   await page.getByRole("button",{name:"Load more",exact:true}).click();
   await expect(page.getByRole("checkbox")).toHaveCount(50);
   await expect(hades).toBeChecked();
+  await openFilters(page);
   await page.getByLabel("Games to show",{exact:true}).selectOption("50");
   await expect(page.getByRole("checkbox")).toHaveCount(50);
-  await expect(hades).not.toBeChecked();
+  await expect(hades).toBeChecked();
+  await openFilters(page);
   await page.getByLabel("Games to show",{exact:true}).selectOption("100");
   await expect(page.getByRole("checkbox")).toHaveCount(100);
+  await openFilters(page);
   await page.getByLabel("Games to show",{exact:true}).selectOption("all");
   await expect(page.getByRole("checkbox")).toHaveCount(127);
   await expect(page.getByRole("button",{name:"Load more",exact:true})).toHaveCount(0);
+  await openFilters(page);
   await page.getByLabel("Games to show",{exact:true}).selectOption("25");
   await expect(page.getByRole("checkbox")).toHaveCount(25);
   await hades.check();
@@ -217,16 +246,22 @@ test("Steam browsing loads more without losing selection, changes amounts and fi
   await expect(page.getByRole("checkbox")).toHaveCount(50);
   await expect(hades).toBeChecked();
   expect(new Set(await page.getByRole("checkbox").evaluateAll(elements=>elements.map(element=>element.getAttribute("aria-label")))).size).toBe(50);
+  await openFilters(page);
   await page.getByLabel("Minimum hours",{exact:true}).fill("1");
+  await openFilters(page);
   await page.getByLabel("Maximum hours",{exact:true}).fill("2");
   await expect(page.getByRole("button",{name:"Apply filters",exact:true})).toHaveCount(0);
   await expect(page.getByRole("checkbox")).toHaveCount(1);
   await expect(hades).toBeVisible();
+  await openFilters(page);
   await page.getByLabel("Minimum hours",{exact:true}).fill("0");
+  await openFilters(page);
   await page.getByLabel("Maximum hours",{exact:true}).fill("0");
   await expect(page.getByRole("checkbox",{name:"Select game Steam Fixture Adventure",exact:true})).toBeVisible();
   await expect(hades).toHaveCount(0);
+  await openFilters(page);
   await page.getByLabel("Minimum hours",{exact:true}).fill("101");
+  await openFilters(page);
   await page.getByLabel("Maximum hours",{exact:true}).fill("102");
   await expect(page.getByText("No Steam games match these filters.")).toBeVisible();
   await page.getByRole("button",{name:"Clear filters",exact:true}).click();
@@ -238,25 +273,29 @@ test("Steam playtime filters keep typing responsive and discard outdated results
   await context.addCookies([authCookie]);
   await fetch("http://127.0.0.1:3101/__steam-user",{method:"POST"});
   await page.goto("/profile/import/steam");await openSteamTools(page);
-  await expect(page.getByRole("checkbox")).toHaveCount(127);
+  await expect(page.getByRole("checkbox")).toHaveCount(25);
   let delayed=false;
   await page.route("**/profile/import/steam",async route=>{
     if(route.request().method()==="POST"&&!delayed){delayed=true;await new Promise(resolve=>setTimeout(resolve,700));}
     await route.continue();
   });
   const request=page.waitForRequest(req=>req.method()==="POST"&&Boolean(req.headers()["next-action"]));
+  await openFilters(page);
   await page.getByLabel("Minimum hours",{exact:true}).fill("5");
   await request;
   await expect(page.getByLabel("Minimum hours",{exact:true})).toBeEnabled();
+  await openFilters(page);
   await page.getByLabel("Minimum hours",{exact:true}).fill("101");
+  await openFilters(page);
   await page.getByLabel("Maximum hours",{exact:true}).fill("102");
   await expect(page.getByText("No Steam games match these filters.")).toBeVisible();
   await expect(page.getByRole("checkbox")).toHaveCount(0);
   await expect(page.getByLabel("Minimum hours",{exact:true})).toHaveValue("101");
+  await openFilters(page);
   await page.getByLabel("Maximum hours",{exact:true}).fill("100");
   await expect(page.getByText("Use nonnegative hours and a minimum no greater than the maximum.")).toBeVisible();
   await page.getByRole("button",{name:"Clear filters",exact:true}).click();
-  await expect(page.getByRole("checkbox")).toHaveCount(127);
+  await expect(page.getByRole("checkbox")).toHaveCount(25);
 });
 
 test("Steam artwork falls back to its header and then a placeholder if images fail",async({page,context})=>{

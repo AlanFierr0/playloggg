@@ -8,7 +8,7 @@ import { ProfileAvatar } from "@/components/profile-avatar";
 
 export function ProfileNavigation() {
   const t = useMessages();
-  const { publicBase, profile } = usePortfolio();
+  const { publicBase } = usePortfolio();
   const path = usePathname();
   const navigation = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -28,17 +28,14 @@ export function ProfileNavigation() {
     {items.map(([label, href]) => <Link key={href} href={href} aria-current={path === href ? "page" : undefined} className={`min-h-12 shrink-0 inline-flex justify-center items-center rounded-lg px-4 py-3 text-center font-label-md ${path === href ? "bg-primary-container text-on-primary-container font-semibold" : "text-on-surface-variant hover:bg-surface-container-high hover:text-primary"}`}>{t(label)}</Link>)}
   </nav>
   <p className="mt-2 text-right text-label-sm text-on-surface-variant lg:hidden">{t("Scroll for more sections")} <span aria-hidden="true">↔</span></p>
-  {publicBase && path !== publicBase && (
-      <div className="flex justify-end pt-4">
-        <Link href={publicBase} aria-label={`${t("Viewing profile")} ${profile.displayName}`} className="flex min-w-0 max-w-full items-center gap-3 rounded-xl bg-surface-container-low px-4 py-3">
-          <div className="min-w-0 text-right">
-            <p className="text-label-sm font-label-sm uppercase tracking-wider text-on-surface-variant">{t("Viewing profile")}</p>
-            <p translate="no" className="text-headline-md font-headline-md font-semibold break-words">{profile.displayName}</p>
-            <p translate="no" className="text-body-sm text-primary break-all">@{profile.handle}</p>
-          </div>
-          <ProfileAvatar name={profile.displayName} src={profile.avatarUrl} className="h-11 w-11 rounded-xl" />
-        </Link>
-      </div>
-  )}
   </>;
+}
+
+export function ProfileIdentity() {
+  const {profile,publicBase}=usePortfolio(),t=useMessages();
+  if(!publicBase)return null;
+  return <Link href={publicBase} aria-label={`${t("Viewing profile")} ${profile.displayName}`} className="inline-flex min-w-0 max-w-full items-center gap-3 rounded-xl text-body-sm text-on-surface-variant [@media(hover:hover)_and_(pointer:fine)]:hover:text-on-surface">
+    <ProfileAvatar name={profile.displayName} src={profile.avatarUrl} className="h-11 w-11 shrink-0 rounded-xl" />
+    <span translate="no" className="min-w-0"><span className="block break-words font-semibold text-on-surface">{profile.displayName}</span><span className="block break-all">@{profile.handle}</span></span>
+  </Link>;
 }

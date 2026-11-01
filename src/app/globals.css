@@ -211,9 +211,10 @@ a.inline-flex:not(.rounded-full), a[class*="bg-primary"]:not(.rounded-full) { bo
 @layer components {
   .ui-action { @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 py-3 font-body-md text-body-lg font-semibold transition-colors; }
   .ui-action:active { transform: scale(.98); }
+  .catalog-control:focus-visible { @apply outline outline-2 outline-offset-2 outline-primary; }
   .catalog-control { @apply w-full min-w-0 rounded-xl border border-outline bg-surface-container px-3 py-2.5 font-body-md text-body-md text-on-surface; }
 }
-/* Explicit surface scale: actions/panels 12px, artwork 8px, avatars circular. */
+/* Explicit surface scale: actions/panels/fields 12px, artwork 8px, avatars circular. */
 @layer utilities {
   .rounded-lg { border-radius: .5rem; }
   .rounded-xl { border-radius: .75rem; }

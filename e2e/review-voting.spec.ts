@@ -35,6 +35,7 @@ test("review helpfulness can switch, persist and remove a single vote", async ({
   await expect(down).toHaveText(/Not helpful0/);
   await context.clearCookies();
   await page.reload();
-  await expect(up).toBeDisabled();
+  await expect(up).toHaveCount(0);
+  await expect(page.getByText("Helpful: 0 / Not helpful: 0",{exact:true})).toBeVisible();
   await expect(page.getByRole("link", { name: "Sign in to vote on reviews." })).toBeVisible();
 });

@@ -1,14 +1,15 @@
-import {test,expect} from "./test";
+import {test,expect, openComparisonProfiles } from "./test";
 import AxeBuilder from "@axe-core/playwright";
 // @ts-expect-error Node-only local fake session.
 import {authCookie} from "./fixture-server.mjs";
 test("published comparisons show real affinity, independent tiers and reloadable handles",async ({page,context},info)=>{
  await page.goto("/compare");
  await page.screenshot({path:`e2e-artifacts/compare-picker-${info.project.name}.png`,fullPage:true});
+  await openComparisonProfiles(page);
  await page.getByRole("combobox",{name:"First profile handle",exact:true}).fill("fixture_public");
  await page.getByRole("combobox",{name:"Second profile handle",exact:true}).fill("fixture_peer");
  await page.getByRole("button",{name:"Compare profiles"}).click();
- await expect(page.locator("[data-affinity]")).toHaveText("90%");
+ await expect(page.getByRole("region",{name:"Profile comparison",exact:true}).locator("[data-affinity]")).toHaveText("90%");
  const legend=page.getByRole("list",{name:"Games on this chart",exact:true});
  await expect(legend).toBeVisible();
  const legendGames=legend.getByRole("button");
@@ -35,7 +36,7 @@ test("published comparisons show real affinity, independent tiers and reloadable
  for(const theme of ["dark","light"]){
    await context.addCookies([{name:"playlogg_theme",value:theme,url:"http://127.0.0.1:3100"}]);
    await page.reload();
-   await expect(page.locator("[data-affinity]")).toHaveText("90%");
+   await expect(page.getByRole("region",{name:"Profile comparison",exact:true}).locator("[data-affinity]")).toHaveText("90%");
    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
    expect((await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze()).violations).toEqual([]);
    await expect(page.locator("p").filter({hasText:"X · Published Fixture"})).toBeVisible();
@@ -45,7 +46,7 @@ test("published comparisons show real affinity, independent tiers and reloadable
    await page.screenshot({path:`e2e-artifacts/compare-results-${theme}-${info.project.name}.png`,fullPage:true});
  }
 
- await page.reload(); await expect(page.getByRole("combobox",{name:"First profile handle",exact:true})).toHaveValue("fixture_public");
+ await page.reload(); await openComparisonProfiles(page); await expect(page.getByRole("combobox",{name:"First profile handle",exact:true})).toHaveValue("fixture_public");
  await expect(page.getByRole("table").locator("tbody tr")).toHaveCount(20);
  await page.getByRole("link",{name:"Next",exact:true}).click();
  await expect(page).toHaveURL(/page=2$/);
@@ -67,7 +68,7 @@ test("other users private and missing profiles stay unavailable even to a signed
   await page.goto(`/compare?left=fixture_public&right=${encodeURIComponent(right)}`);
   await expect(page.getByRole("status").filter({hasText:"Comparison unavailable. Check both handles and make sure both profiles are published."})).toBeVisible();
   await expect(page.getByText("Private fixture review")).toHaveCount(0);
-  await expect(page.locator("[data-affinity]")).toHaveCount(0);
+  await expect(page.getByRole("region",{name:"Profile comparison",exact:true}).locator("[data-affinity]")).toHaveCount(0);
  }
  await page.goto("/compare?left=fixture_owner&right=fixture_owner");
  await expect(page.getByRole("status").filter({hasText:"Choose two different published profiles."})).toBeVisible();
@@ -77,34 +78,41 @@ test("signed-in comparisons default to the owner but allow either profile to cha
  await page.goto("/compare");
  const first=page.getByRole("combobox",{name:"First profile handle",exact:true});
  const second=page.getByRole("combobox",{name:"Second profile handle",exact:true});
+ await openComparisonProfiles(page);
  await expect(first).toHaveValue("fixture_owner");
+ await openComparisonProfiles(page);
  await expect(first).toBeEditable();
  await second.fill("fixture_peer");
  await page.getByRole("button",{name:"Compare profiles"}).click();
  await expect(page).toHaveURL(/left=fixture_owner&right=fixture_peer/);
  await page.reload();
+ await openComparisonProfiles(page);
  await expect(first).toHaveValue("fixture_owner");
  await expect(second).toHaveValue("fixture_peer");
  await first.fill("fixture_public");
  await page.getByRole("button",{name:"Compare profiles"}).click();
  await expect(page).toHaveURL(/left=fixture_public&right=fixture_peer/);
+ await openComparisonProfiles(page);
  await expect(first).toHaveValue("fixture_public");
  await expect(second).toHaveValue("fixture_peer");
- await expect(page.locator("[data-affinity]")).toHaveText("90%");
+ await expect(page.getByRole("region",{name:"Profile comparison",exact:true}).locator("[data-affinity]")).toHaveText("90%");
  await expect(page.getByRole("table").locator('a[href^="/u/fixture_public/game/"]').first()).toBeVisible();
  await expect(page.getByRole("table").locator('a[href^="/log?"]')).toHaveCount(0);
  await page.getByRole("link",{name:"Next",exact:true}).click();
  await page.reload();
+ await openComparisonProfiles(page);
  await expect(first).toHaveValue("fixture_public");
  await expect(second).toHaveValue("fixture_peer");
  await page.goto("/compare?left=fixture_public&right=fixture_owner");
+ await openComparisonProfiles(page);
  await expect(first).toHaveValue("fixture_public");
  await expect(second).toHaveValue("fixture_owner");
  await expect(page.getByRole("region",{name:"Profile comparison"}).getByRole("link",{name:"Fixture Owner",exact:true})).toHaveAttribute("href","/profile");
  await page.goto("/compare?left=alexvance&right=fixture_public");
- await expect(page.locator("[data-affinity]")).toHaveCount(0);
+ await expect(page.getByRole("region",{name:"Profile comparison",exact:true}).locator("[data-affinity]")).toHaveCount(0);
  await expect(page.getByRole("status").filter({hasText:"Comparison unavailable. Check both handles and make sure both profiles are published."})).toBeVisible();
  await page.goto("/compare");
+ await openComparisonProfiles(page);
  await expect(first).toHaveValue("fixture_owner");
 });
 
@@ -112,6 +120,7 @@ test("signed-in comparisons default to the owner but allow either profile to cha
 test("compare fields search public profiles live and support pointer and keyboard selection", async ({page,context},info) => {
  await context.addCookies([authCookie]);await page.goto("/compare");
  const first=page.getByRole("combobox",{name:"First profile handle",exact:true}),second=page.getByRole("combobox",{name:"Second profile handle",exact:true});
+ await openComparisonProfiles(page);
  await expect(first).toHaveValue("fixture_owner");
  await first.fill("Published");
  await expect(page.getByRole("option",{name:/Published Fixture/})).toBeVisible();
@@ -120,6 +129,7 @@ test("compare fields search public profiles live and support pointer and keyboar
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:`e2e-artifacts/compare-profile-dropdown-${info.project.name}.png`});
  await page.getByRole("option",{name:/Published Fixture/}).click();
+ await openComparisonProfiles(page);
  await expect(first).toHaveValue("fixture_public");await expect(page.getByRole("listbox")).toHaveCount(0);
  await second.fill("@FIXTURE_PEER");
  await expect(page.getByRole("option",{name:/Published Peer/})).toBeVisible();
@@ -131,5 +141,5 @@ test("compare fields search public profiles live and support pointer and keyboar
  await second.fill("fixture_peer");await expect(page.getByRole("option",{name:/Published Peer/})).toBeVisible();
  await second.press("ArrowDown");await second.press("Enter");
  await page.getByRole("button",{name:"Compare profiles",exact:true}).click();
- await expect(page).toHaveURL(/left=fixture_public&right=fixture_peer/);await expect(page.locator("[data-affinity]")).toHaveText("90%");
+ await expect(page).toHaveURL(/left=fixture_public&right=fixture_peer/);await expect(page.getByRole("region",{name:"Profile comparison",exact:true}).locator("[data-affinity]")).toHaveText("90%");
 });

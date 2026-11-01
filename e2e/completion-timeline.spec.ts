@@ -11,6 +11,8 @@ test("completion timeline groups all completions by year, browses horizontally, 
  await expect(page).toHaveURL(/\/profile\/timeline$/);
  await expect(page.getByRole("link",{name:"Timeline",exact:true})).toHaveAttribute("aria-current","page");
  const chart=page.getByRole("region",{name:"Completion chart",exact:true});
+ await expect(chart).toBeHidden();
+ await page.locator("summary").filter({hasText:/^Your gaming orbit/}).click();
  await expect(chart.locator("[data-completion-period]")).toHaveCount(12);
  await expect(chart.locator(`[data-completion-period="03"]`)).toHaveAttribute("data-completion-count","2");
  await expect(chart.locator(`[data-completion-period="02"]`)).toHaveAttribute("data-completion-count","0");
@@ -19,12 +21,12 @@ test("completion timeline groups all completions by year, browses horizontally, 
  await expect(chart.getByRole("button",{name:"March: 2 Completed games",exact:true})).toHaveAttribute("aria-pressed","true");
  await expect(page.locator("[data-timeline-year]")).toHaveCount(1);
  await expect(page.locator("[data-timeline-year]")).toHaveAttribute("data-timeline-year","2025");
- await page.getByLabel("Year",{exact:true}).selectOption("2024");
- await expect(page.getByRole("button",{name:"All months",exact:true})).toHaveAttribute("aria-pressed","true");
+ await page.getByLabel("Filter years",{exact:true}).selectOption("2024");
+ await expect(page.getByRole("button",{name:"Whole year",exact:true})).toHaveAttribute("aria-pressed","true");
  await expect(page.locator("[data-timeline-year]")).toHaveAttribute("data-timeline-year","2024");
- await page.getByLabel("Year",{exact:true}).selectOption("");
+ await page.getByLabel("Filter years",{exact:true}).selectOption("");
  await chart.getByRole("button",{name:"March: 2 Completed games",exact:true}).click();
- await page.getByRole("button",{name:"All months",exact:true}).click();
+ await page.getByRole("button",{name:"Whole year",exact:true}).click();
  const panels=page.locator("[data-timeline-year]");
  await expect(panels).toHaveCount(1);
  await expect(page.getByRole("button",{name:/^(Newer|Older) year$/})).toHaveCount(0);
@@ -66,7 +68,7 @@ test("completion timeline groups all completions by year, browses horizontally, 
  await tabs.getByRole("tab",{name:"2024",exact:true}).click();await expect(panels.first()).toHaveAttribute("data-timeline-year","2024");
  await expect(page.getByRole("group",{name:"Monthly completions · 2024",exact:true}).locator('[data-month-section="02"]')).toHaveAttribute("data-month-count","1");
  await page.getByRole("group",{name:"Monthly completions · 2024",exact:true}).locator('[data-month-section="02"]').click();
- await page.getByRole("button",{name:"Clear month filter",exact:true}).click();
+ await page.getByRole("button",{name:"Whole year",exact:true}).click();
  await expect(panels.first()).toHaveAttribute("data-timeline-year","2024");
  await expect(chart.locator(`[data-completion-period="03"]`).getByRole("button")).toBeDisabled();
  await tabs.getByRole("tab",{name:"2025",exact:true}).click();
@@ -86,14 +88,14 @@ test("completion timeline groups all completions by year, browses horizontally, 
  const history=page.getByRole("region",{name:"Timeline",exact:true});const historyBox=await history.boundingBox(),orbitBox=await chart.boundingBox();
  expect(orbitBox!.y).toBeGreaterThan(historyBox!.y+historyBox!.height);
 
- await page.getByLabel("Year",{exact:true}).selectOption("2024");await expect(panels).toHaveCount(1);
+ await page.getByLabel("Filter years",{exact:true}).selectOption("2024");await expect(panels).toHaveCount(1);
  await expect(panels.first()).toHaveAttribute("data-timeline-year","2024");
  await expect(chart.locator(`[data-completion-period="03"]`)).toHaveAttribute("data-completion-count","0");
- await page.getByLabel("Year",{exact:true}).selectOption("");await expect(panels).toHaveCount(1);await expect(tabs.getByRole("tab")).toHaveCount(15);
+ await page.getByLabel("Filter years",{exact:true}).selectOption("");await expect(panels).toHaveCount(1);await expect(tabs.getByRole("tab")).toHaveCount(15);
  const undated=page.getByRole("heading",{name:/Completed without a date/}).locator("..");
  await expect(undated.getByRole("link")).toHaveCount(2);
  await expect(undated.getByRole("link").first()).toHaveAttribute("href","/log?game=fixture-game-1");
- await page.getByLabel("Year",{exact:true}).selectOption("2025");
+ await page.getByLabel("Filter years",{exact:true}).selectOption("2025");
  for(const [locale,theme] of [["en","dark"],["es-AR","light"]]){
   await context.addCookies([{name:"playlogg_locale",value:locale,url:"http://127.0.0.1:3100"},{name:"playlogg_theme",value:theme,url:"http://127.0.0.1:3100"}]);await page.reload();
   await page.getByRole("combobox").selectOption(locale==="en"?"":"2025");
