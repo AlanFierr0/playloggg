@@ -20,7 +20,7 @@ test("platform sorting uses anonymous all-profile averages and survives filterin
   await expect(page.getByText("Private fixture review",{exact:true})).toHaveCount(0);
   await expect(cards.filter({has:page.getByRole("heading",{name:"Fixture Game 00",exact:true})})).toContainText("100.0 / 100");
   await page.getByRole("button",{name:/^Filters/}).click();
-  await page.locator("#games-sort").selectOption("platform-asc");
+  await page.locator("#games-sort:visible").selectOption("platform-asc");
   await expect(page).toHaveURL(/sort=platform-asc/);
   await expect(cards.first()).toHaveAttribute("data-catalog-game","fixture-game-1");
   await expect(cards.first()).toContainText("0.0 / 100");

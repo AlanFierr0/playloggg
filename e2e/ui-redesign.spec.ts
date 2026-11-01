@@ -41,10 +41,10 @@ test("profile preview, responsive menu and catalog disclosure work in both theme
   const filters = page.getByRole("button", {name:/Filtros y orden/});
   await expect(filters).toBeVisible();
   await expect(filters).toHaveAttribute("aria-expanded", "false");
-  await expect(page.locator("#games-genre")).toBeHidden();
+  await expect(page.locator("#games-genre:visible")).toBeHidden();
   await filters.click();
   await expect(filters).toHaveAttribute("aria-expanded", "true");
-  await page.locator("#games-genre").selectOption("Roguelike");
+  await page.locator("#games-genre:visible").selectOption("Roguelike");
   await expect(page).toHaveURL(/genre=Roguelike/);
   await expect(page.getByRole("heading",{name:"Hades",exact:true})).toBeVisible();
   await page.reload();
@@ -52,7 +52,7 @@ test("profile preview, responsive menu and catalog disclosure work in both theme
   await expect(filters).toContainText("(1)");
   await page.screenshot({path: `e2e-artifacts/catalog-filter-button-${testInfo.project.name}.png`});
   await filters.click();
-  await expect(page.locator("#games-genre")).toHaveValue("Roguelike");
+  await expect(page.locator("#games-genre:visible")).toHaveValue("Roguelike");
   await expect(page.locator("[data-catalog-game]:visible").getByText("No registrado",{exact:true})).toHaveCount(0);
   await page.screenshot({path: `e2e-artifacts/ui-catalog-${testInfo.project.name}.png`, fullPage: true});
   const themeMenu = page.locator("header summary");
